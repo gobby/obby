@@ -15,12 +15,14 @@ AM_CPPFLAGS += $(libhowl_CFLAGS)
 endif
 
 noinst_PROGRAMS =  record
+noinst_PROGRAMS += line
 noinst_PROGRAMS += buffer
 noinst_PROGRAMS += bufferd
 noinst_PROGRAMS += 2buffer
 noinst_PROGRAMS += curses
 
 record_SOURCES = record.cpp
+line_SOURCES = line.cpp
 buffer_SOURCES = buffer.cpp
 bufferd_SOURCES = bufferd.cpp
 2buffer_SOURCES = 2buffer.cpp
