@@ -62,5 +62,5 @@ fi
 AC_C_CONST
 
 AC_CONFIG_FILES([Makefile])
-AC_OUTPUT([src/Makefile test/Makefile lobby-1.0.pc])
+AC_OUTPUT([inc/Makefile src/Makefile test/Makefile lobby-1.0.pc])
 
