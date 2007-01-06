@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: obby\n"
 "Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
-"POT-Creation-Date: 2006-08-17 14:17+0200\n"
+"POT-Creation-Date: 2006-09-24 21:55+0200\n"
 "PO-Revision-Date: 2006-08-20 21:29+0000\n"
 "Last-Translator: Jordi Mallach <jordi@canonical.com>\n"
 "Language-Team: Catalan  <ca@dodds.net>\n"
@@ -30,12 +30,10 @@ msgstr "El fitxer no és una sessió d'obby desada"
 
 #: inc/server_buffer.hpp:388 src/user_table.cpp:75 src/chat.cpp:251
 #: src/text.cpp:188
-#, c-format
 msgid "Unexpected child node: '%0%'"
 msgstr "Node fill inesperat: «%0%»"
 
 #: inc/serialise/attribute.hpp:127
-#, c-format
 msgid "Attribute '%0%' has unexpected type: %1%"
 msgstr "L'atribut «%0%» té un tipus inesperat «%1%»"
 
@@ -60,7 +58,6 @@ msgid "Connection is not yet encrypted"
 msgstr "La connexió encara no és xifrada"
 
 #: src/user_table.cpp:58
-#, c-format
 msgid "User ID %0% is already in use"
 msgstr "El color ja està en ús"
 
@@ -69,17 +66,14 @@ msgid "Restored session"
 msgstr "S'ha restaurat la sessió"
 
 #: src/chat.cpp:332
-#, c-format
 msgid "%0% has joined"
 msgstr "%0% s'ha unit"
 
 #: src/chat.cpp:339
-#, c-format
 msgid "%0% has left"
 msgstr "%0% ha sortit"
 
 #: src/serialise/token.cpp:94
-#, c-format
 msgid "Unexpected escape sequence: \\%0%"
 msgstr "Seqüència d'escapada inesperada: \\%0%"
 
@@ -88,7 +82,6 @@ msgid "String not closed"
 msgstr "La cadena no s'ha tancat"
 
 #: src/serialise/token.cpp:275
-#, c-format
 msgid "Unexpected token: '%0%'"
 msgstr "Testimoni inesperat: «%0%»"
 
@@ -97,12 +90,10 @@ msgid "Unexpected end of input"
 msgstr "Final de l'entrada inesperat"
 
 #: src/serialise/attribute.cpp:54
-#, c-format
 msgid "Expected '=' after %0%"
 msgstr "S'esperava «=» després de %0%"
 
 #: src/serialise/attribute.cpp:65
-#, c-format
 msgid "Expected string literal as value for attribute '%0%'"
 msgstr "S'esperava un literal de cadena com a valor per a l'atribut «%0%»"
 
@@ -115,17 +106,14 @@ msgid "Expected child object after indentation"
 msgstr "S'esperava un objecte fill després del sagnat"
 
 #: src/serialise/object.cpp:159
-#, c-format
 msgid "Expected child object instead of '%0%'"
 msgstr "S'esperava un objecte fill en comptes de «%0%»"
 
 #: src/serialise/object.cpp:220 src/serialise/object.cpp:234
-#, c-format
 msgid "Object '%0%' requires attribute '%1%'"
 msgstr "L'objecte «%0%» requereix l'atribut «%1%»"
 
 #: src/serialise/parser.cpp:36
-#, c-format
 msgid "Could not open file '%0%' for reading"
 msgstr "No s'ha pogut obrir el fitxer «%0%» per a lectura"
 
@@ -150,12 +138,10 @@ msgid "Expected root object after document type"
 msgstr "S'esperava l'objecte arrel després del tipus de document"
 
 #: src/serialise/parser.cpp:147
-#, c-format
 msgid "Expected end of input instead of '%0%'"
 msgstr "S'esperava el final de l'entrada en comptes de «%0%»"
 
 #: src/serialise/parser.cpp:159
-#, c-format
 msgid "Could not open file '%0%' for writing"
 msgstr "No s'ha pogut obrir el fitxer «%0%» per a escriptura"
 

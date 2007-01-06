@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: obby 0.3.0\n"
 "Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
-"POT-Creation-Date: 2006-08-17 14:17+0200\n"
+"POT-Creation-Date: 2006-09-24 21:55+0200\n"
 "PO-Revision-Date: 2006-04-03 13:45+0000\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"
@@ -30,12 +30,10 @@ msgstr "Filen är inte en sparad obby-session"
 
 #: inc/server_buffer.hpp:388 src/user_table.cpp:75 src/chat.cpp:251
 #: src/text.cpp:188
-#, c-format
 msgid "Unexpected child node: '%0%'"
 msgstr "Oväntad barn-nod: '%0%'"
 
 #: inc/serialise/attribute.hpp:127
-#, c-format
 msgid "Attribute '%0%' has unexpected type: %1%"
 msgstr "Attribut'%0%' har en oväntad typ: %1%"
 
@@ -60,7 +58,6 @@ msgid "Connection is not yet encrypted"
 msgstr ""
 
 #: src/user_table.cpp:58
-#, c-format
 msgid "User ID %0% is already in use"
 msgstr "Användarid %0% används redan"
 
@@ -69,17 +66,14 @@ msgid "Restored session"
 msgstr "Återställd session"
 
 #: src/chat.cpp:332
-#, c-format
 msgid "%0% has joined"
 msgstr "%0% har anslutit"
 
 #: src/chat.cpp:339
-#, c-format
 msgid "%0% has left"
 msgstr "%0% har lämnat"
 
 #: src/serialise/token.cpp:94
-#, c-format
 msgid "Unexpected escape sequence: \\%0%"
 msgstr "Oväntad escape-sekvens: \\%0%"
 
@@ -88,7 +82,6 @@ msgid "String not closed"
 msgstr "Sträng ej terminerad"
 
 #: src/serialise/token.cpp:275
-#, c-format
 msgid "Unexpected token: '%0%'"
 msgstr "Oväntad token: '%0%'"
 
@@ -97,12 +90,10 @@ msgid "Unexpected end of input"
 msgstr "Oväntat slut på indata"
 
 #: src/serialise/attribute.cpp:54
-#, c-format
 msgid "Expected '=' after %0%"
 msgstr "Väntade '=' efter %0%"
 
 #: src/serialise/attribute.cpp:65
-#, c-format
 msgid "Expected string literal as value for attribute '%0%'"
 msgstr "Väntade strängliteral som värde för attribut '%0%'"
 
@@ -115,17 +106,14 @@ msgid "Expected child object after indentation"
 msgstr "Väntade barnobjekt efter indrag"
 
 #: src/serialise/object.cpp:159
-#, c-format
 msgid "Expected child object instead of '%0%'"
 msgstr "Väntade barnobjekt itstället för '%0%'"
 
 #: src/serialise/object.cpp:220 src/serialise/object.cpp:234
-#, c-format
 msgid "Object '%0%' requires attribute '%1%'"
 msgstr "Objekt '%0%' kräver attribut '%1%'"
 
 #: src/serialise/parser.cpp:36
-#, c-format
 msgid "Could not open file '%0%' for reading"
 msgstr "Kunde inte öppna filen '%0%' för läsning"
 
@@ -150,12 +138,10 @@ msgid "Expected root object after document type"
 msgstr "Väntade rotobjekt efter dokumenttyp"
 
 #: src/serialise/parser.cpp:147
-#, c-format
 msgid "Expected end of input instead of '%0%'"
 msgstr "Väntade slut på indata istället för '%0%'"
 
 #: src/serialise/parser.cpp:159
-#, c-format
 msgid "Could not open file '%0%' for writing"
 msgstr "Kund inte öppna filen '%0%' för skrivning"
 

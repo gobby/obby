@@ -2,8 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([obby], [0.4.1], [crew@0x539.de])
-AM_INIT_AUTOMAKE(1.9)
+AC_INIT([obby], [0.4.2], [crew@0x539.de])
+AM_INIT_AUTOMAKE(1.9 check-news)
 AM_MAINTAINER_MODE
 AC_CONFIG_SRCDIR([inc/buffer.hpp])
 AC_CONFIG_HEADER([inc/config.hpp])
@@ -11,19 +11,14 @@ AC_CONFIG_HEADER([inc/config.hpp])
 # Extract host information.
 AC_CANONICAL_HOST
 
-# Drop Fortran checks for a massive speed-up
-m4_undefine([AC_PROG_F77])
-m4_defun([AC_PROG_F77],[])
-
 # Checks for programs.
-AC_LANG(C++)
+AC_LANG([C++])
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AC_CACHE_SAVE
@@ -42,7 +37,7 @@ PKG_CHECK_MODULES([libraries], [$extra_requires])
 AC_ARG_ENABLE([ipv6],
               AS_HELP_STRING([--enable-ipv6],
 	                     [enable IPv6 support]),
-              [ipv6=$withval], [ipv6=no])
+              [ipv6=$enableval], [ipv6=no])
 AC_CACHE_CHECK([whether to enable IPv6 support],
                [ipv6], [ipv6=no])
 if test "x$ipv6" = "xyes" ; then
@@ -114,7 +109,7 @@ PKG_CHECK_MODULES([libobby], [$extra_requires])
 
 # gettext / i18n
 AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION
+AM_GNU_GETTEXT_VERSION([0.15])
 
 AC_CONFIG_FILES([Makefile po/Makefile.in inc/Makefile src/Makefile
                  src/serialise/Makefile test/Makefile obby-0.4.pc])

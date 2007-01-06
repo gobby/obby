@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: obby\n"
 "Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
-"POT-Creation-Date: 2006-08-17 14:17+0200\n"
+"POT-Creation-Date: 2006-09-24 21:55+0200\n"
 "PO-Revision-Date: 2006-06-29 17:23+0000\n"
 "Last-Translator: Rik van achterberg <rik@vanachterberg.com>\n"
 "Language-Team: Dutch <nl@li.org>\n"
@@ -29,12 +29,10 @@ msgstr "Bestand is geen opgeslagen obby-sessie"
 
 #: inc/server_buffer.hpp:388 src/user_table.cpp:75 src/chat.cpp:251
 #: src/text.cpp:188
-#, c-format
 msgid "Unexpected child node: '%0%'"
 msgstr "Onverwachte dochternode: '%0%'"
 
 #: inc/serialise/attribute.hpp:127
-#, c-format
 msgid "Attribute '%0%' has unexpected type: %1%"
 msgstr "Attribuut '%0%' heeft onverwacht type: %1%"
 
@@ -59,7 +57,6 @@ msgid "Connection is not yet encrypted"
 msgstr "Verbinding is nog niet versleuteld"
 
 #: src/user_table.cpp:58
-#, c-format
 msgid "User ID %0% is already in use"
 msgstr "Gebruikers-ID %0% is al in gebruik"
 
@@ -68,17 +65,14 @@ msgid "Restored session"
 msgstr "Herstelde sessie"
 
 #: src/chat.cpp:332
-#, c-format
 msgid "%0% has joined"
 msgstr "%0% heeft zich bij de sessie gevoegd"
 
 #: src/chat.cpp:339
-#, c-format
 msgid "%0% has left"
 msgstr "%0% heeft de sessie verlaten"
 
 #: src/serialise/token.cpp:94
-#, c-format
 msgid "Unexpected escape sequence: \\%0%"
 msgstr "Onverwachte ontsnappingsopeenvolging: \\%0%"
 
@@ -87,7 +81,6 @@ msgid "String not closed"
 msgstr "Tekenreeks niet afgesloten"
 
 #: src/serialise/token.cpp:275
-#, c-format
 msgid "Unexpected token: '%0%'"
 msgstr "Onverwachte eenheid: '%0%'"
 
@@ -96,12 +89,10 @@ msgid "Unexpected end of input"
 msgstr "Onverwachte beëindiging van invoer"
 
 #: src/serialise/attribute.cpp:54
-#, c-format
 msgid "Expected '=' after %0%"
 msgstr "'=' verwacht achter %0%"
 
 #: src/serialise/attribute.cpp:65
-#, c-format
 msgid "Expected string literal as value for attribute '%0%'"
 msgstr "Verwachte tekenreeks letterlijke waarde voor attribuut '%0%'"
 
@@ -114,17 +105,14 @@ msgid "Expected child object after indentation"
 msgstr ""
 
 #: src/serialise/object.cpp:159
-#, c-format
 msgid "Expected child object instead of '%0%'"
 msgstr ""
 
 #: src/serialise/object.cpp:220 src/serialise/object.cpp:234
-#, c-format
 msgid "Object '%0%' requires attribute '%1%'"
 msgstr ""
 
 #: src/serialise/parser.cpp:36
-#, c-format
 msgid "Could not open file '%0%' for reading"
 msgstr ""
 
@@ -149,11 +137,9 @@ msgid "Expected root object after document type"
 msgstr ""
 
 #: src/serialise/parser.cpp:147
-#, c-format
 msgid "Expected end of input instead of '%0%'"
 msgstr ""
 
 #: src/serialise/parser.cpp:159
-#, c-format
 msgid "Could not open file '%0%' for writing"
 msgstr ""
