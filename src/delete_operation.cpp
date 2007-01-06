@@ -40,9 +40,10 @@ obby::delete_operation::delete_operation(position pos, position len,
 obby::delete_operation::delete_operation(const net6::packet& pack,
                                          unsigned int& index)
  : operation(),
-   m_pos(pack.get_param(index + 1).as<int>() ),
-   m_len(pack.get_param(index + 2).as<int>() )
+   m_pos(pack.get_param(index + 0).as<int>() ),
+   m_len(pack.get_param(index + 1).as<int>() )
 {
+	index += 2;
 }
 
 obby::operation* obby::delete_operation::clone() const
