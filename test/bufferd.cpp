@@ -25,6 +25,8 @@ protected:
 
 	void on_insert_document(obby::document& doc);
 
+	void on_message(obby::user& user, const std::string& message);
+
 	void on_join(obby::user& user);
 	void on_part(obby::user& user);
 
@@ -48,6 +50,9 @@ bufferd::bufferd(int argc, char* argv[])
 	m_buffer.insert_document_event().connect(
 		sigc::mem_fun(*this, &bufferd::on_insert_document) );
 
+	m_buffer.message_event().connect(
+		sigc::mem_fun(*this, &bufferd::on_message) );
+	
 	m_buffer.user_join_event().connect(
 		sigc::mem_fun(*this, &bufferd::on_join) );
 	m_buffer.user_part_event().connect(
@@ -97,6 +102,11 @@ void bufferd::on_insert_document(obby::document& doc)
 {
 	std::cout << "New document created: ID = " << doc.get_id() << ", ";
 	std::cout << "TITLE = \"" << doc.get_title() << "\"" << std::endl;
+}
+
+void bufferd::on_message(obby::user& user, const std::string& message)
+{
+	std::cout << user.get_name() << "> " << message << std::endl;
 }
 
 void bufferd::on_join(obby::user& user)
