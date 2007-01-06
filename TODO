@@ -1,0 +1,18 @@
+libobby
+=======
+
+This file lists prioritised items which need to be fixed or developed.
+
+Serious:
+ * Draft an API which could manage and process changes from multiple clients.
+ * Draft a network protocol to transmit those changes.
+
+Important:
+ * Implement automatic service announcement and discovery.
+
+Normal:
+
+Minor:
+
+Wishlist:
+

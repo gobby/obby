@@ -1,0 +1,34 @@
+libobby FAQ
+===========
+
+1) Why is libobby called ``libobby''?
+     
+  This answer to this one is trivial, but it only sounds funny to those familiar
+  with development. The library should be called lobby, and in fact the compiler
+  sees it as -lobby when it's linked. Thus, we will call it ``Lobby'' in the
+  other responses within this FAQ.
+
+    Lobby because it provides a room for people to express themselves in words
+  and in future perhaps also in pictures and maybe in sounds.
+
+2) What is Lobby capable of?
+
+  Lobby provides a network-synced buffer. This means that it syncs the inputs
+  of various clients on documents. However, this is only the framework and
+  concrete programs need to implement both the server and the client part.
+
+    It can be used to provide chat services or -- more importantly -- an editor
+  for collaborative editing.
+
+3) Could Lobby detect other Lobby clients automatically when they are within
+   my LAN?
+
+  Yes. Lobby uses libhowl, which is a wrapper around ZeroConf (or Rendezvous)
+  which provides local service announcement and discovery. The client could
+  use those abstractions to announce its documents to the world. Others are
+  able to find it without any further configuration.
+
+    When used on the internet either a dedicated server or a client which is
+  reachable for the others is needed. This might require a port-forwarding
+  on one side.
+

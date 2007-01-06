@@ -1,6 +1,12 @@
-This piece of software is developed by the 0x539 dev group.
-Please send bugreports to <crew@0x539.de>
+libobby
+=======
+
+  This library is written by the 0x539 dev group.
+
+  Copyright (C) 2005 0x539 dev group <crew@0x539.de>
 
 Authors:
+
  * Armin Burgmeier <armin@0x539.de>
+ * Philipp Kern <phil@0x539.de>
 
