@@ -28,6 +28,9 @@ public:
 	unsigned int get_cursor_x();
 	unsigned int get_cursor_y();
 
+	void set_cursor(unsigned int x, unsigned int y);
+	void move_cursor(int by_x, int by_y, bool priority_x);
+
 	void on_insert(obby::position position, const std::string& text);
 	void on_erase(obby::position from, obby::position to);
 
@@ -68,6 +71,69 @@ unsigned int screen::get_cursor_y()
 	unsigned int cursor_x, cursor_y;
 	m_buffer.position_to_coord(m_cursor, cursor_x, cursor_y);
 	return cursor_y;
+}
+
+void screen::set_cursor(unsigned int x, unsigned int y)
+{
+	unsigned int cursor_x, cursor_y;
+	m_buffer.position_to_coord(m_cursor, cursor_x, cursor_y);
+	move_cursor(x - cursor_x, y - cursor_y, false);
+}
+
+void screen::move_cursor(int by_x, int by_y, bool priority_x)
+{
+	unsigned int cx, cy;
+	m_buffer.position_to_coord(m_cursor, cx, cy);
+	int cursor_x = static_cast<int>(cx) + by_x;
+	int cursor_y = static_cast<int>(cy) + by_y;
+
+	if(cursor_y < 0) cursor_y = 0;
+	if(cursor_y > m_buffer.get_line_count() - 1)
+		cursor_y = m_buffer.get_line_count() - 1;
+
+	if(cursor_x < 0)
+	{
+		if(priority_x)
+		{
+			if(cursor_y > 0)
+			{
+				cursor_y --;
+				cursor_x = m_buffer.get_line(cursor_y).length();
+			}
+			else
+			{
+				cursor_x = 0;
+			}
+		}
+		else
+		{
+			cursor_x = 0;
+		}
+	}
+
+	if(cursor_x > m_buffer.get_line(cursor_y).length() )
+	{
+		if(priority_x)
+		{
+			if(cursor_y != m_buffer.get_line_count() - 1)
+			{
+				cursor_y ++;
+				cursor_x = 0;
+			}
+			else
+			{
+				cursor_x = m_buffer.get_line(cursor_y).length();
+			}
+		}
+		else
+		{
+			cursor_x = m_buffer.get_line(cursor_y).length();
+		}
+	}
+
+	m_cursor = m_buffer.coord_to_position(cursor_x, cursor_y);
+	scroll_to_cursor();
+	redraw();
 }
 
 void screen::on_insert(obby::position position, const std::string& text)
@@ -204,7 +270,7 @@ void curses_editor::run()
 			unsigned int y = m_screen.get_cursor_y();
 
 			// Check for printable characters
-			if(isprint(c) || c == '\n')
+			if(isprint(c) && c <= 0xff)
 			{
 				char string[2] = { c, '\0' };
 				m_buffer.insert(m_buffer.coord_to_position(x, y), string);
@@ -216,6 +282,15 @@ void curses_editor::run()
 				m_buffer.insert(m_buffer.coord_to_position(x, y), "\n");
 				m_screen.on_insert(m_buffer.coord_to_position(x, y), "\n");
 			}
+
+			if(c == KEY_LEFT)
+				m_screen.move_cursor(-1, 0, true);
+			if(c == KEY_RIGHT)
+				m_screen.move_cursor(1, 0, true);
+			if(c == KEY_UP)
+				m_screen.move_cursor(0, -1, false);
+			if(c == KEY_DOWN)
+				m_screen.move_cursor(0, 1, false);
 
 			if(c == 'q')
 				quit();
