@@ -34,6 +34,8 @@ public:
 	buffer();
 	~buffer();
 
+	std::string get_sub_buffer(const position& from, const position& to);
+
 	void insert(const position& pos, const std::string& text);
 	void erase(const position& from, const position& to);
 

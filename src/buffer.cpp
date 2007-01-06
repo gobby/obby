@@ -16,6 +16,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <cassert>
 #include "buffer.hpp"
 
 obby::buffer::buffer()
@@ -25,6 +26,28 @@ obby::buffer::buffer()
 
 obby::buffer::~buffer()
 {
+}
+
+std::string obby::buffer::get_sub_buffer(const position& from,
+                                         const position& to)
+{
+	assert(to > from);
+	assert(to.get_line() < m_lines.size() );
+
+	std::string buf;
+	for(unsigned int i = from.get_line(); i <= to.get_line(); ++ i)
+	{
+		unsigned int begin = 0;
+		unsigned int end = m_lines[i].length();
+		
+		if(i == from.get_line() ) begin = from.get_col();
+		if(i == end.get_line() )  end = to.get_col();
+
+		//buf += m_lines[i].substr(begin, end - begin);
+		buf.append(&m_lines[i][begin], end - begin);
+	}
+
+	return buf;
 }
 
 void obby::buffer::insert(const position& pos, const std::string& text)
