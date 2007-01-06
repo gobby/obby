@@ -11,6 +11,10 @@ AC_CONFIG_HEADER([inc/config.hpp])
 # Extract host information.
 AC_CANONICAL_HOST
 
+# Drop Fortran checks for a massive speed-up
+m4_undefine([AC_PROG_F77])
+m4_defun([AC_PROG_F77],[])
+
 # Checks for programs.
 AC_LANG(C++)
 AC_PROG_CXX
