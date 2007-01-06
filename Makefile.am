@@ -1,4 +1,4 @@
-SUBDIRS = po inc src .
+SUBDIRS = m4 po inc src .
 if BUILD_TESTS
 SUBDIRS += test
 endif
