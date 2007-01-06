@@ -214,8 +214,10 @@ public:
 	curses_editor(int argc, char* argv[]);
 	~curses_editor();
 
-	std::string& run();
+	bool run();
 	void quit();
+
+	const std::string& get_reason() const;
 
 protected:
 	void on_join(obby::user& user);
@@ -262,7 +264,7 @@ curses_editor::~curses_editor()
 		quit();
 }
 
-std::string& curses_editor::run()
+bool curses_editor::run()
 {
 	halfdelay(2);
 	m_quit = false;
@@ -311,12 +313,17 @@ std::string& curses_editor::run()
 		m_buffer.select(0);
 	}
 
-	return m_reason;
+	return m_reason.empty();
 }
 
 void curses_editor::quit()
 {
 	m_quit = true;
+}
+
+const std::string& curses_editor::get_reason() const
+{
+	return m_reason;
 }
 
 void curses_editor::on_join(obby::user& user)
@@ -340,9 +347,7 @@ void curses_editor::on_sync()
 
 void curses_editor::on_login_failed(const std::string& reason)
 {
-	std::stringstream stream;
-	stream << "Login failed: " << reason << std::endl;
-	m_reason = stream.str();
+	m_reason = reason;
 	quit();
 }
 
@@ -369,11 +374,13 @@ int main(int argc, char* argv[]) try
 	else
 	{
 		curses_editor editor(argc, argv);
-		reason = editor.run();
+		if(!editor.run() )
+			reason = editor.get_reason();
 	}
-	// Here we are out of scope. The editor should already be destroyed,
-	// so we could put anything else on the screen.
-	std::cerr << reason;
+
+	if(!reason.empty() )
+		std::cerr << "Login failed: " << reason << std::endl;
+
 	return 0;
 }
 catch(std::runtime_error& e)
