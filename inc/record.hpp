@@ -35,7 +35,7 @@ public:
 	~record();
 
 	virtual void apply(buffer& buf) = 0;
-	virtual bool is_valid() const = 0;
+	virtual bool is_valid() const;
 
 	unsigned int get_id() const;
 	unsigned int get_revision() const;
@@ -44,9 +44,12 @@ public:
 	                       const std::string& text) = 0;
 	virtual void on_delete(const position& from, const position& to) = 0;
 protected:
+	void invalidate();
+
 	unsigned int m_id;
 	unsigned int m_revision;
 	unsigned int m_from;
+	bool m_valid;
 	static unsigned int m_counter; // id counter to create unique ids
 };
 

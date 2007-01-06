@@ -41,11 +41,6 @@ void obby::insert_record::apply(buffer& buf)
 	buf.insert(m_pos, m_text);
 }
 
-bool obby::insert_record::is_valid() const
-{
-	return !m_text.empty();
-}
-
 void obby::insert_record::on_insert(const position& pos,
                                     const std::string& text)
 {
@@ -60,7 +55,7 @@ void obby::insert_record::on_delete(const position& from, const position& to)
 {
 	if(m_pos >= from && m_pos < to)
 	{
-		m_text = "";
+		invalidate();
 	}
 	else if(m_pos >= to)
 	{

@@ -21,17 +21,22 @@
 unsigned int obby::record::m_counter = 0;
 
 obby::record::record(unsigned int revision, unsigned int from)
- : m_id(++ m_counter), m_revision(revision), m_from(from)
+ : m_id(++ m_counter), m_revision(revision), m_from(from), m_valid(true)
 {
 }
 
 obby::record::record(unsigned int revision, unsigned int from, unsigned int id)
- : m_id(id), m_revision(revision), m_from(from)
+ : m_id(id), m_revision(revision), m_from(from), m_valid(true)
 {
 }
 
 obby::record::~record()
 {
+}
+
+bool obby::record::is_valid() const
+{
+	return m_valid;
 }
 
 unsigned int obby::record::get_id() const
@@ -42,4 +47,9 @@ unsigned int obby::record::get_id() const
 unsigned int obby::record::get_revision() const
 {
 	return m_revision;
+}
+
+void obby::record::invalidate()
+{
+	m_valid = false;
 }
