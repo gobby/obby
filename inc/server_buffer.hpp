@@ -485,7 +485,7 @@ void basic_server_buffer<Document, Selector>::
 	if(m_enable_keepalives == enable) return;
 
 	m_enable_keepalives = enable;
-	user_table& table = basic_buffer<Document, Selector>::m_user_table;
+	user_table& table = this->m_user_table;
 
 	for(user_table::iterator iter =
 		table.begin(user::flags::CONNECTED, user::flags::NONE);
@@ -1076,7 +1076,7 @@ command_result basic_server_buffer<Document, Selector>::
 	on_command_emote(const user& from,
 	                 const std::string& paramlist)
 {
-	user_table& table = basic_buffer<Document, Selector>::m_user_table;
+	user_table& table = this->m_user_table;
 
 	net6::packet pack("obby_emote_message");
 	pack << &from << paramlist;
@@ -1112,7 +1112,7 @@ template<typename Document, typename Selector>
 void basic_server_buffer<Document, Selector>::session_close_impl()
 {
 	// Session is closed, so all users have quit
-	user_table& table = basic_buffer<Document, Selector>::m_user_table;
+	user_table& table = this->m_user_table;
 
 	for(user_table::iterator iter =
 		table.begin(user::flags::CONNECTED, user::flags::NONE);

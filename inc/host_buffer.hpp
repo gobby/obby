@@ -341,7 +341,7 @@ void basic_host_buffer<Document, Selector>::session_close_impl()
 template<typename Document, typename Selector>
 void basic_host_buffer<Document, Selector>::init_impl()
 {
-	user_table& table = basic_buffer<Document, Selector>::m_user_table;
+	user_table& table = this->m_user_table;
 	table.deserialised_event().connect(
 		sigc::mem_fun(
 			*this,

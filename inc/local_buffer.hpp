@@ -151,7 +151,7 @@ template<typename Document, typename Selector>
 void basic_local_buffer<Document, Selector>::session_close_impl()
 {
 	// Remove all users except for the local one
-	user_table& table = basic_buffer<Document, Selector>::m_user_table;
+	user_table& table = this->m_user_table;
 
 	for(user_table::iterator iter =
 		table.begin(user::flags::CONNECTED, user::flags::NONE);
