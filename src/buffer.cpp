@@ -19,42 +19,6 @@
 #include <cassert>
 #include "buffer.hpp"
 
-obby::buffer::document_iterator::document_iterator()
- : base_iterator()
-{
-}
-
-obby::buffer::document_iterator::document_iterator(const base_iterator& iter)
- : base_iterator(iter)
-{
-}
-
-obby::buffer::document_iterator&
-obby::buffer::document_iterator::operator=(const base_iterator& iter)
-{
-	return static_cast<document_iterator&>(base_iterator::operator=(iter) );
-}
-
-obby::document& obby::buffer::document_iterator::operator*()
-{
-	return *base_iterator::operator*();
-}
-
-const obby::document& obby::buffer::document_iterator::operator*() const
-{
-	return *base_iterator::operator*();
-}
-
-obby::document* obby::buffer::document_iterator::operator->()
-{
-	return *base_iterator::operator->();
-}
-
-const obby::document* obby::buffer::document_iterator::operator->() const
-{
-	return *base_iterator::operator->();
-}
-
 obby::buffer::buffer()
  : m_netkit(), m_usertable(NULL)
 {

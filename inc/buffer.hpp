@@ -24,6 +24,7 @@
 #include <sigc++/signal.h>
 #include <net6/non_copyable.hpp>
 #include <net6/main.hpp>
+#include "ptr_iterator.hpp"
 #include "user.hpp"
 #include "document.hpp"
 #include "user_table.hpp"
@@ -38,24 +39,7 @@ namespace obby
 class buffer : private net6::non_copyable
 {
 public:
-	/** Iterator to iterate through the list of documents.
-	 */
-	class document_iterator : public std::list<document*>::const_iterator
-	{
-	public:
-		typedef std::list<document*>::const_iterator base_iterator;
-
-		document_iterator();
-		document_iterator(const base_iterator& iter);
-
-		document_iterator& operator=(const base_iterator& iter);
-
-		document& operator*();
-		const document& operator*() const;
-
-		document* operator->();
-		const document* operator->() const;
-	};
+	typedef ptr_iterator<document, std::list<document*>, std::list<document*>::const_iterator> document_iterator;
 
 	typedef sigc::signal<void, user&> signal_user_join_type;
 	typedef sigc::signal<void, user&> signal_user_part_type;

@@ -1,6 +1,7 @@
 pkginclude_HEADERS =  common.hpp
 pkginclude_HEADERS += position.hpp
 pkginclude_HEADERS += duplex_signal.hpp
+pkginclude_HEADERS += ptr_iterator.hpp
 pkginclude_HEADERS += user.hpp
 pkginclude_HEADERS += record.hpp
 pkginclude_HEADERS += delete_record.hpp
