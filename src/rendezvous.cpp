@@ -23,8 +23,10 @@
 
 obby::rendezvous::rendezvous()
 {
-	if(sw_discovery_init(&m_session) != SW_OKAY)
+	if (sw_discovery_init(&m_session) != SW_OKAY)
 		throw std::runtime_error("sw_discovery_init() failed.");
+	if (sw_discovery_salt(m_session, &m_salt) != SW_OKAY)
+		throw std::runtime_error("sw_discovery_salt() failed.");
 }
 
 obby::rendezvous::~rendezvous()
@@ -52,6 +54,23 @@ void obby::rendezvous::publish(const std::string& name, unsigned int port)
 
 void obby::rendezvous::discover()
 {
+	sw_discovery_oid oid;
+	sw_result result;
+
+	if ((result = sw_discovery_browse(m_session, 0, "_lobby._tcp", NULL,
+		&rendezvous::handle_browse_reply,
+		static_cast<sw_opaque>(this), &oid)) != SW_OKAY)
+	{
+		std::stringstream stream;
+		stream << "discover failed: %d" << result;
+		throw std::runtime_error(stream.str());
+	}
+}
+
+void obby::rendezvous::select()
+{
+	sw_ulong msecs = 100;
+	sw_salt_step(m_salt, &msecs);
 }
 
 obby::rendezvous::signal_discover_type

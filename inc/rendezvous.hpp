@@ -49,11 +49,14 @@ public:
 	 * participant. */
 	void discover();
 
+	void select();
+	
 	signal_discover_type discover_event() const;
 
 protected:
 	sw_discovery m_session;
-
+	sw_salt m_salt;
+	
 	signal_discover_type m_signal_discover;
 
 private:
