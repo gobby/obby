@@ -122,6 +122,10 @@ public:
 	 */
 	void set_password(const std::string& password);
 
+	/** Set user colour.
+	 */
+	virtual void set_colour(int red, int green, int blue);
+
 	/** Signal which will be emitted after the first packet, the welcome
 	 * packet, is received.
 	 */
@@ -196,6 +200,11 @@ protected:
 	/** Messaging commands.
 	 */
 	virtual void on_net_message(const net6::packet& pack);
+
+	/** User colour change commands.
+	 */
+	virtual void on_net_user_colour(const net6::packet& pack);
+	virtual void on_net_user_colour_failed(const net6::packet& pack);
 
 	/** Synchronisation commands.
 	 */

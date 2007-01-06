@@ -46,6 +46,7 @@ public:
 	// Signal types
 	typedef sigc::signal<void, user&> signal_user_join_type;
 	typedef sigc::signal<void, user&> signal_user_part_type;
+	typedef sigc::signal<void, user&> signal_user_colour_type;
 	typedef sigc::signal<void, document_info&> signal_document_insert_type;
 	typedef sigc::signal<void, document_info&> signal_document_rename_type;
 	typedef sigc::signal<void, document_info&> signal_document_remove_type;
@@ -104,6 +105,11 @@ public:
 	 */
 	virtual void send_message(const std::string& message) = 0;
 
+	/** Checks if given colour components match an other
+	 * already present one too closely.
+	 */
+	bool check_colour(int red, int green, int blue) const;
+
 	/** Signal which will be emitted if a new user has joined the obby
 	 * session.
 	 */
@@ -112,7 +118,11 @@ public:
 	/** Signal which will be emitted if a user has quit.
 	 */
 	signal_user_part_type user_part_event() const;
-	
+
+	/** Signal which will be emitted if a user changes his colour.
+	 */
+	signal_user_colour_type user_colour_event() const;
+
 	/** Signal which will be emitted when another participant in the
 	 * obby session has created a new document.
 	 */
@@ -178,6 +188,7 @@ protected:
 
 	signal_user_join_type m_signal_user_join;
 	signal_user_part_type m_signal_user_part;
+	signal_user_colour_type m_signal_user_colour;
 
 	signal_document_insert_type m_signal_document_insert;
 	signal_document_rename_type m_signal_document_rename;

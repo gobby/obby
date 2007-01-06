@@ -110,6 +110,13 @@ obby::user::flags obby::user::get_flags() const
 	return m_flags;
 }
 
+void obby::user::set_colour(int red, int green, int blue)
+{
+	m_red = red;
+	m_green = green;
+	m_blue = blue;
+}
+
 void obby::user::set_token(const std::string& token)
 {
 	m_token = token;
@@ -167,3 +174,4 @@ obby::user::document_iterator obby::user::document_end() const
 	return m_documents.end();
 }
 #endif
+

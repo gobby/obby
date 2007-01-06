@@ -92,6 +92,26 @@ obby::document_info* obby::buffer::find_document(unsigned int owner_id,
 	return NULL;
 }
 
+bool obby::buffer::check_colour(int red, int green, int blue) const
+{
+	// Check for existing colours
+	// TODO: Check for colours that non-connected users occupy?
+	std::list<user*>::iterator iter;
+	for(user_table::user_iterator<user::CONNECTED> iter =
+		m_usertable.user_begin<user::CONNECTED>();
+	    iter != m_usertable.user_end<user::CONNECTED>();
+	    ++ iter)
+	{
+		if((abs(red   - iter->get_red()) +
+		    abs(green - iter->get_green()) +
+		    abs(blue  - iter->get_blue())) < 32)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 obby::buffer::document_iterator obby::buffer::document_begin() const
 {
 	return static_cast<document_iterator>(m_doclist.begin() );
@@ -115,6 +135,11 @@ obby::buffer::signal_user_join_type obby::buffer::user_join_event() const
 obby::buffer::signal_user_part_type obby::buffer::user_part_event() const
 {
 	return m_signal_user_part;
+}
+
+obby::buffer::signal_user_colour_type obby::buffer::user_colour_event() const
+{
+	return m_signal_user_colour;
 }
 
 obby::buffer::signal_document_insert_type

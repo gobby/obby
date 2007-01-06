@@ -74,6 +74,10 @@ public:
 	virtual void create_document(const std::string& title,
 	                             const std::string& content);
 
+	/** Sets a new colour for the current user.
+	 */
+	virtual void set_colour(int red, int green, int blue);
+	
 protected:
 	/** Private constructor used by derived classed. It does not create
 	 * a net6::host object to allow derived classed to create derived

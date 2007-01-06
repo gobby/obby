@@ -40,3 +40,9 @@ obby::local_buffer::find_document(unsigned int owner_id, unsigned int id) const
 	);
 }
 
+obby::local_buffer::signal_user_colour_failed_type
+obby::local_buffer::user_colour_failed_event() const
+{
+	return m_signal_user_colour_failed;
+}
+

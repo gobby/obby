@@ -181,6 +181,16 @@ void obby::server_buffer::send_message_impl(const std::string& message,
 	m_server->send(pack);
 }
 
+void obby::server_buffer::user_colour_impl(obby::user& user, int red,
+                                           int green, int blue)
+{
+	user.set_colour(red, green, blue);
+	m_signal_user_colour.emit(user);
+	net6::packet pack("obby_user_colour");
+	pack << &user << red << green << blue;
+	m_server->send(pack);
+}
+
 void obby::server_buffer::on_connect(net6::server::peer& peer)
 {
 	// Create random token for this connection
@@ -306,21 +316,10 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 	if(pack.get_param_count() > 5)
 		user_password = pack.get_param(5).as<std::string>();
 
-	// Check for existing colors
-	// TODO: Check for colors that non-connected user occupy?
-	std::list<user*>::iterator iter;
-	for(user_table::user_iterator<user::CONNECTED> iter =
-		m_usertable.user_begin<user::CONNECTED>();
-	    iter != m_usertable.user_end<user::CONNECTED>();
-	    ++ iter)
+	if(!check_colour(red, green, blue) )
 	{
-		if((abs(red   - iter->get_red()) +
-		    abs(green - iter->get_green()) +
-		    abs(blue  - iter->get_blue())) < 32)
-		{
-			error = login::ERROR_COLOR_IN_USE;
-			return false;
-		}
+		error = login::ERROR_COLOR_IN_USE;
+		return false;
 	}
 
 	// Non-empty password?
@@ -443,6 +442,13 @@ bool obby::server_buffer::execute_packet(const net6::packet& pack, user& from)
 		return true;
 	}
 
+	if(pack.get_command() == "obby_user_colour")
+	{
+		// User colour
+		on_net_user_colour(pack, from);
+		return true;
+	}
+
 	if(pack.get_command() == "obby_document")
 	{
 		// Forward to the document sub system
@@ -493,6 +499,22 @@ void obby::server_buffer::on_net_user_password(const net6::packet& pack,
 		pack.get_param(0).as<std::string>() ));
 }
 
+void obby::server_buffer::on_net_user_colour(const net6::packet& pack,
+                                             user& from)
+{
+	// Set all the received colour components for this user
+	int red   = pack.get_param(0).as<int>();
+	int green = pack.get_param(1).as<int>();
+	int blue  = pack.get_param(2).as<int>();
+	if(!check_colour(red, green, blue) )
+	{
+		net6::packet reply_pack("obby_user_colour_failed");
+		m_server->send(reply_pack,
+			*static_cast<net6::server::peer*>(from.get_peer() ));
+	}
+	user_colour_impl(from, red, green, blue);
+}
+
 void obby::server_buffer::on_net_document(const net6::packet& pack, user& from)
 {
 	// Get target document
@@ -534,4 +556,5 @@ obby::server_buffer::add_document_info(const user* owner,
 	m_doclist.push_back(doc);
 	return *doc;
 }
+
 

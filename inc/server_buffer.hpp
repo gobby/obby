@@ -118,11 +118,16 @@ protected:
 	                                  unsigned int id);
 
 	/** Relays a message to the other users. The message is originally
-	 * sent by the user with the ID <em>user_id</em>.
+	 * sent by the user <em>writer</em>.
 	 */
 	void send_message_impl(const std::string& message,
 	                       const obby::user* writer);
-	
+
+	/** Changes the colour of the given user to the new provided
+	 * colors and relays the fact to the other users.
+	 */
+	void user_colour_impl(obby::user& user, int red, int green, int blue);
+
 	/** net6 signal handlers.
 	 */
 	void on_connect(net6::server::peer& peer);
@@ -150,7 +155,11 @@ protected:
 	/** Messaging commands.
 	 */
 	virtual void on_net_message(const net6::packet& pack, user& from);
+
+	/** User commands.
+	 */
 	virtual void on_net_user_password(const net6::packet& pack, user& from);
+	virtual void on_net_user_colour(const net6::packet& pack, user& from);
 
 	/** Forwarding commands.
 	 */

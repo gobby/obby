@@ -123,6 +123,10 @@ public:
 	 */
 	flags get_flags() const;
 
+	/** Sets the three colour components of the user colour.
+	 */
+	void set_colour(int red, int green, int blue);
+
 	/** Changes the token to the one the server generated for this user.
 	 */
 	void set_token(const std::string& token);
@@ -279,4 +283,5 @@ public:
 }
 
 #endif // _OBBY_USER_HPP_
+
 

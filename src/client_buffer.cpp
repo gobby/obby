@@ -158,6 +158,15 @@ void obby::client_buffer::set_password(const std::string& password)
 	m_client->send(pack);
 }
 
+void obby::client_buffer::set_colour(int red, int green, int blue)
+{
+	// Sets the user colour, the change has to propagate back
+	// from the server until the change is visible
+	net6::packet pack("obby_user_colour");
+	pack << red << green << blue;
+	m_client->send(pack);
+}
+
 obby::client_buffer::signal_welcome_type
 obby::client_buffer::welcome_event() const
 {
@@ -338,6 +347,20 @@ bool obby::client_buffer::execute_packet(const net6::packet& pack)
 		return true;
 	}
 
+	if(pack.get_command() == "obby_user_colour")
+	{
+		// User colour change
+		on_net_user_colour(pack);
+		return true;
+	}
+
+	if(pack.get_command() == "obby_user_colour_failed")
+	{
+		// User colour change failed
+		on_net_user_colour_failed(pack);
+		return true;
+	}
+
 	if(pack.get_command() == "obby_sync_init")
 	{
 		// Initial synchronisation begin
@@ -465,6 +488,17 @@ void obby::client_buffer::on_net_message(const net6::packet& pack)
 		// Got server message
 		m_signal_server_message.emit(message);
 	}
+}
+
+void obby::client_buffer::on_net_user_colour(const net6::packet& pack)
+{
+	user* from = pack.get_param(0).as<user*>();
+	m_signal_user_colour.emit(*from);
+}
+
+void obby::client_buffer::on_net_user_colour_failed(const net6::packet& pack)
+{
+	m_signal_user_colour_failed.emit();
 }
 
 void obby::client_buffer::on_net_sync_init(const net6::packet& pack)

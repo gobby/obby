@@ -31,6 +31,8 @@ namespace obby
 class local_buffer : virtual public buffer
 {
 public: 
+	typedef sigc::signal<void>               signal_user_colour_failed_type;
+
 	local_buffer();
 	virtual ~local_buffer();
 
@@ -56,14 +58,27 @@ public:
 	local_document_info* find_document(unsigned int owner_id,
 	                                   unsigned int id) const;
 
+	/** Sets a new colour for the local user and propagates this change
+	 * to the others.
+	 */
+	virtual void set_colour(int red, int green, int blue) = 0;
+
+	/** Signal which will be emitted if a user colour changed failed at
+	 * the server.
+	 */
+	signal_user_colour_failed_type user_colour_failed_event() const;
+
 protected:
         /** Adds a new document with the given title to the buffer.
 	 */
 	virtual document_info& add_document_info(const user* owner,
 	                                         unsigned int id,
 	                                         const std::string& title) = 0;
+
+	signal_user_colour_failed_type m_signal_user_colour_failed;
 };
 
 }
 
 #endif // _OBBY_LOCAL_BUFFER_HPP_
+
