@@ -26,8 +26,9 @@ const char* obby_version()
 
 #ifdef WITH_HOWL
 /* This is an entry point for which external scripts could check. */
-void obby_has_howl()
+extern "C" void obby_has_howl()
 {
+	return;
 }
 #endif
 
