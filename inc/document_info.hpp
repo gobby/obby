@@ -26,6 +26,7 @@
 #include "user.hpp"
 #include "document.hpp"
 #include "document_packet.hpp"
+#include "serialise/object.hpp"
 
 namespace obby
 {
@@ -89,6 +90,10 @@ public:
 	                    net6::basic_object<selector_type>& net,
 	                    const user* owner, unsigned int id,
 	                    const std::string& title);
+
+	basic_document_info(const basic_buffer<selector_type>& buffer,
+	                    net6::basic_object<selector_type>& net,
+	                    const serialise::object& obj);
 
 	/** Returns the owner of this document. It may return NULL if the
 	 * document has no owner (indicating that the server created the
@@ -437,6 +442,32 @@ basic_document_info<selector_type>::
 	                    const user* owner, unsigned int id,
 	                    const std::string& title):
 	m_buffer(buffer), m_net(net), m_owner(owner), m_id(id), m_title(title),
+	m_priv_table(
+		new privileges_table(privileges::SUBSCRIBE | privileges::MODIFY)
+	)
+{
+}
+
+template<typename selector_type>
+basic_document_info<selector_type>::
+	basic_document_info(const basic_buffer<selector_type>& buffer,
+	                    net6::basic_object<selector_type>& net,
+	                    const serialise::object& obj):
+	m_buffer(buffer), m_net(net),
+	m_owner(
+		obj.get_required_attribute("owner").
+			serialise::attribute::as<const user*>(
+				buffer.get_user_table()
+			)
+	),
+	m_id(
+		obj.get_required_attribute("id").
+			serialise::attribute::as<unsigned int>()
+	),
+	m_title(
+		obj.get_required_attribute("title").
+			serialise::attribute::as<std::string>()
+	),
 	m_priv_table(
 		new privileges_table(privileges::SUBSCRIBE | privileges::MODIFY)
 	)

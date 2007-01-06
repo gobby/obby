@@ -24,6 +24,7 @@
 #include <net6/address.hpp>
 #include <net6/non_copyable.hpp>
 #include <string>
+#include "serialise/object.hpp"
 
 namespace obby
 {
@@ -112,6 +113,10 @@ public:
 	 */
 	user(unsigned int id, const std::string& name, int red, int green,
 	     int blue);
+
+	/** Creates a user from a serialised user object.
+	 */
+	user(const serialise::object& obj);
 
 	/** Releases the underlaying net6::user object from this user.
 	 * This is useful if this object gets deleted because the

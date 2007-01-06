@@ -78,6 +78,11 @@ public:
 	     unsigned int from,
 	     const user_table& user_table);
 
+	/** Deserialises a line from a serialisation object.
+	 */
+	line(const serialise::object& obj,
+	     const user_table& user_table);
+
 	/** Copy constructor, it copies a line with its authors.
 	 */
 	line(const line& other);

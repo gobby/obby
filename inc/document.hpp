@@ -22,6 +22,7 @@
 #include "position.hpp"
 #include "duplex_signal.hpp"
 #include "user.hpp"
+#include "user_table.hpp"
 #include "line.hpp"
 
 namespace obby
@@ -41,6 +42,12 @@ public:
 	> signal_delete_type;
 
 	document();
+
+	/** Deserialises the document.
+	 * TODO: Should be ctor?
+	 */
+	void deserialise(const serialise::object& obj,
+	                 const user_table& user_table);
 
 	/** Returns the whole content of the document.
 	 */

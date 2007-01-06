@@ -16,11 +16,45 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "gettext.hpp"
 #include "document.hpp"
 
 obby::document::document()
  : m_lines(1, line() )
 {
+}
+
+void obby::document::deserialise(const serialise::object& obj,
+                                 const user_table& user_table)
+{
+	// Clear lines
+	m_lines.clear();
+	// Load from serialisation object
+	for(serialise::object::child_iterator iter = obj.children_begin();
+	    iter != obj.children_end();
+	    ++ iter)
+	{
+		if(iter->get_name() == "line")
+		{
+			m_lines.push_back(line(*iter, user_table) );
+		}
+		else
+		{
+			// Unexpected child node
+			// TODO: unexpected_child_error
+			format_string str("Unexpected child node: '%0%'");
+			str << iter->get_name();
+			throw serialise::error(str.str(), iter->get_line() );
+		}
+	}
+	// Do not allow documents with no lines
+	if(m_lines.empty() )
+	{
+		throw serialise::error(
+			_("Document needs at least one line"),
+			obj.get_line()
+		);
+	}
 }
 
 std::string obby::document::get_text() const

@@ -22,7 +22,9 @@
 #include <string>
 #include <sstream>
 #include <net6/serialise.hpp>
-#include "serialise/token.hpp"
+#include "../format_string.hpp"
+#include "error.hpp"
+#include "token.hpp"
 
 namespace obby
 {
@@ -87,7 +89,8 @@ public:
 	 * the context <em>ctx</em>.
 	 */
 	template<typename data_type>
-	data_type as(const ::serialise::context<data_type>& ctx) const;
+	data_type as(const ::serialise::context<data_type>& ctx =
+	             ::serialise::context<data_type>()) const;
 private:
 	std::string m_name;
 	::serialise::data m_value;

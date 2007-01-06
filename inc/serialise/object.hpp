@@ -21,8 +21,8 @@
 
 #include <map>
 #include <list>
-#include "serialise/token.hpp"
-#include "serialise/attribute.hpp"
+#include "token.hpp"
+#include "attribute.hpp"
 
 namespace obby
 {
@@ -80,13 +80,16 @@ public:
 		const std::string& name
 	);
 
-	attribute* get_attribute(
-		const std::string& name
-	);
+	attribute* get_attribute(const std::string& name);
+	const attribute* get_attribute(const std::string& name) const;
 
-	const attribute* get_attribute(
-		const std::string& name
-	) const;
+	/** Throws a serialise::error if the attribute is not defined.
+	 */
+	attribute& get_required_attribute(const std::string& name);
+
+	/** Throws a serialise::error if the attribute is not defined.
+	 */
+	const attribute& get_required_attribute(const std::string& name) const;
 
 	attribute_iterator attributes_begin() const;
 	attribute_iterator attributes_end() const;

@@ -20,6 +20,8 @@
 #define _OBBY_SERVER_DOCUMENT_INFO_HPP_
 
 #include <net6/server.hpp>
+#include "serialise/object.hpp"
+#include "serialise/attribute.hpp"
 #include "insert_operation.hpp"
 #include "delete_operation.hpp"
 #include "record.hpp"
@@ -46,6 +48,14 @@ public:
 		net6::basic_server<selector_type>& net,
 		const user* owner, unsigned int id,
 		const std::string& title, const std::string& content
+	);
+
+	/** Deserialises a document from a serialisation object.
+	 */
+	basic_server_document_info(
+		const basic_server_buffer<selector_type>& buffer,
+		net6::basic_server<selector_type>& net,
+		const serialise::object& obj
 	);
 
 	/** Inserts the given text at the given position into the document.
@@ -185,6 +195,41 @@ basic_server_document_info<selector_type>::basic_server_document_info(
 	if(owner != NULL)
 		user_subscribe(*owner);
 
+	// Connect to signals
+	m_jupiter->local_event().connect(
+		sigc::mem_fun(
+			*this,
+			&basic_server_document_info::on_jupiter_local
+		)
+	);
+
+	m_jupiter->remote_event().connect(
+		sigc::mem_fun(
+			*this,
+			&basic_server_document_info::on_jupiter_remote
+		)
+	);
+}
+
+template<typename selector_type>
+basic_server_document_info<selector_type>::basic_server_document_info(
+	const basic_server_buffer<selector_type>& buffer,
+	net6::basic_server<selector_type>& net,
+	const serialise::object& obj
+):
+	basic_document_info<selector_type>(buffer, net, obj)
+{
+	// TODO: Avoid code duplication somehow
+	// Assign document content
+	basic_document_info<selector_type>::assign_document();
+	// Deserialise document
+	basic_document_info<selector_type>::
+		m_document->deserialise(obj, buffer.get_user_table() );
+
+	// Create jupiter server implementation
+	m_jupiter.reset(new jupiter_server(
+		*basic_document_info<selector_type>::m_document
+	) );
 	// Connect to signals
 	m_jupiter->local_event().connect(
 		sigc::mem_fun(

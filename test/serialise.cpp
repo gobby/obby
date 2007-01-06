@@ -13,7 +13,7 @@ namespace
 		"   child_2_1_1\n"
 		"  child_2_2\n"
 		" child_3\n"
-		"  child_3_1";
+		"  child_3_1 attribute=\"value\"";
 }
 
 int main() try

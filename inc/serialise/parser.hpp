@@ -22,7 +22,7 @@
 #include <string>
 #include <iostream>
 #include <net6/non_copyable.hpp>
-#include "serialise/object.hpp"
+#include "object.hpp"
 
 namespace obby
 {

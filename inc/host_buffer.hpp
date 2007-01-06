@@ -105,9 +105,15 @@ public:
 protected:
 	/** Creates a new document info object according to the type of buffer.
 	 */
-	virtual typename basic_server_buffer<selector_type>::document_info*
-	new_document_info(const user* owner, unsigned int id,
-	                  const std::string& title, const std::string& content);
+	virtual document_info* new_document_info(const user* owner,
+	                                         unsigned int id,
+	                                         const std::string& title,
+	                                         const std::string& content);
+
+	/** Creates a new document info deserialised from a serialisation
+	 * object according to the type of buffer.
+	 */
+	virtual document_info* new_document_info(const serialise::object& obj);
 
 	/** Creates the underlaying net6 network object corresponding to the
 	 * buffer's type.
@@ -195,6 +201,11 @@ void basic_host_buffer<selector_type>::open(const std::string& content,
                                             unsigned int port)
 {
 	basic_server_buffer<selector_type>::open(content, port);
+
+	// Create local user
+	m_self = basic_buffer<selector_type>::m_user_table.add_user(
+		net6_host().get_self(), m_red, m_green, m_blue
+	);
 }
 
 template<typename selector_type>
@@ -275,13 +286,22 @@ void basic_host_buffer<selector_type>::set_colour(int red, int green, int blue)
 }
 
 template<typename selector_type>
-typename basic_server_buffer<selector_type>::document_info*
+typename basic_host_buffer<selector_type>::document_info*
 basic_host_buffer<selector_type>::
 	new_document_info(const user* owner, unsigned int id,
 	                  const std::string& title, const std::string& content)
 {
 	// Create host_document_info, according to host_buffer
 	return new document_info(*this, net6_host(), owner, id, title, content);
+}
+
+template<typename selector_type>
+typename basic_host_buffer<selector_type>::document_info*
+basic_host_buffer<selector_type>::
+	new_document_info(const serialise::object& obj)
+{
+	// Create host_document_info, according to host_buffer
+	return new document_info(*this, net6_host(), obj);
 }
 
 template<typename selector_type>

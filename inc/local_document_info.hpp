@@ -20,6 +20,7 @@
 #define _OBBY_LOCAL_DOCUMENT_INFO_HPP_
 
 #include <net6/local.hpp>
+#include "serialise/object.hpp"
 #include "document_info.hpp"
 
 namespace obby
@@ -42,6 +43,12 @@ public:
 		net6::basic_local<selector_type>& net,
 		const user* owner, unsigned int id,
 		const std::string& title
+	);
+
+	basic_local_document_info(
+		const basic_local_buffer<selector_type>& buffer,
+		net6::basic_local<selector_type>& net,
+		const serialise::object& obj
 	);
 
 	/** Sends a subscribe request for the local user. If the subscribe
@@ -77,7 +84,18 @@ basic_local_document_info<selector_type>::basic_local_document_info(
 	net6::basic_local<selector_type>& net,
 	const user* owner, unsigned int id,
 	const std::string& title
-) : basic_document_info<selector_type>(buffer, net, owner, id, title)
+):
+	basic_document_info<selector_type>(buffer, net, owner, id, title)
+{
+}
+
+template<typename selector_type>
+basic_local_document_info<selector_type>::basic_local_document_info(
+	const basic_local_buffer<selector_type>& buffer,
+	net6::basic_local<selector_type>& net,
+	const serialise::object& obj
+):
+	basic_document_info<selector_type>(buffer, net, obj)
 {
 }
 

@@ -40,8 +40,38 @@ obby::user::user(unsigned int id, const std::string& name, int red, int green,
 {
 }
 
+obby::user::user(const serialise::object& obj):
+	m_flags(flags::NONE), m_privs(privileges::NONE)
+{
+	const serialise::attribute& id_attr =
+		obj.get_required_attribute("id");
+	const serialise::attribute& name_attr =
+		obj.get_required_attribute("name");
+
+	// TODO: Replace this by a obby::colour class before releasing 0.3.0!
+	const serialise::attribute& red_attr =
+		obj.get_required_attribute("red");
+	const serialise::attribute& green_attr =
+		obj.get_required_attribute("green");
+	const serialise::attribute& blue_attr =
+		obj.get_required_attribute("blue");
+
+	m_user6 = NULL;
+	m_id = id_attr.as<unsigned int>();
+	m_name = name_attr.as<std::string>();
+	m_red = red_attr.as<unsigned int>();
+	m_green = green_attr.as<unsigned int>();
+	m_blue = blue_attr.as<unsigned int>();
+
+	m_privs = privileges::NONE;
+}
+
 void obby::user::release_net6()
 {
+	// User must be already connected
+	if(~get_flags() & flags::CONNECTED)
+		throw std::logic_error("obby::user::release_net6");
+
 	m_user6 = NULL;
 	remove_flags(flags::CONNECTED);
 }

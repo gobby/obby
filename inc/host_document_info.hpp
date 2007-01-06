@@ -45,6 +45,12 @@ public:
 		const std::string& title, const std::string& content
 	);
 
+	basic_host_document_info(
+		const basic_host_buffer<selector_type>& buffer,
+		net6::basic_host<selector_type>& net,
+		const serialise::object& obj
+	);
+
 	/** Inserts the given text at the given position into the document.
 	 */
 	virtual void insert(position pos, const std::string& text);
@@ -99,11 +105,12 @@ basic_host_document_info<selector_type>::basic_host_document_info(
 	net6::basic_host<selector_type>& net,
 	const user* owner, unsigned int id,
 	const std::string& title, const std::string& content
-) : basic_document_info<selector_type>(buffer, net, owner, id, title),
-    basic_local_document_info<selector_type>(buffer, net, owner, id, title),
-    basic_server_document_info<selector_type>(
-	buffer, net, owner, id, title, content
-    )
+):
+	basic_document_info<selector_type>(buffer, net, owner, id, title),
+	basic_local_document_info<selector_type>(buffer, net, owner, id, title),
+ 	basic_server_document_info<selector_type>(
+		buffer, net, owner, id, title, content
+	)
 {
 	// Server adds owner automagically to jupiter algo. If the local user
 	// is the owner, it does not need to be added to jupiter.
@@ -114,6 +121,18 @@ basic_host_document_info<selector_type>::basic_host_document_info(
 		basic_server_document_info<selector_type>::
 			m_jupiter->client_remove(*owner);
 	}
+}
+
+template<typename selector_type>
+basic_host_document_info<selector_type>::basic_host_document_info(
+	const basic_host_buffer<selector_type>& buffer,
+	net6::basic_host<selector_type>& net,
+	const serialise::object& obj
+):
+	basic_document_info<selector_type>(buffer, net, obj),
+	basic_local_document_info<selector_type>(buffer, net, obj),
+	basic_server_document_info<selector_type>(buffer, net, obj)
+{
 }
 
 template<typename selector_type>

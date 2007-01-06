@@ -193,22 +193,48 @@ obby::serialise::attribute& obby::serialise::object::add_attribute(
 	return m_attributes[name];
 }
 
-obby::serialise::attribute* obby::serialise::object::get_attribute(
-	const std::string& name
-)
+obby::serialise::attribute*
+obby::serialise::object::get_attribute(const std::string& name)
 {
 	attribute_map::iterator iter = m_attributes.find(name);
 	if(iter == m_attributes.end() ) return NULL;
 	return &iter->second;
 }
 
-const obby::serialise::attribute* obby::serialise::object::get_attribute(
-	const std::string& name
-) const
+const obby::serialise::attribute*
+obby::serialise::object::get_attribute(const std::string& name) const
 {
 	attribute_map::const_iterator iter = m_attributes.find(name);
 	if(iter == m_attributes.end() ) return NULL;
 	return &iter->second;
+}
+
+obby::serialise::attribute&
+obby::serialise::object::get_required_attribute(const std::string& name)
+{
+	attribute_map::iterator iter = m_attributes.find(name);
+	if(iter == m_attributes.end() )
+	{
+		format_string str("Object '%0%' requires attribute '%1%'");
+		str << m_name << name;
+		throw error(str.str(), m_line);
+	}
+
+	return iter->second;
+}
+
+const obby::serialise::attribute&
+obby::serialise::object::get_required_attribute(const std::string& name) const
+{
+	attribute_map::const_iterator iter = m_attributes.find(name);
+	if(iter == m_attributes.end() )
+	{
+		format_string str("Object '%0%' requires attribute '%1%'");
+		str << m_name << name;
+		throw error(str.str(), m_line);
+	}
+
+	return iter->second;
 }
 
 obby::serialise::object::attribute_iterator

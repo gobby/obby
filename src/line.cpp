@@ -17,6 +17,7 @@
  */
 
 #include <cassert>
+#include "gettext.hpp"
 #include "line.hpp"
 
 const obby::line::size_type obby::line::npos = obby::line::string_type::npos;
@@ -61,6 +62,39 @@ obby::line::line(const net6::packet& pack,
 		// Add to vector
 		user_pos upos = { author, pos };
 		m_authors.push_back(upos);
+	}
+}
+
+obby::line::line(const serialise::object& obj,
+                 const user_table& user_table)
+{
+	for(serialise::object::child_iterator iter = obj.children_begin();
+	    iter != obj.children_end();
+	    ++ iter)
+	{
+		if(iter->get_name() == "part")
+		{
+			// Part of the line
+			user_pos pos = {
+				iter->get_required_attribute("author").
+					as<const user*>(user_table),
+				m_line.length()
+			};
+
+			// Line content
+			m_line += iter->get_required_attribute("content").
+				as<std::string>();
+
+			m_authors.push_back(pos);
+		}
+		else
+		{
+			// Unexpected child
+			// TODO: unexpected_child_error
+			format_string str(_("Unexpected child node: '%0%'") );
+			str << iter->get_name();
+			throw serialise::error(str.str(), iter->get_line() );
+		}
 	}
 }
 

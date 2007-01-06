@@ -19,6 +19,8 @@
 #ifndef _OBBY_SERVER_BUFFER_HPP_
 #define _OBBY_SERVER_BUFFER_HPP_
 
+#include "serialise/error.hpp"
+#include "serialise/parser.hpp"
 #include "error.hpp"
 #include "sha1.hpp"
 #include "rsa.hpp"
@@ -118,6 +120,11 @@ protected:
 	                                         unsigned int id,
 	                                         const std::string& title,
 	                                         const std::string& content);
+
+	/** Creates a new document info deserialised from a serialisation
+	 * object according to the type of buffer.
+	 */
+	virtual document_info* new_document_info(const serialise::object& obj);
 
 	/** Creates the underlaying net6 network object corresponding to the
 	 * buffer's type.
@@ -233,29 +240,6 @@ basic_server_buffer<selector_type>::
 {
 }
 
-/*template<typename selector_type>
-basic_server_buffer<selector_type>::basic_server_buffer(unsigned int port)
- : basic_buffer<selector_type>()
-{
-	init_impl(port);
-
-	// TODO: Key length as ctor parameter
-	std::pair<RSA::Key, RSA::Key> keys = RSA::generate(
-		basic_buffer<selector_type>::m_rclass, 256
-	);
-
-	m_public = keys.first; m_private = keys.second;
-}
-
-template<typename selector_type>
-basic_server_buffer<selector_type>::
-	basic_server_buffer(unsigned int port, const RSA::Key& public_key,
-	                    const RSA::Key& private_key)
- : basic_buffer<selector_type>(), m_public(public_key), m_private(private_key)
-{
-	init_impl(port);
-}*/
-
 template<typename selector_type>
 void basic_server_buffer<selector_type>::open(unsigned int port)
 {
@@ -273,8 +257,56 @@ void basic_server_buffer<selector_type>::open(const std::string& session,
 	if(is_open() )
 		throw std::logic_error("obby::basic_server_buffer::open");
 
-	// TODO: Restore session
-	open(port);
+	// Open server
+	basic_buffer<selector_type>::m_net.reset(new_net(port) );
+	register_signal_handlers();
+
+	// Deserialise file
+	serialise::parser parser;
+	parser.deserialise(session);
+
+	// TODO: Localisation (header file. :((99). Maybe we should have a
+	// macro like _h() for gettext usage in header files...
+	if(parser.get_type() != "obby")
+		throw serialise::error("File is not an obby document", 1);
+
+	// Get root object, verify that it is an obby session
+	serialise::object& root = parser.get_root();
+	if(root.get_name() != "session")
+	{
+		throw serialise::error(
+			"File is not a stored obby session",
+			root.get_line()
+		);
+	}
+
+	// Check children
+	for(serialise::object::child_iterator iter = root.children_begin();
+	    iter != root.children_end();
+	    ++ iter)
+	{
+		if(iter->get_name() == "user_table")
+		{
+			// Stored user table
+			basic_buffer<selector_type>::
+				m_user_table.deserialise(*iter);
+		}
+		else if(iter->get_name() == "document")
+		{
+			// Stored document, load it
+			document_info* info = new_document_info(*iter);
+			// Add to list
+			basic_buffer<selector_type>::document_add(*info);
+		}
+		else
+		{
+			// Unexpected child
+			// TODO: unexpected_child_error
+			format_string str("Unexpected child node: '%0%'");
+			str << iter->get_name();
+			throw serialise::error(str.str(), iter->get_line() );
+		}
+	}
 }
 
 template<typename selector_type>
@@ -743,6 +775,8 @@ bool basic_server_buffer<selector_type>::
 
 	if(pack.get_command() == "obby_document")
 		{ on_net_document(pack, from); return true; }
+
+	return false;
 }
 
 template<typename selector_type>
@@ -870,6 +904,15 @@ basic_server_buffer<selector_type>::
 	return new document_info(
 		*this, net6_server(), owner, id, title, content
 	);
+}
+
+template<typename selector_type>
+typename basic_server_buffer<selector_type>::document_info*
+basic_server_buffer<selector_type>::
+	new_document_info(const serialise::object& obj)
+{
+	// Create server_document_info, according to server_buffer
+	return new document_info(*this, net6_server(), obj);
 }
 
 template<typename selector_type>

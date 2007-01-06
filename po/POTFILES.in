@@ -1,7 +1,9 @@
 # source files
 
 src/error.cpp
-src/client_buffer.cpp
+src/user_table.cpp
+src/line.cpp
+src/document.cpp
 src/serialise/token.cpp
 src/serialise/attribute.cpp
 src/serialise/object.cpp

@@ -132,10 +132,9 @@ void obby::serialise::parser::deserialise_memory(
 	// Must be EOF now
 	if(iter != list.end() )
 	{
-		throw error(
-			_("Expected end of input"),
-			iter->get_line()
-		);
+		format_string str(_("Expected end of input instead of '%0%'") );
+		str << iter->get_text();
+		throw error(str.str(), iter->get_line() );
 	}
 }
 

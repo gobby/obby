@@ -147,6 +147,10 @@ public:
 	user_table();
 	virtual ~user_table();
 
+	/** Deserialises a user_table from a serialisation object.
+	 */
+	void deserialise(const serialise::object& obj);
+
 	/** Clears all users from the user table.
 	 */
 	void clear();

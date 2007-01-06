@@ -16,6 +16,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "gettext.hpp"
+#include "serialise/error.hpp"
 #include "user_table.hpp"
 
 obby::user_table::user_table()
@@ -25,6 +27,59 @@ obby::user_table::user_table()
 obby::user_table::~user_table()
 {
 	clear();
+}
+
+void obby::user_table::deserialise(const serialise::object& obj)
+{
+	for(serialise::object::child_iterator iter = obj.children_begin();
+	    iter != obj.children_end();
+	    ++ iter)
+	{
+		if(iter->get_name() == "user")
+		{
+			// Create new user
+			user* new_user = new user(*iter);
+
+			// Check for conflicts
+			if(m_user_map.find(new_user->get_id()) !=
+			   m_user_map.end() || new_user->get_id() == 0)
+			{
+				format_string str(
+					_("User ID %0% is already in use")
+				);
+				str << new_user->get_id();
+
+				delete new_user;
+				throw serialise::error(
+					str.str(),
+					iter->get_line()
+				);
+			}
+
+			// Insert into user map
+			m_user_map[new_user->get_id()] = new_user;
+			
+			/*const serialise::attribute* id_attr =
+				iter->get_attribute("id");
+			const serialise::attribute* name_attr =
+				iter->get_attribute("name");
+			// TODO: Replace this by a obby::colour class
+			const serialise::attribute* red_attr =
+				iter->get_attribute("red");
+			const serialise::attribute* blue_attr =
+				iter->get_attribute("green");
+			const serialise::attribute* green_attr =
+				iter->get_attribute("blue");
+
+			if(!id_attr || !name_attr || !red_attr || !blue_attr || !green_attr)*/
+		}
+		else
+		{
+			format_string str("Unexpected child node: '%0%'");
+			str << iter->get_name();
+			throw serialise::error(str.str(), iter->get_line() );
+		}
+	}
 }
 
 void obby::user_table::clear()
