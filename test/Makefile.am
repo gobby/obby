@@ -10,7 +10,7 @@ LDADD = -L../src/.libs -lobby $(libobby_LIBS)
 AM_CPPFLAGS = -I../inc/ $(libobby_CFLAGS)
 
 if WITH_HOWL
-LDADD    += $(libhowl_LIBS)
+LDADD       += $(libhowl_LIBS)
 AM_CPPFLAGS += $(libhowl_CFLAGS)
 endif
 
