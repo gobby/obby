@@ -14,6 +14,9 @@ endif
 
 libobby_la_CPPFLAGS = $(libobby_CFLAGS) -I../inc
 
+# gettext
+libobby_la_CPPFLAGS += -DLOCALEDIR=\""$(datadir)/locale"\"
+
 libobby_la_SOURCES = common.cpp
 libobby_la_SOURCES += format_string.cpp
 libobby_la_SOURCES += error.cpp

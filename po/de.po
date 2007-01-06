@@ -7,22 +7,31 @@ msgid ""
 msgstr ""
 "Project-Id-Version: obby 0.2.0\n"
 "Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
-"POT-Creation-Date: 2005-07-18 01:53+0200\n"
-"PO-Revision-Date: 2005-07-18 01:54+0200\n"
+"POT-Creation-Date: 2005-07-24 16:42+0200\n"
+"PO-Revision-Date: 2005-07-24 16:44+0200\n"
 "Last-Translator: Philipp Kern <phil@0x539.de>\n"
 "Language-Team: German Translation Team <crew@0x539.de>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/error.cpp:35
+#: src/error.cpp:37
 msgid "Colour is already in use"
 msgstr "Farbe wird bereits benutzt"
 
-#: src/error.cpp:37
+#: src/error.cpp:39
 msgid "Wrong session password"
 msgstr "Falsches Sitzungspasswort"
 
-#: src/error.cpp:39
+#: src/error.cpp:41
 msgid "Wrong user password"
 msgstr "Falsches Benutzerpasswort"
+
+#: src/error.cpp:43
+msgid "Protocol version mismatch"
+msgstr "Falsche Protokollversion"
+
+#: src/client_buffer.cpp:67
+msgid "No server public key available, wait for the welcome packet"
+msgstr "Kein öffentlicher Schlüssel des Servers verfügbar, warte auf das "
+"erste Paket"
