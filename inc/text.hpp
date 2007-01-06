@@ -53,6 +53,7 @@ protected:
 		void serialise(serialise::object& obj);
 		void append_packet(net6::packet& pack);
 
+		void prepend(const string_type& text);
 		void append(const string_type& text);
 		void insert(size_type pos, const string_type& text);
 		void erase(size_type pos, size_type len = npos);
@@ -68,27 +69,13 @@ protected:
 	typedef std::list<chunk*> list_type;
 
 public:
-	// TODO: Cache iterators to serveral points in the text
+	// TODO: Cache iterators to serveral points in the text (1/8, 1/4, ...)
 	// to optimize insert, erase and other functions
 	typedef ptr_iterator<
 		const chunk,
 		list_type,
 		list_type::const_iterator
 	> chunk_iterator;
-/*	class chunk_iterator
-	{
-	public:
-		chunk_iterator& operator++();
-		chunk_iterator operator++(int);
-
-		const user* get_author() const;
-		const std::string& get_text() const;
-
-		bool operator==(const chunk_iterator& iter);
-		bool operator!=(const chunk_iterator& iter);
-	protected:
-		list_type::iterator m_internal;
-	};*/
 
 	text();
 	text(const text& other);
@@ -135,9 +122,18 @@ public:
 	void set_max_chunk_size(size_type max_chunk);
 
 	operator const std::string&() const;
+
 protected:
 	size_type m_max_chunk;
 	list_type m_chunks;
+
+private:
+	list_type::iterator insert_chunk(list_type::iterator chunk_it,
+	                                 size_type& chunk_pos,
+	                                 const string_type& str,
+	                                 const user* author);
+
+	list_type::iterator find_chunk(size_type& pos);
 };
 
 #if 0

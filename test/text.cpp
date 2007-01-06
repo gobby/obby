@@ -23,21 +23,52 @@ namespace
 		const char* expected;
 	};
 
-	insert_test insert_tests[] = {
+	struct substr_test {
+		const char* str;
+		text::size_type pos;
+		text::size_type len;
+		const char* expected;
+	};
+
+	insert_test INSERT_TESTS[] = {
 		{ "", 0, "[1]bar", "[1]bar" },
 		{ "", 1, "[1]bar", NULL },
 		{ "[1]foo", 3, "[1]bar", "[1]foobar" },
 		{ "[1]foo", 0, "[1]bar", "[1]barfoo" },
+		{ "[1]for", 2, "[1]oba", "[1]foobar" },
+		{ "[1]foo", 0, "[2]bar", "[2]bar[1]foo" },
 		{ "[1]foo", 4, "[1]bar", NULL },
 		{ "[1]gnah", 3, "[2]gnah", "[1]gna[2]gnah[1]h" },
+		{ "[1]gnah", 4, "[2]gnah", "[1]gnah[2]gnah" },
 		{ "[1]b[2]a", 1, "[1]foo", "[1]bfoo[2]a" },
 		{ "[1]b[2]a", 1, "[2]foo", "[1]b[2]fooa" },
 		{ "[1]b[2]a", 1, "[1]f[2]oo", "[1]bf[2]ooa" },
 		{ "[1]b[2]a", 1, "[2]f[1]oo", "[1]b[2]f[1]oo[2]a" },
 		{ "[1]b[2]a", 1, "[1]f[2]o[1]o", "[1]bf[2]o[1]o[2]a" },
 		{ "[1]b[2]a", 1, "[2]f[1]o[2]o", "[1]b[2]f[1]o[2]oa" }
+	};
 
-		// TODO: Add some more
+	substr_test SUBSTR_TESTS[] = {
+		{ "", 0, 0, "" },
+		{ "[1]bar", 0, 3, "[1]bar" },
+		{ "[1]bar", 0, 1, "[1]b" },
+		{ "[1]bar", 0, 0, "" },
+		{ "[1]b[2]a[1]r", 0, 3, "[1]b[2]a[1]r" },
+		{ "[1]b[2]a[1]r", 0, 2, "[1]b[2]a" },
+		{ "[1]b[2]a[1]r", 1, 1, "[2]a" },
+		{ "[1]foo[2]bar", 0, 3, "[1]foo" },
+		{ "[1]foo[2]bar", 3, 3, "[2]bar" },
+		{ "[1]foo[2]bar", 1, 3, "[1]oo[2]b" },
+		{ "[1]foo[2]bar", 2, 3, "[1]o[2]ba" },
+		{ "[1]foo[2]bar", 0, 4, "[1]foo[2]b" },
+		{ "[1]foo[2]bar", 1, 4, "[1]oo[2]ba" },
+		{ "[1]foo[2]bar", 2, 4, "[1]o[2]bar" },
+		{ "[1]foo[2]bar", 1, 2, "[1]oo" },
+		{ "[1]foo[2]bar", 2, 2, "[1]o[2]b" },
+		{ "[1]foo[2]bar", 3, 2, "[2]ba" },
+		{ "[1]foo[2]bar", 5, 2, NULL },
+		{ "[1]foo[2]bar", 2, text::npos, "[1]o[2]bar" },
+		{ "[1]foo[2]bar", 3, text::npos, "[2]bar" }
 	};
 
 	class desc_error: public std::logic_error
@@ -134,6 +165,7 @@ namespace
 			text ins(make_text_from_desc(test.second) );
 
 			base.insert(test.pos, ins);
+
 			if(test.expected == NULL)
 			{
 				throw std::logic_error(
@@ -153,10 +185,42 @@ namespace
 		}
 		catch(desc_error& e)
 		{
-			throw std::logic_error(
-				std::string("Malformed text description: ") +
-				e.what()
-			);
+			throw e;
+		}
+		catch(std::logic_error& e)
+		{
+			if(test.expected != NULL)
+				throw e;
+		}
+	}
+
+	void test_substr(const substr_test& test)
+	{
+		try
+		{
+			text base(make_text_from_desc(test.str) );
+			text substrd = base.substr(test.pos, test.len);
+
+			if(test.expected == NULL)
+			{
+				throw std::logic_error(
+					"Substr should fail, but it has not"
+				);
+			}
+
+			text exp(make_text_from_desc(test.expected) );
+			if(compare_text(substrd, exp) == false)
+			{
+				throw std::logic_error(
+					"Result does not match expectation:\n"
+					"Expected " + make_desc_from_text(exp) +
+					", got " + make_desc_from_text(base)
+				);
+			}
+		}
+		catch(desc_error& e)
+		{
+			throw e;
 		}
 		catch(std::logic_error& e)
 		{
@@ -192,9 +256,15 @@ namespace
 int main()
 {
 	test_suite<insert_test, test_insert>(
-		insert_tests,
-		ARRAY_SIZE(insert_tests),
+		INSERT_TESTS,
+		ARRAY_SIZE(INSERT_TESTS),
 		"insert"
+	);
+
+	test_suite<substr_test, test_substr>(
+		SUBSTR_TESTS,
+		ARRAY_SIZE(SUBSTR_TESTS),
+		"substr"
 	);
 
 	return EXIT_SUCCESS;
