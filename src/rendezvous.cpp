@@ -69,8 +69,13 @@ void obby::rendezvous::discover()
 
 void obby::rendezvous::select()
 {
-	sw_ulong msecs = 100;
-	sw_salt_step(m_salt, &msecs);
+	sw_discovery_run(m_session);
+}
+
+void obby::rendezvous::select(unsigned int msecs)
+{
+	sw_ulong ms = msecs;
+	sw_salt_step(m_salt, &ms);
 }
 
 obby::rendezvous::signal_discover_type

@@ -50,6 +50,7 @@ public:
 	void discover();
 
 	void select();
+	void select(unsigned int msecs);
 	
 	signal_discover_type discover_event() const;
 
