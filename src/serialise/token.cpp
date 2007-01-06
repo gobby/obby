@@ -179,7 +179,7 @@ namespace
 				break;
 
 		// Add indentation if this is not an empty line
-		if(*iter != '\n')
+		if(*iter != '\n' && *iter != '\0' && iter != src.end() )
 		{
 			list.add(
 				token::TYPE_INDENTATION,
@@ -266,7 +266,7 @@ namespace
 				throw error(str.str(), line);
 			}
 
-			list.add(type, std::string(*iter, 1), line);
+			list.add(type, std::string(1, *iter), line);
 
 			// Go on with next character
 			++ iter;
