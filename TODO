@@ -10,7 +10,6 @@ Serious:
 Important:
  * Implement automatic service announcement and discovery.
  * Implement chat 
- * Implement user colorizing
  * Catch connection resets in net6::server/client and handle them just as normal
    EOF
 

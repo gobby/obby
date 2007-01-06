@@ -22,6 +22,7 @@
 #include <net6/client.hpp>
 #include "position.hpp"
 #include "record.hpp"
+#include "client_user_table.hpp"
 #include "document.hpp"
 
 namespace obby
@@ -37,7 +38,8 @@ public:
 	/** Creates a new client_document with given ID. <em>client</em> is
 	 * a net6::client object to synchronize changes to.
 	 */
-	client_document(unsigned int id, net6::client& client);
+	client_document(unsigned int id, net6::client& client,
+	                const client_user_table& usertable);
 	virtual ~client_document();
 	
 	/** Inserts <em>text</em> at <em>pos</em>.

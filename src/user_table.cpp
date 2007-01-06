@@ -125,3 +125,40 @@ void obby::user_table::delete_user(obby::user& new_user)
 	assert(iter != m_users.end() );
 }
 
+const obby::user_table::user* obby::user_table::find(unsigned int id) const
+{
+	std::list<user>::const_iterator iter;
+	for(iter = m_users.begin(); iter != m_users.end(); ++ iter)
+		if(id == iter->m_id)
+			return &(*iter);
+	return NULL;
+}
+
+const obby::user_table::user*
+obby::user_table::find_from_user_id(unsigned int id) const
+{
+	std::list<user>::const_iterator iter;
+	for(iter = m_users.begin(); iter != m_users.end(); ++ iter)
+	{
+		// Server user
+		if(id == 0)
+		{
+			if(iter->m_id == 0)
+			{
+				return &(*iter);
+			}
+		}
+
+		// Normal user
+		else if(iter->m_obj)
+		{
+			if(iter->m_obj->get_id() == id)
+			{
+				return &(*iter);
+			}
+		}
+	}
+
+	return NULL;
+}
+

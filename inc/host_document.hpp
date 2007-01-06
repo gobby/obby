@@ -21,6 +21,7 @@
 
 #include <sigc++/signal.h>
 #include <net6/host.hpp>
+#include "host_user_table.hpp"
 #include "server_document.hpp"
 
 namespace obby
@@ -37,7 +38,8 @@ public:
 	 * @param id Unique ID for this document.
 	 * @param host net6::host object to synchronize data to.
 	 */
-	host_document(unsigned int id, net6::host& host);
+	host_document(unsigned int id, net6::host& host,
+	              const host_user_table& usertable);
 	virtual ~host_document();
 
 protected:

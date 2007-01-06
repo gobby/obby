@@ -47,7 +47,7 @@ obby::record* obby::delete_record::clone() const
 void obby::delete_record::apply(document& doc) const
 {
 	assert(doc.get_sub_buffer(m_pos, m_pos + m_text.length()) == m_text);
-	doc.erase_nosync(m_pos, m_pos + m_text.length() );
+	doc.erase_nosync(m_pos, m_pos + m_text.length(), m_from);
 }
 
 void obby::delete_record::apply(record& rec) const

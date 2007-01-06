@@ -18,6 +18,7 @@ pkginclude_HEADERS = \
 	inc/client_user_table.hpp \
 	inc/server_user_table.hpp \
 	inc/host_user_table.hpp \
+	inc/line.hpp
 	inc/document.hpp \
 	inc/client_document.hpp \
 	inc/server_document.hpp \
@@ -39,6 +40,7 @@ libobby_la_SOURCES = \
 	src/client_user_table.cpp \
 	src/server_user_table.cpp \
 	src/host_user_table.cpp \
+	src/line.cpp \
 	src/document.cpp \
 	src/client_document.cpp \
 	src/server_document.cpp \

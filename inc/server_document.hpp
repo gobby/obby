@@ -23,8 +23,10 @@
 #include <net6/server.hpp>
 #include "insert_record.hpp"
 #include "delete_record.hpp"
-#include "server_document.hpp"
-#include "buffer.hpp"
+#include "server_user_table.hpp"
+#include "document.hpp"
+//#include "server_document.hpp"
+//#include "buffer.hpp"
 
 namespace obby
 {
@@ -40,7 +42,8 @@ public:
 	 * @param id Unique ID for this document.
 	 * @param server net6::server object to synchronize data to.
 	 */
-	server_document(unsigned int id, net6::server& server);
+	server_document(unsigned int id, net6::server& server,
+	                const server_user_table& usertable);
 	virtual ~server_document();
 
 	/** Inserts <em>text</em> at <em>pos</em> and synchronizes it with

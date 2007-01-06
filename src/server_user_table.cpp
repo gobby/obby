@@ -22,6 +22,8 @@ obby::server_user_table::server_user_table(net6::server& server,
                                            const server_buffer& buffer)
  : user_table(), m_server(server), m_buffer(buffer)
 {
+	// Add obby server user to user table for changes from server
+	m_users.push_back(user(0, "obby server", 255, 255, 255) );
 }
 
 obby::server_user_table::~server_user_table()

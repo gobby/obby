@@ -217,7 +217,8 @@ void obby::server_buffer::register_signal_handlers()
 
 obby::document& obby::server_buffer::add_document(unsigned int id)
 {
-	document* doc = new server_document(id, *m_server);
+	server_user_table* table = static_cast<server_user_table*>(m_usertable);
+	document* doc = new server_document(id, *m_server, *table);
 	m_doclist.push_back(doc);
 	return *doc;
 }

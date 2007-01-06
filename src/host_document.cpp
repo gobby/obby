@@ -18,8 +18,9 @@
 
 #include "host_document.hpp"
 
-obby::host_document::host_document(unsigned int id, net6::host& host)
- : server_document(id, host)
+obby::host_document::host_document(unsigned int id, net6::host& host,
+                                   const host_user_table& usertable)
+ : server_document(id, host, usertable)
 {
 }
 

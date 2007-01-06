@@ -112,6 +112,16 @@ public:
 	 * name and color are stored further on to identify new users.
 	 */
 	void delete_user(obby::user& old_user);
+
+	/** Finds a user by its user id. Note that this is the user id of the
+	 * obby::user_table::user, not the one of the corresponding obby::user.
+	 */
+	const user* find(unsigned int id) const;
+
+	/** Finds a user by its user id. Note that this is the user id of the
+	 * corresponding obby::user, not the one of the obby::user_table::user.
+	 */
+	const user* find_from_user_id(unsigned int id) const;
 protected:
 	/** List of users that are registered in the user table.
 	 */

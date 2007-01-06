@@ -27,6 +27,8 @@
 #include "record.hpp"
 #include "insert_record.hpp"
 #include "delete_record.hpp"
+#include "user_table.hpp"
+#include "line.hpp"
 
 namespace obby
 {
@@ -41,7 +43,7 @@ public:
 	typedef sigc::signal<void, const insert_record&> signal_insert_type;
 	typedef sigc::signal<void, const delete_record&> signal_delete_type;
 
-	document(unsigned int id);
+	document(unsigned int id, const user_table& usertable);
 	virtual ~document();
 
 	/** Returns a unique ID for this document.
@@ -66,13 +68,24 @@ public:
 	 */
 	virtual void erase(position from, position to) = 0;
 
-	/** Inserts text without syncing it to other users. USE WITH CARE!
+	/** Inserts text without syncing it to other users. This is an low-level
+	 * function libobby uses within itself, so USE WITH CARE! You may
+	 * destroy the complete obby session by performing unsynced operations.
+	 * @param pos Position where to insert text
+	 * @param text text to insert
+	 * @param author_id ID of the user who performed this operation.
 	 */
-	void insert_nosync(position pos, const std::string& text);
+	void insert_nosync(position pos, const std::string& text,
+	                   unsigned int author_id);
 
-	/** Removes text without syncing it to other users. USE WITH CARE!
+	/** Removes text without syncing it to other users. This is an low-level
+	 * function libobby uses within itself, so USE WITH CARE! You may
+	 * destroy the complete obby session by performing unsynced operations.
+	 * @param from Beginning of the position where to remove text
+	 * @param to End of the area where to remove text
+	 * @param author_id ID of the user who performed this operation.
 	 */
-	void erase_nosync(position from, position to);
+	void erase_nosync(position from, position to, unsigned int author_id);
 
 	/** Signal which will be emitted if text has been inserted into the
 	 * document. A call to insert or insert_nosync will not emit this
@@ -111,8 +124,9 @@ protected:
 
 	std::list<record*> m_history;
 	unsigned int m_revision;
+	const user_table& m_usertable;
 
-	std::vector<std::string> m_lines;
+	std::vector<line> m_lines;
 
 	signal_insert_type m_signal_insert;
 	signal_delete_type m_signal_delete;

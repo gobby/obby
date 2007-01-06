@@ -19,8 +19,9 @@
 #include <cassert>
 #include "document.hpp"
 
-obby::document::document(unsigned int id)
- : m_id(id), m_history(), m_revision(0), m_lines(1, "")
+obby::document::document(unsigned int id, const user_table& usertable)
+ : m_id(id), m_history(), m_revision(0), m_usertable(usertable),
+   m_lines(1, line())
 {
 }
 
@@ -39,7 +40,7 @@ unsigned int obby::document::get_id() const
 std::string obby::document::get_whole_buffer() const
 {
 	std::string content;
-	std::vector<std::string>::const_iterator iter;
+	std::vector<line>::const_iterator iter;
 	for(iter = m_lines.begin(); iter != m_lines.end(); ++ iter)
 		content += *iter;
 	return content;
@@ -56,7 +57,7 @@ std::string obby::document::get_sub_buffer(position from, position to) const
 	assert(to_col <= m_lines[to_row].length() );
 
 	std::string buffer;
-	std::vector<std::string>::size_type i;
+	std::vector<line>::size_type i;
 	for(i = from_row; i <= to_row; ++ i)
 	{
 		std::string::size_type begin = 0, end = m_lines[i].length();
@@ -72,69 +73,103 @@ std::string obby::document::get_sub_buffer(position from, position to) const
 	return buffer;
 }
 
-void obby::document::insert_nosync(position pos, const std::string& text)
+void obby::document::insert_nosync(position pos, const std::string& text,
+                                   unsigned int author_id)
 {
+	// Convert position to row and column
 	unsigned int pos_row, pos_col;
 	position_to_coord(pos, pos_row, pos_col);
 
+	// Verify them
 	assert(pos_row < m_lines.size() );
 	assert(pos_col <= m_lines[pos_row].length() );
 
-	std::vector<std::string>::iterator iter = m_lines.begin();
+	// Find author in user table
+	const user_table::user* author;
+	author = m_usertable.find_from_user_id(author_id);
+	assert(author != NULL);
+
+	// Move line iterator to the line where to insert text
+	std::vector<line>::iterator iter = m_lines.begin();
 	for(unsigned int i = 0; i < pos_row; ++ i)
 		++ iter;
 
-	std::string first_line_carry;
+	// Line that holds a carry from the first line when text contains
+	// a newline
+	line first_line_carry;
 	unsigned int ins_col = pos_col;
+
+	// Insert line by line
 	std::string::size_type nl_pos = 0, nl_prev = 0;
 	while( (nl_pos = text.find('\n', nl_pos)) != std::string::npos)
 	{
+		// First line?
 		if(nl_prev == 0)
 		{
+			// Store rest of line in first_line_carry
 			first_line_carry = iter->substr(pos_col);
+			// and remove it from the source line
 			iter->erase(pos_col);
+			// Insert the line at the beginning of the next line
 			ins_col = 0;
 		}
 
-		iter->append(text.substr(nl_prev, nl_pos - nl_prev) );
+		// Append the text to this newline onto this line
+		iter->append(text.substr(nl_prev, nl_pos - nl_prev), *author);
+		// Insert next line
 		++ iter;
-		iter = m_lines.insert(iter, "");
+		iter = m_lines.insert(iter, line());
 
+		// Store newline position for substringing next line
 		nl_prev = ++ nl_pos;
 	}
 
-	iter->insert(ins_col, text.substr(nl_prev) + first_line_carry);
+	// Insert first_line_carry (if any) and the text in the last line
+	iter->insert(ins_col, first_line_carry);
+	iter->insert(ins_col, text.substr(nl_prev), *author);
 }
 
-void obby::document::erase_nosync(position from, position to)
+void obby::document::erase_nosync(position from, position to,
+                                  unsigned int author_id)
 {
+	// Convert positions to rows and columns
 	unsigned int from_row, from_col, to_row, to_col;
 	position_to_coord(from, from_row, from_col);
 	position_to_coord(to, to_row, to_col);
 	
+	// Verify them
 	assert(to >= from);
 	assert(to_row < m_lines.size() );
 	assert(to_col <= m_lines[to_row].length() );
 
-	std::vector<std::string>::iterator iter = m_lines.begin();
+	// Find author in user_table
+	const user_table::user* author;
+	author = m_usertable.find_from_user_id(author_id);
+	assert(author != NULL);
+
+	// Find the iterator for the given row
+	std::vector<line>::iterator iter = m_lines.begin();
 	for(unsigned int i = 0; i < from_row; ++ i)
 		++ iter;
 
+	// Do not remove any lines?
 	if(from_row == to_row)
 	{
-		unsigned int erase_len = to_col - from_col;
-		iter->erase(from_col, erase_len);
+		// Just erase text from the line
+		iter->erase(from_col, to_col - from_col);
 	}
 	else
 	{
+		// Erase the rest of this line
 		iter->erase(from_col);
+		// And append the rest of the last line
 		iter->append(m_lines[to_row].substr(to_col) );
 
+		// Remove all lines between the first and the last one
 		++ iter;
-		std::vector<std::string>::iterator end_iter = iter;
+		std::vector<line>::iterator end_iter = iter;
 		for(unsigned int i = from_row + 1; i <= to_row; ++ i)
 			++ end_iter;
-//		++ end_iter;
 		m_lines.erase(iter, end_iter);
 	}
 }

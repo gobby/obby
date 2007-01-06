@@ -69,9 +69,12 @@ const obby::user& obby::host_buffer::get_self() const
 
 obby::document& obby::host_buffer::add_document(unsigned int id)
 {
+	host_user_table* table = static_cast<host_user_table*>(m_usertable);
 	net6::host* host = static_cast<net6::host*>(m_server);
-	document* doc = new host_document(id, *host);
-	m_doc_counter = id;
+
+	document* doc = new host_document(id, *host, *table);
+
 	m_doclist.push_back(doc);
 	return *doc;
 }
+

@@ -47,7 +47,7 @@ obby::record* obby::insert_record::clone() const
 
 void obby::insert_record::apply(document& doc) const
 {
-	doc.insert_nosync(m_pos, m_text);
+	doc.insert_nosync(m_pos, m_text, m_from);
 }
 
 void obby::insert_record::apply(record& rec) const

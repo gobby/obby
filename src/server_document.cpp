@@ -18,8 +18,9 @@
 
 #include "server_document.hpp"
 
-obby::server_document::server_document(unsigned int id, net6::server& server)
- : document(id), m_server(server)
+obby::server_document::server_document(unsigned int id, net6::server& server,
+                                       const server_user_table& usertable)
+ : document(id, usertable), m_server(server)
 {
 }
 
@@ -29,18 +30,27 @@ obby::server_document::~server_document()
 
 void obby::server_document::insert(position pos, const std::string& text)
 {
-	insert_nosync(pos, text);
-	record* rec = new insert_record(pos, text, m_id, m_revision, 0);
+	// Build record
+	record* rec = new insert_record(pos, text, m_id, ++ m_revision, 0);
+	// Apply on document
+	rec->apply(*this);
+	// Insert into history
 	m_history.push_back(rec);
+	// Synchronize to clients
 	m_server.send(rec->to_packet() );
 }
 
 void obby::server_document::erase(position from, position to)
 {
+	// Get erased text
 	std::string erased = get_sub_buffer(from, to);
-	erase_nosync(from, to);
-	record* rec = new delete_record(from, erased, m_id, m_revision, 0);
+	// Create record
+	record* rec = new delete_record(from, erased, m_id, ++ m_revision, 0);
+	// Apply on document
+	rec->apply(*this);
+	// Insert into history
 	m_history.push_back(rec);
+	// Synchronize to clients
 	m_server.send(rec->to_packet() );
 }
 
@@ -93,13 +103,15 @@ void obby::server_document::synchronize(net6::server::peer& peer)
 	m_server.send(init_pack, peer);
 
 	// Send buffer
-	std::vector<std::string>::const_iterator iter;
+	std::vector<line>::const_iterator iter;
 	for(iter = m_lines.begin(); iter != m_lines.end(); ++ iter)
-	{
+		m_server.send(iter->to_packet(m_id), peer);
+//		iter->synchronize(peer, m_server, m_id);
+/*	{
 		net6::packet line_pack("obby_sync_doc_line");
 		line_pack << m_id << *iter;
 		m_server.send(line_pack, peer);
-	}
+	}*/
 
 	// Send final sync packet
 	net6::packet final_pack("obby_sync_doc_final");

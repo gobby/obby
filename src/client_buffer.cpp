@@ -304,7 +304,8 @@ void obby::client_buffer::register_signal_handlers()
 
 obby::document& obby::client_buffer::add_document(unsigned int id)
 {
-	document* doc = new client_document(id, *m_client);
+	client_user_table* table = static_cast<client_user_table*>(m_usertable);
+	document* doc = new client_document(id, *m_client, *table);
 	m_doclist.push_back(doc);
 	return *doc;
 }

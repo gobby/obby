@@ -19,8 +19,9 @@
 #include <cassert>
 #include "client_document.hpp"
 
-obby::client_document::client_document(unsigned int id, net6::client& client)
- : document(id), m_unsynced(), m_client(client)
+obby::client_document::client_document(unsigned int id, net6::client& client,
+                                       const client_user_table& usertable)
+ : document(id, usertable), m_unsynced(), m_client(client)
 {
 }
 
@@ -34,11 +35,13 @@ obby::client_document::~client_document()
 void obby::client_document::insert(position pos, const std::string& text)
 {
 	// Insert into buffer
-	insert_nosync(pos, text);
+//	insert_nosync(pos, text, m_client.get_self()->get_id() );
 	// Add to unsynced changes
 	record* rec = new insert_record(pos, text, m_id, m_revision,
 	                                m_client.get_self()->get_id() );
 	m_unsynced.push_back(rec);
+	// Apply on document
+	rec->apply(*this);
 	// Send sync request to server
 	m_client.send(rec->to_packet() );
 }
@@ -47,11 +50,13 @@ void obby::client_document::erase(position from, position to)
 {
 	std::string text = get_sub_buffer(from, to);
 	// Delete from buffer
-	erase_nosync(from, to);
+//	erase_nosync(from, to);
 	// Add to unsynced changes
 	record* rec = new delete_record(from, text, m_id, m_revision,
 	                                m_client.get_self()->get_id() );
 	m_unsynced.push_back(rec);
+	// Delete from document
+	rec->apply(*this);
 	// Send sync request to server
 	m_client.send(rec->to_packet() );
 }
@@ -196,11 +201,12 @@ void obby::client_document::on_net_sync_init(const net6::packet& pack)
 
 void obby::client_document::on_net_sync_line(const net6::packet& pack)
 {
-	if(pack.get_param_count() < 2) return;
+	m_lines.push_back(line(pack, m_usertable) );
+/*	if(pack.get_param_count() < 2) return;
 	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
 	if(pack.get_param(1).get_type() != net6::packet::param::STRING) return;
 
-	m_lines.push_back(pack.get_param(1).as_string() );
+	m_lines.push_back(pack.get_param(1).as_string() );*/
 }
 
 void obby::client_document::on_net_sync_final(const net6::packet& pack)
