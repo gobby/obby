@@ -281,6 +281,11 @@ void basic_server_buffer<selector_type>::open(const std::string& session,
 		);
 	}
 
+	serialise::attribute& version_attr =
+		root.get_required_attribute("version");
+
+	// TODO: Check version for incompatibilites
+	// TODO: Block higher version files
 	// Check children
 	for(serialise::object::child_iterator iter = root.children_begin();
 	    iter != root.children_end();

@@ -273,6 +273,7 @@ void basic_buffer<selector_type>::serialise(const std::string& session) const
 
 	serialise::object& root = parser.get_root();
 	root.set_name("session");
+	root.add_attribute("version").set_value(obby_version() );
 
 	serialise::object& user_table = root.add_child();
 	user_table.set_name("user_table");
