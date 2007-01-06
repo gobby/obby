@@ -24,6 +24,7 @@
 #include "operation.hpp"
 #include "record.hpp"
 #include "jupiter_algorithm.hpp"
+#include "jupiter_undo.hpp"
 
 namespace obby
 {
@@ -34,9 +35,7 @@ class jupiter_server: private net6::non_copyable
 {
 public:
 	typedef sigc::signal<void, const record&, const user&, const user*>
-		signal_local_type;
-	typedef sigc::signal<void, const record&, const user&, const user*>
-		signal_remote_type;
+		signal_record_type;
 
 	/** Creates a new jupiter_server which uses the given document.
 	 * Local and remote changes are applied to this document.
@@ -52,36 +51,36 @@ public:
 	 */
 	void client_remove(const user& client);
 
-	/** Performs a local operation by the user <em>from</em>. local_event
+	/** Performs a local operation by the user <em>from</em>. record_event
 	 * will be emitted for each client with a corresponding
 	 * record that may be transmitted to it.
 	 */
 	void local_op(const operation& op, const user* from);
 
-	/** Performs a remote operation by the user <em>from</em>. remote_event
+	/** Performs a remote operation by the user <em>from</em>. record_event
 	 * will be emitted for each client except <em>from</em> with a record
 	 * that may be transmitted to it.
 	 */
 	void remote_op(const record& rec, const user* from);
 
+	/** Undoes the last operation by the user <em>from</em>. record_event
+	 * will be emitted for each client with a corresponding record that
+	 * may be transmitted to it.
+	 */
+	void undo_op(const user* from);
+
 	/** Signal which will be emitted when a local operation has been
 	 * applied.
 	 */
-	signal_local_type local_event() const;
-
-	/** Signal which will be emitted when a remote operation has been
-	 * applied.
-	 */
-	signal_remote_type remote_event() const;
-
+	signal_record_type record_event() const;
 protected:
 	typedef std::map<const user*, jupiter_algorithm*> client_map;
 
 	client_map m_clients;
 	document& m_document;
+	jupiter_undo m_undo;
 
-	signal_local_type m_signal_local;
-	signal_remote_type m_signal_remote;
+	signal_record_type m_signal_record;
 };
 
 } // namespace obby

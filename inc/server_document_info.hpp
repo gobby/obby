@@ -141,16 +141,10 @@ protected:
 	virtual void on_net_unsubscribe(const document_packet& pack,
 	                                const obby::user& from);
 
-	/** Callback from jupiter implementation with a record of a local
-	 * operation that may be sent to the given user.
+	/** Callback from jupiter implementation with a record
+	 * that may be sent to the given user.
 	 */
-	virtual void on_jupiter_local(const record& rec, const user& user,
-	                              const obby::user* from);
-
-	/** Callback from jupiter implementation with a record of a remote
-	 * operation (got by a user) that may be sent to others.
-	 */
-	virtual void on_jupiter_remote(const record& rec, const user& user,
+	virtual void on_jupiter_record(const record& rec, const user& user,
 	                               const obby::user* from);
 
 	std::auto_ptr<jupiter_server> m_jupiter;
@@ -196,17 +190,10 @@ basic_server_document_info<selector_type>::basic_server_document_info(
 		user_subscribe(*owner);
 
 	// Connect to signals
-	m_jupiter->local_event().connect(
+	m_jupiter->record_event().connect(
 		sigc::mem_fun(
 			*this,
-			&basic_server_document_info::on_jupiter_local
-		)
-	);
-
-	m_jupiter->remote_event().connect(
-		sigc::mem_fun(
-			*this,
-			&basic_server_document_info::on_jupiter_remote
+			&basic_server_document_info::on_jupiter_record
 		)
 	);
 }
@@ -231,17 +218,10 @@ basic_server_document_info<selector_type>::basic_server_document_info(
 		*basic_document_info<selector_type>::m_document
 	) );
 	// Connect to signals
-	m_jupiter->local_event().connect(
+	m_jupiter->record_event().connect(
 		sigc::mem_fun(
 			*this,
-			&basic_server_document_info::on_jupiter_local
-		)
-	);
-
-	m_jupiter->remote_event().connect(
-		sigc::mem_fun(
-			*this,
-			&basic_server_document_info::on_jupiter_remote
+			&basic_server_document_info::on_jupiter_record
 		)
 	);
 }
@@ -446,22 +426,14 @@ void basic_server_document_info<selector_type>::
 
 template<typename selector_type>
 void basic_server_document_info<selector_type>::
-	on_jupiter_local(const record& rec,
-	                 const user& user,
-	                 const obby::user* from)
+	on_jupiter_record(const record& rec,
+	                  const user& user,
+	                  const obby::user* from)
 {
 	document_packet pack(*this, "record");
 	pack << from;
 	rec.append_packet(pack);
 	get_net6().send(pack, user.get_net6() );
-}
-
-template<typename selector_type>
-void basic_server_document_info<selector_type>::
-	on_jupiter_remote(const record& rec, const user& user, const obby::user* from)
-{
-	// TODO: Make only one signal in jupiter_server
-	on_jupiter_local(rec, user, from);
 }
 
 template<typename selector_type>

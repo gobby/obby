@@ -19,7 +19,7 @@
 #include "jupiter_server.hpp"
 
 obby::jupiter_server::jupiter_server(document& doc)
- : m_document(doc)
+ : m_document(doc), m_undo(doc)
 {
 }
 
@@ -55,6 +55,8 @@ void obby::jupiter_server::local_op(const operation& op, const user* from)
 {
 	// Apply locally
 	op.apply(m_document, from);
+	// Tell undo manager
+	m_undo.local_op(op, from);
 	// Delegate to clients
 	for(client_map::iterator iter = m_clients.begin();
 	    iter != m_clients.end();
@@ -63,7 +65,7 @@ void obby::jupiter_server::local_op(const operation& op, const user* from)
 		// Get resulting record
 		std::auto_ptr<record> rec = iter->second->local_op(op);
 		// Emit corresponding signal
-		m_signal_local.emit(*rec, *iter->first, from);
+		m_signal_record.emit(*rec, *iter->first, from);
 	}
 }
 
@@ -78,6 +80,8 @@ void obby::jupiter_server::remote_op(const record& rec, const user* from)
 	std::auto_ptr<operation> op = iter->second->remote_op(rec);
 	// Apply to local document
 	op->apply(m_document, from);
+	// Tell undo manager
+	m_undo.remote_op(*op, from);
 
 	// Delegate to other clients
 	for(iter = m_clients.begin(); iter != m_clients.end(); ++ iter)
@@ -88,20 +92,31 @@ void obby::jupiter_server::remote_op(const record& rec, const user* from)
 			// Generate record for this client
 			std::auto_ptr<record> rec = iter->second->local_op(*op);
 			// Emit remote signal
-			m_signal_remote.emit(*rec, *iter->first, from);
+			m_signal_record.emit(*rec, *iter->first, from);
 		}
 	}
 }
 
-obby::jupiter_server::signal_local_type
-obby::jupiter_server::local_event() const
+void obby::jupiter_server::undo_op(const user* from)
 {
-	return m_signal_local;
+	// Get operatioln from undo manager
+	std::auto_ptr<operation> op = m_undo.undo();
+	// Apply locally
+	op->apply(m_document, from);
+	// Delegate to clients
+	for(client_map::iterator iter = m_clients.begin();
+	    iter != m_clients.end();
+	    ++ iter)
+	{
+		// Get resulting record
+		std::auto_ptr<record> rec = iter->second->local_op(*op);
+		// Emit corresponding signal
+		m_signal_record.emit(*rec, *iter->first, from);
+	}
 }
 
-obby::jupiter_server::signal_remote_type
-obby::jupiter_server::remote_event() const
+obby::jupiter_server::signal_record_type
+obby::jupiter_server::record_event() const
 {
-	return m_signal_remote;
+	return m_signal_record;
 }
-
