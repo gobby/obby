@@ -480,6 +480,8 @@ bool basic_client_document_info<selector_type>::
 
 	if(pack.get_command() == "unsubscribe")
 		{ on_net_unsubscribe(pack); return true; }
+
+	return false;
 }
 
 template<typename selector_type>
