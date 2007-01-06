@@ -208,6 +208,11 @@ protected:
 	 */
 	std::list<document_info*> m_docs;
 
+	/** gettext catalog for obby.
+	 * TODO: Move to some obby::main object and/or refcount this?
+	 */
+	net6::gettext_package m_package;
+
 	/** Counter for document IDs.
 	 */
 	unsigned int m_doc_counter;
@@ -219,11 +224,12 @@ template<typename selector_type>
 const unsigned long basic_buffer<selector_type>::PROTOCOL_VERSION = 5;
 
 template<typename selector_type>
-basic_buffer<selector_type>::basic_buffer()
- : m_rclass(GMP_RAND_ALG_LC, 16), m_chat(*this, 0xff), m_doc_counter(0)
+basic_buffer<selector_type>::basic_buffer():
+	m_rclass(GMP_RAND_ALG_LC, 16), m_chat(*this, 0xff),
+	m_package(obby_package(), obby_localedir()), m_doc_counter(0)
 {
 	// Initialize gettext
-	init_gettext();
+	init_gettext(m_package);
 
 	// Seed random number generator with system time
 	m_rclass.seed(std::time(NULL) );

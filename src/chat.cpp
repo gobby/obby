@@ -17,7 +17,7 @@
  */
 
 #include "format_string.hpp"
-#include "gettext.hpp"
+#include "common.hpp"
 #include "chat.hpp"
 
 namespace

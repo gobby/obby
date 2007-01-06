@@ -19,10 +19,14 @@
 #ifndef _OBBY_COMMON_HPP_
 #define _OBBY_COMMON_HPP_
 
+#include "net6/gettext_package.hpp"
+
 extern "C" {
 
 const char* obby_version();
 const char* obby_codename();
+const char* obby_package();
+const char* obby_localedir();
 
 }
 
@@ -32,7 +36,11 @@ namespace obby
 /** Initializes gettext for usage with libobby. The constructor of the main
  * libobby objects (basic_buffer and derivates) call this function.
  */
-void init_gettext();
+void init_gettext(net6::gettext_package& package);
+
+/** Translates a message of the libobby catalog.
+ */
+const char* _(const char* msgid);
 
 }
 

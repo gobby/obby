@@ -17,7 +17,7 @@
  */
 
 #include "error.hpp"
-#include "gettext.hpp"
+#include "common.hpp"
 
 // Login error codes
 const obby::login::error obby::login::ERROR_COLOUR_IN_USE =

@@ -21,6 +21,7 @@
 
 #include "serialise/error.hpp"
 #include "serialise/parser.hpp"
+#include "common.hpp"
 #include "error.hpp"
 #include "sha1.hpp"
 #include "rsa.hpp"
@@ -266,17 +267,15 @@ void basic_server_buffer<selector_type>::open(const std::string& session,
 	serialise::parser parser;
 	parser.deserialise(session);
 
-	// TODO: Localisation (header file. :((99). Maybe we should have a
-	// macro like _h() for gettext usage in header files...
 	if(parser.get_type() != "obby")
-		throw serialise::error("File is not an obby document", 1);
+		throw serialise::error(_("File is not an obby document"), 1);
 
 	// Get root object, verify that it is an obby session
 	serialise::object& root = parser.get_root();
 	if(root.get_name() != "session")
 	{
 		throw serialise::error(
-			"File is not a stored obby session",
+			_("File is not a stored obby session"),
 			root.get_line()
 		);
 	}
@@ -317,7 +316,7 @@ void basic_server_buffer<selector_type>::open(const std::string& session,
 		{
 			// Unexpected child
 			// TODO: unexpected_child_error
-			format_string str("Unexpected child node: '%0%'");
+			format_string str(_("Unexpected child node: '%0%'") );
 			str << iter->get_name();
 			throw serialise::error(str.str(), iter->get_line() );
 		}

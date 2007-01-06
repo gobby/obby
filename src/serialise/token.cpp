@@ -16,7 +16,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "gettext.hpp"
+#include "common.hpp"
 #include "format_string.hpp"
 #include "serialise/error.hpp"
 #include "serialise/token.hpp"
@@ -25,6 +25,13 @@ namespace
 {
 	using namespace obby::serialise;
 	typedef std::string::const_iterator string_iterator;
+
+	/** Local _() function that uses obby::_.
+	 */
+	const char* _(const char* msgid)
+	{
+		return obby::_(msgid);
+	}
 
 	void escape(
 		std::string& src

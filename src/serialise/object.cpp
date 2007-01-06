@@ -16,7 +16,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "gettext.hpp"
+#include "common.hpp"
 #include "format_string.hpp"
 #include "serialise/error.hpp"
 #include "serialise/object.hpp"

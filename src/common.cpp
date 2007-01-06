@@ -18,7 +18,14 @@
 
 #include "common.hpp"
 #include "config.hpp"
-#include "gettext.hpp"
+
+#ifdef ENABLE_NLS
+namespace
+{
+	// obby gettext catalog
+	net6::gettext_package* local_package = NULL;
+}
+#endif
 
 extern "C"
 {
@@ -33,6 +40,16 @@ const char* obby_codename()
 	return "firenze";
 }
 
+const char* obby_package()
+{
+	return PACKAGE;
+}
+
+const char* obby_localedir()
+{
+	return LOCALEDIR;
+}
+
 #ifdef WITH_HOWL
 /* This is an entry point for which external scripts could check. */
 void obby_has_howl()
@@ -42,12 +59,18 @@ void obby_has_howl()
 #endif
 }
 
-void obby::init_gettext()
+void obby::init_gettext(net6::gettext_package& package)
 {
 #ifdef ENABLE_NLS
-	// Gettext initialisation
-	bindtextdomain(PACKAGE, LOCALEDIR);
-	bind_textdomain_codeset(PACKAGE, "UTF-8");
+	local_package = &package;
 #endif
 }
 
+const char* obby::_(const char* msgid)
+{
+#ifdef ENABLE_NLS
+	return local_package->gettext(msgid);
+#else
+	return msgid;
+#endif
+}

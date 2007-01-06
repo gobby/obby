@@ -17,7 +17,7 @@
  */
 
 #include <fstream>
-#include "gettext.hpp"
+#include "common.hpp"
 #include "format_string.hpp"
 #include "serialise/error.hpp"
 #include "serialise/parser.hpp"
