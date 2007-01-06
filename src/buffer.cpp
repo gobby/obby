@@ -20,8 +20,7 @@
 
 namespace obby {
 
-template<typename Document, typename Selector>
-const unsigned long basic_buffer<Document, Selector>::PROTOCOL_VERSION = 8ul;
+const unsigned long PROTOCOL_VERSION = 8ul;
 
 }
 

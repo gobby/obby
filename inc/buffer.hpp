@@ -36,6 +36,8 @@
 namespace obby
 {
 
+extern const unsigned long PROTOCOL_VERSION;
+
 /** Abstract base class for obby buffers. A buffer contains multiple documents
  * that are synchronised through many users and a user list.
  */
@@ -210,9 +212,6 @@ public:
 	 */
 	signal_document_remove_type document_remove_event() const;
 
-	/** Current obby protocol version.
-	 */
-	static const unsigned long PROTOCOL_VERSION;
 protected:
         /** Internal function to add a document to the buffer.
 	 */
