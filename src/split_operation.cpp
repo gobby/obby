@@ -29,32 +29,6 @@ obby::split_operation::split_operation(operation* first, operation* second)
 {
 }
 
-obby::split_operation::split_operation(const operation& first,
-                                       const operation& second,
-                                       const operation& original)
- : operation(original), m_first(first.clone() ), m_second(second.clone() )
-{
-}
-
-obby::split_operation::split_operation(operation* first, operation* second,
-                                       const operation& original)
- : operation(original), m_first(first), m_second(second)
-{
-}
-
-obby::split_operation::split_operation(const operation& first,
-                                       const operation& second,
-                                       original_operation* original)
- : operation(original), m_first(first.clone() ), m_second(second.clone() )
-{
-}
-
-obby::split_operation::split_operation(operation* first, operation* second,
-                                       original_operation* original)
- : operation(original), m_first(first), m_second(second)
-{
-}
-
 obby::split_operation::split_operation(const net6::packet& pack,
                                        unsigned int& index,
                                        const user_table& user_table)
@@ -74,7 +48,7 @@ obby::split_operation::split_operation(const net6::packet& pack,
 
 obby::operation* obby::split_operation::clone() const
 {
-	return new split_operation(*m_first, *m_second, m_original);
+	return new split_operation(*m_first, *m_second);
 }
 
 obby::operation* obby::split_operation::reverse(const document& doc) const
@@ -111,7 +85,6 @@ obby::split_operation::transform_insert(position pos,
 	return new split_operation(
 		m_first->transform_insert(pos, text),
 		m_second->transform_insert(pos, text)
-		// TODO: What about original op?
 	);
 }
 
@@ -121,7 +94,6 @@ obby::split_operation::transform_delete(position pos, position len) const
 	return new split_operation(
 		m_first->transform_delete(pos, len),
 		m_second->transform_delete(pos, len)
-		// TODO: What about original op?
 	);
 }
 
@@ -131,5 +103,3 @@ void obby::split_operation::append_packet(net6::packet& pack) const
 	m_first->append_packet(pack);
 	m_second->append_packet(pack);
 }
-
-

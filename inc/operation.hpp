@@ -30,16 +30,7 @@ namespace obby
 class operation : private net6::non_copyable
 {
 public:
-	/** Standard constructor with no original operation assigned.
-	 */
 	operation();
-
-	/** Constructor taking a given operation as the original one.
-	 * An original operation is the operation before transformations
-	 * were applied.
-	 */
-	operation(const operation& original);
-
 	virtual ~operation();
 
 	/** Creates a copy of this operation.
@@ -86,23 +77,6 @@ public:
 	                    unsigned int& index,
 	                    const user_table& user_table);
 protected:
-	/** Struct containing an original operation with a reference counter
-	 * attached to it.
-	 */
-	struct original_operation
-	{
-		std::auto_ptr<const operation> op;
-		unsigned int refcount;
-	};
-
-	/** Constructor taking an original_operation struct. It does not copy
-	 * the original operation but increases its reference counter.
-	 * As original operations will never be changed, they do not have to
-	 * be copied when clone()ing an operation.
-	 */
-	operation(original_operation* original);
-
-	original_operation* m_original;
 };
 
 } // namespace obby

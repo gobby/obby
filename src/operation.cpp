@@ -24,34 +24,11 @@
 #include "reversible_insert_operation.hpp"
 
 obby::operation::operation()
- : m_original(NULL)
 {
-}
-
-obby::operation::operation(const operation& original)
- : m_original(new original_operation)
-{
-	m_original->op.reset(original.clone() );
-	m_original->refcount = 1;
-}
-
-obby::operation::operation(original_operation* original)
- : m_original(original)
-{
-	if(m_original != NULL)
-		++ m_original->refcount;
 }
 
 obby::operation::~operation()
 {
-	if(m_original != NULL)
-	{
-		-- m_original->refcount;
-		if(m_original->refcount == 0)
-		{
-			delete m_original;
-		}
-	}
 }
 
 std::auto_ptr<obby::operation>

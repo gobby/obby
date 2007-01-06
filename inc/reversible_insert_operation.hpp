@@ -31,16 +31,8 @@ namespace obby
 class reversible_insert_operation: public operation
 {
 public:
-	/** Standard constructor with no original operation assigned.
-	 */
 	reversible_insert_operation(position pos,
 	                            const line& text);
-
-	/** Constructor taking a given operation as the original one.
-	 */
-	reversible_insert_operation(position pos,
-	                            const line& text,
-	                            const operation& original);
 
 	/** Reads an insert_operation from the given network packet.
 	 */
@@ -79,12 +71,6 @@ public:
 	 */
 	virtual void append_packet(net6::packet& pack) const;
 protected:
-	/** Constructor taking an original_operation struct.
-	 */
-	reversible_insert_operation(position pos,
-	                            const line& text,
-	                            original_operation* original);
-
 	position m_pos;
 	line m_text;
 };

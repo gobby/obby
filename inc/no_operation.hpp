@@ -33,13 +33,7 @@ namespace obby
 class no_operation : public operation
 {
 public:
-	/** Standard constructor with no original operation assigned.
-	 */
 	no_operation();
-
-	/** Constructor taking a given operation as the original one.
-	 */
-	no_operation(const operation& original);
 
 	/** Reads a no_operation from the given network packet.
 	 */
@@ -79,10 +73,6 @@ public:
 	/** Appends the operation to the given packet.
 	 */
 	virtual void append_packet(net6::packet& pack) const;
-protected:
-	/** Constructor taking an original_operation struct.
-	 */
-	no_operation(original_operation* original);
 };
 
 } // namespace obby

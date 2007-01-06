@@ -24,18 +24,6 @@ obby::insert_operation::insert_operation(position pos, const std::string& text)
 {
 }
 
-obby::insert_operation::insert_operation(position pos, const std::string& text,
-                                         const operation& original)
- : operation(original), m_pos(pos), m_text(text)
-{
-}
-
-obby::insert_operation::insert_operation(position pos, const std::string& text,
-                                         original_operation* original)
- : operation(original), m_pos(pos), m_text(text)
-{
-}
-
 obby::insert_operation::insert_operation(const net6::packet& pack,
                                          unsigned int& index)
  : operation(),
@@ -46,7 +34,7 @@ obby::insert_operation::insert_operation(const net6::packet& pack,
 
 obby::operation* obby::insert_operation::clone() const
 {
-	return new insert_operation(m_pos, m_text, m_original);
+	return new insert_operation(m_pos, m_text);
 }
 
 obby::operation* obby::insert_operation::reverse(const document& doc) const
@@ -86,8 +74,7 @@ obby::insert_operation::transform_insert(position pos,
 		{
 			return new insert_operation(
 				m_pos + text.length(),
-				m_text,
-				*this
+				m_text
 			);
 		}
 	}
@@ -96,8 +83,7 @@ obby::insert_operation::transform_insert(position pos,
 		// Case 2
 		return new insert_operation(
 			m_pos + text.length(),
-			m_text,
-			*this
+			m_text
 		);
 	}
 }
@@ -113,12 +99,12 @@ obby::insert_operation::transform_delete(position pos, position len) const
 	else if(m_pos > pos + len)
 	{
 		// Case 4
-		return new insert_operation(m_pos - len, m_text, *this);
+		return new insert_operation(m_pos - len, m_text);
 	}
 	else
 	{
 		// Case 5
-		return new insert_operation(pos, m_text, *this);
+		return new insert_operation(pos, m_text);
 	}
 }
 
@@ -126,5 +112,3 @@ void obby::insert_operation::append_packet(net6::packet& pack) const
 {
 	pack << "ins" << m_pos << m_text;
 }
-
-

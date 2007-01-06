@@ -40,17 +40,6 @@ public:
 	 */
 	split_operation(operation* first, operation* second);
 
-	/** Constructor taking a given operation as the original one.
-	 */
-	split_operation(const operation& first, const operation& second,
-	                const operation& original);
-
-	/** Constructor taking the ownership of both operations instead of
-	 * making a copy and the original one.
-	 */
-	split_operation(operation* first, operation* second,
-	                const operation& original);
-
 	/** Reads a split_operation from the given network packet.
 	 */
 	split_operation(const net6::packet& pack,
@@ -92,17 +81,6 @@ public:
 	 */
 	virtual void append_packet(net6::packet& pack) const;
 protected:
-	/** Constructor taking an original_operation struct.
-	 */
-	split_operation(const operation& first, const operation& second,
-	                original_operation* original);
-
-	/** Constructor taking the ownership of both operations instead of
-	 * making a copy and an original_operation struct.
-	 */
-	split_operation(operation* first, operation* second,
-	                original_operation* original);
-
 	std::auto_ptr<operation> m_first;
 	std::auto_ptr<operation> m_second;
 };

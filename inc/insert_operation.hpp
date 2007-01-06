@@ -30,14 +30,7 @@ namespace obby
 class insert_operation : public operation
 {
 public:
-	/** Standard constructor with no original operation assigned.
-	 */
 	insert_operation(position pos, const std::string& text);
-
-	/** Constructor taking a given operation as the original one.
-	 */
-	insert_operation(position pos, const std::string& text,
-	                 const operation& original);
 
 	/** Reads an insert_operation from the given network packet.
 	 */
@@ -74,11 +67,6 @@ public:
 	 */
 	virtual void append_packet(net6::packet& pack) const;
 protected:
-	/** Constructor taking an original_operation struct.
-	 */
-	insert_operation(position pos, const std::string& text,
-	                 original_operation* original);
-
 	position m_pos;
 	std::string m_text;
 };

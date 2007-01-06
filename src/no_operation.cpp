@@ -23,25 +23,15 @@ obby::no_operation::no_operation()
 {
 }
 
-obby::no_operation::no_operation(const operation& original)
- : operation(original)
-{
-}
-
 obby::no_operation::no_operation(const net6::packet& pack, unsigned int& index)
  : operation()
 {
 	// Nothing to read
 }
 
-obby::no_operation::no_operation(original_operation* original)
- : operation(original)
-{
-}
-
 obby::operation* obby::no_operation::clone() const
 {
-	return new no_operation(m_original);
+	return new no_operation;
 }
 
 obby::operation* obby::no_operation::reverse(const document& doc) const

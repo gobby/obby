@@ -26,18 +26,6 @@ obby::delete_operation::delete_operation(position pos, position len)
 {
 }
 
-obby::delete_operation::delete_operation(position pos, position len,
-                                         const operation& original)
- : operation(original), m_pos(pos), m_len(len)
-{
-}
-
-obby::delete_operation::delete_operation(position pos, position len,
-                                         original_operation* original)
- : operation(original), m_pos(pos), m_len(len)
-{
-}
-
 obby::delete_operation::delete_operation(const net6::packet& pack,
                                          unsigned int& index)
  : operation(),
@@ -49,7 +37,7 @@ obby::delete_operation::delete_operation(const net6::packet& pack,
 
 obby::operation* obby::delete_operation::clone() const
 {
-	return new delete_operation(m_pos, m_len, m_original);
+	return new delete_operation(m_pos, m_len);
 }
 
 obby::operation* obby::delete_operation::reverse(const document& doc) const
@@ -89,27 +77,21 @@ obby::delete_operation::transform_insert(position pos,
 		// Case 7
 		return new delete_operation(
 			m_pos + text.length(),
-			m_len,
-			*this
+			m_len
 		);
 	}
 	else
 	{
 		// Case 8
-		// TODO: Both delete_operation's originals should refer to the
-		// same object.
 		return new split_operation(
 			new delete_operation(
 				m_pos,
-				pos - m_pos,
-				*this
+				pos - m_pos
 			),
 			new delete_operation(
 				pos + text.length(),
-				m_len - (pos - m_pos),
-				*this
+				m_len - (pos - m_pos)
 			)
-			// TODO: What about split_operation's original
 		);
 	}
 }
@@ -125,20 +107,19 @@ obby::delete_operation::transform_delete(position pos, position len) const
 	else if(m_pos >= pos + len)
 	{
 		// Case 10
-		return new delete_operation(m_pos - len, m_len, *this);
+		return new delete_operation(m_pos - len, m_len);
 	}
 	else if(pos <= m_pos && pos + len >= m_pos + m_len)
 	{
 		// Case 11
-		return new no_operation(*this);
+		return new no_operation;
 	}
 	else if(pos <= m_pos && pos + len < m_pos + m_len)
 	{
 		// Case 12
 		return new delete_operation(
 			pos,
-			m_len - (pos + len - m_pos),
-			*this
+			m_len - (pos + len - m_pos)
 		);
 	}
 	else if(pos > m_pos && pos + len >= m_pos + m_len)
@@ -146,8 +127,7 @@ obby::delete_operation::transform_delete(position pos, position len) const
 		// Case 13
 		return new delete_operation(
 			m_pos,
-			pos - m_pos,
-			*this
+			pos - m_pos
 		);
 	}
 	else
@@ -155,8 +135,7 @@ obby::delete_operation::transform_delete(position pos, position len) const
 		// Case 14
 		return new delete_operation(
 			m_pos,
-			m_len - len,
-			*this
+			m_len - len
 		);
 	}
 }
@@ -165,5 +144,3 @@ void obby::delete_operation::append_packet(net6::packet& pack) const
 {
 	pack << "del" << m_pos << m_len;
 }
-
-

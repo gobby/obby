@@ -27,22 +27,6 @@ obby::reversible_insert_operation::
 }
 
 obby::reversible_insert_operation::
-	reversible_insert_operation(position pos,
-	                            const line& text,
-	                            const operation& original):
-	operation(original), m_pos(pos), m_text(text)
-{
-}
-
-obby::reversible_insert_operation::
-	reversible_insert_operation(position pos,
-	                            const line& text,
-	                            original_operation* original):
-	operation(original), m_pos(pos), m_text(text)
-{
-}
-
-obby::reversible_insert_operation::
 	reversible_insert_operation(const net6::packet& pack,
                                     unsigned int& index,
 				    const user_table& user_table):
@@ -54,7 +38,7 @@ obby::reversible_insert_operation::
 
 obby::operation* obby::reversible_insert_operation::clone() const
 {
-	return new reversible_insert_operation(m_pos, m_text, m_original);
+	return new reversible_insert_operation(m_pos, m_text);
 }
 
 obby::operation*
@@ -97,8 +81,7 @@ obby::operation* obby::reversible_insert_operation::
 		{
 			return new reversible_insert_operation(
 				m_pos + text.length(),
-				m_text,
-				*this
+				m_text
 			);
 		}
 	}
@@ -107,8 +90,7 @@ obby::operation* obby::reversible_insert_operation::
 		// Case 2
 		return new reversible_insert_operation(
 			m_pos + text.length(),
-			m_text,
-			*this
+			m_text
 		);
 	}
 }
@@ -127,8 +109,7 @@ obby::operation* obby::reversible_insert_operation::
 		// Case 4
 		return new reversible_insert_operation(
 			m_pos - len,
-			m_text,
-			*this
+			m_text
 		);
 	}
 	else
@@ -136,21 +117,13 @@ obby::operation* obby::reversible_insert_operation::
 		// Case 5
 		return new reversible_insert_operation(
 			pos,
-			m_text,
-			*this
+			m_text
 		);
 	}
 }
 
 void obby::reversible_insert_operation::append_packet(net6::packet& pack) const
 {
-	// Should not be sent through the net
-	throw std::logic_error(
-		"obby::reversible_insert_operation::append_packet"
-	);
-
 	pack << "revins";
 	m_text.append_packet(pack);
 }
-
-

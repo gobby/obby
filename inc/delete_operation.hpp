@@ -29,14 +29,7 @@ namespace obby
 class delete_operation: public operation
 {
 public:
-	/** Standard constructor with no original operation assigned.
-	 */
 	delete_operation(position pos, position len);
-
-	/** Constructor taking a given operation as the original one.
-	 */
-	delete_operation(position pos, position len,
-	                 const operation& original);
 
 	/** Reads a delete_operation from the given network packet.
 	 */
@@ -73,11 +66,6 @@ public:
 	 */
 	virtual void append_packet(net6::packet& pack) const;
 protected:
-	/** Constructor taking an original_operation struct.
-	 */
-	delete_operation(position pos, position len,
-	                 original_operation* original);
-
 	position m_pos;
 	position m_len;
 };
