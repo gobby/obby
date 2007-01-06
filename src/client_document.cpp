@@ -191,10 +191,12 @@ void obby::client_document::on_net_sync_init(const net6::packet& pack)
 {
 	if(pack.get_param_count() < 2) return;
 	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
-	if(pack.get_param(1).get_type() != net6::packet::param::INT) return;
+	if(pack.get_param(1).get_type() != net6::packet::param::STRING) return;
+	if(pack.get_param(2).get_type() != net6::packet::param::INT) return;
 
 	m_id = pack.get_param(0).as_int();
-	m_revision = pack.get_param(1).as_int();
+	m_title = pack.get_param(1).as_string();
+	m_revision = pack.get_param(2).as_int();
 
 	m_lines.clear();
 }

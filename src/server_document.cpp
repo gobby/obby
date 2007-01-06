@@ -99,7 +99,7 @@ void obby::server_document::synchronize(net6::server::peer& peer)
 {
 	// Send doc initial sync packet with document revision
 	net6::packet init_pack("obby_sync_doc_init");
-	init_pack << m_id << m_revision;
+	init_pack << m_id << m_title << m_revision;
 	m_server.send(init_pack, peer);
 
 	// Send buffer

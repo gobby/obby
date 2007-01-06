@@ -96,7 +96,8 @@ void buffer::on_close()
 
 void buffer::on_insert_document(obby::document& doc)
 {
-	std::cout << "Created document " << doc.get_id() << ":" << std::endl;
+	std::cout << "Created document (ID = " << doc.get_id() << ", ";
+	std::cout << "TITLE = \"" << doc.get_title() << "\"):" << std::endl;
 	std::cout << doc.get_whole_buffer() << std::endl;
 	std::cout << "----------------------" << std::endl;
 

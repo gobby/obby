@@ -64,7 +64,8 @@ obby::document& obby::server_buffer::create_document(const std::string& title)
 {
 	unsigned int id = ++ m_doc_counter;
 	document& doc = add_document(id);
-	
+	doc.set_title(title);
+
 	net6::packet pack("obby_document_create");
 	pack << id;
 	pack << title;
@@ -301,7 +302,8 @@ void obby::server_buffer::on_net_document_create(const net6::packet& pack,
 	const std::string& title = pack.get_param(0).as_string();
 
 	document& doc = create_document(title);
-	m_signal_insert_document.emit(doc, title);
+	doc.set_title(title);
+	m_signal_insert_document.emit(doc);
 }
 
 void obby::server_buffer::on_net_document_rename(const net6::packet& pack,

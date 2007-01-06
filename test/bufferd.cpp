@@ -20,11 +20,13 @@ public:
 	void run();
 	void quit();
 protected:
-	void on_join(obby::user& user);
-	void on_part(obby::user& user);
-
 	void on_connect(net6::server::peer& peer);
 	void on_disconnect(net6::server::peer& peer);
+
+	void on_insert_document(obby::document& doc);
+
+	void on_join(obby::user& user);
+	void on_part(obby::user& user);
 
 	void on_doc_insert(const obby::insert_record&, obby::document& doc);
 	void on_doc_remove(const obby::delete_record&, obby::document& doc);
@@ -36,7 +38,15 @@ protected:
 bufferd::bufferd(int argc, char* argv[])
  : m_buffer(argc > 1 ? strtol(argv[1], NULL, 10) : 6522), m_quit(false)
 {
-	obby::document& doc = m_buffer.create_document();
+	obby::document& doc = m_buffer.create_document("main");
+
+	/* We need to issue this manually the first time, as create_document()
+	 * does not emit any signal.
+	 */
+	on_insert_document(doc);
+
+	m_buffer.insert_document_event().connect(
+		sigc::mem_fun(*this, &bufferd::on_insert_document) );
 
 	m_buffer.user_join_event().connect(
 		sigc::mem_fun(*this, &bufferd::on_join) );
@@ -81,6 +91,12 @@ void bufferd::on_disconnect(net6::server::peer& peer)
 {
 	std::cout << peer.get_address().get_name() << " disconnected."
 	          << std::endl;
+}
+
+void bufferd::on_insert_document(obby::document& doc)
+{
+	std::cout << "New document created: ID = " << doc.get_id() << ", ";
+	std::cout << "TITLE = \"" << doc.get_title() << "\"" << std::endl;
 }
 
 void bufferd::on_join(obby::user& user)

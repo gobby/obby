@@ -205,7 +205,7 @@ void obby::client_buffer::on_net_record(const net6::packet& pack)
 
 void obby::client_buffer::on_net_document_create(const net6::packet& pack)
 {
-	if(pack.get_param_count() < 1) return;
+	if(pack.get_param_count() < 2) return;
 	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
 	if(pack.get_param(1).get_type() != net6::packet::param::STRING) return;
 
@@ -214,7 +214,8 @@ void obby::client_buffer::on_net_document_create(const net6::packet& pack)
 	assert(find_document(id) == NULL);
 
 	document& new_doc = add_document(id);
-	m_signal_insert_document.emit(new_doc, title);
+	new_doc.set_title(title);
+	m_signal_insert_document.emit(new_doc);
 }
 
 void obby::client_buffer::on_net_document_rename(const net6::packet& pack)

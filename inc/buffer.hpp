@@ -58,7 +58,7 @@ public:
 
 	typedef sigc::signal<void, user&> signal_user_join_type;
 	typedef sigc::signal<void, user&> signal_user_part_type;
-	typedef sigc::signal<void, document&, const std::string&>
+	typedef sigc::signal<void, document&>
 	       	signal_insert_document_type;
 	typedef sigc::signal<void, document&, const std::string&>
 		signal_rename_document_type;
