@@ -33,6 +33,11 @@ namespace obby
 
 // TODO: Put all this in a separate namespace?
 
+template<typename data_type>
+class command_context_from: public ::serialise::default_context_from<data_type>
+{
+};
+
 /** @brief Command query that may be sent to a server.
  */
 class command_query
@@ -119,19 +124,23 @@ protected:
 class command_paramlist
 {
 public:
+	typedef std::vector<std::string>::size_type size_type;
+
 	/** @brief Creates a parameter list from its string representation.
 	 */
 	command_paramlist(const std::string& list);
 
+	/** @brief Returns the amount of parameters.
+	 */
+	size_type count() const;
+
 	/** @brief Accesses the <em>index</em>th element and tries to
 	 * convert it to the given type.
-	 *
-	 * TODO: command_context_from deriving from default_context_from!
 	 */
 	template<typename data_type>
 	data_type get(unsigned int index,
 	              const ::serialise::context_base_from<data_type>& context =
-	              ::serialise::default_context_from<data_type>() )
+	              command_context_from<data_type>() )
 	{
 		return context.from_string(m_params.at(index) );
 	}
@@ -192,7 +201,7 @@ public:
 	typedef sigc::signal<void, const command_query&>
 		signal_query_failed_type;
 
-	typedef sigc::signal<void, const std::string, const std::string&>
+	typedef sigc::signal<void, const std::string&, const std::string&>
 		signal_help_type;
 
 	command_queue();

@@ -206,6 +206,11 @@ obby::command_paramlist::command_paramlist(const std::string& list)
 		m_params.push_back(param);
 }
 
+obby::command_paramlist::size_type obby::command_paramlist::count() const
+{
+	return m_params.size();
+}
+
 const std::string& obby::command_paramlist::value(unsigned int index) const
 {
 	return m_params.at(index);

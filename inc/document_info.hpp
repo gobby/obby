@@ -24,6 +24,7 @@
 #include "position.hpp"
 #include "ptr_iterator.hpp"
 #include "format_string.hpp"
+#include "command.hpp"
 #include "user.hpp"
 #include "document_packet.hpp"
 #include "serialise/object.hpp"
@@ -391,6 +392,7 @@ protected:
 namespace serialise
 {
 
+// Default context - lookup by owner and ID
 template<typename DocumentInfo>
 class document_info_context_to: public context_base_to<DocumentInfo*>
 {
@@ -402,18 +404,18 @@ protected:
 	virtual void on_stream_setup(std::stringstream& stream) const;
 };
 
-template<typename Selector, typename Document>
-class default_context_to<obby::basic_document_info<Selector, Document>*>:
+template<typename Document, typename Selector>
+class default_context_to<obby::basic_document_info<Document, Selector>*>:
 	public document_info_context_to<
-		obby::basic_document_info<Selector, Document>
+		obby::basic_document_info<Document, Selector>
 	>
 {
 };
 
-template<typename Selector, typename Document>
-class default_context_to<const obby::basic_document_info<Selector, Document>*>:
+template<typename Document, typename Selector>
+class default_context_to<const obby::basic_document_info<Document, Selector>*>:
 	public document_info_context_to<
-		const obby::basic_document_info<Selector, Document>
+		const obby::basic_document_info<Document, Selector>
 	>
 {
 };
@@ -446,59 +448,59 @@ protected:
 	virtual void on_stream_setup(std::stringstream& stream) const;
 };
 
-template<typename Selector, typename Document>
-class default_context_from<obby::basic_document_info<Selector, Document>*>:
+template<typename Document, typename Selector>
+class default_context_from<obby::basic_document_info<Document, Selector>*>:
 	public document_info_context_from<
-		obby::basic_document_info<Selector, Document>
+		obby::basic_document_info<Document, Selector>
 	>
 {
 public:
 	typedef typename document_info_context_from<
-		obby::basic_document_info<Selector, Document>
+		obby::basic_document_info<Document, Selector>
 	>::buffer_type buffer_type;
 
 	default_context_from(const buffer_type& buffer);
 };
 
-template<typename Selector, typename Document>
+template<typename Document, typename Selector>
 class default_context_from<
-	const obby::basic_document_info<Selector, Document
->*>:
+	const obby::basic_document_info<Document, Selector>*
+>:
 	public document_info_context_from<
-		const obby::basic_document_info<Selector, Document>
+		const obby::basic_document_info<Document, Selector>
 	>
 {
 public:
 	typedef typename document_info_context_from<
-		obby::basic_document_info<Selector, Document>
+		const obby::basic_document_info<Document, Selector>
 	>::buffer_type buffer_type;
 
 	default_context_from(const buffer_type& buffer);
 };
 
-template<typename Selector, typename Document>
-class hex_context_from<obby::basic_document_info<Selector, Document>*>:
+template<typename Document, typename Selector>
+class hex_context_from<obby::basic_document_info<Document, Selector>*>:
 	public document_info_hex_context_from<
-		obby::basic_document_info<Selector, Document>
+		obby::basic_document_info<Document, Selector>
 	>
 {
 public:
 	typedef typename document_info_context_from<
-		obby::basic_document_info<Selector, Document>
+		obby::basic_document_info<Document, Selector>
 	>::buffer_type buffer_type;
 
 	hex_context_from(const buffer_type& buffer);
 };
 
-template<typename Selector, typename Document>
-class hex_context_from<const obby::basic_document_info<Selector, Document>*>:
+template<typename Document, typename Selector>
+class hex_context_from<const obby::basic_document_info<Document, Selector>*>:
 	public document_info_hex_context_from<
-		const obby::basic_document_info<Selector, Document>
+		const obby::basic_document_info<Document, Selector>
 	>
 {
 public:
 	typedef typename document_info_context_from<
-		obby::basic_document_info<Selector, Document>
+		const obby::basic_document_info<Document, Selector>
 	>::buffer_type buffer_type;
 
 	hex_context_from(const buffer_type& buffer);
@@ -553,7 +555,6 @@ document_info_context_from<DocumentInfo>::
 		throw conversion_error(str.str() );
 	}
 
-	// Done
 	return info;
 }
 
@@ -577,35 +578,35 @@ void document_info_hex_context_from<DocumentInfo>::
 	stream >> std::hex;
 }
 
-template<typename Selector, typename Document>
-default_context_from<obby::basic_document_info<Selector, Document>*>::
+template<typename Document, typename Selector>
+default_context_from<obby::basic_document_info<Document, Selector>*>::
 	default_context_from(const buffer_type& buffer):
 	document_info_context_from<
-		obby::basic_document_info<Selector, Document>
+		obby::basic_document_info<Document, Selector>
 	>(buffer)
 {
 }
 
-template<typename Selector, typename Document>
-default_context_from<const obby::basic_document_info<Selector, Document>*>::
+template<typename Document, typename Selector>
+default_context_from<const obby::basic_document_info<Document, Selector>*>::
 	default_context_from(const buffer_type& buffer):
 	document_info_context_from<
-		const obby::basic_document_info<Selector, Document>
+		const obby::basic_document_info<Document, Selector>
 	>(buffer)
 {
 }
 
-template<typename Selector, typename Document>
-hex_context_from<obby::basic_document_info<Selector, Document>*>::
+template<typename Document, typename Selector>
+hex_context_from<obby::basic_document_info<Document, Selector>*>::
 	hex_context_from(const buffer_type& buffer):
 	document_info_hex_context_from<
-		obby::basic_document_info<Selector, Document>
+		obby::basic_document_info<Document, Selector>
 	>(buffer)
 {
 }
 
-template<typename Selector, typename Document>
-hex_context_from<const obby::basic_document_info<Selector, Document>*>::
+template<typename Document, typename Selector>
+hex_context_from<const obby::basic_document_info<Document, Selector>*>::
 	hex_context_from(const buffer_type& buffer):
 	document_info_hex_context_from<
 		const obby::basic_document_info<Document, Selector>
@@ -618,7 +619,95 @@ hex_context_from<const obby::basic_document_info<Selector, Document>*>::
 namespace obby
 {
 
+// Command context - lookup by document title
+template<typename DocumentInfo>
+class command_document_info_context_from:
+	public ::serialise::context_base_from<DocumentInfo*>
+{
+public:
+	typedef typename DocumentInfo::buffer_type buffer_type;
+	typedef DocumentInfo* data_type;
 
+	command_document_info_context_from(const buffer_type& buffer);
+	virtual data_type from_string(const std::string& from) const;
+
+protected:
+	const buffer_type& m_buffer;
+};
+
+template<typename Document, typename Selector>
+class command_context_from<obby::basic_document_info<Document, Selector>*>:
+	public command_document_info_context_from<
+		obby::basic_document_info<Document, Selector>
+	>
+{
+public:
+	typedef typename command_document_info_context_from<
+		obby::basic_document_info<Document, Selector>
+	>::buffer_type buffer_type;
+
+	command_context_from(const buffer_type& buffer);
+};
+
+template<typename Document, typename Selector>
+class command_context_from<const obby::basic_document_info<Document, Selector>*>:
+	public command_document_info_context_from<
+		const obby::basic_document_info<Document, Selector>
+	>
+{
+public:
+	typedef typename command_document_info_context_from<
+		const obby::basic_document_info<Document, Selector>
+	>::buffer_type buffer_type;
+
+	command_context_from(const buffer_type& buffer);
+};
+
+template<typename DocumentInfo>
+command_document_info_context_from<DocumentInfo>::
+	command_document_info_context_from(const buffer_type& buffer):
+	m_buffer(buffer)
+{
+}
+
+template<typename DocumentInfo>
+typename command_document_info_context_from<DocumentInfo>::data_type
+command_document_info_context_from<DocumentInfo>::
+	from_string(const std::string& from) const
+{
+	for(typename buffer_type::document_iterator iter =
+		m_buffer.document_begin();
+	    iter != m_buffer.document_end();
+	    ++ iter)
+	{
+		if(iter->get_suffixed_title() == from)
+			return &(*iter);
+	}
+
+	throw ::serialise::conversion_error(
+		"Document with title " + from + " does not exist"
+	);
+}
+
+template<typename Document, typename Selector>
+command_context_from<obby::basic_document_info<Document, Selector>*>::
+	command_context_from(const buffer_type& buffer):
+	command_document_info_context_from<
+		obby::basic_document_info<Document, Selector>
+	>(buffer)
+{
+}
+
+template<typename Document, typename Selector>
+command_context_from<const obby::basic_document_info<Document, Selector>*>::
+	command_context_from(const buffer_type& buffer):
+	command_document_info_context_from<
+		const obby::basic_document_info<Document, Selector>
+	>(buffer)
+{
+}
+
+// Document info implementation
 template<typename Document, typename Selector>
 basic_document_info<Document, Selector>::
 	basic_document_info(const buffer_type& buffer,

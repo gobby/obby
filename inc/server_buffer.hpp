@@ -115,6 +115,14 @@ public:
 	 */
 	void set_enable_keepalives(bool enable);
 
+	/** @brief Provides access to the server's command map.
+	 */
+	command_map& get_command_map();
+
+	/** @brief Provides access to the server's command map.
+	 */
+	const command_map& get_command_map() const;
+
 	/** Signal which will be emitted if a new client has connected.
 	 */
 	signal_connect_type connect_event() const;
@@ -491,6 +499,19 @@ void basic_server_buffer<Document, Selector>::
 			iter->get_net6().set_enable_keepalives(enable);
 		} catch(...) {}
 	}
+}
+
+template<typename Document, typename Selector>
+command_map& basic_server_buffer<Document, Selector>::get_command_map()
+{
+	return m_command_map;
+}
+
+template<typename Document, typename Selector>
+const command_map& basic_server_buffer<Document, Selector>::
+	get_command_map() const
+{
+	return m_command_map;
 }
 
 template<typename Document, typename Selector>
