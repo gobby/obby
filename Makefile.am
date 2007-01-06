@@ -18,7 +18,7 @@ pkginclude_HEADERS = \
 	inc/client_user_table.hpp \
 	inc/server_user_table.hpp \
 	inc/host_user_table.hpp \
-	inc/line.hpp
+	inc/line.hpp \
 	inc/document.hpp \
 	inc/client_document.hpp \
 	inc/server_document.hpp \

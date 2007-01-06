@@ -64,6 +64,14 @@ public:
 	buffer();
 	virtual ~buffer();
 
+	/** Waits indefinitely for incoming events.
+	 */
+	virtual void select() = 0;
+
+	/** Waits for incoming events or until <em>timeout</em> expires.
+	 */
+	virtual void select(unsigned int timeout) = 0;
+	
 	/** Looks for a document with the given ID.
 	 */
 	document* find_document(unsigned int id) const;

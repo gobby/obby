@@ -45,11 +45,11 @@ public:
 
 	/** Waits indefinitely for incoming events.
 	 */
-	void select();
+	virtual void select();
 
 	/** Waits for incoming events or until <em>timeout</em> expires.
 	 */
-	void select(unsigned int timeout);
+	virtual void select(unsigned int timeout);
 	
 	/** Creates a new document.
 	 */

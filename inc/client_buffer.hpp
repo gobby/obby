@@ -34,7 +34,7 @@ namespace obby
 
 /** Buffer for establish a connection to a server_buffer.
  */
-	
+
 class client_buffer : public buffer, public sigc::trackable
 {
 public:
@@ -76,11 +76,11 @@ public:
 
 	/** Waits indefinitly for incoming events.
 	 */
-	void select();
+	virtual void select();
 
 	/** Waits for incoming events or <em>timeout</em> expired.
 	 */
-	void select(unsigned int timeout);
+	virtual void select(unsigned int timeout);
 
 	/** Signal which will be emitted if the initial synchronization of
 	 * the documents has been completed.
