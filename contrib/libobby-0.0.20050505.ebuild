@@ -9,11 +9,11 @@ SLOT="0"
 KEYWORDS="~x86 ~ppc ~amd64"
 IUSE="notest howl"
 EDARCS_REPOSITORY="http://darcs.0x539.de/libobby"
-EDARCS_GET_CMD="get --verbose"
+EDARCS_GET_CMD="get --verbose --set-scripts-executable --partial"
 
 DEPEND="net-libs/net6
         >=dev-libs/libsigc++-2.0
-		howl? ( >=net-misc/howl-0.9.8 )"
+	howl? ( >=net-misc/howl-0.9.8 )"
 
 RDEPEND=""
 
