@@ -3,7 +3,6 @@
 # This file is distributed under the same license as the obby package.
 # Philipp Kern <phil@0x539.de>, 2005.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: obby 0.2.0\n"
@@ -13,7 +12,7 @@ msgstr ""
 "Last-Translator: Philipp Kern <phil@0x539.de>\n"
 "Language-Team: German Translation Team <crew@0x539.de>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #: src/error.cpp:31
