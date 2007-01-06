@@ -45,12 +45,44 @@ std::string obby::buffer::get_sub_buffer(position from, position to) const
 void obby::buffer::insert_nosync(position pos, const std::string& text)
 {
 	m_buffer.insert(pos, text);
+	std::string::size_type new_pos = 0, new_prev = 0;
+	std::vector<position>::iterator iter;
+	for(iter = m_lines.begin(); iter != m_lines.end(); ++ iter)
+	{
+		if(new_pos != std::string::npos && pos > *iter)
+		{
+			while((new_pos = text.find('\n', new_pos)) !=
+			       std::string::npos)
+			{
+				iter = m_lines.insert(iter, pos + new_pos);
+				++ iter;
+			}
+		}
+
+		if(pos > *iter)
+			*iter += text.length();
+	}
+
+	if(new_pos != std::string::npos)
+		while((new_pos = text.find('\n', new_pos)) != std::string::npos)
+			m_lines.push_back(pos + new_pos);
 }
 
 void obby::buffer::erase_nosync(position from, position to)
 {
 	assert(to >= from);
 	m_buffer.erase(from, to - from);
+
+	std::vector<position>::iterator iter;
+	for(iter = m_lines.begin(); iter != m_lines.end(); )
+	{
+		if(*iter >= from && *iter < to)
+			iter = m_lines.erase(iter);
+		else if(*iter >= to)
+			{ *iter -= (to - from); ++ iter; }
+		else
+			++ iter;
+	}
 }
 
 obby::buffer::signal_insert_type obby::buffer::insert_event() const
@@ -61,5 +93,46 @@ obby::buffer::signal_insert_type obby::buffer::insert_event() const
 obby::buffer::signal_delete_type obby::buffer::delete_event() const
 {
 	return m_signal_delete;
+}
+
+std::string obby::buffer::get_line(unsigned int index) const
+{
+	assert(index <= m_lines.size() );
+
+	position from = (index == 0) ? (0) : (m_lines[index - 1] + 1);
+	position to = (index == m_lines.size() ) ? (m_buffer.length() )
+	                                         : (m_lines[index]);
+	return m_buffer.substr(from, to - from);
+}
+
+obby::position obby::buffer::coord_to_position(unsigned int x,
+                                               unsigned int y) const
+{
+	assert(y < m_lines.size() - 1);
+	if(y == 0) return x;
+
+	return m_lines[y - 1] + x;
+}
+
+void obby::buffer::position_to_coord(position pos, unsigned int& x,
+                                     unsigned int& y) const
+{
+	assert(pos <= m_buffer.length() );
+
+	y = 0;
+
+	std::vector<position>::const_iterator iter;
+	for(iter = m_lines.begin(); iter != m_lines.end(); ++ iter)
+	{
+		if(*iter < pos)
+			++ y;
+		else
+			break;
+	}
+
+	if(iter == m_lines.begin() )
+		x = pos;
+	else
+		x = pos - (*(--iter) );
 }
 

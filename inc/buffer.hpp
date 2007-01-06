@@ -50,10 +50,17 @@ public:
 
 	signal_insert_type insert_event() const;
 	signal_delete_type delete_event() const;
+
+	std::string get_line(unsigned int index) const;
+	position coord_to_position(unsigned int x, unsigned int y) const;
+	void position_to_coord(position pos, unsigned int& x,
+	                       unsigned int& y) const;
 protected:
 	std::list<record*> m_history;
 	unsigned int m_revision;
+
 	std::string m_buffer;
+	std::vector<position> m_lines;
 
 	signal_insert_type m_signal_insert;
 	signal_delete_type m_signal_delete;
