@@ -36,7 +36,7 @@ class host_document : public server_document
 public: 
 	/** Creates a new host_document.
 	 * @param id Unique ID for this document.
-	 * @param host net6::host object to synchronize data to.
+	 * @param host net6::host object to synchronise data to.
 	 */
 	host_document(unsigned int id, net6::host& host,
 	              const host_user_table& usertable);

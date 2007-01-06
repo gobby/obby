@@ -36,7 +36,7 @@ class client_document : public document
 {
 public:
 	/** Creates a new client_document with given ID. <em>client</em> is
-	 * a net6::client object to synchronize changes to.
+	 * a net6::client object to synchronise changes to.
 	 */
 	client_document(unsigned int id, net6::client& client,
 	                const client_user_table& usertable);

@@ -40,18 +40,18 @@ class server_document : public document
 public: 
 	/** Creates a new server document.
 	 * @param id Unique ID for this document.
-	 * @param server net6::server object to synchronize data to.
+	 * @param server net6::server object to synchronise data to.
 	 */
 	server_document(unsigned int id, net6::server& server,
 	                const server_user_table& usertable);
 	virtual ~server_document();
 
-	/** Inserts <em>text</em> at <em>pos</em> and synchronizes it with
+	/** Inserts <em>text</em> at <em>pos</em> and synchronises it with
 	 * the clients.
 	 */
 	virtual void insert(position pos, const std::string& text);
 
-	/** Removes text from the given area and synchronizes it with the
+	/** Removes text from the given area and synchronises it with the
 	 * clients.
 	 */
 	virtual void erase(position from, position end);

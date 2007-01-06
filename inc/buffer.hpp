@@ -31,7 +31,7 @@ namespace obby
 {
 
 /** Abstract base class for obby buffers. A buffer contains multiple documents
- * that are synchronized through many users and a user list.
+ * that are synchronised through many users and a user list.
  */
 
 class buffer : private net6::non_copyable
@@ -101,7 +101,7 @@ public:
 	 */
 	signal_user_part_type user_part_event() const;
 	
-	/** Signal which will be emitted when another participiant in the
+	/** Signal which will be emitted when another participant in the
 	 * obby session has created a new document.
 	 */
 	signal_insert_document_type insert_document_event() const;

@@ -34,7 +34,7 @@ namespace obby
 {
 
 /** Abstract base class for obby documents. A document contains an amount of
- * text that is synchronized to all other participiants in the obby session.
+ * text that is synchronised to all other participants in the obby session.
  */
 	
 class document : private net6::non_copyable
@@ -58,12 +58,12 @@ public:
 	 */
 	std::string get_sub_buffer(position from, position to) const;
 
-	/** Inserts <em>text</em> at <em>pos</em> and synchronizes this change
+	/** Inserts <em>text</em> at <em>pos</em> and synchronises this change
 	 * to other users.
 	 */
 	virtual void insert(position pos, const std::string& text) = 0;
 
-	/** Remove the text at the speciefied position and synchronizes this
+	/** Remove the text at the speciefied position and synchronises this
 	 * change to other users.
 	 */
 	virtual void erase(position from, position to) = 0;

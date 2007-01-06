@@ -29,7 +29,7 @@ namespace obby
 {
 
 /** Buffer that serves as (dedicated) server. It listens for incoming
- * connections from client_buffers and synchronizes their changes.
+ * connections from client_buffers and synchronises their changes.
  */
 	
 class server_buffer : public buffer, public sigc::trackable
