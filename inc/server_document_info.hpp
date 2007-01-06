@@ -409,20 +409,20 @@ template<typename Document, typename Selector>
 void basic_server_document_info<Document, Selector>::
 	user_subscribe(const user& user)
 {
-	// Call base function
-	basic_document_info<Document, Selector>::user_subscribe(user);
 	// Add client to jupiter
 	m_jupiter->client_add(user);
+	// Call base function
+	basic_document_info<Document, Selector>::user_subscribe(user);
 }
 
 template<typename Document, typename Selector>
 void basic_server_document_info<Document, Selector>::
 	user_unsubscribe(const user& user)
 {
-	// Remove client from jupiter
-	m_jupiter->client_remove(user);
 	// Call base function
 	basic_document_info<Document, Selector>::user_unsubscribe(user);
+	// Remove client from jupiter
+	m_jupiter->client_remove(user);
 }
 
 template<typename Document, typename Selector>

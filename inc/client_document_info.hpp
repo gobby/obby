@@ -317,6 +317,8 @@ void basic_client_document_info<Document, Selector>::
 		);
 	}
 
+	// TODO: Deny insertion when state is not SUBSCRIBED
+
 	if(m_jupiter.get() != NULL)
 	{
 		insert_operation<document_type> op(pos, text);
@@ -345,6 +347,8 @@ void basic_client_document_info<Document, Selector>::
 			"Local user is not subscribed"
 		);
 	}
+
+	// TODO: Deny erasure when state is not SUBSCRIBED
 
 	if(m_jupiter.get() != NULL)
 	{
@@ -467,9 +471,6 @@ template<typename Document, typename Selector>
 void basic_client_document_info<Document, Selector>::
 	user_subscribe(const user& user)
 {
-	// Call base function
-	base_type::user_subscribe(user);
-
 	// Add client to jupiter algo if we are subscribed
 	if(m_jupiter.get() != NULL)
 		m_jupiter->client_add(user);
@@ -515,18 +516,21 @@ void basic_client_document_info<Document, Selector>::
 
 		m_subscription_state = base_local_type::SUBSCRIBED;
 	}
+
+	// Call base function
+	base_type::user_subscribe(user);
 }
 
 template<typename Document, typename Selector>
 void basic_client_document_info<Document, Selector>::
 	user_unsubscribe(const user& user)
 {
+	// Call base function
+	base_type::user_unsubscribe(user);
+
 	// Remove user from jupiter if we are subscribed
 	if(m_jupiter.get() != NULL)
 		m_jupiter->client_remove(user);
-
-	// Call base function
-	base_type::user_unsubscribe(user);
 
 	// Local unsubscription
 	if(&get_buffer().get_self() == &user)
