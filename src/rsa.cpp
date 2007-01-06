@@ -28,7 +28,7 @@ obby::RSA::Key::Key(const Key& other)
 {
 }
 
-obby::RSA::Key::~Key();
+obby::RSA::Key::~Key()
 {
 }
 
@@ -65,25 +65,27 @@ mpz_class obby::RSA::Key::apply(const mpz_class& num) const
 
 namespace
 {
-	inline void encrypt_num_to_str(const Key& key, const mpz_class& num,
-	                               std::string& res)
+	inline void encrypt_num_to_str(const obby::RSA::Key& key,
+	                               const mpz_class& num, std::string& res)
 	{
 		res += key.apply(num).get_str(36);
 	}
 
-	inline void decrypt_num_to_str(const Key& key, const mpz_class& num,
-	                               std::string& res)
+	inline void decrypt_num_to_str(const obby::RSA::Key& key,
+		                       const mpz_class& num, std::string& res)
 	{
+		// TODO: Mit Armin klaeren, ob das wirklich stimmt...
+		// Testcare, ob das nicht den String rueckwaerts gibt oder so.
 		mpz_class t(key.apply(num) );
 		do
 		{
 			res += (t & 0xff);
-			res >>= 8;
-		} while(t);
+			t >>= 8;
+		} while(t != 0);
 	}
 }
 
-std::pair<Key, Key> obby::RSA::generate(unsigned int bits)
+std::pair<obby::RSA::Key, obby::RSA::Key> obby::RSA::generate(unsigned int bits)
 {
 	/* TODO... IMPLEMENT THIS */
 	/* There is still room for optimisations... */
@@ -134,6 +136,4 @@ std::string obby::RSA::decrypt(const Key& key, const std::string& msg)
 	decrypt_num_to_str(key, mpz_class(msg.substr(prev), 36), result);
 	return result;
 }
-
-#endif // _OBBY_RSA_HPP_
 

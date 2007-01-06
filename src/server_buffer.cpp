@@ -19,6 +19,8 @@
 #include <cassert>
 #include <iostream>
 #include "error.hpp"
+#include "rsa.hpp"
+#include "sha1.hpp"
 #include "server_document.hpp"
 #include "server_document_info.hpp"
 #include "server_buffer.hpp"
