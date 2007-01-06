@@ -188,6 +188,16 @@ obby::line obby::line::substr(size_type from, size_type len) const
 	return new_line;
 }
 
+obby::line::author_iterator obby::line::author_begin() const
+{
+	return m_authors.begin();
+}
+
+obby::line::author_iterator obby::line::author_end() const
+{
+	return m_authors.end();
+}
+
 void obby::line::compress_authors()
 {
 	std::vector<user_pos>::iterator iter;

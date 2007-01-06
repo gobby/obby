@@ -39,6 +39,18 @@ public:
 	typedef user_table::user user_type;
 	static const size_type npos;
 
+protected:
+	/** Internal struct used to store author and the position where the
+	 * text in the line has been written by that user.
+	 */
+	struct user_pos
+	{
+		const user_type* author;
+		size_type position;
+	};
+public:
+	typedef std::vector<user_pos>::const_iterator author_iterator;
+
 	/** Creates a new line.
 	 */
 	line();
@@ -107,6 +119,14 @@ public:
 	 */
 	line substr(size_type from, size_type len = npos) const;
 
+	/** Returns the begin of the authors list.
+	 */
+	author_iterator author_begin() const;
+
+	/** Returns the end of the authors list.
+	 */
+	author_iterator author_end() const;
+
 	/** Converts the line into a net6::packet to send it through the net.
 	 * @param document_id ID of the document this line belongs to.
 	 */
@@ -117,15 +137,6 @@ protected:
 	 * losing data.
 	 */
 	void compress_authors();
-
-	/** Internal struct used to store author and the position where the
-	 * text in the line has been written by that user.
-	 */
-	struct user_pos
-	{
-		const user_type* author;
-		size_type position;
-	};
 
 	/** Line content.
 	 */
