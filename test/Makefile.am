@@ -30,3 +30,5 @@ jupiter_SOURCES   += ../src/user_table.cpp
 jupiter_SOURCES   += ../src/colour.cpp
 jupiter_SOURCES   += ../src/common.cpp # gettext
 
+dist_noinst_DATA   = base_file
+
