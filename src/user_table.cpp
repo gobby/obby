@@ -162,3 +162,13 @@ obby::user_table::find_from_user_id(unsigned int id) const
 	return NULL;
 }
 
+obby::user_table::user_iterator obby::user_table::user_begin() const
+{
+	return m_users.begin();
+}
+
+obby::user_table::user_iterator obby::user_table::user_end() const
+{
+	return m_users.end();
+}
+

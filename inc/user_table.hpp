@@ -97,6 +97,8 @@ public:
 		std::string m_name;
 		unsigned int m_red, m_green, m_blue;
 	};
+
+	typedef std::list<user>::const_iterator user_iterator;
 	
 	/** Creates a new user table.
 	 */
@@ -122,6 +124,14 @@ public:
 	 * corresponding obby::user, not the one of the obby::user_table::user.
 	 */
 	const user* find_from_user_id(unsigned int id) const;
+
+	/** Returns the beginning of the user list.
+	 */
+	user_iterator user_begin() const;
+
+	/** Returns the end of the user list.
+	 */
+	user_iterator user_end() const;
 protected:
 	/** List of users that are registered in the user table.
 	 */
