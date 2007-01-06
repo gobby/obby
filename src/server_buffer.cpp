@@ -17,6 +17,7 @@
  */
 
 #include <cassert>
+#include "error.hpp"
 #include "server_user_table.hpp"
 #include "server_document.hpp"
 #include "server_buffer.hpp"
@@ -221,10 +222,9 @@ void obby::server_buffer::on_part(net6::server::peer& peer)
 
 bool obby::server_buffer::on_auth(net6::server::peer& peer,
                                   const net6::packet& pack,
-				  std::string& reason)
+				  net6::login::error& error)
 {
 	// Verify packet correctness
-	reason = "Invalid login request";
 	if(pack.get_param_count() < 4) return false;
 	if(pack.get_param(1).get_type() != net6::packet::param::INT)
 		return false;
@@ -232,7 +232,6 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 		return false;
 	if(pack.get_param(3).get_type() != net6::packet::param::INT)
 		return false;
-	reason.clear();
 
 	// Extract colour components
 	int red = pack.get_param(1).as_int();
@@ -247,7 +246,7 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 		    abs(green - (*iter)->get_green()) +
 		    abs(blue  - (*iter)->get_blue())) < 32)
 		{
-			reason = "Color is already in use";
+			error = login::ERROR_COLOR_IN_USE;
 			return false;
 		}
 	}

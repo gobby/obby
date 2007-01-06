@@ -1,4 +1,5 @@
 pkginclude_HEADERS =  common.hpp
+pkginclude_HEADERS += error.hpp
 pkginclude_HEADERS += position.hpp
 pkginclude_HEADERS += duplex_signal.hpp
 pkginclude_HEADERS += ptr_iterator.hpp

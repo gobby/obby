@@ -227,7 +227,7 @@ protected:
 	void on_part(obby::user& user);
 	void on_close();
 	void on_sync();
-	void on_login_failed(const std::string& reason);
+	void on_login_failed(obby::login::error error);
 
 	void on_document_insert(obby::document& doc);
 	void on_document_remove(obby::document& doc);
@@ -395,9 +395,9 @@ void curses_editor::on_sync()
 	m_synced = true;
 }
 
-void curses_editor::on_login_failed(const std::string& reason)
+void curses_editor::on_login_failed(obby::login::error error)
 {
-	m_reason = reason;
+	m_reason = obby::login::errstring(error);
 	quit();
 }
 

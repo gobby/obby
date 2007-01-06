@@ -213,9 +213,9 @@ void obby::client_buffer::on_data(const net6::packet& pack)
 		on_net_sync_final(pack);
 }
 
-void obby::client_buffer::on_login_failed(const std::string& reason)
+void obby::client_buffer::on_login_failed(net6::login::error error)
 {
-	m_signal_login_failed.emit(reason);
+	m_signal_login_failed.emit(error);
 }
 
 void obby::client_buffer::on_login_extend(net6::packet& pack)

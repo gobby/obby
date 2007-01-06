@@ -23,6 +23,7 @@
 #include <list>
 #include <sigc++/signal.h>
 #include <net6/client.hpp>
+#include "error.hpp"
 #include "record.hpp"
 #include "user.hpp"
 #include "insert_record.hpp"
@@ -42,9 +43,9 @@ class client_buffer : virtual public local_buffer,
                       public sigc::trackable
 {
 public:
-	typedef sigc::signal<void>                     signal_sync_type;
-	typedef sigc::signal<void>                     signal_close_type;
-	typedef sigc::signal<void, const std::string&> signal_login_failed_type;
+	typedef sigc::signal<void>               signal_sync_type;
+	typedef sigc::signal<void>               signal_close_type;
+	typedef sigc::signal<void, login::error> signal_login_failed_type;
 	
 	/** Creates a new client_buffer and connects to <em>hostname</em>
 	 * at <em>port</em>
@@ -135,7 +136,7 @@ protected:
 	void on_part(net6::client::peer& peer, const net6::packet& pack);
 	void on_close();
 	void on_data(const net6::packet& pack);
-	void on_login_failed(const std::string& reason);
+	void on_login_failed(net6::login::error error);
 	void on_login_extend(net6::packet& pack);
 
 	void on_net_record(const net6::packet& pack);

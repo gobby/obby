@@ -15,6 +15,7 @@ endif
 libobby_la_CPPFLAGS = $(libobby_CFLAGS) -I../inc
 
 libobby_la_SOURCES = common.cpp
+libobby_la_SOURCES += error.cpp
 libobby_la_SOURCES += position.cpp
 libobby_la_SOURCES += duplex_signal.cpp
 libobby_la_SOURCES += ptr_iterator.cpp
