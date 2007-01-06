@@ -26,18 +26,20 @@ const obby::user::flags obby::user::flags::CONNECTED = obby::user::flags(0x00000
 const obby::user::privileges obby::user::privileges::NONE = obby::user::privileges(0x00000000);
 const obby::user::privileges obby::user::privileges::CREATE_DOCUMENT = obby::user::privileges(0x00000001);
 
-obby::user::user(unsigned int id, const net6::user& user6,
-                 int red, int green, int blue):
+obby::user::user(unsigned int id,
+                 const net6::user& user6,
+                 const colour& colour):
 	m_user6(&user6), m_id(id), m_name(user6.get_name() ),
-	m_red(red), m_green(green), m_blue(blue), m_flags(flags::CONNECTED),
+	m_colour(colour), m_flags(flags::CONNECTED),
 	m_privs(privileges::NONE)
 {
 }
 
-obby::user::user(unsigned int id, const std::string& name, int red, int green,
-                 int blue)
- : m_user6(NULL), m_id(id), m_name(name), m_red(red), m_green(green),
-   m_blue(blue), m_flags(flags::NONE), m_privs(privileges::NONE)
+obby::user::user(unsigned int id,
+                 const std::string& name,
+		 const colour& colour):
+	m_user6(NULL), m_id(id), m_name(name), m_colour(colour),
+	m_flags(flags::NONE), m_privs(privileges::NONE)
 {
 }
 
@@ -48,21 +50,13 @@ obby::user::user(const serialise::object& obj):
 		obj.get_required_attribute("id");
 	const serialise::attribute& name_attr =
 		obj.get_required_attribute("name");
-
-	// TODO: Replace this by a obby::colour class before releasing 0.3.0!
-	const serialise::attribute& red_attr =
-		obj.get_required_attribute("red");
-	const serialise::attribute& green_attr =
-		obj.get_required_attribute("green");
-	const serialise::attribute& blue_attr =
-		obj.get_required_attribute("blue");
+	const serialise::attribute& colour_attr =
+		obj.get_required_attribute("colour");
 
 	m_user6 = NULL;
 	m_id = id_attr.as<unsigned int>();
 	m_name = name_attr.as<std::string>();
-	m_red = red_attr.as<unsigned int>();
-	m_green = green_attr.as<unsigned int>();
-	m_blue = blue_attr.as<unsigned int>();
+	m_colour = colour_attr.as<obby::colour>();
 
 	m_privs = privileges::NONE;
 }
@@ -71,9 +65,7 @@ void obby::user::serialise(serialise::object& obj) const
 {
 	obj.add_attribute("id").set_value(m_id);
 	obj.add_attribute("name").set_value(m_name);
-	obj.add_attribute("red").set_value(m_red);
-	obj.add_attribute("green").set_value(m_green);
-	obj.add_attribute("blue").set_value(m_blue);
+	obj.add_attribute("colour").set_value(m_colour);
 }
 
 void obby::user::release_net6()
@@ -86,8 +78,8 @@ void obby::user::release_net6()
 	remove_flags(flags::CONNECTED);
 }
 
-void obby::user::assign_net6(const net6::user& user6, int red, int green,
-                             int blue)
+void obby::user::assign_net6(const net6::user& user6,
+                             const colour& colour)
 {
 	// User must not be already connected
 	if(get_flags() & flags::CONNECTED)
@@ -98,9 +90,7 @@ void obby::user::assign_net6(const net6::user& user6, int red, int green,
 		throw std::logic_error("obby::user::assign_net6");
 
 	m_user6 = &user6;
-	m_red = red;
-	m_green = green;
-	m_blue = blue;
+	m_colour = colour;
 
 	add_flags(flags::CONNECTED);
 }
@@ -108,7 +98,6 @@ void obby::user::assign_net6(const net6::user& user6, int red, int green,
 const net6::user& obby::user::get_net6() const
 {
 	if(m_user6 == NULL)
-		// TODO: Own error class?
 		throw std::logic_error("obby::user::get_net6");
 
 	return *m_user6;
@@ -122,7 +111,6 @@ const std::string& obby::user::get_name() const
 const net6::address& obby::user::get_address() const
 {
 	if(m_user6 == NULL)
-		// TODO: Own error class?
 		throw std::logic_error("obby::user::get_address");
 
 	return m_user6->get_connection().get_remote_address();
@@ -133,19 +121,9 @@ unsigned int obby::user::get_id() const
 	return m_id;
 }
 
-int obby::user::get_red() const
+const obby::colour& obby::user::get_colour() const
 {
-	return m_red;
-}
-
-int obby::user::get_green() const
-{
-	return m_green;
-}
-
-int obby::user::get_blue() const
-{
-	return m_blue;
+	return m_colour;
 }
 
 const std::string& obby::user::get_token() const
@@ -163,11 +141,9 @@ obby::user::flags obby::user::get_flags() const
 	return m_flags;
 }
 
-void obby::user::set_colour(int red, int green, int blue)
+void obby::user::set_colour(const colour& colour)
 {
-	m_red = red;
-	m_green = green;
-	m_blue = blue;
+	m_colour = colour;
 }
 
 void obby::user::set_token(const std::string& token)

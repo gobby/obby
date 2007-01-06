@@ -87,8 +87,9 @@ void obby::user_table::clear()
 	m_user_map.clear();
 }
 
-obby::user* obby::user_table::add_user(unsigned int id, const net6::user& user6,
-                                       int red, int green, int blue)
+obby::user* obby::user_table::add_user(unsigned int id,
+                                       const net6::user& user6,
+                                       const colour& colour)
 {
 	// Find already exiting user with the given name
 	user* existing_user = find_int(user6.get_name() );
@@ -100,7 +101,7 @@ obby::user* obby::user_table::add_user(unsigned int id, const net6::user& user6,
 			throw std::logic_error("obby::user_table::add_user");
 
 		// Assign new net6::user to existing obby::user.
-		existing_user->assign_net6(user6, red, green, blue);
+		existing_user->assign_net6(user6, colour);
 		return existing_user;
 	}
 	else
@@ -110,7 +111,7 @@ obby::user* obby::user_table::add_user(unsigned int id, const net6::user& user6,
 			throw std::logic_error("obby::user_table::add_user");
 
 		// User seems to be here for his first time: Create a new user.
-		user* new_user = new user(id, user6, red, green, blue);
+		user* new_user = new user(id, user6, colour);
 
 		// Insert user into user list
 		m_user_map[id] = new_user;
@@ -119,8 +120,9 @@ obby::user* obby::user_table::add_user(unsigned int id, const net6::user& user6,
 	}
 }
 
-obby::user* obby::user_table::add_user(unsigned int id, const std::string& name,
-                                       int red, int green, int blue)
+obby::user* obby::user_table::add_user(unsigned int id,
+                                       const std::string& name,
+                                       const colour& colour)
 {
 	// Look for an existing user with this name.
 	user* existing_user = find_int(name);
@@ -134,7 +136,7 @@ obby::user* obby::user_table::add_user(unsigned int id, const std::string& name,
 	if(id == 0 || m_user_map.find(id) != m_user_map.end() )
 		throw std::logic_error("obby::user_table::add_user");
 
-	user* new_user = new user(id, name, red, green, blue);
+	user* new_user = new user(id, name, colour);
 	m_user_map[id] = new_user;
 
 	return new_user;

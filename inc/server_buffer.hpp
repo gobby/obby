@@ -146,7 +146,8 @@ protected:
 	/** Changes the colour of the given user to the new provided
 	 * colors and relays the fact to the other users.
 	 */
-	void user_colour_impl(obby::user& user, int red, int green, int blue);
+	void user_colour_impl(obby::user& user,
+	                      const colour& colour);
 
 	/** net6 signal handlers.
 	 */
@@ -465,15 +466,15 @@ void basic_server_buffer<selector_type>::
 
 template<typename selector_type>
 void basic_server_buffer<selector_type>::
-	user_colour_impl(obby::user& user, int red, int green, int blue)
+	user_colour_impl(obby::user& user, const colour& colour)
 {
 	// TODO: user_colour_impl should check for color conflicts
-	user.set_colour(red, green, blue);
+	user.set_colour(colour);
 	// TODO: user::set_colour should emit this signal
 	basic_buffer<selector_type>::m_signal_user_colour.emit(user);
 
 	net6::packet colour_pack("obby_user_colour");
-	colour_pack << &user << red << green << blue;
+	colour_pack << &user << colour;
 	net6_server().send(colour_pack);
 }
 
@@ -544,8 +545,7 @@ void basic_server_buffer<selector_type>::on_join(const net6::user& user6)
 	{
 		net6::packet user_pack("obby_sync_usertable_user");
 		user_pack << iter->get_id() << iter->get_name()
-		          << iter->get_red() << iter->get_green()
-		          << iter->get_blue();
+		          << iter->get_colour();
 		net6_server().send(user_pack, user6);
 	}
 
@@ -623,21 +623,17 @@ bool basic_server_buffer<selector_type>::
 {
 	const std::string name =
 		pack.get_param(0).net6::parameter::as<std::string>();
-	unsigned int red =
-		pack.get_param(1).net6::parameter::as<unsigned int>();
-	unsigned int green =
-		pack.get_param(2).net6::parameter::as<unsigned int>();
-	unsigned int blue =
-		pack.get_param(3).net6::parameter::as<unsigned int>();
+	colour colour =
+		pack.get_param(1).net6::parameter::as<obby::colour>();
 
 	// Get global and user password
 	const std::string global_password =
-		pack.get_param(4).net6::parameter::as<std::string>();
+		pack.get_param(2).net6::parameter::as<std::string>();
 	const std::string user_password =
-		pack.get_param(5).net6::parameter::as<std::string>();
+		pack.get_param(3).net6::parameter::as<std::string>();
 
 	// Check colour
-	if(!basic_buffer<selector_type>::check_colour(red, green, blue) )
+	if(!basic_buffer<selector_type>::check_colour(colour) )
 	{
 		error = login::ERROR_COLOR_IN_USE;
 		return false;
@@ -691,12 +687,8 @@ void basic_server_buffer<selector_type>::
 	on_login(const net6::user& user6, const net6::packet& pack)
 {
 	// Get color
-	unsigned int red =
-		pack.get_param(1).net6::parameter::as<unsigned int>();
-	unsigned int green =
-		pack.get_param(2).net6::parameter::as<unsigned int>();
-	unsigned int blue =
-		pack.get_param(3).net6::parameter::as<unsigned int>();
+	colour colour =
+		pack.get_param(1).net6::parameter::as<obby::colour>();
 
 	// Choose free user ID (note that this is another ID as the net6
 	// user ID because this ID must remain valid over multiple sessions).
@@ -705,7 +697,7 @@ void basic_server_buffer<selector_type>::
 
 	// Insert into user list
 	user* new_user = basic_buffer<selector_type>::m_user_table.add_user(
-		user_id, user6, red, green, blue
+		user_id, user6, colour
 	);
 
 	// Remove token from temporary token list because token can now be
@@ -745,8 +737,7 @@ void basic_server_buffer<selector_type>::
 	}
 
 	// Extend user-join packet with colour and obby-ID
-	pack << cur_user->get_id() << cur_user->get_red()
-	     << cur_user->get_green() << cur_user->get_blue();
+	pack << cur_user->get_id() << cur_user->get_colour();
 }
 
 template<typename selector_type>
@@ -856,15 +847,11 @@ template<typename selector_type>
 void basic_server_buffer<selector_type>::
 	on_net_user_colour(const net6::packet& pack, const user& from)
 {
-	unsigned int red =
-		pack.get_param(0).net6::parameter::as<unsigned int>();
-	unsigned int green =
-		pack.get_param(1).net6::parameter::as<unsigned int>();
-	unsigned int blue =
-		pack.get_param(2).net6::parameter::as<unsigned int>();
+	colour colour =
+		pack.get_param(0).net6::parameter::as<obby::colour>();
 
 	// Check new user colour for conflicts
-	if(!basic_buffer<selector_type>::check_colour(red, green, blue, &from) )
+	if(!basic_buffer<selector_type>::check_colour(colour, &from) )
 	{
 		net6::packet reply_pack("obby_user_colour_failed");
 		net6_server().send(reply_pack, from.get_net6() );
@@ -873,7 +860,7 @@ void basic_server_buffer<selector_type>::
 	{
 		// TODO: user_colour_impl should take const user&, user_table
 		// performs the necessary operation
-		user_colour_impl(const_cast<user&>(from), red, green, blue);
+		user_colour_impl(const_cast<user&>(from), colour);
 	}
 }
 

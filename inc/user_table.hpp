@@ -166,15 +166,17 @@ public:
 	 * assigned to this user, the colour is updated. If a user with this ID
 	 * is already connected, std::logic_error is thrown.
 	 */
-	obby::user* add_user(unsigned int id, const net6::user& user, int red,
-	                     int green, int blue);
+	obby::user* add_user(unsigned int id,
+	                     const net6::user& user,
+			     const colour& colour);
 
 	/** Adds a new user to the user list. No net6::user exists, so the
 	 * connected flag will not be set. If a user with this ID exists
 	 * already, std::logic_error will be thrown.
 	 */
-	obby::user* add_user(unsigned int id, const std::string& name, int red,
-	                     int green, int blue);
+	obby::user* add_user(unsigned int id,
+	                     const std::string& name,
+			     const colour& colour);
 
 	/** Removes a user from the user list. This means that this user gets
 	 * marked as non-connected and the reference to the underlaying

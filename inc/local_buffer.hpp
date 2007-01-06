@@ -65,7 +65,7 @@ public:
 	/** Sets a new colour for the local user and propagates this change
 	 * to the others.
 	 */
-	virtual void set_colour(int red, int green, int blue) = 0;
+	virtual void set_colour(const colour& colour) = 0;
 
 	/** Signal which will be emitted if a user colour changecd failed at
 	 * the server.

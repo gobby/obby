@@ -129,7 +129,7 @@ public:
 	 * already present one too closely.
 	 * TODO: Move this function to user table?
 	 */
-	bool check_colour(int red, int green, int blue,
+	bool check_colour(const colour& colour,
 	                  const user* ignore = NULL) const;
 
 	/** Signal which will be emitted if a new user has joined the obby
@@ -216,7 +216,7 @@ protected:
 typedef basic_buffer<net6::selector> buffer;
 
 template<typename selector_type>
-const unsigned long basic_buffer<selector_type>::PROTOCOL_VERSION = 3;
+const unsigned long basic_buffer<selector_type>::PROTOCOL_VERSION = 4;
 
 template<typename selector_type>
 basic_buffer<selector_type>::basic_buffer()
@@ -317,7 +317,7 @@ basic_buffer<selector_type>::document_find(unsigned int owner_id,
 }
 
 template<typename selector_type>
-bool basic_buffer<selector_type>::check_colour(int red, int green, int blue,
+bool basic_buffer<selector_type>::check_colour(const colour& colour,
                                                const user* ignore) const
 {
 	for(user_table::iterator iter =
@@ -328,10 +328,7 @@ bool basic_buffer<selector_type>::check_colour(int red, int green, int blue,
 		// Ignore given user to ignore
 		if(&(*iter) == ignore) continue;
 
-		// TODO: obby::colour class to perform this check
-		if( abs(red - iter->get_red()) +
-		    abs(green - iter->get_green()) +
-		    abs(blue - iter->get_blue()) < 32)
+		if(colour.similar_colour(iter->get_colour()) )
 		{
 			// Conflict
 			return false;

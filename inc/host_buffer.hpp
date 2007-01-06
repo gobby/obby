@@ -41,24 +41,20 @@ public:
 
 	/** Creates a new host_buffer.
 	 * @param username User name for the local user.
-	 * @param red Red color component for the local user.
-	 * @param green Green color component for the local user.
-	 * @param blue Blue color component for the local user.
+	 * @param colour Local user colour.
 	 */
 	basic_host_buffer(const std::string& username,
-	                  int red, int green, int blue);
+	                  const colour& colour);
 
 	/** Creates a new host_buffer.
 	 * @param username User name for the local user.
-	 * @param red Red color component for the local user.
-	 * @param green Green color component for the local user.
-	 * @param blue Blue color component for the local user.
+	 * @param colour Local user colour.
 	 * @param public_key Public RSA key of the server's key pair.
 	 * @param private_key Corresponding private key. Must match
 	 * the public one.
 	 */
 	basic_host_buffer(const std::string& username,
-			  int red, int green, int blue,
+	                  const colour& colour,
 	                  const RSA::Key& public_key,
 	                  const RSA::Key& private_key);
 
@@ -100,7 +96,7 @@ public:
 
 	/** Sets a new colour for the local user.
 	 */
-	virtual void set_colour(int red, int green, int blue);
+	virtual void set_colour(const colour& colour);
 	
 protected:
 	/** Creates a new document info object according to the type of buffer.
@@ -121,9 +117,7 @@ protected:
 	virtual net_type* new_net(unsigned int port);
 
 	std::string m_username;
-	int m_red;
-	int m_green;
-	int m_blue;
+	colour m_colour;
 
 	user* m_self;
 private:
@@ -164,24 +158,24 @@ basic_host_buffer<selector_type>::
 template<typename selector_type>
 basic_host_buffer<selector_type>::
 	basic_host_buffer(const std::string& username,
-	                  int red, int green, int blue)
+	                  const colour& colour)
  : basic_buffer<selector_type>(),
    basic_local_buffer<selector_type>(),
    basic_server_buffer<selector_type>(),
-   m_username(username), m_red(red), m_green(green), m_blue(blue), m_self(NULL)
+   m_username(username), m_colour(colour), m_self(NULL)
 {
 }
 
 template<typename selector_type>
 basic_host_buffer<selector_type>::
 	basic_host_buffer(const std::string& username,
-	                  int red, int green, int blue,
+	                  const colour& colour,
 	                  const RSA::Key& public_key,
 	                  const RSA::Key& private_key)
  : basic_buffer<selector_type>(),
    basic_local_buffer<selector_type>(),
    basic_server_buffer<selector_type>(public_key, private_key),
-   m_username(username), m_red(red), m_green(green), m_blue(blue), m_self(NULL)
+   m_username(username), m_colour(colour), m_self(NULL)
 {
 }
 
@@ -193,7 +187,7 @@ void basic_host_buffer<selector_type>::open(unsigned int port)
 	// Create local user
 	m_self = basic_buffer<selector_type>::m_user_table.add_user(
 		basic_buffer<selector_type>::m_user_table.find_free_id(),
-		net6_host().get_self(), m_red, m_green, m_blue
+		net6_host().get_self(), m_colour
 	);
 
 	basic_buffer<selector_type>::m_signal_user_join.emit(*m_self);
@@ -208,7 +202,7 @@ void basic_host_buffer<selector_type>::open(const std::string& content,
 	// Create local user
 	m_self = basic_buffer<selector_type>::m_user_table.add_user(
 		basic_buffer<selector_type>::m_user_table.find_free_id(),
-		net6_host().get_self(), m_red, m_green, m_blue
+		net6_host().get_self(), m_colour
 	);
 
 	basic_buffer<selector_type>::m_signal_user_join.emit(*m_self);
@@ -268,14 +262,14 @@ void basic_host_buffer<selector_type>::
 }
 
 template<typename selector_type>
-void basic_host_buffer<selector_type>::set_colour(int red, int green, int blue)
+void basic_host_buffer<selector_type>::set_colour(const colour& colour)
 {
 	if(m_self == NULL)
 		throw std::logic_error("obby::host_buffer::set_colour");
 
 	// Check for colour conflicts
 	// TODO: user_colour_impl should check this
-	if(!basic_buffer<selector_type>::check_colour(red, green, blue, m_self))
+	if(!basic_buffer<selector_type>::check_colour(colour, m_self))
 	{
 		basic_local_buffer<selector_type>::
 			m_signal_user_colour_failed.emit();
@@ -285,7 +279,7 @@ void basic_host_buffer<selector_type>::set_colour(int red, int green, int blue)
 		// TODO: user_colour_impl should take const user&, user_table
 		// performs the necessary operation
 		basic_server_buffer<selector_type>::user_colour_impl(
-			const_cast<user&>(*m_self), red, green, blue
+			const_cast<user&>(*m_self), colour
 		);
 	}
 }

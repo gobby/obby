@@ -25,6 +25,7 @@
 #include <net6/non_copyable.hpp>
 #include <string>
 #include "serialise/object.hpp"
+#include "colour.hpp"
 
 namespace obby
 {
@@ -98,23 +99,21 @@ public:
 	/** Creates a new user from an existing net6::user.
 	 * @param id Unique obby ID for this user.
 	 * @param user6 Underlaying net6::user object.
-	 * @param red Red colour component of the user colour (0-255)
-	 * @param green Green colour component of the user colour (0-255)
-	 * @param blue Blue colour component of the user colour (0-255)
+	 * @param colour User colour.
 	 */
-	user(unsigned int id, const net6::user& user6,
-	     int red, int green, int blue);
+	user(unsigned int id,
+	     const net6::user& user6,
+	     const colour& colour);
 
 	/** Creates a new user that represents a client that has already left
 	 * the obby session.
 	 * @param id Unique obby ID for this user.
 	 * @param name Name of the user.
-	 * @param red Red colour component of the user colour (0-255)
-	 * @param green Green colour component of the user colour (0-255)
-	 * @param blue Blue colour component of the user colour (0-255)
+	 * @param colour User colour.
 	 */
-	user(unsigned int id, const std::string& name, int red, int green,
-	     int blue);
+	user(unsigned int id,
+	     const std::string& name,
+	     const colour& colour);
 
 	/** Creates a user from a serialised user object.
 	 */
@@ -135,7 +134,8 @@ public:
 	 * left the obby session and rejoined (maybe with another colour, in
 	 * this case the colour in all the documents gets updated).
 	 */
-	void assign_net6(const net6::user& user6, int red, int green, int blue);
+	void assign_net6(const net6::user& user6,
+	                 const colour& colour);
 
 	/** Returns the underlaying net6::user object.
 	 */
@@ -157,17 +157,9 @@ public:
 	 */
 	unsigned int get_id() const;
 
-	/** Returns the red component of the user colour.
+	/** Returns the user colour.
 	 */
-	int get_red() const;
-
-	/** Returns the green component of the user colour.
-	 */
-	int get_green() const;
-
-	/** Returns the blue component of the user colour.
-	 */
-	int get_blue() const;
+	const colour& get_colour() const;
 
 	/** Returns the random token set for this user.
 	 */
@@ -184,7 +176,7 @@ public:
 
 	/** Sets the three colour components of the user colour.
 	 */
-	void set_colour(int red, int green, int blue);
+	void set_colour(const colour& colour);
 
 	/** Changes the token to the one the server generated for this user.
 	 */
@@ -207,9 +199,7 @@ protected:
 
 	unsigned int m_id;
 	std::string m_name;
-	int m_red;
-	int m_green;
-	int m_blue;
+	colour m_colour;
 
 	std::string m_token;
 	std::string m_password;

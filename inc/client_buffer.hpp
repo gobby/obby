@@ -91,16 +91,15 @@ public:
 
 	/** Sends a login request for this client.
 	 * @param name User name for this client.
-	 * @param red Red color component for the user color.
-	 * @param green Green color component for the user color.
-	 * @param blue Blue color component for the user color.
+	 * @param colour User colour.
 	 * @param global_password Password that is used as a global session
 	 * password. If it is not provided, signal_global_password will be
 	 * emitted to prompt for a session password.
 	 * @param user_password Same as global password, but is used as
 	 * user password.
 	 */
-	void login(const std::string& name, int red, int green, int blue,
+	void login(const std::string& name,
+	           const obby::colour& colour,
 	           const std::string& global_password = "",
 	           const std::string& user_password = "");
 
@@ -152,7 +151,7 @@ public:
 
 	/** Set user colour.
 	 */
-	virtual void set_colour(int red, int green, int blue);
+	virtual void set_colour(const colour& colour);
 
 	/** Signal which will be emitted after the first packet, the welcome
 	 * packet, is received. This is a good place to perform a call to
@@ -263,9 +262,7 @@ protected:
 	user* m_self;
 
 	std::string m_name;
-	int m_red;
-	int m_green;
-	int m_blue;
+	colour m_colour;
 	std::string m_global_password;
 	std::string m_user_password;
 
@@ -345,7 +342,8 @@ bool basic_client_buffer<selector_type>::is_connected() const
 
 template<typename selector_type>
 void basic_client_buffer<selector_type>::
-	login(const std::string& name, int red, int green, int blue,
+	login(const std::string& name,
+	      const colour& colour,
               const std::string& global_password,
 	      const std::string& user_password)
 {
@@ -354,9 +352,7 @@ void basic_client_buffer<selector_type>::
 		throw std::logic_error("obby::basic_client_buffer::login");
 
 	m_name = name;
-	m_red = red;
-	m_green = green;
-	m_blue = blue;
+	m_colour = colour;
 	m_global_password = global_password;
 	m_user_password = user_password;
 
@@ -448,10 +444,10 @@ void basic_client_buffer<selector_type>::
 
 template<typename selector_type>
 void basic_client_buffer<selector_type>::
-	set_colour(int red, int green, int blue)
+	set_colour(const colour& colour)
 {
 	net6::packet colour_pack("obby_user_colour");
-	colour_pack << red << green << blue;
+	colour_pack << colour;
 	net6_client().send(colour_pack);
 }
 
@@ -510,16 +506,12 @@ void basic_client_buffer<selector_type>::
 {
 	unsigned int id =
 		pack.get_param(2).net6::parameter::as<unsigned int>();
-	unsigned int red =
-		pack.get_param(3).net6::parameter::as<unsigned int>();
-	unsigned int green =
-		pack.get_param(4).net6::parameter::as<unsigned int>();
-	unsigned int blue =
-		pack.get_param(5).net6::parameter::as<unsigned int>();
+	colour colour =
+		pack.get_param(3).net6::parameter::as<obby::colour>();
 
 	// Add user
 	user* new_user = basic_buffer<selector_type>::m_user_table.add_user(
-		id, user6, red, green, blue
+		id, user6, colour
 	);
 
 	// The first joining user is the local one
@@ -599,7 +591,7 @@ void basic_client_buffer<selector_type>::
 		if(m_signal_global_password.emit(global_password) )
 		{
 			login(
-				m_name, m_red, m_green, m_blue,
+				m_name, m_colour,
 				global_password, m_user_password
 			);
 		}
@@ -611,7 +603,7 @@ void basic_client_buffer<selector_type>::
 		if(m_signal_user_password.emit(user_password) )
 		{
 			login(
-				m_name, m_red, m_green, m_blue,
+				m_name, m_colour,
 				m_global_password, user_password
 			);
 		}
@@ -626,7 +618,7 @@ template<typename selector_type>
 void basic_client_buffer<selector_type>::on_login_extend(net6::packet& pack)
 {
 	// Add user colour and (hashed) passwords
-	pack << m_red << m_green << m_blue
+	pack << m_colour
 	     << SHA1::hash(m_token + m_global_password)
 	     << SHA1::hash(m_token + m_user_password);
 }
@@ -800,9 +792,7 @@ void basic_client_buffer<selector_type>::
 
 	// TODO: Should be done by a call to the user_table
 	const_cast<user*>(from)->set_colour(
-		pack.get_param(1).net6::parameter::as<unsigned int>(),
-		pack.get_param(2).net6::parameter::as<unsigned int>(),
-		pack.get_param(3).net6::parameter::as<unsigned int>()
+		pack.get_param(1).net6::parameter::as<obby::colour>()
 	);
 
 	// TODO: user::set_colour should emit the signal
@@ -836,16 +826,12 @@ void basic_client_buffer<selector_type>::
 		pack.get_param(0).net6::parameter::as<unsigned int>();
 	const std::string& name =
 		pack.get_param(1).net6::parameter::as<std::string>();
-	unsigned int red =
-		pack.get_param(2).net6::parameter::as<unsigned int>();
-	unsigned int green =
-		pack.get_param(3).net6::parameter::as<unsigned int>();
-	unsigned int blue =
-		pack.get_param(4).net6::parameter::as<unsigned int>();
+	colour colour =
+		pack.get_param(2).net6::parameter::as<obby::colour>();
 
 	// Add user into user table
 	basic_buffer<selector_type>::m_user_table.add_user(
-		id, name, red, green, blue
+		id, name, colour
 	);
 
 	// TODO: Emit user_join_signal. Should be done automatically by the
