@@ -36,9 +36,12 @@ obby::host_buffer::host_buffer(unsigned int port, const std::string& username,
 	m_usertable = new host_user_table(*host, *this);
 	
 	assert(host->get_self() );
+	m_self = add_user(*host->get_self(), red, green, blue);
+	/*
 	m_self = new user(*host->get_self(), red, green, blue);
 	m_userlist.push_back(m_self);
-
+	m_usertable->insert(*m_self);
+	*/
 	register_signal_handlers();
 }
 
