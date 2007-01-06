@@ -1,5 +1,11 @@
 lib_LTLIBRARIES = libobby.la
 
+#  current  : revision :      age
+#     ^     :     ^    :       ^
+#     |     :   minor  :       |
+# interface :  changes : compatibility
+libobby_la_LDFLAGS = -version-info 0:0:0 -release 0
+
 INCLUDES = $(libobby_CFLAGS) -I../inc/
 
 pkginclude_HEADERS = \
