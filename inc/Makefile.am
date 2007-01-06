@@ -19,6 +19,6 @@ pkginclude_HEADERS += server_buffer.hpp
 pkginclude_HEADERS += host_buffer.hpp
 
 if WITH_HOWL
-pkginclude_HEADERS += rendezvous.hpp
+pkginclude_HEADERS += zeroconf.hpp
 endif
 

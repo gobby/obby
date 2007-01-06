@@ -7,7 +7,7 @@
 #include "document.hpp"
 #include "client_buffer.hpp"
 
-// TODO: rendezvous
+// TODO: Zeroconf
 // TODO: MDI output
 
 class buffer : public sigc::trackable

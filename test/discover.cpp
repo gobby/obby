@@ -1,4 +1,4 @@
-#include "rendezvous.hpp"
+#include "zeroconf.hpp"
 
 #include <iostream>
 
@@ -20,14 +20,14 @@ void on_leave(const string& name)
 
 int main()
 {
-	rendezvous rendezvous;
+	zeroconf zeroconf;
 
-	rendezvous.discover_event().connect(sigc::ptr_fun(&on_discover));
-	rendezvous.leave_event().connect(sigc::ptr_fun(&on_leave));
+	zeroconf.discover_event().connect(sigc::ptr_fun(&on_discover));
+	zeroconf.leave_event().connect(sigc::ptr_fun(&on_leave));
 
-	rendezvous.discover();
+	zeroconf.discover();
 	
 	while(true)
-		rendezvous.select();
+		zeroconf.select();
 }
 

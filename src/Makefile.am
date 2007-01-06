@@ -37,6 +37,6 @@ libobby_la_SOURCES += host_buffer.cpp
 if WITH_HOWL
 libobby_la_CPPFLAGS += $(libhowl_CFLAGS)
 libobby_la_LIBADD   += $(libhowl_LIBS)
-libobby_la_SOURCES  += rendezvous.cpp
+libobby_la_SOURCES  += zeroconf.cpp
 endif
 

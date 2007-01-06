@@ -16,8 +16,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef _OBBY_RENDEZVOUS_HPP_
-#define _OBBY_RENDEZVOUS_HPP_
+#ifndef _OBBY_ZEROCONF_HPP_
+#define _OBBY_ZEROCONF_HPP_
 
 #include <string>
 
@@ -29,15 +29,15 @@
 namespace obby
 {
 
-class rendezvous : private net6::non_copyable
+class zeroconf : private net6::non_copyable
 {
 public:
 	typedef sigc::signal<void, const std::string&, 
 		const net6::ipv4_address&> signal_discover_type;
 	typedef sigc::signal<void, const std::string&> signal_leave_type;
 	
-	rendezvous();
-	~rendezvous();
+	zeroconf();
+	~zeroconf();
 
 	/** Publishes a record to other users of this library within the
 	 * default domain (.local). It uses the service identifier
@@ -52,11 +52,11 @@ public:
 	 * participant. */
 	void discover();
 
-	/** Process all rendezvous events. This procedure does not return,
+	/** Process all zeroconf events. This procedure does not return,
 	 * so it should be used in an own thread. */
 	void select();
 
-	/** Process all available rendezvous events in a timeframe of
+	/** Process all available Zeroconf events in a timeframe of
 	 * <em>msecs</em> milliseconds. A value of 0 will prevent the command
 	 * from blocking the caller. */
 	void select(unsigned int msecs);
@@ -99,4 +99,5 @@ private:
 
 }
 
-#endif // _OBBY_RENDEZVOUS_HPP_
+#endif // _OBBY_ZEROCONF_HPP_
+

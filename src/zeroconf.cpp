@@ -16,12 +16,12 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "rendezvous.hpp"
+#include "zeroconf.hpp"
 
 #include <stdexcept>
 #include <sstream>
 
-obby::rendezvous::rendezvous()
+obby::zeroconf::zeroconf()
 {
 	if (sw_discovery_init(&m_session) != SW_OKAY)
 		throw std::runtime_error("sw_discovery_init() failed.");
@@ -29,12 +29,12 @@ obby::rendezvous::rendezvous()
 		throw std::runtime_error("sw_discovery_salt() failed.");
 }
 
-obby::rendezvous::~rendezvous()
+obby::zeroconf::~zeroconf()
 {
 	sw_discovery_fina(m_session);
 }
 
-void obby::rendezvous::publish(const std::string& name, unsigned int port)
+void obby::zeroconf::publish(const std::string& name, unsigned int port)
 {
 	sw_discovery_oid oid;
 	sw_result result;
@@ -43,7 +43,7 @@ void obby::rendezvous::publish(const std::string& name, unsigned int port)
 	 * default domain (.local) */
 	if((result = sw_discovery_publish(m_session, 0, name.c_str(),
 		"_lobby._tcp.", NULL, NULL, port, NULL, 0,
-	       	&rendezvous::handle_publish_reply,
+	       	&zeroconf::handle_publish_reply,
 		static_cast<sw_opaque>(this), &oid)) != SW_OKAY)
 	{
 		std::stringstream stream;
@@ -52,13 +52,13 @@ void obby::rendezvous::publish(const std::string& name, unsigned int port)
 	}
 }
 
-void obby::rendezvous::discover()
+void obby::zeroconf::discover()
 {
 	sw_discovery_oid oid;
 	sw_result result;
 
 	if ((result = sw_discovery_browse(m_session, 0, "_lobby._tcp", NULL,
-		&rendezvous::handle_browse_reply,
+		&zeroconf::handle_browse_reply,
 		static_cast<sw_opaque>(this), &oid)) != SW_OKAY)
 	{
 		std::stringstream stream;
@@ -67,30 +67,30 @@ void obby::rendezvous::discover()
 	}
 }
 
-void obby::rendezvous::select()
+void obby::zeroconf::select()
 {
 	sw_discovery_run(m_session);
 }
 
-void obby::rendezvous::select(unsigned int msecs)
+void obby::zeroconf::select(unsigned int msecs)
 {
 	sw_ulong ms = msecs;
 	sw_salt_step(m_salt, &ms);
 }
 
-obby::rendezvous::signal_discover_type
-obby::rendezvous::discover_event() const
+obby::zeroconf::signal_discover_type
+obby::zeroconf::discover_event() const
 {
 	return m_signal_discover;
 }
 
-obby::rendezvous::signal_leave_type
-obby::rendezvous::leave_event() const
+obby::zeroconf::signal_leave_type
+obby::zeroconf::leave_event() const
 {
 	return m_signal_leave;
 }
 
-sw_result obby::rendezvous::handle_publish_reply(sw_discovery discovery,
+sw_result obby::zeroconf::handle_publish_reply(sw_discovery discovery,
 	sw_discovery_oid oid, sw_discovery_publish_status status,
 	sw_opaque extra)
 {
@@ -103,12 +103,12 @@ sw_result obby::rendezvous::handle_publish_reply(sw_discovery discovery,
 	return SW_OKAY;
 }
 
-sw_result obby::rendezvous::handle_browse_reply(sw_discovery discovery,
+sw_result obby::zeroconf::handle_browse_reply(sw_discovery discovery,
 	sw_discovery_oid oid, sw_discovery_browse_status status,
 	sw_uint32 interface_index, sw_const_string name, sw_const_string type,
 	sw_const_string domain, sw_opaque extra)
 {
-	sw_discovery session = static_cast<obby::rendezvous*>(extra)->m_session;
+	sw_discovery session = static_cast<obby::zeroconf*>(extra)->m_session;
 	
 	switch(status)
 	{
@@ -123,7 +123,7 @@ sw_result obby::rendezvous::handle_browse_reply(sw_discovery discovery,
 		{
 			sw_result result;
 			if ((result = sw_discovery_resolve(session, 0, name,
-				type, domain, &rendezvous::handle_resolve_reply,
+				type, domain, &zeroconf::handle_resolve_reply,
 				extra, &oid)) != SW_OKAY)
 			{
 				std::stringstream stream;
@@ -135,7 +135,7 @@ sw_result obby::rendezvous::handle_browse_reply(sw_discovery discovery,
 
 		case SW_DISCOVERY_BROWSE_REMOVE_SERVICE:
 		{
-			static_cast<obby::rendezvous*>(
+			static_cast<obby::zeroconf*>(
 				extra)->leave_event().emit(name);
 			break;
 		}
@@ -144,13 +144,13 @@ sw_result obby::rendezvous::handle_browse_reply(sw_discovery discovery,
 	return SW_OKAY;
 }
 
-sw_result obby::rendezvous::handle_resolve_reply(sw_discovery discovery,
+sw_result obby::zeroconf::handle_resolve_reply(sw_discovery discovery,
 	sw_discovery_oid oid, sw_uint32 interface_index, sw_const_string name,
 	sw_const_string type, sw_const_string domain, sw_ipv4_address address,
 	sw_port port, sw_octets text_record, sw_ulong text_record_len,
 	sw_opaque extra)
 {
-	static_cast<obby::rendezvous*>(extra)->discover_event().emit(
+	static_cast<obby::zeroconf*>(extra)->discover_event().emit(
 		name, net6::ipv4_address::create_from_address(
 		sw_ipv4_address_saddr(address), port));
 	return SW_OKAY;
