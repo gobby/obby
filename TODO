@@ -11,9 +11,11 @@ Normal:
   * Hide equivalent insert / change calls (#28) [stub]
   * Implement records to (un)indent lines of text (#30) [stub]
   * Undo/Redo (#39)
+  * Show the cursors and selections of all participants (#53)
   * Authentication: Database-based authentication using user/password (#57)
   * Authentication: Access control lists (#58)
   * Use precompiled headers (#61)
+  * Encoding should be preserved (#65)
   * UPNP support (#77)
 
 Minor:
@@ -45,6 +47,17 @@ The current undo/redo implementation is taken directly from GtkSourceView.
 This is not good because text that other people have written may be undone. 
 We need a proper undo/redo handling in libobby.
 
+53: Show the cursors and selections of all participants
+-------------------------------------------------------
+I think that being able to see the cursors and selections of all the 
+participants would help me get a sense for where the other participants 
+are, and what they're doing.  I think this would make collaboration a 
+little bit easier and more comfortable.
+
+Also, once gobby knows where everyone else is, I think it would be great to 
+be able to click on someone's name in the Name List to jump their 
+cursor/selection into view.
+
 57: Authentication: Database-based authentication using user/password
 ---------------------------------------------------------------------
 ''libobby'' should provide the following mean of authentication:
@@ -60,6 +73,12 @@ list protection.
 61: Use precompiled headers
 ---------------------------
 All projects should make use of precompiled headers.
+
+65: Encoding should be preserved
+--------------------------------
+The incoming encoding from what it is converted should be saved internally 
+on the host which opened them, so that the save function results in a file 
+with the original one.
 
 77: UPNP support
 ----------------
