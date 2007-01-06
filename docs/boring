@@ -36,8 +36,8 @@
 \.status$
 ^stamp-h1$
 ^libtool$
-^Makefile$
-^Makefile\.in$
+Makefile$
+Makefile\.in$
 (^|/)docs/html($|/)
 (^|/)docs/latex($|/)
 \.gdb_history$
