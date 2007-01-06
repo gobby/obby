@@ -47,7 +47,7 @@ public:
 		std::list<const user*>::const_iterator
 	> user_iterator;
 
-	document_info(const buffer& buf, unsigned int id,
+	document_info(const buffer& buf, const user* owner, unsigned int id,
 	              const std::string& title);
 	~document_info();
 
@@ -70,6 +70,12 @@ public:
 	/** Returns the document for this info, if one is assigned.
 	 */
 	const document* get_document() const;
+
+	/** Returns the owner of this document. It may return NULL if the
+	 * document has no owner (indicating that the server created the
+	 * document).
+	 */
+	const user* get_owner() const;
 
 	/** Renames the document or requests a rename operation.
 	 * signal_rename will be emitted if the document has been renamed.
@@ -126,6 +132,7 @@ protected:
 	void release_document();
 
 	const buffer& m_buffer;
+	const user* m_owner;
 	unsigned int m_id;
 	std::string m_title;
 	document* m_document;
@@ -135,6 +142,47 @@ protected:
 	signal_rename_type m_signal_rename;
 	signal_subscribe_type m_signal_subscribe;
 	signal_unsubscribe_type m_signal_unsubscribe;
+};
+
+}
+
+namespace net6
+{
+
+/** obby document packet type
+ */
+template<>
+class parameter<obby::document_info*> : public basic_parameter {
+public:
+	parameter(obby::document_info* document)
+	 : basic_parameter(TYPE_ID, document) { }
+
+	virtual basic_parameter* clone() const {
+		return new parameter<obby::document_info*>(
+			as<obby::document_info*>()
+		);
+	}
+
+	virtual std::string to_string() const {
+		obby::document_info* document = as<obby::document_info*>();
+
+		int owner_id = 0;
+		if(document->get_owner() )
+			owner_id = document->get_owner()->get_id();
+
+		std::stringstream stream;
+		stream << std::hex << owner_id << " " << document->get_id();
+		return stream.str();
+	}
+
+	static const identification_type TYPE_ID = 'd';
+};
+
+template<>
+class parameter<obby::document_info> : public parameter<obby::document_info*> {
+public:
+	parameter(const obby::document_info& document)
+	 : parameter<obby::document_info*>(&const_cast<obby::document_info&>(document) ) { }
 };
 
 }

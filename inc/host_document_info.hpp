@@ -38,7 +38,8 @@ class host_document_info : public local_document_info,
 {
 public:
 	host_document_info(const host_buffer& buf, net6::host& host,
-	                   unsigned int id, const std::string& title);
+	                   const user* owner, unsigned int id,
+	                   const std::string& title);
 	~host_document_info();
 
 	/** Returns the buffer to which the document is assigned.
@@ -78,8 +79,8 @@ protected:
 	 * but the host_document_info needs to create a host_document.
 	 */
 	host_document_info(const host_buffer& buf, net6::host& host,
-	                   unsigned int id, const std::string& title,
-	                   bool noassign);
+	                   const user* owner, unsigned int id,
+			   const std::string& title, bool noassign);
 
 	/** Assigns a document to the document info.
 	 */

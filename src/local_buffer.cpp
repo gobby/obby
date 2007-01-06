@@ -28,10 +28,10 @@ obby::local_buffer::~local_buffer()
 }
 
 obby::local_document_info*
-obby::local_buffer::find_document(unsigned int id) const
+obby::local_buffer::find_document(unsigned int owner_id, unsigned int id) const
 {
 	return dynamic_cast<obby::local_document_info*>(
-		buffer::find_document(id)
+		buffer::find_document(owner_id, id)
 	);
 }
 

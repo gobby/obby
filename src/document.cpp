@@ -110,21 +110,8 @@ void obby::document::insert_nosync(const insert_record& record)
 	// Get user_table from the buffer
 	const user_table& user_table = get_buffer().get_user_table();
 
-	// Find author in user table
-	// user::CONNECTED should be correct here: Only conncted users
-	// can edit this document.
-	const user* author =
-		user_table.find_user<user::CONNECTED>(record.get_from() );
-
-	// Author may be NULL if the user_id is 0, then a server_document,
-	// which has no user, has inserted something directly
-	if(author == NULL && record.get_from() != 0)
-	{
-		std::cerr << "obby::document::insert_nosync: User "
-		          << record.get_from() << " is not connected"
-		          << std::endl;
-		return;
-	}
+	// Get author from record
+	const user* author = record.get_user();
 
 	// Move line iterator to the line where to insert text
 	// TODO: std::vector::iterator is a random access iterator, we can
@@ -191,21 +178,8 @@ void obby::document::erase_nosync(const delete_record& record)
 	// Get user_table from the buffer
 	const user_table& user_table = get_buffer().get_user_table();
 
-	// Find author in user table
-	// user::CONNECTED should be correct here: Only conncted users
-	// can edit this document.
-	const user* author =
-		user_table.find_user<user::CONNECTED>(record.get_from() );
-
-	// Author may be NULL if the user_id is 0, then a server_document,
-	// which has no user, has inserted something directly
-	if(author == NULL && record.get_from() != 0)
-	{
-		std::cerr << "obby::document::insert_nosync: User "
-		          << record.get_from() << " does not exist"
-		          << std::endl;
-		return;
-	}
+	// Get author from record
+	const user* author = record.get_user();
 
 	// Find the iterator for the given row
 	// TODO: std::vector::iterator is a random access iterator, we can

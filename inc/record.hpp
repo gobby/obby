@@ -23,6 +23,7 @@
 #include <net6/non_copyable.hpp>
 #include <net6/packet.hpp>
 #include "position.hpp"
+#include "user.hpp"
 
 namespace obby
 {
@@ -32,14 +33,15 @@ class document;
 class record : private net6::non_copyable
 {
 public:
-	record(unsigned int document, unsigned int revision, unsigned int from);
-	record(unsigned int document, unsigned int revision, unsigned int from,
-	       unsigned int id);
+	record(document& doc, const user* from,
+	       unsigned int revision);
+	record(document& doc, const user* from,
+	       unsigned int revision, unsigned int id);
 	~record();
 
 	virtual record* clone() const = 0;
-	
-	virtual void apply(document& doc) const = 0;
+
+	virtual void apply(/*document& doc*/) const = 0;
 	virtual void apply(record& rec) const = 0;
 	virtual net6::packet to_packet() const = 0;
 	virtual record* reverse() = 0;
@@ -47,11 +49,11 @@ public:
 	bool is_valid() const;
 
 	unsigned int get_id() const;
-	unsigned int get_document() const;
-	unsigned int get_from() const;
+	const document& get_document() const;
+	const user* get_user() const;
 	unsigned int get_revision() const;
 
-	void set_from(unsigned int from);
+	void set_user(const user* new_user);
 	void set_revision(unsigned int revision);
 
 	virtual void on_insert(position pos, const std::string& text) = 0;
@@ -59,16 +61,14 @@ public:
 
 	static record* from_packet(const net6::packet& pack);
 
-#ifndef NDEBUG
 	virtual std::string inspect() const = 0;
-#endif
 protected:
 	void invalidate();
 
 	unsigned int m_id;
-	unsigned int m_document;
+	document* m_document;
 	unsigned int m_revision;
-	unsigned int m_from;
+	const user* m_user;
 	bool m_valid;
 
 	static unsigned int m_counter; // id counter to create unique ids

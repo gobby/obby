@@ -42,12 +42,12 @@ const obby::server_buffer& obby::server_document::get_buffer() const
 
 void obby::server_document::insert(position pos, const std::string& text)
 {
-	insert(pos, text, 0);
+	insert_impl(pos, text, NULL);
 }
 
 void obby::server_document::erase(position begin, position end)
 {
-	erase(begin, end, 0);
+	erase_impl(begin, end, NULL);
 }
 
 void obby::server_document::apply_record(const record& rec_)
@@ -74,7 +74,7 @@ void obby::server_document::apply_record(const record& rec_)
 	{
 		-- iter;
 
-		if( (*iter)->get_from() != rec.get_from() )
+		if( (*iter)->get_user() != rec.get_user() )
 			(*iter)->apply(rec);
 	}
 
@@ -86,7 +86,7 @@ void obby::server_document::apply_record(const record& rec_)
 	m_signal_change.before().emit();
 
 	// Apply record on buffer
-	rec.apply(*this);
+	rec.apply();
 
 	// Increment revision
 	rec.set_revision(++ m_revision);
@@ -101,17 +101,17 @@ void obby::server_document::apply_record(const record& rec_)
 	forward_record(rec);
 }
 
-void obby::server_document::insert(position pos, const std::string& text,
-                                   unsigned int author_id)
+void obby::server_document::insert_impl(position pos, const std::string& text,
+                                        const user* author)
 {
 	// Emit change signal before changing anything
 	m_signal_change.before().emit();
 	// Build record
 	record* rec = new insert_record(
-		pos, text, get_id(), ++ m_revision, author_id
+		pos, text, *this, author, ++ m_revision
 	);
 	// Apply on document
-	rec->apply(*this);
+	rec->apply();
 	// Insert into history
 	m_history.push_front(rec);
 	// Changes have been performed
@@ -120,8 +120,8 @@ void obby::server_document::insert(position pos, const std::string& text,
 	forward_record(*rec);
 }
 
-void obby::server_document::erase(position from, position to,
-                                  unsigned int author_id)
+void obby::server_document::erase_impl(position from, position to,
+                                       const user* author)
 {
 	// Emit change signal before changing anything
 	m_signal_change.before().emit();
@@ -129,10 +129,10 @@ void obby::server_document::erase(position from, position to,
 	std::string erased = get_slice(from, to);
 	// Create record
 	record* rec = new delete_record(
-		from, erased, get_id(), ++ m_revision, author_id
+		from, erased, *this, author, ++ m_revision
 	);
 	// Apply on document
-	rec->apply(*this);
+	rec->apply();
 	// Insert into history
 	m_history.push_front(rec);
 	// Changes have been performed
@@ -148,13 +148,13 @@ void obby::server_document::synchronise(const user& to)
 
 	// Send doc initial sync packet with document revision
 	net6::packet init_pack("obby_document");
-	init_pack << get_id() << "sync_init" << m_revision;
+	init_pack << m_info << "sync_init" << m_revision;
 	m_server.send(init_pack, peer);
 
 	// Send buffer
 	std::vector<line>::const_iterator iter;
 	for(iter = m_lines.begin(); iter != m_lines.end(); ++ iter)
-		m_server.send(iter->to_packet(get_id()), peer);
+		m_server.send(iter->to_packet(*this), peer);
 }
 
 void obby::server_document::forward_record(const record& rec) const

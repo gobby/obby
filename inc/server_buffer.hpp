@@ -60,9 +60,13 @@ public:
 	 */
 	virtual void remove_document(document_info& doc);
 
-	/** Looks for a document with the given ID.
+	/** Looks for a document with the given ID which belongs to the user
+	 * with the given owner ID. Note that we do not take a real user object
+	 * here because the ID is enough and one might not have a user object
+	 * to the corresponding ID. So a time-consuming lookup is obsolete.
 	 */
-	server_document_info* find_document(unsigned int id) const;
+	server_document_info* find_document(unsigned int owner_id,
+	                                    unsigned int id) const;
 
 	/** Sends a global message to all users.
 	 */
@@ -90,25 +94,27 @@ protected:
 	 */
 	void register_signal_handlers();
 
-	/** Adds a new document with the given ID to the buffer.
+        /** Adds a new document with the given title to the buffer.
 	 */
-	virtual document_info& add_document_info(unsigned int id,
+	virtual document_info& add_document_info(const user* owner,
+	                                         unsigned int id,
 	                                         const std::string& title);
 
 	/** Internal function to create a document with predefined content,
-	 * that the user with the ID <em>author_id</em> created.
+	 * that the given user created.
 	 * obby::host_buffer uses this function to create documents with
 	 * the ID of its local user.
 	 */
 	virtual void create_document_impl(const std::string& title,
 	                                  const std::string& content,
-				          unsigned int author_id);
+				          const obby::user* owner,
+	                                  unsigned int id);
 
 	/** Relays a message to the other users. The message is originally
 	 * sent by the user with the ID <em>user_id</em>.
 	 */
 	void send_message_impl(const std::string& message,
-	                       unsigned int user_id);
+	                       const obby::user* writer);
 	
 	/** net6 signal handlers.
 	 */
@@ -140,7 +146,8 @@ protected:
 	 */
 	void on_net_document(const net6::packet& pack, user& from);
 
-	unsigned int m_doc_counter;
+	// Is in buffer
+	//unsigned int m_doc_counter;
 	net6::server* m_server;
 
 	signal_connect_type m_signal_connect;

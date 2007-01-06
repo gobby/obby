@@ -46,11 +46,11 @@ const obby::client_buffer& obby::client_document::get_buffer() const
 void obby::client_document::insert(position pos, const std::string& text)
 {
 	// Add to unsynced changes
-	record* rec = new insert_record(pos, text, get_id(), m_revision,
-	                                m_client.get_self()->get_id() );
+	record* rec = new insert_record(pos, text, *this,
+	                                &get_buffer().get_self(), m_revision);
 	m_unsynced.push_back(rec);
 	// Apply on document
-	rec->apply(*this);
+	rec->apply();
 	// Send sync request to server
 	m_client.send(rec->to_packet() );
 }
@@ -59,11 +59,11 @@ void obby::client_document::erase(position from, position to)
 {
 	std::string text = get_slice(from, to);
 	// Add to unsynced changes
-	record* rec = new delete_record(from, text, get_id(), m_revision,
-	                                m_client.get_self()->get_id() );
+	record* rec = new delete_record(from, text, *this,
+	                                &get_buffer().get_self(), m_revision);
 	m_unsynced.push_back(rec);
 	// Delete from document
-	rec->apply(*this);
+	rec->apply();
 	// Send sync request to server
 	m_client.send(rec->to_packet() );
 }
@@ -89,16 +89,16 @@ void obby::client_document::apply_record(const record& rec)
 	for(iter = m_unsynced.end(); iter-- != m_unsynced.begin(); )
 	{
 		record* rev = (*iter)->reverse();
-		rev->apply(*this);
+		rev->apply();
 		delete rev;
 	}
 
 	// Insert rec.
-	rec.apply(*this);
+	rec.apply();
 
 	for(iter = m_unsynced.begin(); iter != m_unsynced.end(); )
 	{
-		if( (*iter)->get_from() == rec.get_from() &&
+		if( (*iter)->get_user() == rec.get_user() &&
 		    (*iter)->get_id() == rec.get_id() )
 		{
 			delete *iter;
@@ -106,7 +106,7 @@ void obby::client_document::apply_record(const record& rec)
 		}
 		else
 		{
-			if((*iter)->get_from() != rec.get_from() )
+			if((*iter)->get_user() != rec.get_user() )
 				rec.apply(**iter);
 
 			if(!(*iter)->is_valid() )
@@ -116,7 +116,7 @@ void obby::client_document::apply_record(const record& rec)
 			}
 			else
 			{
-				(*iter)->apply(*this);
+				(*iter)->apply();
 				++ iter;
 			}
 		}

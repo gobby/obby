@@ -20,9 +20,10 @@
 #include "local_buffer.hpp"
 
 obby::local_document_info::local_document_info(const local_buffer& buf,
+                                               const user* owner,
                                                unsigned int id,
                                                const std::string& title)
- : document_info(buf, id, title)
+ : document_info(buf, owner, id, title)
 {
 }
 

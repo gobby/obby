@@ -21,11 +21,12 @@
 
 obby::host_document_info::host_document_info(const host_buffer& buf,
                                              net6::host& host,
+                                             const user* owner,
                                              unsigned int id,
                                              const std::string& title)
- : document_info(buf, id, title),
-   local_document_info(buf, id, title),
-   server_document_info(buf, host, id, title, true)
+ : document_info(buf, owner, id, title),
+   local_document_info(buf, owner, id, title),
+   server_document_info(buf, host, owner, id, title, true)
 {
 	// Server documents infos have always a document assigned.
 	assign_document();
@@ -33,12 +34,13 @@ obby::host_document_info::host_document_info(const host_buffer& buf,
 
 obby::host_document_info::host_document_info(const host_buffer& buf,
                                              net6::host& host,
+                                             const user* owner,
                                              unsigned int id,
                                              const std::string& title,
                                              bool noassign)
- : document_info(buf, id, title),
-   local_document_info(buf, id, title),
-   server_document_info(buf, host, id, title)
+ : document_info(buf, owner, id, title),
+   local_document_info(buf, owner, id, title),
+   server_document_info(buf, host, owner, id, title)
 {
 }
 
@@ -64,7 +66,7 @@ const obby::host_document* obby::host_document_info::get_document() const
 void obby::host_document_info::rename(const std::string& new_title)
 {
 	// Rename with local user's ID instead of server ID 0.
-	rename_impl(new_title, get_buffer().get_self().get_id() );
+	rename_impl(new_title, &get_buffer().get_self() );
 }
 
 void obby::host_document_info::subscribe()

@@ -64,9 +64,13 @@ public:
 	 */
 	virtual void remove_document(document_info& doc);
 
-	/** Looks for a document with the given ID.
+	/** Looks for a document with the given ID which belongs to the user
+	 * with the given owner ID. Note that we do not take a real user object
+	 * here because the ID is enough and one might not have a user object
+	 * to the corresponding ID. So a time-consuming lookup is obsolete.
 	 */
-	client_document_info* find_document(unsigned int id) const;
+	client_document_info* find_document(unsigned int owner_id,
+	                                    unsigned int id) const;
 
 	/** Returns the local user.
 	 */
@@ -113,9 +117,10 @@ protected:
 	 */
 	void register_signal_handlers();
 
-        /** Adds a new client_document with the given ID to the buffer.
+        /** Adds a new document with the given title to the buffer.
 	 */
-	virtual document_info& add_document_info(unsigned int id,
+	virtual document_info& add_document_info(const user* owner,
+	                                         unsigned int id,
 	                                         const std::string& title);
 
 	/** net6 signal handlers.

@@ -34,8 +34,8 @@ class local_buffer;
 class local_document_info : virtual public document_info
 {
 public:
-	local_document_info(const local_buffer& buf, unsigned int id,
-	                    const std::string& title);
+	local_document_info(const local_buffer& buf, const user* owner,
+	                    unsigned int id, const std::string& title);
 	~local_document_info();
 
 	/** Returns the buffer associated with the document.

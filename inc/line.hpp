@@ -28,6 +28,8 @@
 namespace obby
 {
 
+class document;
+
 /** Line in a obby document. It stores the content of the line and which user
  * edited which part of the line.
  */
@@ -134,9 +136,9 @@ public:
 	author_iterator author_end() const;
 
 	/** Converts the line into a net6::packet to send it through the net.
-	 * @param document_id ID of the document this line belongs to.
+	 * @param doc Document this line belongs to.
 	 */
-	net6::packet to_packet(unsigned int document_id) const;
+	net6::packet to_packet(const document& doc) const;
 
 protected:
 	/** Internal function that simplifies the m_authors vector without

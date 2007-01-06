@@ -17,11 +17,23 @@
  */
 
 #include <cassert>
+#include "format_string.hpp"
 #include "buffer.hpp"
 
 obby::buffer::buffer()
- : m_netkit()
+ : m_netkit(), m_doc_counter(0)
 {
+	// Register user type
+	net6::packet::register_type(
+		net6::parameter<user*>::TYPE_ID,
+		sigc::mem_fun(*this, &buffer::translate_user)
+	);
+
+	// Register document type
+	net6::packet::register_type(
+		net6::parameter<document_info*>::TYPE_ID,
+		sigc::mem_fun(*this, &buffer::translate_document)
+	);
 }
 
 obby::buffer::~buffer()
@@ -36,12 +48,41 @@ const obby::user_table& obby::buffer::get_user_table() const
 	return m_usertable;
 }
 
-obby::document_info* obby::buffer::find_document(unsigned int id) const
+obby::document_info* obby::buffer::find_document(unsigned int owner_id,
+                                                 unsigned int id) const
 {
 	std::list<document_info*>::const_iterator iter;
 	for(iter = m_doclist.begin(); iter != m_doclist.end(); ++ iter)
+	{
+		// Check document ID
 		if( (*iter)->get_id() == id)
-			return *iter;
+		{
+			// Get owner
+			const user* owner = (*iter)->get_owner();
+
+			// Does the document have an owner?
+			if(!owner)
+			{
+				// No. Check if we requested such a document
+				if(owner_id == 0)
+				{
+					// Ok.
+					return *iter;
+				}
+			}
+			else
+			{
+				// Compare owners
+				if(owner->get_id() == owner_id)
+				{
+					// Ok.
+					return *iter;
+				}
+			}
+		}
+	}
+
+	/* No such document */
 	return NULL;
 }
 
@@ -97,5 +138,63 @@ obby::buffer::signal_server_message_type
 obby::buffer::server_message_event() const
 {
 	return m_signal_server_message;
+}
+
+net6::basic_parameter*
+obby::buffer::translate_user(const std::string& str) const
+{
+	// Read user ID
+	std::stringstream stream(str);
+	int user_id;
+	stream >> std::hex >> user_id;
+
+	// Read with success?
+	if(stream.bad() )
+		throw net6::basic_parameter::bad_format(
+			"User ID is not a hexadecimal integer"
+		);
+
+	// Check for no user
+	if(user_id == 0) return new net6::parameter<user*>(NULL);
+	// Find corresponding user
+	obby::user* found_user = m_usertable.find_user<user::NONE>(user_id);
+
+	if(found_user == NULL)
+	{
+		// No such user
+		format_string str("User ID %0 does not exist");
+		str << user_id;
+		throw net6::basic_parameter::bad_format(str.str() );
+	}
+
+	// Done
+	return new net6::parameter<user*>(found_user);
+}
+
+net6::basic_parameter*
+obby::buffer::translate_document(const std::string& str) const
+{
+	// Read document and owner IDs
+	std::stringstream stream(str);
+	int owner_id, document_id;
+	stream >> std::hex >> owner_id >> document_id;
+
+	// Check for valid integers
+	if(stream.bad() )
+		throw net6::basic_parameter::bad_format(
+			"Document ID has to be two hexadecimal integers"
+		);
+
+	// Lookup document
+	document_info* info = find_document(owner_id, document_id);
+	if(!info)
+	{
+		// No such document
+		format_string str("Document ID %0 from User %1 does not exist");
+		str << document_id << owner_id;
+		throw net6::basic_parameter::bad_format(str.str() );
+	}
+
+	return new net6::parameter<obby::document_info*>(info);
 }
 

@@ -42,11 +42,11 @@ const obby::host_buffer& obby::host_document::get_buffer() const
 
 void obby::host_document::insert(position pos, const std::string& text)
 {
-	server_document::insert(pos, text, get_buffer().get_self().get_id() );
+	insert_impl(pos, text, &get_buffer().get_self() );
 }
 
 void obby::host_document::erase(position begin, position end)
 {
-	server_document::erase(begin, end, get_buffer().get_self().get_id() );
+	erase_impl(begin, end, &get_buffer().get_self() );
 }
 

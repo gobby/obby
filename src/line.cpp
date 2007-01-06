@@ -43,15 +43,8 @@ obby::line::line(const string_type& text, const user_type* author)
 
 obby::line::line(const net6::packet& pack, const user_table& user_table)
 {
-	if(pack.get_param_count() < 3) return;
-	// Parameters 0 and 1 are checked by buffer.
-	if(pack.get_param(2).get_type() != net6::packet::param::STRING) return;
-
 	// Parameter 0 is the document ID which we do not need here.
-	m_line = pack.get_param(2).as_string();
-
-	// We need odd parameter count (line, pos->author, pos->author, etc.)
-	if( (pack.get_param_count() % 2) == 0) return;
+	m_line = pack.get_param(2).as<std::string>();
 
 	// Reserve space in author vector
 	m_authors.reserve( (pack.get_param_count() - 3) / 2);
@@ -59,32 +52,13 @@ obby::line::line(const net6::packet& pack, const user_table& user_table)
 	// Add authors
 	for(unsigned int i = 3; i < pack.get_param_count(); i += 2)
 	{
-		// Verify parameters
-		if(pack.get_param(i).get_type() != net6::packet::param::INT)
-			return;
-		if(pack.get_param(i + 1).get_type() != net6::packet::param::INT)
-			return;
-
 		// Get position and author id
-		unsigned int pos = pack.get_param(i).as_int();
-		unsigned int user_id = pack.get_param(i + 1).as_int();
+		unsigned int pos = pack.get_param(i).as<int>();
+		const user* author = pack.get_param(i + 1).as<user*>();
 
-		// Find author
-		const user* author = user_table.find_user(user_id);
-
-		// Author may be NULL if user is 0, this means that a server
-		// document has written something directly into a line.
-		if(author == NULL && user_id != 0)
-		{
-			std::cerr << "obby::line::line: User " << user_id << " "
-			          << "does not exist" << std::endl;
-		}
-		else
-		{
-			// Add to vector
-			user_pos upos = { author, pos };
-			m_authors.push_back(upos);
-		}
+		// Add to vector
+		user_pos upos = { author, pos };
+		m_authors.push_back(upos);
 	}
 }
 
@@ -296,16 +270,15 @@ void obby::line::compress_authors()
 	m_authors.swap(new_vec);
 }
 
-net6::packet obby::line::to_packet(unsigned int document_id) const
+net6::packet obby::line::to_packet(const document& doc) const
 {
 	net6::packet pack("obby_document", net6::packet::DEFAULT_PRIORITY,
 	                  2 + m_authors.size() * 2);
-	pack << document_id << "sync_line" << m_line;
+	pack << doc.get_info() << "sync_line" << m_line;
 
 	std::vector<user_pos>::const_iterator iter;
 	for(iter = m_authors.begin(); iter != m_authors.end(); ++ iter)
-		pack << static_cast<int>(iter->position) <<
-			static_cast<int>(iter->author->get_id());
+		pack << static_cast<int>(iter->position) << iter->author;
 
 	return pack;
 }

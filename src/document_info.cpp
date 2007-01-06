@@ -19,10 +19,12 @@
 #include "document_info.hpp"
 #include "buffer.hpp"
 
-obby::document_info::document_info(const buffer& buf, unsigned int id,
-                                   const std::string& title)
- : m_buffer(buf), m_id(id), m_title(title), m_document(NULL)
+obby::document_info::document_info(const buffer& buf, const user* owner,
+                                   unsigned int id, const std::string& title)
+ : m_buffer(buf), m_owner(owner), m_id(id), m_title(title), m_document(NULL)
 {
+	// Subscribe the owner to the document
+	if(owner) m_userlist.push_back(owner);
 }
 
 obby::document_info::~document_info()
@@ -54,6 +56,11 @@ obby::document* obby::document_info::get_document()
 const obby::document* obby::document_info::get_document() const
 {
 	return m_document;
+}
+
+const obby::user* obby::document_info::get_owner() const
+{
+	return m_owner;
 }
 
 const obby::user* obby::document_info::find_user(unsigned int id) const

@@ -79,9 +79,13 @@ public:
 	 */
 	virtual void remove_document(document_info& doc) = 0;
 	
-	/** Looks for a document with the given ID.
+	/** Looks for a document with the given ID which belongs to the user
+	 * with the given owner ID. Note that we do not take a real user object
+	 * here because the ID is enough and one might not have a user object
+	 * to the corresponding ID. So a time-consuming lookup is obsolete.
 	 */
-	document_info* find_document(unsigned int id) const;
+	document_info* find_document(unsigned int owner_id,
+	                             unsigned int id) const;
 
 	/** Returns the begin of the document list.
 	 */
@@ -134,10 +138,19 @@ public:
 	signal_server_message_type server_message_event() const;
 
 protected:
-        /** Adds a new client_document with the given ID to the buffer.
+        /** Adds a new document with the given title to the buffer.
 	 */
-	virtual document_info& add_document_info(unsigned int id,
+	virtual document_info& add_document_info(const user* owner,
+	                                         unsigned int id,
 	                                         const std::string& title) = 0;
+
+	/** Translates a user parameter back to a net6 packet parameter.
+	 */
+	net6::basic_parameter* translate_user(const std::string& str) const;
+
+	/** Translates a document parameter back to a net6 packet parameter.
+	 */
+	net6::basic_parameter* translate_document(const std::string& str) const;
 
 	/** net6 main object to keep net6 initialised during the obby session.
 	 */
@@ -150,6 +163,10 @@ protected:
 	/** List of documents.
 	 */
 	std::list<document_info*> m_doclist;
+
+	/** Counter for document IDs.
+	 */
+	unsigned int m_doc_counter;
 
 	signal_user_join_type m_signal_user_join;
 	signal_user_part_type m_signal_user_part;

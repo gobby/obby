@@ -17,20 +17,23 @@
  */
 
 #include <cassert>
+#include <sstream>
 #include "delete_record.hpp"
 #include "insert_record.hpp"
 #include "document.hpp"
+#include "document_info.hpp"
 
 obby::delete_record::delete_record(position pos, const std::string& text,
-                                   unsigned int document, unsigned int revision,                                   unsigned int from)
- : record(document, revision, from), m_pos(pos), m_text(text)
+                                   document& doc, const user* from,
+                                   unsigned int revision)
+ : record(doc, from, revision), m_pos(pos), m_text(text)
 {
 }
 
 obby::delete_record::delete_record(position pos, const std::string& text,
-                                   unsigned int document, unsigned int revision,
-                                   unsigned int from, unsigned int id)
- : record(document, revision, from, id), m_pos(pos), m_text(text)
+                                   document& doc, const user* from,
+                                   unsigned int revision, unsigned int id)
+ : record(doc, from, revision, id), m_pos(pos), m_text(text)
 {
 }
 
@@ -40,14 +43,14 @@ obby::delete_record::~delete_record()
 
 obby::record* obby::delete_record::clone() const
 {
-	return new delete_record(m_pos, m_text, m_document,
-	                         m_revision, m_from, m_id);
+	return new delete_record(m_pos, m_text, *m_document,
+	                         m_user, m_revision, m_id);
 }
 
-void obby::delete_record::apply(document& doc) const
+void obby::delete_record::apply() const
 {
-	assert(doc.get_slice(m_pos, m_pos + m_text.length()) == m_text);
-	doc.erase_nosync(*this);
+	assert(m_document->get_slice(m_pos, m_pos + m_text.length()) == m_text);
+	m_document->erase_nosync(*this);
 }
 
 void obby::delete_record::apply(record& rec) const
@@ -58,15 +61,16 @@ void obby::delete_record::apply(record& rec) const
 net6::packet obby::delete_record::to_packet() const
 {
 	net6::packet pack("obby_document");
-	pack << m_document << "record" << "delete" << m_id << m_revision
-	     << m_from << static_cast<unsigned int>(m_pos) << m_text;
+	pack << m_document->get_info() << "record" << "delete" << m_id
+	     << m_revision << m_user << static_cast<unsigned int>(m_pos)
+	     << m_text;
 	return pack;
 }
 
 obby::record* obby::delete_record::reverse()
 {
-	return new insert_record(m_pos, m_text, m_document,
-	                         m_revision, m_from, m_id);
+	return new insert_record(m_pos, m_text, *m_document,
+	                         m_user, m_revision, m_id);
 }
 
 void obby::delete_record::on_insert(position pos, const std::string& text)
@@ -114,16 +118,12 @@ void obby::delete_record::on_delete(position from, position to)
 	}
 }
 
-#ifndef NDEBUG
-#include <sstream>
-
 std::string obby::delete_record::inspect() const
 {
 	std::stringstream stream;
 	stream << "delete " << m_text << " from " << m_pos;
 	return stream.str();
 }
-#endif
 
 obby::position obby::delete_record::get_begin() const
 {

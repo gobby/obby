@@ -49,9 +49,11 @@ obby::host_buffer::~host_buffer()
 }
 
 obby::host_document_info*
-obby::host_buffer::find_document(unsigned int id) const
+obby::host_buffer::find_document(unsigned int owner_id, unsigned int id) const
 {
-	return dynamic_cast<host_document_info*>(buffer::find_document(id) );
+	return dynamic_cast<host_document_info*>(
+		buffer::find_document(owner_id, id)
+	);
 }
 
 obby::user& obby::host_buffer::get_self()
@@ -68,24 +70,25 @@ void obby::host_buffer::send_message(const std::string& message)
 {
 	// Send message from local peer object instead of the server.
 	m_signal_message.emit(*m_self, message);
-	send_message_impl(message, m_self->get_id() );
+	send_message_impl(message, m_self);
 }
 
 void obby::host_buffer::create_document(const std::string& title,
                                         const std::string& content)
 {
 	// Create message from local peer object instead of the server.
-	create_document_impl(title, content, m_self->get_id() );
+	create_document_impl(title, content, m_self, ++ m_doc_counter);
 }
 
 obby::document_info&
-obby::host_buffer::add_document_info(unsigned int id,
+obby::host_buffer::add_document_info(const user* owner, unsigned int id,
                                      const std::string& title)
 {
 	// Get net6 host object by casting the underlaying server object
 	// (we create a corresponding net6::host in our constructor).
 	net6::host* host = static_cast<net6::host*>(m_server);
-	document_info* doc = new host_document_info(*this, *host, id, title);
+	document_info* doc =
+		new host_document_info(*this, *host, owner, id, title);
 	m_doclist.push_back(doc);
 	return *doc;
 }

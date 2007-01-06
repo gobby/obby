@@ -36,7 +36,8 @@ class client_document_info : public local_document_info
 {
 public:
 	client_document_info(const client_buffer& buf, net6::client& client,
-	                     unsigned int id, const std::string& title);
+	                     const user* owner, unsigned int id,
+	                     const std::string& title);
 	~client_document_info();
 
 	/** Returns the buffer to which the document is assigned.
@@ -65,6 +66,7 @@ public:
 	 */
 	virtual void unsubscribe();
 
+	// TODO: Make the following functions friend to client buffer.
 	/** Called by the buffer if a network event occured that belongs to the
 	 * document. Parameter 0 has to be the document ID, parameter 1 a kind
 	 * of sub-command, what to do. The real packet command is
@@ -76,6 +78,13 @@ public:
 	 * called by the buffer while synchronising the document list.
 	 */
 	virtual void obby_sync_subscribe(const user& user);
+
+	/** Called by the buffer if the local user created a document. The
+	 * document content is assigned immediately in this case because
+	 * the clients does not wait for server acknowledgement to show the
+	 * new document without delay.
+	 */
+	virtual void obby_local_init(const std::string& initial_content);
 
 protected:
 	/** Assigns a document to the document info.

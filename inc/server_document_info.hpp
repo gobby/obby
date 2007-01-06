@@ -36,7 +36,8 @@ class server_document_info : virtual public document_info
 {
 public:
 	server_document_info(const server_buffer& buf, net6::server& server,
-	                     unsigned int id, const std::string& title);
+	                     const user* owner, unsigned int id,
+	                     const std::string& title);
 	~server_document_info();
 
 	/** Returns the buffer to which the document is assigned.
@@ -67,6 +68,7 @@ public:
 	 * document. Parameter 0 has to the document ID, parameter 1 a kind
 	 * of sub-command, what to do. The real packet command is
 	 * "obby_document" to notify that the packet belongs to a document.
+	 * TODO: Make this function friend to server_buffer
 	 */
 	virtual void obby_data(const net6::packet& pack, user& from);
 
@@ -81,8 +83,8 @@ protected:
 	 * but the host_document_info needs to create a host_document.
 	 */
 	server_document_info(const server_buffer& buf, net6::server& server,
-	                     unsigned int id, const std::string& title,
-	                     bool noassign);
+	                     const user* owner, unsigned int id,
+	                     const std::string& title, bool noassign);
 
 	/** Assigns a document to the document info.
 	 */
@@ -91,27 +93,27 @@ protected:
 	/** Renames the document. The operation is performed by 
 	 * <em>user_id</em>.
 	 */
-	void rename_impl(const std::string& new_title, unsigned int user_id);
+	void rename_impl(const std::string& new_title, const user* from);
 
 	/** Executes a network packet.
 	 */
-	bool execute_packet(const net6::packet& pack, obby::user& from);
+	bool execute_packet(const net6::packet& pack, user& from);
 
 	/** Rename request.
 	 */
-	void on_net_rename(const net6::packet& pack, obby::user& from);
+	void on_net_rename(const net6::packet& pack, user& from);
 	
 	/** Change in a document.
 	 */
-	void on_net_record(const net6::packet& pack, obby::user& from);
+	void on_net_record(const net6::packet& pack, user& from);
 
 	/** Subscribe request.
 	 */
-	void on_net_subscribe(const net6::packet& pack, obby::user& from);
+	void on_net_subscribe(const net6::packet& pack, user& from);
 
 	/** Unsubscribe request.
 	 */
-	void on_net_unsubscribe(const net6::packet& pack, obby::user& from);
+	void on_net_unsubscribe(const net6::packet& pack, user& from);
 
 	net6::server& m_server;
 };

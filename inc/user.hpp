@@ -22,6 +22,7 @@
 #include <string>
 #include <net6/address.hpp>
 #include <net6/peer.hpp>
+#include <net6/packet.hpp>
 #include "ptr_iterator.hpp"
 
 namespace obby
@@ -200,6 +201,49 @@ inline user::flags& operator^=(user::flags& rhs, user::flags lhs) {
 inline user::flags operator~(user::flags rhs) {
 	return static_cast<user::flags>(~static_cast<int>(rhs) );
 }
+
+}
+
+namespace net6
+{
+
+/** obby user packet type
+ */
+template<>
+class parameter<obby::user*> : public basic_parameter {
+public:
+	parameter(obby::user* user)
+	 : basic_parameter(TYPE_ID, user) { }
+
+	virtual basic_parameter* clone() const {
+		return new parameter<obby::user*>(as<obby::user*>() );
+	}
+
+	virtual std::string to_string() const {
+		obby::user* user = as<obby::user*>();
+		int user_id = user ? user->get_id() : 0;
+
+		std::stringstream stream;
+		stream << std::hex << user_id;
+		return stream.str();
+	}
+
+	static const identification_type TYPE_ID = 'u';
+};
+
+template<>
+class parameter<obby::user> : public parameter<obby::user*> {
+public:
+	parameter(obby::user& user)
+	 : parameter<obby::user*>(&user) { }
+};
+
+template<>
+class parameter<const obby::user*> : public parameter<obby::user*> {
+public:
+	parameter(const obby::user* user)
+	: parameter<obby::user*>(const_cast<obby::user*>(user) ) { }
+};
 
 }
 

@@ -22,20 +22,24 @@
 
 obby::server_document_info::server_document_info(const server_buffer& buf,
                                                  net6::server& server,
+                                                 const user* owner,
                                                  unsigned int id,
                                                  const std::string& title)
- : document_info(buf, id, title), m_server(server)
+ : document_info(buf, owner, id, title), m_server(server)
 {
 	// Server documents are always assigned.
 	assign_document();
+	// Subscribe the owner to the document
+	if(owner) m_userlist.push_back(owner);
 }
 
 obby::server_document_info::server_document_info(const server_buffer& buf,
                                                  net6::server& server,
+                                                 const user* owner,
                                                  unsigned int id,
                                                  const std::string& title,
                                                  bool noassign)
- : document_info(buf, id, title), m_server(server)
+ : document_info(buf, owner, id, title), m_server(server)
 {
 }
 
@@ -62,7 +66,7 @@ void obby::server_document_info::rename(const std::string& new_title)
 {
 	// Rename the document with the special ID 0 which means that the
 	// server has changed the name.
-	rename_impl(new_title, 0);
+	rename_impl(new_title, NULL);
 }
 
 void obby::server_document_info::subscribe_user(const user& user)
@@ -72,15 +76,13 @@ void obby::server_document_info::subscribe_user(const user& user)
 
 	// Add user to the list of subscribed users
 	m_userlist.push_back(&user);
-	// Add document to the user's list of documents he is subscribed to
-//	user.subscribe(*this);
 
 	// Emit corresponding signal
 	m_signal_subscribe.emit(user);
 
 	// Tell others about subscription
 	net6::packet pack("obby_document");
-	pack << m_id << "subscribe" << user.get_id();
+	pack << static_cast<document_info*>(this) << "subscribe" << &user;
 	m_server.send(pack);
 }
 
@@ -91,15 +93,13 @@ void obby::server_document_info::unsubscribe_user(const user& user)
 		std::remove(m_userlist.begin(), m_userlist.end(), &user),
 		m_userlist.end()
 	);
-	// Remove document from the user's list of documents he is subscribed to
-//	user.unsubscribe(*this);
 
 	// Emit corresponding signal
 	m_signal_unsubscribe.emit(user);
 
 	// Tell others about unsubscripition
 	net6::packet pack("obby_document");
-	pack << m_id << "unsubscribe" << user.get_id();
+	pack << static_cast<document_info*>(this) << "unsubscribe" << &user;
 }
 
 void obby::server_document_info::obby_data(const net6::packet& pack, user& from)
@@ -108,8 +108,8 @@ void obby::server_document_info::obby_data(const net6::packet& pack, user& from)
 	if(!execute_packet(pack, from) )
 	{
 		std::cerr << "obby::server_document_info::obby_data: Document "
-		          << "command " << pack.get_param(1).as_string() << " "
-		          << "does not exist" << std::endl;
+		          << "command " << pack.get_param(1).as<std::string>()
+		          << " does not exist" << std::endl;
 	}
 }
 
@@ -119,11 +119,12 @@ void obby::server_document_info::assign_document()
 }
 
 void obby::server_document_info::rename_impl(const std::string& new_title,
-                                             unsigned int user_id)
+                                             const user* user)
 {
 	// Send rename request
-	net6::packet pack("document");
-	pack << m_id << "rename" << user_id << new_title;
+	net6::packet pack("obby_document");
+	pack << static_cast<document_info*>(this) << "rename"
+	     << user << new_title;
 	m_server.send(pack);
 
 	// Emit changed signal
@@ -136,7 +137,7 @@ void obby::server_document_info::rename_impl(const std::string& new_title,
 bool obby::server_document_info::execute_packet(const net6::packet& pack,
                                                 user& from)
 {
-	const std::string& command = pack.get_param(1).as_string();
+	const std::string& command = pack.get_param(1).as<std::string>();
 	if(command == "rename")
 	{
 		// Rename request
@@ -171,13 +172,10 @@ bool obby::server_document_info::execute_packet(const net6::packet& pack,
 void obby::server_document_info::on_net_rename(const net6::packet& pack,
                                                user& from)
 {
-	if(pack.get_param_count() < 3) return;
-	if(pack.get_param(2).get_type() != net6::packet::param::STRING) return;
-
 	// TODO: Authentication
 
-	const std::string& new_title = pack.get_param(2).as_string();
-	rename_impl(new_title, from.get_id() );
+	const std::string& new_title = pack.get_param(2).as<std::string>();
+	rename_impl(new_title, &from);
 }
 
 void obby::server_document_info::on_net_record(const net6::packet& pack,
@@ -193,7 +191,7 @@ void obby::server_document_info::on_net_record(const net6::packet& pack,
 	}
 
 	// Set correct sender
-	rec->set_from(from.get_id() );
+	rec->set_user(&from);
 
 	try
 	{

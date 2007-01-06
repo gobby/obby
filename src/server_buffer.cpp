@@ -24,12 +24,12 @@
 #include "server_buffer.hpp"
 
 obby::server_buffer::server_buffer()
- : buffer(), m_doc_counter(0), m_server(NULL)
+ : buffer(), m_server(NULL)
 {
 }
 
 obby::server_buffer::server_buffer(unsigned int port)
- : buffer(), m_doc_counter(0), m_server(NULL)
+ : buffer(), m_server(NULL)
 {
 	m_server = new net6::server(port, false);
 
@@ -58,9 +58,9 @@ void obby::server_buffer::select(unsigned int timeout)
 void obby::server_buffer::create_document(const std::string& title,
                                           const std::string& content)
 {
-	// Create the document with the special ID 0, which means that this
-	// document is created by the server.
-	create_document_impl(title, content, 0);
+	// Create the document with the special owner NULL,
+	// which means that this document is created by the server.
+	create_document_impl(title, content, NULL, ++ m_doc_counter);
 }
 
 void obby::server_buffer::remove_document(document_info& doc)
@@ -83,7 +83,7 @@ void obby::server_buffer::remove_document(document_info& doc)
 
 	// Tell other clients that the document will be removed
 	net6::packet pack("obby_document_remove");
-	pack << doc.get_id();
+	pack << doc;
 	m_server->send(pack);
 
 	// Free associated resources.
@@ -91,9 +91,11 @@ void obby::server_buffer::remove_document(document_info& doc)
 }
 
 obby::server_document_info*
-obby::server_buffer::find_document(unsigned int id) const
+obby::server_buffer::find_document(unsigned int owner_id, unsigned int id) const
 {
-	return dynamic_cast<server_document_info*>(buffer::find_document(id) );
+	return dynamic_cast<server_document_info*>(
+		buffer::find_document(owner_id, id)
+	);
 }
 
 void obby::server_buffer::send_message(const std::string& message)
@@ -120,30 +122,30 @@ obby::server_buffer::disconnect_event() const
 
 void obby::server_buffer::create_document_impl(const std::string& title,
                                                const std::string& content,
-                                               unsigned int author_id)
+                                               const user* owner,
+                                               unsigned int id)
 {
 	// Internally create the document
-	unsigned int id = ++ m_doc_counter;
-	document_info& doc = add_document_info(id, title);
-
+	document_info& doc = add_document_info(owner, id, title);
 	// Publish the new document to the users
+	// TODO: Do not send the packet back to the owner?
 	net6::packet pack("obby_document_create");
-	pack << id << title;
+	pack << owner << id << title;
 	m_server->send(pack);
-
 	// Insert the document's initial content.
-	insert_record rec(0, content, id, 0, author_id, 0);
+	insert_record rec(0, content, *doc.get_document(), owner, 0, 0);
 	doc.get_document()->insert_nosync(rec);
-
 	// Emit the signal
 	m_signal_document_insert.emit(doc);
+	// Emit subscription signal for the owner
+	doc.subscribe_event().emit(*owner);
 }
 
 void obby::server_buffer::send_message_impl(const std::string& message,
-                                            unsigned int user_id)
+                                            const user* writer)
 {
 	net6::packet pack("obby_message");
-	pack << user_id << message;
+	pack << writer << message;
 	m_server->send(pack);
 }
 
@@ -188,15 +190,16 @@ void obby::server_buffer::on_join(net6::server::peer& peer)
 	    iter != document_end();
 	    ++ iter)
 	{
-		// Setup document packet with ID and title
+		// Setup document packet with owner, ID and title
 		net6::packet doc_pack("obby_sync_doclist_document");
-		doc_pack << iter->get_id() << iter->get_title();
+		doc_pack << iter->get_owner() << iter->get_id()
+		         << iter->get_title();
 
 		// Add users that are subscribed to this document
 		for(document_info::user_iterator user_iter = iter->user_begin();
 		    user_iter != iter->user_end();
 		    ++ user_iter)
-			doc_pack << iter->get_id();
+			doc_pack << &(*user_iter);
 
 		m_server->send(doc_pack, peer);
 	}
@@ -239,19 +242,10 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
                                   const net6::packet& pack,
 				  net6::login::error& error)
 {
-	// Verify packet correctness
-	if(pack.get_param_count() < 4) return false;
-	if(pack.get_param(1).get_type() != net6::packet::param::INT)
-		return false;
-	if(pack.get_param(2).get_type() != net6::packet::param::INT)
-		return false;
-	if(pack.get_param(3).get_type() != net6::packet::param::INT)
-		return false;
-
 	// Extract colour components
-	int red = pack.get_param(1).as_int();
-	int green = pack.get_param(2).as_int();
-	int blue = pack.get_param(3).as_int();
+	int red = pack.get_param(1).as<int>();
+	int green = pack.get_param(2).as<int>();
+	int blue = pack.get_param(3).as<int>();
 
 	// Check for existing colors
 	// TODO: Check for colors that non-connected user occupy?
@@ -277,9 +271,9 @@ unsigned int obby::server_buffer::on_login(net6::server::peer& peer,
                                            const net6::packet& pack)
 {
 	// Get colour from packet
-	int red = pack.get_param(1).as_int();
-	int green = pack.get_param(2).as_int();
-	int blue = pack.get_param(3).as_int();
+	int red = pack.get_param(1).as<int>();
+	int green = pack.get_param(2).as<int>();
+	int blue = pack.get_param(3).as<int>();
 
 	// Insert user into list
 	user* new_user = m_usertable.add_user(peer, red, green, blue);
@@ -365,82 +359,43 @@ bool obby::server_buffer::execute_packet(const net6::packet& pack, user& from)
 void obby::server_buffer::on_net_document_create(const net6::packet& pack,
                                                  user& from)
 {
-	if(pack.get_param_count() < 2) return;
-	if(pack.get_param(0).get_type() != net6::packet::param::STRING) return;
-	if(pack.get_param(1).get_type() != net6::packet::param::STRING) return;
+	unsigned int id = pack.get_param(0).as<int>();
+	const std::string& title = pack.get_param(1).as<std::string>();
+	const std::string& content = pack.get_param(2).as<std::string>();
 
-	const std::string& title = pack.get_param(0).as_string();
-	const std::string& content = pack.get_param(1).as_string();
-
-	create_document_impl(title, content, from.get_id() );
+	create_document_impl(title, content, &from, id);
 }
 
 void obby::server_buffer::on_net_document_remove(const net6::packet& pack,
                                                  user& from)
 {
-	if(pack.get_param_count() < 1) return;
-	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
-
 	// Get document to remove
-	unsigned int id = pack.get_param(0).as_int();
-	document_info* doc = find_document(id);
+	document_info* doc = pack.get_param(0).as<document_info*>();
 
 	// TODO: Auth
 
-	// Check if we remove a valid document
-	if(!doc)
-	{
-		std::cerr << "obby::server_buffer::on_net_document_remove: "
-		          << "Document " << id << " does not exist"
-		          << std::endl;
-		return;
-	}
-
+	// Remove it
 	remove_document(*doc);
 }
 
 void obby::server_buffer::on_net_message(const net6::packet& pack, user& from)
 {
-	if(pack.get_param_count() < 1) return;
-	if(pack.get_param(0).get_type() != net6::packet::param::STRING) return;
-
-	unsigned int uid = from.get_id();
-	const std::string& message = pack.get_param(0).as_string();
-
-	obby::user* user = m_usertable.find_user<user::CONNECTED>(uid);
-	if(!user)
-	{
-		std::cerr << "obby::server_buffer::on_net_message: User "
-		          << uid << " is not connected" << std::endl;
-	}
-	else
-	{
-		m_signal_message.emit(*user, message);
-		send_message_impl(message, uid);
-	}
+	// Get message
+	const std::string& message = pack.get_param(0).as<std::string>();
+	// Send it
+	m_signal_message.emit(from, message);
+	send_message_impl(message, &from);
 }
 
 void obby::server_buffer::on_net_document(const net6::packet& pack, user& from)
 {
-	if(pack.get_param_count() < 2) return;
-	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
-	if(pack.get_param(1).get_type() != net6::packet::param::STRING) return;
-
-	unsigned int id = pack.get_param(0).as_int();
-	// Param 1 is a kind of sub-command for the document.
-
-	// Find document to which the packet belongs
-	server_document_info* doc = find_document(id);
-	if(!doc)
-	{
-		// No such document
-		std::cerr << "obby::server_buffer::on_net_document: Document "
-		          << id << " does not exist" << std::endl;
-		return;
-	}
-
+	// Get target document
+	document_info* doc = pack.get_param(0).as<document_info*>();
+	// Cast to server document
+	server_document_info* server_doc =
+		dynamic_cast<server_document_info*>(doc);
 	// Forward packet
-	doc->obby_data(pack, from);
+	server_doc->obby_data(pack, from);
 }
 
 void obby::server_buffer::register_signal_handlers()
@@ -464,11 +419,12 @@ void obby::server_buffer::register_signal_handlers()
 }
 
 obby::document_info&
-obby::server_buffer::add_document_info(unsigned int id,
+obby::server_buffer::add_document_info(const user* owner,
+                                       unsigned int id,
                                        const std::string& title)
 {
 	document_info* doc =
-		new server_document_info(*this, *m_server, id, title);
+		new server_document_info(*this, *m_server, owner, id, title);
 	m_doclist.push_back(doc);
 	return *doc;
 }

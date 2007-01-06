@@ -68,15 +68,15 @@ public:
 
 protected:
 	/** Inserts <em>text</em> at the given position and marks it as
-	 * written by the user with the id <em>author_id</em>.
+	 * written by the user <em>author</em>.
 	 */
-	void insert(position pos, const std::string& text,
-	            unsigned int author_id);
+	void insert_impl(position pos, const std::string& text,
+	                 const user* author);
 
 	/** Erases text from <em>begin</em> to <em>end</em> and marks the
-	 * changes as performed by the user with the id <em>author_id</em>.
+	 * changes as performed by the user <em>author</em>
 	 */
-	void erase(position begin, position end, unsigned int author_id);
+	void erase_impl(position begin, position end, const user* author);
 
 	/** Forwards a given record to all the clients that are subscribed
 	 * to this document.

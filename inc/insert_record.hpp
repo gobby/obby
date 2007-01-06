@@ -32,16 +32,16 @@ class insert_record : public record
 {
 public:
 	insert_record(position pos, const std::string& text,
-	              unsigned int document, unsigned int revision,
-	              unsigned int from);
+	              document& doc, const user* from,
+	              unsigned int revision);
 	insert_record(position pos, const std::string& text,
-	              unsigned int document, unsigned int revision,
-	              unsigned int from, unsigned int id);
+	              document& doc, const user* from,
+	              unsigned int revision, unsigned int id);
 	~insert_record();
 
 	virtual record* clone() const;
 
-	virtual void apply(document& doc) const;
+	virtual void apply() const;
 	virtual void apply(record& rec) const;
 	virtual net6::packet to_packet() const;
 	virtual record* reverse();
@@ -52,9 +52,7 @@ public:
 	position get_position() const;
 	const std::string& get_text() const;
 
-#ifndef NDEBUG
 	virtual std::string inspect() const;
-#endif
 protected:
 	position m_pos;
 	std::string m_text;

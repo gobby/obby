@@ -22,9 +22,11 @@
 
 obby::client_document_info::client_document_info(const client_buffer& buf,
                                                  net6::client& client,
+                                                 const user* owner,
                                                  unsigned int id,
                                                  const std::string& title)
- : document_info(buf, id, title), local_document_info(buf, id, title),
+ : document_info(buf, owner, id, title),
+   local_document_info(buf, owner, id, title),
    m_client(client)
 {
 }
@@ -50,7 +52,7 @@ const obby::client_document* obby::client_document_info::get_document() const
 
 void obby::client_document_info::rename(const std::string& new_title)
 {
-	net6::packet pack("document");
+	net6::packet pack("obby_document");
 	pack << m_id << "rename" << new_title;
 	m_client.send(pack);
 }
@@ -67,7 +69,7 @@ void obby::client_document_info::subscribe()
 	{
 		// Send subscribe request
 		net6::packet pack("obby_document");
-		pack << m_id << "subscribe";
+		pack << static_cast<document_info*>(this) << "subscribe";
 		m_client.send(pack);
 	}
 }
@@ -78,7 +80,7 @@ void obby::client_document_info::unsubscribe()
 	{
 		// Send unsubscribe request
 		net6::packet pack("obby_document");
-		pack << m_id << "unsubscribe";
+		pack << static_cast<document_info*>(this) << "unsubscribe";
 		m_client.send(pack);
 	}
 	else
@@ -95,8 +97,8 @@ void obby::client_document_info::obby_data(const net6::packet& pack)
 	if(!execute_packet(pack) )
 	{
 		std::cerr << "obby::client_document_info::obby_data: Document "
-		          << "command " << pack.get_param(1).as_string() << " "
-		          << "does not exist" << std::endl;
+		          << "command " << pack.get_param(1).as<std::string>()
+		          << " does not exist" << std::endl;
 	}
 }
 
@@ -109,10 +111,22 @@ void obby::client_document_info::obby_sync_subscribe(const user& user)
 	m_userlist.push_back(&user);
 }
 
+void
+obby::client_document_info::obby_local_init(const std::string& initial_content)
+{
+	// Assign a document to the function
+	assign_document();
+	// Create initial content
+	insert_record rec(
+		0, initial_content, *m_document, &get_buffer().get_self(), 0, 0
+	);
+	get_document()->insert_nosync(rec);
+}
+
 bool obby::client_document_info::execute_packet(const net6::packet& pack)
 {
 	// TODO: std::map<> from command to function
-	const std::string& command = pack.get_param(1).as_string();
+	const std::string& command = pack.get_param(1).as<std::string>();
 
 	if(command == "rename")
 	{
@@ -161,12 +175,8 @@ bool obby::client_document_info::execute_packet(const net6::packet& pack)
 
 void obby::client_document_info::on_net_rename(const net6::packet& pack)
 {
-	if(pack.get_param_count() < 4) return;
-	if(pack.get_param(2).get_type() != net6::packet::param::INT) return;
-	if(pack.get_param(3).get_type() != net6::packet::param::STRING) return;
-
-	unsigned int user_id = pack.get_param(2).as_int();
-	const std::string& new_title = pack.get_param(3).as_string();
+	unsigned int user_id = pack.get_param(2).as<int>();
+	const std::string& new_title = pack.get_param(3).as<std::string>();
 
 	// Emit signal before setting new title to allow the signal handler
 	// to access the previous title.
@@ -217,12 +227,8 @@ void obby::client_document_info::on_net_sync_init(const net6::packet& pack)
 		return;
 	}
 
-	// Check packet correctness
-	if(pack.get_param_count() < 3) return;
-	if(pack.get_param(2).get_type() != net6::packet::param::INT) return;
-
 	// Extract revision
-	unsigned int revision = pack.get_param(2).as_int();
+	unsigned int revision = pack.get_param(2).as<int>();
 
 	// Create document and initialise it
 	assign_document();
@@ -247,76 +253,48 @@ void obby::client_document_info::on_net_sync_line(const net6::packet& pack)
 
 void obby::client_document_info::on_net_subscribe(const net6::packet& pack)
 {
-	// Check packet
-	if(pack.get_param_count() < 3) return;
-	if(pack.get_param(2).get_type() != net6::packet::param::INT) return;
-
 	// Find user which subscribed
-	unsigned int user_id = pack.get_param(2).as_int();
-	const user_table& table = get_buffer().get_user_table();
-	user* user = table.find_user<user::CONNECTED>(user_id);
-
-	// Check for valid user
-	if(!user)
-	{
-		std::cerr << "obby::client_document_info::on_net_subscribe: "
-		          << "User " << user_id << " is not connected"
-		          << std::endl;
-		return;
-	}
+	user* new_user = pack.get_param(2).as<user*>();
 
 	// Verify that the user is not already subscribed
-	if(is_subscribed(*user) )
+	if(is_subscribed(*new_user) )
 	{
 		std::cerr << "obby::client_document_info::on_net_subscribe: "
-		          << "User " << user_id << " (" << user->get_name()
-		          << ") is already subscribed" << std::endl;
+		          << "User " << new_user->get_id() << " ("
+		          << new_user->get_name() << ") is already subscribed"
+		          << std::endl;
 		return;
 	}
 
 	// Put it into the list of subscribed users
-	m_userlist.push_back(user);
+	m_userlist.push_back(new_user);
 	// Emit signal
-	m_signal_subscribe.emit(*user);
+	m_signal_subscribe.emit(*new_user);
 }
 
 void obby::client_document_info::on_net_unsubscribe(const net6::packet& pack)
 {
-	// Check packet
-	if(pack.get_param_count() < 3) return;
-	if(pack.get_param(2).get_type() != net6::packet::param::INT) return;
-
 	// Find user which unsubscribed
-	unsigned int user_id = pack.get_param(2).as_int();
-	const user_table& table = get_buffer().get_user_table();
-	user* user = table.find_user<user::CONNECTED>(user_id);
-
-	// Check for valid user
-	if(!user)
-	{
-		std::cerr << "obby::client_document_info::on_net_unsubscribe: "
-		          << "User " << user_id << " is not connected"
-		          << std::endl;
-		return;
-	}
+	user* old_user = pack.get_param(2).as<obby::user*>();
 
 	// Verify that the user is not already subscribed
-	if(!is_subscribed(*user) )
+	if(!is_subscribed(*old_user) )
 	{
 		std::cerr << "obby::client_document_info::on_net_unsubscribe: "
-		          << "User " << user_id << " (" << user->get_name()
-		          << ") is not subscribed" << std::endl;
+		          << "User " << old_user->get_name() << " ("
+		          << old_user->get_name() << ") is not subscribed"
+		          << std::endl;
 		return;
 	}
 
 	// Remove it from the list of subscribed users
 	m_userlist.erase(
-		std::remove(m_userlist.begin(), m_userlist.end(), user),
+		std::remove(m_userlist.begin(), m_userlist.end(), old_user),
 		m_userlist.end()
 	);
 
 	// Emit signal
-	m_signal_unsubscribe.emit(*user);
+	m_signal_unsubscribe.emit(*old_user);
 }
 
 void obby::client_document_info::assign_document()
