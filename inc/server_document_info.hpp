@@ -322,15 +322,8 @@ template<typename selector_type>
 void basic_server_document_info<selector_type>::
 	erase_impl(position pos, position len, const user* author)
 {
-	// TODO: unreversible delete_operation only with len
-	delete_operation op(
-		pos,
-		basic_document_info<selector_type>::get_content().get_slice(
-			pos,
-			len
-		)
-	);
-
+	// TODO: Store delete_undo_operation locally
+	delete_operation op(pos, len);
 	m_jupiter->local_op(op, author);
 }
 
@@ -450,3 +443,4 @@ basic_server_document_info<selector_type>::get_net6() const
 } // namespace obby
 
 #endif // _OBBY_SERVER_DOCUMENT_INFO_HPP_
+
