@@ -17,6 +17,7 @@ Normal:
 
 Minor:
  * Implement indent_record and unindent_record to (un)indent lines of text
+ * Grep for TODOs in the Code :)
 
 Wishlist:
  * Implement paintchat
