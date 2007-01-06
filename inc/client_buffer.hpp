@@ -37,6 +37,7 @@ public:
 	typedef sigc::signal<void, const insert_record&> signal_insert_type;
 	typedef sigc::signal<void, const delete_record&> signal_delete_type;
 	typedef sigc::signal<void, net6::client::peer&> signal_join_type;
+	typedef sigc::signal<void> signal_sync_type;
 	typedef sigc::signal<void, net6::client::peer&> signal_part_type;
 	typedef sigc::signal<void>                      signal_close_type;
 	typedef sigc::signal<void, const std::string&> signal_login_failed_type;
@@ -56,6 +57,7 @@ public:
 	signal_insert_type insert_event() const;
 	signal_delete_type delete_event() const;
 	signal_join_type join_event() const;
+	signal_sync_type sync_event() const;
 	signal_part_type part_event() const;
 	signal_close_type close_event() const;
 	signal_login_failed_type login_failed_event() const;
@@ -67,12 +69,18 @@ protected:
 	void on_data(const net6::packet& pack);
 	void on_login_failed(const std::string& reason);
 
+	void on_net_record(const net6::packet& pack);
+	void on_net_sync_init(const net6::packet& pack);
+	void on_net_sync_line(const net6::packet& pack);
+	void on_net_sync_final(const net6::packet& pack);
+
 	std::list<record*> m_unsynced;
 	net6::client m_connection;
 
 	signal_insert_type m_signal_insert;
 	signal_delete_type m_signal_delete;
 	signal_join_type m_signal_join;
+	signal_sync_type m_signal_sync;
 	signal_part_type m_signal_part;
 	signal_close_type m_signal_close;
 	signal_login_failed_type m_signal_login_failed;

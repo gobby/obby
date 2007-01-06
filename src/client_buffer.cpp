@@ -103,6 +103,11 @@ obby::client_buffer::signal_join_type obby::client_buffer::join_event() const
 	return m_signal_join;
 }
 
+obby::client_buffer::signal_sync_type obby::client_buffer::sync_event() const
+{
+	return m_signal_sync;
+}
+
 obby::client_buffer::signal_part_type obby::client_buffer::part_event() const
 {
 	return m_signal_part;
@@ -137,109 +142,134 @@ void obby::client_buffer::on_close()
 void obby::client_buffer::on_data(const net6::packet& pack)
 {
 	if(pack.get_command() == "obby_record")
-	{
-		record* rec = record::from_packet(pack);
-		if(!rec) return;
-
-		// Undo all non-synced changes
-		std::list<record*>::iterator iter;
-		for(iter = m_unsynced.begin(); iter != m_unsynced.end(); ++iter)
-		{
-			record* rev_iter = (*iter)->reverse(*this);
-			rev_iter->apply(*this);
-			delete rev_iter;
-
-			// TODO: Check if it behaves correct if we have
-			// more than one unsynced changes
-			if( (*iter)->get_from() != rec->get_from() ||
-			    (*iter)->get_id() != rec->get_id() )
-			{
-				rec->apply(**iter);
-			}
-		}
-
-		// Apply new record
-		rec->apply(*this);
-
-		// Record in unsynced changes that is synced with this packet
-		record* sync_record = NULL;
-
-		// Redo all unsynced changes except the one that just came in
-		while(iter != m_unsynced.begin() )
-		{
-			-- iter;
-
-			// Check if this record is the one we are syncing
-			if( (*iter)->get_from() == rec->get_from() )
-			{
-				if( (*iter)->get_id() == rec->get_id() )
-				{
-					// Delete unsynced record
-					sync_record = (*iter)->reverse(*this);
-					delete *iter;
-
-					// Record is synced - remove from list
-					iter = m_unsynced.erase(iter);
-					continue;
-				}
-			}
-
-			// TODO: Maybe switch these two statements, don't know :/
-			// Apply the current change to the new record
-			(*iter)->apply(*rec);
-
-			// Apply the current change to the syncing record
-			if(sync_record) (sync_record)->apply(**iter);
-
-			// Reapply revision to the buffer
-			(*iter)->apply(*this);
-		}
-
-		// Put the synced record into history
-		m_history.push_front(rec);
-
-		// Update revision
-		m_revision = rec->get_revision();
-
-		// TODO: Check if sync_record record changes the document
-		// or if sync_record and rec result in the same document.
-		// Don't emit any signals in this case.
-
-		// Emit changed signal
-		// again, HACKHACKHACK :D
-		if(pack.get_param(0).as_string() == "insert")
-		{
-			if(sync_record)
-				m_signal_delete.emit(
-					*static_cast<delete_record*>(
-						sync_record
-					)
-				);
-
-			m_signal_insert.emit(
-				*static_cast<insert_record*>(rec) );
-		}
-		
-		if(pack.get_param(0).as_string() == "delete")
-		{
-			if(sync_record)
-				m_signal_insert.emit(
-					*static_cast<insert_record*>(
-						sync_record
-					)
-				);
-
-			m_signal_delete.emit(
-				*static_cast<delete_record*>(rec) );
-		}
-
-		// sync_record is not needed any longer.
-		delete sync_record;
-	}
+		on_net_record(pack);
+	if(pack.get_command() == "obby_sync_init")
+		on_net_sync_init(pack);
+	if(pack.get_command() == "obby_sync_line")
+		on_net_sync_line(pack);
+	if(pack.get_command() == "obby_sync_final")
+		on_net_sync_final(pack);
 }
 
 void obby::client_buffer::on_login_failed(const std::string& reason)
 {
 	m_signal_login_failed.emit(reason);
+}
+
+void obby::client_buffer::on_net_record(const net6::packet& pack)
+{
+	record* rec = record::from_packet(pack);
+	if(!rec) return;
+
+	// Undo all non-synced changes
+	std::list<record*>::iterator iter;
+	for(iter = m_unsynced.begin(); iter != m_unsynced.end(); ++iter)
+	{
+		record* rev_iter = (*iter)->reverse(*this);
+		rev_iter->apply(*this);
+		delete rev_iter;
+
+		// TODO: Check if it behaves correct if we have
+		// more than one unsynced changes
+		if( (*iter)->get_from() != rec->get_from() ||
+		    (*iter)->get_id() != rec->get_id() )
+		{
+			rec->apply(**iter);
+		}
+	}
+
+	// Apply new record
+	rec->apply(*this);
+
+	// Record in unsynced changes that is synced with this packet
+	record* sync_record = NULL;
+
+	// Redo all unsynced changes except the one that just came in
+	while(iter != m_unsynced.begin() )
+	{
+		-- iter;
+
+		// Check if this record is the one we are syncing
+		if( (*iter)->get_from() == rec->get_from() )
+		{
+			if( (*iter)->get_id() == rec->get_id() )
+			{
+				// Delete unsynced record
+				sync_record = (*iter)->reverse(*this);
+				delete *iter;
+
+				// Record is synced - remove from list
+				iter = m_unsynced.erase(iter);
+				continue;
+			}
+		}
+
+		// TODO: Maybe switch these two statements, don't know :/
+		// Apply the current change to the new record
+		(*iter)->apply(*rec);
+
+		// Apply the current change to the syncing record
+		if(sync_record) (sync_record)->apply(**iter);
+
+		// Reapply revision to the buffer
+		(*iter)->apply(*this);
+	}
+
+	// Put the synced record into history
+	m_history.push_front(rec);
+
+	// Update revision
+	m_revision = rec->get_revision();
+
+	// TODO: Check if sync_record record changes the document
+	// or if sync_record and rec result in the same document.
+	// Don't emit any signals in this case.
+
+	// Emit changed signal
+	// again, HACKHACKHACK :D
+	if(pack.get_param(0).as_string() == "insert")
+	{
+		if(sync_record)
+			m_signal_delete.emit(
+				*static_cast<delete_record*>(sync_record) );
+
+		m_signal_insert.emit(
+			*static_cast<insert_record*>(rec) );
+	}
+		
+	if(pack.get_param(0).as_string() == "delete")
+	{
+		if(sync_record)
+			m_signal_insert.emit(
+				*static_cast<insert_record*>(sync_record) );
+
+		m_signal_delete.emit(
+			*static_cast<delete_record*>(rec) );
+	}
+
+	// sync_record is not needed any longer.
+	delete sync_record;
+}
+
+void obby::client_buffer::on_net_sync_init(const net6::packet& pack)
+{
+	if(pack.get_param_count() < 1) return;
+	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
+
+	m_revision = pack.get_param(0).as_int();
+	m_lines.clear();
+}
+
+void obby::client_buffer::on_net_sync_line(const net6::packet& pack)
+{
+	if(pack.get_param_count() < 1) return;
+	if(pack.get_param(0).get_type() != net6::packet::param::STRING) return;
+
+	m_lines.push_back(pack.get_param(0).as_string() );
+}
+
+void obby::client_buffer::on_net_sync_final(const net6::packet& pack)
+{
+	m_signal_sync.emit();
 }
 

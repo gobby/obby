@@ -93,6 +93,23 @@ void obby::server_buffer::on_join(net6::server::peer& peer)
 
 void obby::server_buffer::on_login(net6::server::peer& peer)
 {
+	// Client logged in. Synchronise the complete buffer, but
+	// seperate it into multiple packets to not block other high-priority
+	// network packets like chat packets.
+	net6::packet init_sync("obby_sync_init");
+	init_sync << static_cast<int>(m_revision);
+	m_server.send(init_sync, peer);
+
+	for(unsigned int cur_line = 0; cur_line < m_lines.size(); ++ cur_line)
+	{
+		net6::packet line_sync("obby_sync_line");
+		line_sync << m_lines[cur_line];
+		m_server.send(line_sync, peer);
+	}
+
+	net6::packet final_sync("obby_sync_final");
+	m_server.send(final_sync, peer);
+
 	m_signal_login.emit(peer);
 }
 
