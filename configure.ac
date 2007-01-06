@@ -100,6 +100,6 @@ AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION
 
 AC_CONFIG_FILES([Makefile m4/Makefile po/Makefile.in inc/Makefile src/Makefile
-                 test/Makefile obby-0.2.pc])
+                 test/Makefile obby-0.3.pc])
 AC_OUTPUT
 

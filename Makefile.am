@@ -7,7 +7,7 @@ endif
 ACLOCAL_AMFLAGS = -I m4
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = obby-0.2.pc
+pkgconfig_DATA = obby-0.3.pc
 
 # gettext
 EXTRA_DIST = config.rpath mkinstalldirs
