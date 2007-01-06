@@ -16,6 +16,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <cassert>
 #include "server_document.hpp"
 #include "server_buffer.hpp"
 
@@ -57,6 +58,8 @@ obby::document& obby::server_buffer::create_document()
 	net6::packet pack("obby_document_create");
 	pack << id;
 	m_server->send(pack);
+
+	return doc;
 }
 
 void obby::server_buffer::remove_document(document* doc)
@@ -123,19 +126,18 @@ void obby::server_buffer::on_part(net6::server::peer& peer)
 		return;
 	}
 
-	// Delete user from user list
+	// Find user in list
 	std::list<user*>::iterator iter;
 	for(iter = m_userlist.begin(); iter != m_userlist.end(); ++ iter)
-	{
 		if( (*iter)->get_id() == peer.get_id() )
-		{
-			delete *iter;
-			m_userlist.erase(iter);
 			break;
-		}
-	}
+
+	// User was logged in: It must be in the user list
+	assert(iter != m_userlist.end() );
 
 	m_signal_user_part.emit(**iter);
+	m_userlist.erase(iter);
+	delete *iter;
 }
 
 void obby::server_buffer::on_data(const net6::packet& pack,
