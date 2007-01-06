@@ -1,0 +1,5 @@
+RewriteEngine on
+
+RewriteRule ^(.*)/(.*) obby.php?file=$1&document=$2 [L,QSA]
+RewriteRule ^(.*) obby.php?file=$1 [L,QSA]
+RewriteRule ^$ obby.php [L,QSA]
