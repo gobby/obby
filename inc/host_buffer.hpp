@@ -26,6 +26,8 @@
 namespace obby
 {
 
+class host_user_table;
+
 class host_buffer : public server_buffer
 {
 public: 

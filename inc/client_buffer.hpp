@@ -32,6 +32,8 @@
 namespace obby
 {
 
+class client_user_table;
+
 /** Buffer for establish a connection to a server_buffer.
  */
 

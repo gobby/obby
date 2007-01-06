@@ -28,6 +28,8 @@
 namespace obby
 {
 
+class server_user_table;
+
 /** Buffer that serves as (dedicated) server. It listens for incoming
  * connections from client_buffers and synchronises their changes.
  */
