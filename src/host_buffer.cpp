@@ -119,7 +119,7 @@ obby::host_buffer::add_document_info(const user* owner, unsigned int id,
 {
 	// Get net6 host object by casting the underlaying server object
 	// (we create a corresponding net6::host in our constructor).
-	net6::host* host = static_cast<net6::host*>(m_server);
+	net6::host* host = dynamic_cast<net6::host*>(m_server);
 	document_info* doc =
 		new host_document_info(*this, *host, owner, id, title);
 	m_doclist.push_back(doc);

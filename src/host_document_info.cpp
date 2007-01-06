@@ -84,7 +84,7 @@ void obby::host_document_info::unsubscribe()
 void obby::host_document_info::assign_document()
 {
 	m_document = new host_document(
-		*this, static_cast<net6::host&>(m_server)
+		*this, dynamic_cast<net6::host&>(m_server)
 	);
 }
 
