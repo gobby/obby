@@ -105,6 +105,11 @@ std::string obby::buffer::get_line(unsigned int index) const
 	return m_buffer.substr(from, to - from);
 }
 
+unsigned int obby::buffer::get_line_count() const
+{
+	return m_lines.size() + 1;
+}
+
 obby::position obby::buffer::coord_to_position(unsigned int x,
                                                unsigned int y) const
 {
