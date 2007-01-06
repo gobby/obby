@@ -70,6 +70,9 @@ void obby::server_document::on_net_record(record& rec)
 	if(!rec.is_valid() )
 		return;
 
+	// Emit change signal before changing anything
+	m_signal_change.before().emit();
+
 	// Apply record on buffer
 	rec.apply(*this);
 
@@ -78,6 +81,9 @@ void obby::server_document::on_net_record(record& rec)
 
 	// Add change to history
 	m_history.push_front(rec.clone() );
+
+	// Changes have been performed
+	m_signal_change.after().emit();
 
 	// Tell clients
 	m_server.send(rec.to_packet() );

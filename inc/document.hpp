@@ -47,6 +47,8 @@ public:
 		signal_insert_type;
 	typedef duplex_signal<sigc::signal<void, const delete_record&> >
 		signal_delete_type;
+	typedef duplex_signal<sigc::signal<void> >
+		signal_change_type;
 
 	document(unsigned int id, const buffer& buf);
 	virtual ~document();
@@ -107,6 +109,13 @@ public:
 	 */
 	signal_delete_type delete_event() const;
 
+	/** Signal whill will be emitted if a change in the document will be
+	 * performed. Between the before and after change call, any number of
+	 * insert/delete events may be raised to ensure synchronisation in the
+	 * obby session.
+	 */
+	signal_change_type change_event() const;
+
 	/** Returns the given line of text.
 	 */
 	const line& get_line(unsigned int index) const;
@@ -145,6 +154,7 @@ protected:
 
 	signal_insert_type m_signal_insert;
 	signal_delete_type m_signal_delete;
+	signal_change_type m_signal_change;
 };
 
 }

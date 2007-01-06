@@ -217,6 +217,11 @@ obby::document::signal_delete_type obby::document::delete_event() const
 	return m_signal_delete;
 }
 
+obby::document::signal_change_type obby::document::change_event() const
+{
+	return m_signal_change;
+}
+
 const obby::line& obby::document::get_line(unsigned int index) const
 {
 	assert(index < m_lines.size() );

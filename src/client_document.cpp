@@ -73,6 +73,9 @@ obby::client_document::unsynced_count() const
 
 void obby::client_document::on_net_record(record& rec)
 {
+	// We are about to change anything
+	m_signal_change.before().emit();
+
 	// Apply the record to the history
 	m_history.push_front(rec.clone() );
 
@@ -115,7 +118,11 @@ void obby::client_document::on_net_record(record& rec)
 		}
 	}
 
+	// Update revision
 	m_revision = rec.get_revision();
+
+	// Change has been done
+	m_signal_change.after().emit();
 
 	// THE FOLLOWING DOES NOT WORK :((99
 	// TODO: What happens with invalid records?
