@@ -41,7 +41,7 @@ obby::document_packet::document_packet(const net6::packet& base)
 const std::string& obby::document_packet::get_command() const
 {
 	// Real command is obby_document, first parameter is document
-	return net6::packet::get_param(1).as<std::string>();
+	return net6::packet::get_param(1).serialised();
 }
 
 const net6::parameter&
