@@ -61,7 +61,13 @@ public:
 	 */
 	const std::string& get_title() const;
 
-	/** Sets a new title for this document.
+	/** Returns the current revision number for this document.
+	 */
+	unsigned int get_revision() const;
+
+	/** Sets a new title for this document. Be careful! Titles set with
+	 * this function or not synced to other users. Use
+	 * buffer::rename_document instead.
 	 */
 	void set_title(const std::string& title);
 

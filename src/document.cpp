@@ -43,6 +43,11 @@ const std::string& obby::document::get_title() const
 	return m_title;
 }
 
+unsigned int obby::document::get_revision() const
+{
+	return m_revision;
+}
+
 void obby::document::set_title(const std::string& title)
 {
 	m_title = title;
