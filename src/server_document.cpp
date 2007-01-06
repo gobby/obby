@@ -17,15 +17,21 @@
  */
 
 #include "server_document.hpp"
+#include "server_buffer.hpp"
 
 obby::server_document::server_document(unsigned int id, net6::server& server,
-                                       const server_user_table& usertable)
- : document(id, usertable), m_server(server)
+                                       const server_buffer& buf)
+ : document(id, buf), m_server(server)
 {
 }
 
 obby::server_document::~server_document()
 {
+}
+
+const obby::server_buffer& obby::server_document::get_buffer() const
+{
+	return static_cast<const obby::server_buffer&>(m_buffer);
 }
 
 void obby::server_document::insert(position pos, const std::string& text)

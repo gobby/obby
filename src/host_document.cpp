@@ -17,13 +17,19 @@
  */
 
 #include "host_document.hpp"
+#include "host_buffer.hpp"
 
 obby::host_document::host_document(unsigned int id, net6::host& host,
-                                   const host_user_table& usertable)
- : server_document(id, host, usertable)
+                                   const host_buffer& buf)
+ : server_document(id, host, buf)
 {
 }
 
 obby::host_document::~host_document()
 {
+}
+
+const obby::host_buffer& obby::host_document::get_buffer() const
+{
+	return static_cast<const host_buffer&>(m_buffer);
 }

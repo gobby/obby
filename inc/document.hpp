@@ -33,6 +33,8 @@
 namespace obby
 {
 
+class buffer;
+
 /** Abstract base class for obby documents. A document contains an amount of
  * text that is synchronised to all other participants in the obby session.
  */
@@ -43,7 +45,7 @@ public:
 	typedef sigc::signal<void, const insert_record&> signal_insert_type;
 	typedef sigc::signal<void, const delete_record&> signal_delete_type;
 
-	document(unsigned int id, const user_table& usertable);
+	document(unsigned int id, const buffer& buf);
 	virtual ~document();
 
 	/** Returns a unique ID for this document.
@@ -57,6 +59,10 @@ public:
 	/** Sets a new title for this document.
 	 */
 	void set_title(const std::string& title);
+
+	/** Returns the buffer to which the document is assigned.
+	 */
+	const buffer& get_buffer() const;
 
 	/** Returns the whole content of the document.
 	 */
@@ -131,13 +137,14 @@ public:
 	/** Called by the buffer if another user changed anything.
 	 */
 	virtual void on_net_record(record& rec) = 0;
+
 protected:
 	unsigned int m_id;
-	std::string m_title;
+	const buffer& m_buffer;
 
+	std::string m_title;
 	std::list<record*> m_history;
 	unsigned int m_revision;
-	const user_table& m_usertable;
 
 	std::vector<line> m_lines;
 

@@ -28,6 +28,8 @@
 namespace obby
 {
 
+class client_buffer;
+
 /** Document used by client_buffer. Usually you do not have create or delete
  * document objects by youself, the equivalent buffers do this.
  */
@@ -39,9 +41,13 @@ public:
 	 * a net6::client object to synchronise changes to.
 	 */
 	client_document(unsigned int id, net6::client& client,
-	                const client_user_table& usertable);
+	                const client_buffer& buf);
 	virtual ~client_document();
-	
+
+	/** Returns the buffer to which the document is assigned.
+	 */
+	const client_buffer& get_buffer() const;
+
 	/** Inserts <em>text</em> at <em>pos</em>.
 	 */
 	virtual void insert(position pos, const std::string& text);

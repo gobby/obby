@@ -83,11 +83,8 @@ void obby::host_buffer::send_message(const std::string& message)
 
 obby::document& obby::host_buffer::add_document(unsigned int id)
 {
-	host_user_table* table = static_cast<host_user_table*>(m_usertable);
 	net6::host* host = static_cast<net6::host*>(m_server);
-
-	document* doc = new host_document(id, *host, *table);
-
+	document* doc = new host_document(id, *host, *this);
 	m_doclist.push_back(doc);
 	return *doc;
 }

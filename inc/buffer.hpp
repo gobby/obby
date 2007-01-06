@@ -160,6 +160,7 @@ public:
 	 * obby session sends a chat packet.
 	 */
 	signal_server_message_type server_message_event() const;
+
 protected:
 	/** Internal function to add a new user to the user list.
 	 */

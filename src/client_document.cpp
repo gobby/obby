@@ -18,10 +18,11 @@
 
 #include <cassert>
 #include "client_document.hpp"
+#include "client_buffer.hpp"
 
 obby::client_document::client_document(unsigned int id, net6::client& client,
-                                       const client_user_table& usertable)
- : document(id, usertable), m_unsynced(), m_client(client)
+                                       const client_buffer& buf)
+ : document(id, buf), m_unsynced(), m_client(client)
 {
 }
 
@@ -30,6 +31,11 @@ obby::client_document::~client_document()
 	std::list<record*>::iterator iter;
 	for(iter = m_unsynced.begin(); iter != m_unsynced.end(); ++ iter)
 		delete *iter;
+}
+
+const obby::client_buffer& obby::client_document::get_buffer() const
+{
+	return static_cast<const client_buffer&>(m_buffer);
 }
 
 void obby::client_document::insert(position pos, const std::string& text)
@@ -203,7 +209,7 @@ void obby::client_document::on_net_sync_init(const net6::packet& pack)
 
 void obby::client_document::on_net_sync_line(const net6::packet& pack)
 {
-	m_lines.push_back(line(pack, m_usertable) );
+	m_lines.push_back(line(pack, get_buffer().get_user_table()) );
 /*	if(pack.get_param_count() < 2) return;
 	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
 	if(pack.get_param(1).get_type() != net6::packet::param::STRING) return;

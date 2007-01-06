@@ -31,6 +31,8 @@
 namespace obby
 {
 
+class server_buffer;
+
 /** Document used by server_buffer. Usually you do not create or delete
  * documents yourself, the buffers manage them.
  */
@@ -43,8 +45,12 @@ public:
 	 * @param server net6::server object to synchronise data to.
 	 */
 	server_document(unsigned int id, net6::server& server,
-	                const server_user_table& usertable);
+	                const server_buffer& buf);
 	virtual ~server_document();
+
+	/** Returns the buffer to which the document is assigned.
+	 */
+	const server_buffer& get_buffer() const;
 
 	/** Inserts <em>text</em> at <em>pos</em> and synchronises it with
 	 * the clients.

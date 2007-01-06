@@ -18,9 +18,10 @@
 
 #include <cassert>
 #include "document.hpp"
+#include "buffer.hpp"
 
-obby::document::document(unsigned int id, const user_table& usertable)
- : m_id(id), m_title(), m_history(), m_revision(0), m_usertable(usertable),
+obby::document::document(unsigned int id, const buffer& buf)
+ : m_id(id), m_title(), m_history(), m_revision(0), m_buffer(buf),
    m_lines(1, line())
 {
 }
@@ -45,6 +46,11 @@ std::string obby::document::get_title() const
 void obby::document::set_title(const std::string& title)
 {
 	m_title = title;
+}
+
+const obby::buffer& obby::document::get_buffer() const
+{
+	return m_buffer;
 }
 
 std::string obby::document::get_whole_buffer() const
@@ -99,7 +105,7 @@ void obby::document::insert_nosync(position pos, const std::string& text,
 
 	// Find author in user table
 	const user_table::user* author;
-	author = m_usertable.find_from_user_id(author_id);
+	author = get_buffer().get_user_table().find_from_user_id(author_id);
 	assert(author != NULL);
 
 	// Move line iterator to the line where to insert text
@@ -157,7 +163,7 @@ void obby::document::erase_nosync(position from, position to,
 
 	// Find author in user_table
 	const user_table::user* author;
-	author = m_usertable.find_from_user_id(author_id);
+	author = get_buffer().get_user_table().find_from_user_id(author_id);
 	assert(author != NULL);
 
 	// Find the iterator for the given row

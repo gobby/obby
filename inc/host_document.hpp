@@ -27,6 +27,8 @@
 namespace obby
 {
 
+class host_buffer;
+
 /** host_document used by host_buffer. Usually you do not have to create or
  * delete documents yourself, the buffers manage them.
  */
@@ -39,8 +41,12 @@ public:
 	 * @param host net6::host object to synchronise data to.
 	 */
 	host_document(unsigned int id, net6::host& host,
-	              const host_user_table& usertable);
+	              const host_buffer& buf);
 	virtual ~host_document();
+
+	/** Returns the buffer to which the document is assigned.
+	 */
+	const host_buffer& get_buffer() const;
 
 protected:
 };
