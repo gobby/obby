@@ -54,8 +54,36 @@ void obby::delete_record::on_insert(const position& pos,
 
 void obby::delete_record::on_delete(const position& from, const position& to)
 {
-	// TODO: Implement me!
-	if(from > m_to) return;
+	assert(to >= from)
 
-	
+	// Deletion after the range
+	if(from >= m_to)
+	{
+		return;
+	}
+	// Delete before the range
+	else if(to <= m_from)
+	{
+		m_from.sub_range(from, to);
+		m_to.sub_range(from, to);
+	}
+	// Deletion of the first part of the range
+	else if(from <= m_from && to > m_from)
+	{
+		m_from = from;
+		m_to.sub_range(from, to);
+	}
+	// Deletion of the last part of the range
+	else if(from < m_to && to >= from)
+	{
+		m_to = from;
+	}
+	// Deletion in the range
+	else
+	{
+		m_to.sub_range(from, to);
+	}
+
+	if(m_to <= m_from)
+		invalidate();
 }
