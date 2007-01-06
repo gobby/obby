@@ -47,3 +47,6 @@ configure$
 stamp-h1$
 (^|/)autom4te\.cache($|/)
 ^inc/config\.hpp
+\.gmo$
+^po/POTFILES$
+stamp-po$
