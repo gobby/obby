@@ -4,7 +4,13 @@ lib_LTLIBRARIES = libobby.la
 #     ^     :     ^    :       ^
 #     |     :   minor  :       |
 # interface :  changes : compatibility
-libobby_la_LDFLAGS = -no-undefined -version-info 0:0:0 -release 0
+libobby_la_LDFLAGS = -version-info 0:0:0 -release 0
+
+libobby_la_LIBADD = $(libobby_LIBS)
+
+if WIN32
+libobby_la_LDFLAGS += -no-undefined
+endif
 
 INCLUDES = $(libobby_CFLAGS) -I../inc
 
