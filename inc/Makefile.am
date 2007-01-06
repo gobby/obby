@@ -16,6 +16,7 @@ pkginclude_HEADERS += client_document.hpp
 pkginclude_HEADERS += server_document.hpp
 pkginclude_HEADERS += host_document.hpp
 pkginclude_HEADERS += buffer.hpp
+pkginclude_HEADERS += local_buffer.hpp
 pkginclude_HEADERS += client_buffer.hpp
 pkginclude_HEADERS += server_buffer.hpp
 pkginclude_HEADERS += host_buffer.hpp

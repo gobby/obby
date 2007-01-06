@@ -22,13 +22,15 @@
 #include <sigc++/signal.h>
 #include <net6/host.hpp>
 #include "server_buffer.hpp"
+#include "local_buffer.hpp"
 
 namespace obby
 {
 
 class host_user_table;
 
-class host_buffer : public server_buffer
+class host_buffer : virtual public server_buffer,
+                    virtual public local_buffer
 {
 public: 
 	/** Returns a new host_buffer.
@@ -48,11 +50,11 @@ public:
 
 	/** Returns the local user.
 	 */
-	user& get_self();
+	virtual user& get_self();
 
 	/** Returns the local user.
 	 */
-	const user& get_self() const;
+	virtual const user& get_self() const;
 
 	/** Sends a global message to all users.
 	 */

@@ -28,6 +28,7 @@
 #include "insert_record.hpp"
 #include "delete_record.hpp"
 #include "buffer.hpp"
+#include "local_buffer.hpp"
 
 namespace obby
 {
@@ -37,7 +38,8 @@ class client_user_table;
 /** Buffer for establish a connection to a server_buffer.
  */
 
-class client_buffer : public buffer, public sigc::trackable
+class client_buffer : virtual public local_buffer,
+                      public sigc::trackable
 {
 public:
 	typedef sigc::signal<void>                     signal_sync_type;
@@ -82,11 +84,11 @@ public:
 
 	/** Returns the local user.
 	 */
-	user& get_self();
+	virtual user& get_self();
 
 	/** Returns the local user.
 	 */
-	const user& get_self() const;
+	virtual const user& get_self() const;
 
 	/** Waits indefinitly for incoming events.
 	 */

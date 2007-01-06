@@ -28,7 +28,7 @@ obby::host_buffer::host_buffer()
 
 obby::host_buffer::host_buffer(unsigned int port, const std::string& username,
                                int red, int green, int blue)
- : server_buffer(), m_self(NULL)
+ : server_buffer(), local_buffer(), m_self(NULL)
 {
 	net6::host* host = new net6::host(port, username, false);
 	m_server = host;

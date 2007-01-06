@@ -16,32 +16,32 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "host_document.hpp"
-#include "host_buffer.hpp"
+#ifndef _OBBY_LOCAL_BUFFER_HPP_
+#define _OBBY_LOCAL_BUFFER_HPP_
 
-obby::host_document::host_document(unsigned int id, net6::host& host,
-                                   const host_buffer& buf)
- : server_document(id, host, buf)
+#include "buffer.hpp"
+
+namespace obby
 {
+
+/** A local_buffer is a buffer object with a local user.
+ */
+	
+class local_buffer : virtual public buffer
+{
+public: 
+	local_buffer();
+	virtual ~local_buffer();
+
+	/** Returns the local user.
+	 */
+	virtual user& get_self() = 0;
+
+	/** Returns the local user.
+	 */
+	virtual const user& get_self() const = 0;
+};
+
 }
 
-obby::host_document::~host_document()
-{
-}
-
-const obby::host_buffer& obby::host_document::get_buffer() const
-{
-	// static_cast does not work with virtual inheritance
-	return dynamic_cast<const host_buffer&>(m_buffer);
-}
-
-void obby::host_document::insert(position pos, const std::string& text)
-{
-	server_document::insert(pos, text, get_buffer().get_self().get_id() );
-}
-
-void obby::host_document::erase(position begin, position end)
-{
-	server_document::erase(begin, end, get_buffer().get_self().get_id() );
-}
-
+#endif // _OBBY_LOCAL_BUFFER_HPP_

@@ -34,7 +34,8 @@ class server_user_table;
  * connections from client_buffers and synchronises their changes.
  */
 	
-class server_buffer : public buffer, public sigc::trackable
+class server_buffer : virtual public buffer,
+                      public sigc::trackable
 {
 public: 
 	typedef sigc::signal<void, net6::server::peer&> signal_connect_type;
@@ -115,6 +116,8 @@ protected:
 	 */
 	void relay_message(unsigned int uid, const std::string& message);
 	
+	/** net6 signal handlers.
+	 */
 	void on_connect(net6::server::peer& peer);
 	void on_disconnect(net6::server::peer& peer);
 	void on_join(net6::server::peer& peer);

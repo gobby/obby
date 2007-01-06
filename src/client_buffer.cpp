@@ -37,7 +37,7 @@ obby::client_buffer::client_buffer()
 
 obby::client_buffer::client_buffer(const std::string& hostname,
                                    unsigned int port)
- : buffer(), m_unsynced(), m_client(NULL), m_self(NULL)
+ : local_buffer(), m_unsynced(), m_client(NULL), m_self(NULL)
 {
 	net6::ipv4_address addr(
 		net6::ipv4_address::create_from_hostname(hostname, port)
@@ -158,6 +158,8 @@ void obby::client_buffer::on_join(net6::client::peer& peer,
 	int blue = pack.get_param(4).as_int();
 
 	user* new_user = add_user(peer, red, green, blue);
+
+	// The first joining user is the local one
 	if(!m_self) m_self = new_user;
 	m_signal_user_join.emit(*new_user);
 }

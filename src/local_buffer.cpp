@@ -16,32 +16,13 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "host_document.hpp"
-#include "host_buffer.hpp"
+#include "local_buffer.hpp"
 
-obby::host_document::host_document(unsigned int id, net6::host& host,
-                                   const host_buffer& buf)
- : server_document(id, host, buf)
+obby::local_buffer::local_buffer()
+ : buffer()
 {
 }
 
-obby::host_document::~host_document()
+obby::local_buffer::~local_buffer()
 {
 }
-
-const obby::host_buffer& obby::host_document::get_buffer() const
-{
-	// static_cast does not work with virtual inheritance
-	return dynamic_cast<const host_buffer&>(m_buffer);
-}
-
-void obby::host_document::insert(position pos, const std::string& text)
-{
-	server_document::insert(pos, text, get_buffer().get_self().get_id() );
-}
-
-void obby::host_document::erase(position begin, position end)
-{
-	server_document::erase(begin, end, get_buffer().get_self().get_id() );
-}
-

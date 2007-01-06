@@ -31,7 +31,8 @@ obby::server_document::~server_document()
 
 const obby::server_buffer& obby::server_document::get_buffer() const
 {
-	return static_cast<const obby::server_buffer&>(m_buffer);
+	// static_cast does not work with virtual inheritance
+	return dynamic_cast<const obby::server_buffer&>(m_buffer);
 }
 
 void obby::server_document::insert(position pos, const std::string& text)

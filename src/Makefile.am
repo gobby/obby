@@ -32,6 +32,7 @@ libobby_la_SOURCES += client_document.cpp
 libobby_la_SOURCES += server_document.cpp
 libobby_la_SOURCES += host_document.cpp
 libobby_la_SOURCES += buffer.cpp
+libobby_la_SOURCES += local_buffer.cpp
 libobby_la_SOURCES += client_buffer.cpp
 libobby_la_SOURCES += server_buffer.cpp
 libobby_la_SOURCES += host_buffer.cpp
