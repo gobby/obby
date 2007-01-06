@@ -110,7 +110,11 @@ public:
 	unsigned int get_id() const;
 	unsigned int get_revision() const;
 
-	// TODO: move: Den Record um Zeilen/Spalten verschieben
+	// Text has been inserted, apply record coordinates
+	virtual void on_insert(const position& pos,
+	                       const std::string& text) = 0;
+	// Text has been deleted, apply record coordinates
+	virtual void on_delete(const position& from, const position& to) = 0;
 protected:
 	// id for this record to identify it after having sent it through the
 	// net (the server has to say which record has been synced)
@@ -137,6 +141,8 @@ public:
 	virtual void apply(buffer& buf);
 	virtual bool is_valid() const;
 
+	virtual void on_insert(const position& pos, const std::string& text);
+	virtual void on_delete(const position& from, const position& to);
 protected:
 	position pos;
 	std::string text;
@@ -156,9 +162,11 @@ public:
 	virtual void apply(buffer& buf);
 	virtual bool is_valid() const;
 
+	virtual void on_insert(const position& pos, const std::string& text);
+	virtual void on_delete(const position& from, const position& to);
 protected:
-	position pos;
-	std::string text;
+	position m_from;
+	position m_to;
 };
 
 // TODO: indent_record, unindent_record
@@ -184,7 +192,7 @@ protected:
 };
 
 // TODO: client_buffer / server_buffer? client_buffer has to remember unsynced
-// changes, server_buffer has to have a list which all clients and their ids
+// changes, server_buffer has to have a list with all clients and their ids
 // (Each client has a unique id, the from member of record is the id of
 // the client which made the corresponding record)
 
