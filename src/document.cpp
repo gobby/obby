@@ -52,7 +52,10 @@ std::string obby::document::get_whole_buffer() const
 	std::string content;
 	std::vector<line>::const_iterator iter;
 	for(iter = m_lines.begin(); iter != m_lines.end(); ++ iter)
+	{
 		content += *iter;
+		content += "\n";
+	}
 	return content;
 }
 
