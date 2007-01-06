@@ -179,27 +179,27 @@ protected:
 
 	/** Welcome handling.
 	 */
-	void on_net_welcome(const net6::packet& pack);
+	virtual void on_net_welcome(const net6::packet& pack);
 
 	/** Document concerning network commands.
 	 */
-	void on_net_document_create(const net6::packet& pack);
-	void on_net_document_remove(const net6::packet& pack);
+	virtual void on_net_document_create(const net6::packet& pack);
+	virtual void on_net_document_remove(const net6::packet& pack);
 
 	/** Messaging commands.
 	 */
-	void on_net_message(const net6::packet& pack);
+	virtual void on_net_message(const net6::packet& pack);
 
 	/** Synchronisation commands.
 	 */
-	void on_net_sync_init(const net6::packet& pack);
-	void on_net_sync_usertable_user(const net6::packet& pack);
-	void on_net_sync_doclist_document(const net6::packet& pack);
-	void on_net_sync_final(const net6::packet& pack);
+	virtual void on_net_sync_init(const net6::packet& pack);
+	virtual void on_net_sync_usertable_user(const net6::packet& pack);
+	virtual void on_net_sync_doclist_document(const net6::packet& pack);
+	virtual void on_net_sync_final(const net6::packet& pack);
 
 	/** Forwarding commands.
 	 */
-	void on_net_document(const net6::packet& pack);
+	virtual void on_net_document(const net6::packet& pack);
 
 	net6::client* m_client;
 	user* m_self;

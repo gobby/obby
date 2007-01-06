@@ -142,17 +142,19 @@ protected:
 
 	/** Document commands.
 	 */
-	void on_net_document_create(const net6::packet& pack, user& from);
-	void on_net_document_remove(const net6::packet& pack, user& from);
+	virtual void on_net_document_create(const net6::packet& pack,
+	                                    user& from);
+	virtual void on_net_document_remove(const net6::packet& pack,
+	                                    user& from);
 
 	/** Messaging commands.
 	 */
-	void on_net_message(const net6::packet& pack, user& from);
-	void on_net_user_password(const net6::packet& pack, user& from);
+	virtual void on_net_message(const net6::packet& pack, user& from);
+	virtual void on_net_user_password(const net6::packet& pack, user& from);
 
 	/** Forwarding commands.
 	 */
-	void on_net_document(const net6::packet& pack, user& from);
+	virtual void on_net_document(const net6::packet& pack, user& from);
 
 	/** net6 server object.
 	 */
