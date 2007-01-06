@@ -20,7 +20,7 @@
 #define _OBBY_SHA1_HPP_
 
 #include <string>
-#include <stdint.h>
+#include <inttypes.h>
 
 namespace obby
 {
