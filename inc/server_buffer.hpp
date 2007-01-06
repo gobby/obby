@@ -920,29 +920,37 @@ template<typename Document, typename Selector>
 bool basic_server_buffer<Document, Selector>::
 	execute_packet(const net6::packet& pack, const user& from)
 {
-	// TODO: std::map<> mapping command to function
-	if(pack.get_command() == "obby_document_create")
-		{ on_net_document_create(pack, from); return true; }
+	try
+	{
+		// TODO: std::map<> mapping command to function
+		if(pack.get_command() == "obby_document_create")
+			{ on_net_document_create(pack, from); return true; }
 
-	if(pack.get_command() == "obby_document_remove")
-		{ on_net_document_remove(pack, from); return true; }
+		if(pack.get_command() == "obby_document_remove")
+			{ on_net_document_remove(pack, from); return true; }
 
-	if(pack.get_command() == "obby_message")
-		{ on_net_message(pack, from); return true; }
+		if(pack.get_command() == "obby_message")
+			{ on_net_message(pack, from); return true; }
 
-	if(pack.get_command() == "obby_user_password")
-		{ on_net_user_password(pack, from); return true; }
+		if(pack.get_command() == "obby_user_password")
+			{ on_net_user_password(pack, from); return true; }
 
-	if(pack.get_command() == "obby_user_colour")
-		{ on_net_user_colour(pack, from); return true; }
+		if(pack.get_command() == "obby_user_colour")
+			{ on_net_user_colour(pack, from); return true; }
 
-	if(pack.get_command() == "obby_document")
-		{ on_net_document(pack, from); return true; }
+		if(pack.get_command() == "obby_document")
+			{ on_net_document(pack, from); return true; }
 
-	if(pack.get_command() == "obby_command_query")
-		{ on_net_command_query(pack, from); return true; }
+		if(pack.get_command() == "obby_command_query")
+			{ on_net_command_query(pack, from); return true; }
 
-	return false;
+		return false;
+	}
+	catch(std::logic_error& e)
+	{
+		// Packet caused a logic error. Not good.
+		throw net6::bad_packet(e.what());
+	}
 }
 
 template<typename Document, typename Selector>
