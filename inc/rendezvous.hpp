@@ -30,7 +30,7 @@ namespace obby
 class rendezvous
 {
 public:
-	typedef sigc::signal<const std::string&, const std::string&,
+	typedef sigc::signal<void, const std::string&, const std::string&,
 		unsigned int> signal_discover_type;
 
 	rendezvous();

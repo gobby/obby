@@ -64,6 +64,13 @@ sw_result obby::rendezvous::handle_publish_reply(sw_discovery discovery,
 	sw_discovery_oid oid, sw_discovery_publish_status status,
 	sw_opaque extra)
 {
+	if (status != SW_OKAY)
+	{
+		std::stringstream stream;
+		stream << "publish failed: " << status;
+		throw std::runtime_error(stream.str());
+	}
+	return SW_OKAY;
 }
 
 sw_result obby::rendezvous::handle_browse_reply(sw_discovery discovery,
@@ -71,6 +78,33 @@ sw_result obby::rendezvous::handle_browse_reply(sw_discovery discovery,
 	sw_uint32 interface_index, sw_const_string name, sw_const_string type,
 	sw_const_string domain, sw_opaque extra)
 {
+	sw_discovery session = static_cast<obby::rendezvous*>(extra)->m_session;
+	
+	switch(status)
+	{
+		case SW_DISCOVERY_BROWSE_INVALID:
+		{
+			throw std::runtime_error(
+				"sw_discovery failed within the callback");
+			break;
+		}
+
+		case SW_DISCOVERY_BROWSE_ADD_SERVICE:
+		{
+			sw_result result;
+			if ((result = sw_discovery_resolve(session, 0, name,
+				type, domain, &rendezvous::handle_resolve_reply,
+				extra, &oid)) != SW_OKAY)
+			{
+				std::stringstream stream;
+				stream << "resolve failed: " << result;
+				throw std::runtime_error(stream.str());
+			}
+			break;
+		}
+	}
+	
+	return SW_OKAY;
 }
 
 sw_result obby::rendezvous::handle_resolve_reply(sw_discovery discovery,
@@ -79,5 +113,10 @@ sw_result obby::rendezvous::handle_resolve_reply(sw_discovery discovery,
 	sw_port port, sw_octets text_record, sw_ulong text_record_len,
 	sw_opaque extra)
 {
+	char ipv4_address[16];
+	sw_ipv4_address_name(address, ipv4_address, 16);
+	static_cast<obby::rendezvous*>(extra)->discover_event().emit(
+		ipv4_address, name, port);
+	return SW_OKAY;
 }
 
