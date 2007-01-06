@@ -60,14 +60,26 @@ void obby::buffer::insert_nosync(const position& pos, const std::string& text)
 	assert(pos.get_line() < m_lines.size() );
 	assert(pos.get_col() <= m_lines[pos.get_line()].size() );
 
+	unsigned int col = pos.get_col();
+	std::string add;
+
 	std::string::size_type cur = 0, prev = 0;
 	std::vector<std::string>::size_type line = pos.get_line();
 	while((cur = text.find('\n', cur)) != std::string::npos)
 	{
+		if(line == pos.get_line() )
+		{
+			add = m_lines[line].substr(col);
+			m_lines[line].erase(col);
+		}
+
 		m_lines[line].append(&text[prev], cur - prev);
 		insert_lines(++line, 1);
+		col = 0;
 	}
-	m_lines[line].append(&text[prev], text.size() - prev);
+
+	m_lines[line].insert(col, &text[prev], text.size() - prev);
+	m_lines[line].append(add);
 }
 
 void obby::buffer::erase_nosync(const position& from, const position& to)
