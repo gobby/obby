@@ -81,6 +81,14 @@ LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libobby_la_SOURCES)
 DIST_SOURCES = $(libobby_la_SOURCES)
 pkgconfigDATA_INSTALL = $(INSTALL_DATA)
@@ -218,7 +226,8 @@ libobby_la_SOURCES = \
 	src/record.cpp \
 	src/insert_record.cpp \
 	src/delete_record.cpp \
-	src/buffer.cpp
+	src/buffer.cpp \
+	src/client_buffer.hpp
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = lobby-1.0.pc

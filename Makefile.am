@@ -16,7 +16,8 @@ libobby_la_SOURCES = \
 	src/record.cpp \
 	src/insert_record.cpp \
 	src/delete_record.cpp \
-	src/buffer.cpp
+	src/buffer.cpp \
+	src/client_buffer.hpp
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = lobby-1.0.pc

@@ -40,7 +40,7 @@ public:
 	typedef sigc::signal<void, const std::string&> signal_login_failed_type;
 	
 	client_buffer(const std::string& hostname, unsigned int port);
-	~client_bufer();
+	~client_buffer();
 
 	void select();
 	void select(unsigned int timeout);
@@ -61,7 +61,7 @@ protected:
 	signal_join_type m_signal_join;
 	signal_part_type m_signal_part;
 	signal_close_type m_signal_close;
-	signal_login_failed_type m_login_failed_event;
+	signal_login_failed_type m_signal_login_failed;
 };
 
 }
