@@ -19,6 +19,18 @@ AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AC_CACHE_SAVE
 
+# Let the user choose if he wants libhowl support or not (default to no).
+AC_ARG_WITH([howl],
+	    AS_HELP_STRING([--with-howl],
+			   [support Zeroconf through libhowl [[default=no]]]),
+	    [ac_cv_use_howl=$withval], [ac_cv_use_howl=no])
+AC_CACHE_CHECK([whether to use howl], [ac_cv_use_howl], [ac_cv_use_howl=no])
+if test "x$ac_cv_use_howl" != "xno" ; then
+	extra_requires=howl
+fi
+AM_CONDITIONAL(WITH_HOWL, test x$ac_cv_use_howl != xno)
+
+# WIN32 build checks
 AC_MSG_CHECKING([whether to enable WIN32 specific flags])
 if test "x$host_os" = "xmingw32" ; then
         win32=true
@@ -30,12 +42,14 @@ fi
 AM_CONDITIONAL(WIN32, test x$win32 = xtrue)
 
 # Checks for libraries.
-PKG_CHECK_MODULES([libobby], [sigc++-2.0 net6-1.0 howl])
+PKG_CHECK_MODULES([libobby], [sigc++-2.0 net6-1.0])
+if test "x$ac_cv_use_howl" != "xno" ; then
+	PKG_CHECK_MODULES([libhowl], [howl])
+fi
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 
 AC_CONFIG_FILES([Makefile])
-AC_OUTPUT([test/Makefile])
-AC_OUTPUT([lobby-1.0.pc])
+AC_OUTPUT([test/Makefile lobby-1.0.pc])
 

@@ -34,7 +34,7 @@ pkginclude_HEADERS = \
 	inc/client_buffer.hpp \
 	inc/server_buffer.hpp \
 	inc/host_buffer.hpp
-#	inc/rendezvous.hpp
+
 
 libobby_la_SOURCES = \
 	src/common.cpp \
@@ -56,7 +56,13 @@ libobby_la_SOURCES = \
 	src/client_buffer.cpp \
 	src/server_buffer.cpp \
 	src/host_buffer.cpp
-#	src/rendezvous.cpp
+
+if WITH_HOWL
+pkginclude_HEADERS += inc/rendezvous.hpp
+libobby_la_SOURCES += src/rendezvous.cpp
+libobby_la_LDFLAGS += $(libhowl_CFLAGS)
+libobby_la_LIBADD  += $(libhowl_LIBS)
+endif
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = lobby-1.0.pc
