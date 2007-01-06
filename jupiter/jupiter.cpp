@@ -409,10 +409,15 @@ public:
 
 	operation* get_operation() const { return m_operation; }
 	const vector_time& get_time() const { return m_timestamp; }
+
+	void set_site(unsigned int new_site) { site = new_site; }
+	unsigned int get_site() const { return site; }
 protected:
 	unsigned int m_from;
 	vector_time m_timestamp;
 	operation* m_operation;
+
+	unsigned int site;
 };
 
 class inclusion_transformation
@@ -461,7 +466,7 @@ public:
 	std::auto_ptr<record> local_op(const operation& op)
 	{
 		// Apply op locally
-		op.apply(m_document);
+		//op.apply(m_document);
 		// Generate request
 		std::auto_ptr<record> rec(new record(m_id, m_time, op) );
 		// Add to outgoing queue
@@ -473,18 +478,19 @@ public:
 
 	/** Receives a remote operation request.
 	 */
-	void remote_op(const record& rec)
+	std::auto_ptr<operation> remote_op(const record& rec)
 	{
 		// Check preconditions before transforming
 		check_preconditions(rec);
 		// Discard acknowledged operations
 		discard_operations(rec);
 		// Transform operation
-		std::auto_ptr<const operation> op(transform(*rec.get_operation() ));
+		std::auto_ptr<operation> op(transform(*rec.get_operation() ));
 		// Apply new operation
 		op->apply(m_document);
 		// Got new message
 		m_time.inc_remote_count();
+		return op;
 	}
 
 	/** Adds an operation to the ack request list.
@@ -571,6 +577,8 @@ public:
 		if(rec.get_time().get_local_count() != m_time.get_remote_count() )
 			throw std::logic_error("algorithm::check_preconditions (#3)");
 	}
+
+	unsigned int get_id() const { return m_id; }
 protected:
 	document& m_document;
 	inclusion_transformation m_it;
@@ -578,6 +586,97 @@ protected:
 	unsigned int m_id;
 	bool m_client;
 	acklist m_ack_list;
+};
+
+class client_proxy
+{
+public:
+	client_proxy(unsigned int id, std::string& document)
+	 : m_algo(document, id, false) { }
+
+	algorithm& get_algo() { return m_algo; }
+protected:
+	algorithm m_algo;
+};
+
+class server
+{
+public:
+	server(document& doc)
+	 : m_doc(doc), m_id_counter(0) { }
+
+	~server()
+	{
+		for(std::list<client_proxy*>::iterator iter = m_clients.begin(); iter != m_clients.end(); ++ iter)
+			delete *iter;
+	}
+
+	unsigned int add_client()
+	{
+		client_proxy* proxy = new client_proxy(++ m_id_counter, m_doc);
+		m_clients.push_back(proxy);
+		return m_id_counter;
+	}
+
+	std::list<record*> local_op(const operation& op)
+	{
+		std::list<record*> records;
+
+		// Apply on local document
+		op.apply(m_doc);
+
+		// Delegate to all clients
+		for(std::list<client_proxy*>::iterator iter = m_clients.begin(); iter != m_clients.end(); ++ iter)
+		{
+			std::auto_ptr<record> rec =
+				(*iter)->get_algo().local_op(op);
+			records.push_back(rec.get() );
+			rec.release();
+		}
+
+		return records;
+	}
+
+	std::list<record*> remote_op(const record& rec, unsigned int from)
+	{
+		std::list<record*> records;
+
+		// Find client_proxy from which the record comes from
+		client_proxy* from_proxy = NULL;
+		for(std::list<client_proxy*>::iterator iter = m_clients.begin(); iter != m_clients.end(); ++ iter)
+			if( (*iter)->get_algo().get_id() == from)
+				{ from_proxy = *iter; break; }
+
+		if(from_proxy == NULL)
+			throw std::logic_error("server::remote_op");
+
+		// Transform operation
+		std::auto_ptr<operation> op =
+			from_proxy->get_algo().remote_op(rec);	
+
+		// Delegate to other clients
+		for(std::list<client_proxy*>::iterator iter = m_clients.begin(); iter != m_clients.end(); ++ iter)
+		{
+			if( (*iter)->get_algo().get_id() != from)
+			{
+				std::auto_ptr<record> rec =
+					(*iter)->get_algo().local_op(*op);
+				records.push_back(rec.get() );
+				rec.release();
+			}
+			else
+			{
+				records.push_back(NULL);
+			}
+		}
+
+		return records;
+	}
+
+protected:
+	document& m_doc;
+	std::list<client_proxy*> m_clients;
+	unsigned int m_id_counter;
 };
 
 // TEST
@@ -594,11 +693,31 @@ public:
 		std::string init = fs[0];
 		std::string result = fs[2];
 
-		std::string doc1(init), doc2(init);
-		algorithm site1(doc1, 1, false), site2(doc2, 2, true);
+		// Client count
+		const unsigned int clients = 3;
 
-		std::list<record*> rec1list;
-		std::list<record*> rec2list;
+		// Build documents
+		std::string serv_doc(init);
+		std::vector<std::string> client_doc;
+		client_doc.resize(clients, init);
+
+		// Build algorithms
+		server serv(serv_doc);
+
+		// TODO: Add more client algos
+		std::vector<algorithm*> client_algos;
+		client_algos.resize(clients, NULL);
+
+		for(unsigned int i = 0; i < clients; ++ i)
+			client_algos[i] = new algorithm(client_doc[i], serv.add_client(), true);
+
+/*		std::string doc1(init), doc2(init);
+		algorithm site1(doc1, 1, false), site2(doc2, 2, true);*/
+
+		// Build recordlists
+		std::list<record*> serv_rec;
+		std::vector<std::list<record*> > client_rec;
+		client_rec.resize(clients);
 
 		std::vector<std::string> ops = split_line(fs[1], ",");
 		for(std::vector<std::string>::size_type i = 0; i < ops.size(); ++ i)
@@ -610,8 +729,8 @@ public:
 				throw std::runtime_error("Expected site->op");
 
 			unsigned long site = strtoul(vs[0].c_str(), NULL, 0);
-			if(site < 1 || site > 2)
-				throw std::runtime_error("Site must be 1 or 2");
+			if(site > client_rec.size() )
+				throw std::runtime_error("Site must be between 0 and client count");
 
 			std::vector<std::string> op = split_line(vs[1], "(");
 			if(op.size() != 2)
@@ -652,31 +771,71 @@ public:
 				if(errno != 0)
 					throw std::runtime_error("Expected numerical position");
 
-				if(site == 1)
-					new_op = new delete_operation(from, doc1.substr(from, to - from), NULL);
+				if(site == 0)
+					new_op = new delete_operation(from, serv_doc.substr(from, to - from), NULL);
 				else
-					new_op = new delete_operation(from, doc2.substr(from, to - from), NULL);
+					new_op = new delete_operation(from, client_doc[site - 1].substr(from, to - from), NULL);
 			}
 
 			// Apply OP
-			if(site == 1)
-				apply_local(site1, new_op, rec1list);
+			if(site == 0)
+			{
+				std::list<record*> records =
+					serv.local_op(*new_op);
+
+				if(records.size() != clients)
+					throw std::logic_error("records.size() != clients");
+
+				unsigned int i = 0;
+				for(std::list<record*>::iterator iter = records.begin(); i < clients; ++ i, ++ iter)
+					client_rec[i].push_back(*iter);
+			}
 			else
-				apply_local(site2, new_op, rec2list);
+			{
+				new_op->apply(client_doc[site-1]);
+				std::auto_ptr<record> rec = client_algos[site-1]->local_op(*new_op);
+				rec->set_site(site-1);
+				serv_rec.push_back(rec.get() );
+				rec.release();
+			}
 
 			delete new_op;
 		}
 
-		// Apply changes remotely
-		apply_remote(site1, rec2list);
-		apply_remote(site2, rec1list);
+		// Apply serverrecs remotely
+		for(std::list<record*>::iterator iter = serv_rec.begin(); iter != serv_rec.end(); ++ iter)
+		{
+			std::list<record*> records = serv.remote_op(**iter, client_algos[(*iter)->get_site()]->get_id() );
+			if(records.size() != clients)
+				throw std::logic_error("records.size() != clients");
+
+			unsigned int i = 0;
+			for(std::list<record*>::iterator iter = records.begin(); i < clients; ++ i, ++ iter)
+				if(*iter != NULL)
+					client_rec[i].push_back(*iter);
+		}
+
+		// Apply clientrecs
+		for(unsigned int i = 0; i < clients; ++ i)
+		{
+			for(std::list<record*>::iterator iter = client_rec[i].begin(); iter != client_rec[i].end(); ++ iter)
+			{
+				client_algos[i]->remote_op(**iter);
+			}
+		}
 
 		// Compare results
-		if(doc1 != doc2 || doc1 != result)
-			throw std::runtime_error("failed: Docs were \"" + doc1 + "\" and \"" + doc2 + "\", but expected \"" + result + "\"");
+		if(serv_doc != result)
+			throw std::runtime_error("Server document \"" + serv_doc + "\" differs from expected result \"" + result + "\"");
+
+		for(unsigned int i = 0; i < clients; ++ i)
+		{
+			if(client_doc[i] != result)
+				throw std::runtime_error("Client document \"" + client_doc[i] + "\" differs from expected result \"" + result + "\"");
+		}
 	}
 
-	static void apply_local(algorithm& algo, operation* op, std::list<record*>& reclist)
+/*	static void apply_local(algorithm& algo, operation* op, std::list<record*>& reclist)
 	{
 		std::auto_ptr<record> rec = algo.local_op(*op);
 		reclist.push_back(rec.get() );
@@ -689,7 +848,7 @@ public:
 		{
 			algo.remote_op(**iter);
 		}
-	}
+	}*/
 
 	static std::vector<std::string> split_line(const std::string& line, const std::string& separator)
 	{
