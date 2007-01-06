@@ -43,7 +43,7 @@ class basic_server_document_info
 public:
 	basic_server_document_info(
 		const basic_server_buffer<selector_type>& buffer,
-		const net6::basic_server<selector_type>& net,
+		net6::basic_server<selector_type>& net,
 		const user* owner, unsigned int id,
 		const std::string& title
 	);
@@ -83,6 +83,14 @@ public:
 	virtual void obby_user_part(const user& user);
 
 protected:
+	/** Internal function that subscribes a user to this document.
+	 */
+	virtual void user_subscribe(const user& user);
+
+	/** Internal function that unsubscribes a user from this document.
+	 */
+	virtual void user_unsubscribe(const user& user);
+
 	/** Inserts text into the document. The operation is performed by
 	 * <em>author</em>.
 	 */
@@ -135,12 +143,17 @@ protected:
 	virtual void on_jupiter_remote(const record& rec, const user& user,
 	                               const user* from);
 
-	jupiter_server m_jupiter;
+	std::auto_ptr<jupiter_server> m_jupiter;
 
-private:
+public:
 	/** Returns the buffer to which this document_info belongs.
 	 */
 	const basic_server_buffer<selector_type>& get_buffer() const;
+
+private:
+	/** Returns the underlaying net6 object.
+	 */
+	net6::basic_server<selector_type>& get_net6();
 
 	/** Returns the underlaying net6 object.
 	 */
@@ -152,7 +165,7 @@ typedef basic_server_document_info<net6::selector> server_document_info;
 template<typename selector_type>
 basic_server_document_info<selector_type>::basic_server_document_info(
 	const basic_server_buffer<selector_type>& buffer,
-	const net6::basic_server<selector_type>& net,
+	net6::basic_server<selector_type>& net,
 	const user* owner, unsigned int id,
 	const std::string& title
 ) : basic_document_info<selector_type>(buffer, net, owner, id, title)
@@ -160,18 +173,27 @@ basic_server_document_info<selector_type>::basic_server_document_info(
 	// Assign document content
 	basic_document_info<selector_type>::assign_document();
 
+	// Create jupiter server implementation
+	m_jupiter.reset(new jupiter_server(
+		*basic_document_info<selector_type>::m_document
+	) );
+
 	// Owner is subscribed implicitely
 	if(owner != NULL)
+	{
 		basic_document_info<selector_type>::user_subscribe(*owner);
+		m_jupiter->client_add(*owner);
+	}
 
-	m_jupiter.local_event().connect(
+	// Connect to signals
+	m_jupiter->local_event().connect(
 		sigc::mem_fun(
 			*this,
 			&basic_server_document_info::on_jupiter_local
 		)
 	);
 
-	m_jupiter.remote_event().connect(
+	m_jupiter->remote_event().connect(
 		sigc::mem_fun(
 			*this,
 			&basic_server_document_info::on_jupiter_remote
@@ -205,7 +227,7 @@ void basic_server_document_info<selector_type>::
 	subscribe_user(const user& user)
 {
 	// Subscribe given user
-	basic_document_info<selector_type>::user_subscribe(user);
+	user_subscribe(user);
 
 	const net6::user& user6 = user.get_net6();
 	unsigned int line_count = basic_document_info<selector_type>::
@@ -227,7 +249,7 @@ void basic_server_document_info<selector_type>::
 
 	// Tell clients
 	document_packet pack(*this, "subscribe");
-	pack << user;
+	pack << &user;
 	get_net6().send(pack);
 }
 
@@ -236,11 +258,11 @@ void basic_server_document_info<selector_type>::
 	unsubscribe_user(const user& user)
 {
 	// Unsubscribe user
-	basic_document_info<selector_type>::user_unsubscribe(user);
+	user_unsubscribe(user);
 
 	// Tell clients
 	document_packet pack(*this, "unsubscribe");
-	pack << user;
+	pack << &user;
 	get_net6().send(pack);
 }
 
@@ -248,7 +270,7 @@ template<typename selector_type>
 void basic_server_document_info<selector_type>::
 	on_net_packet(const document_packet& pack, const user& from)
 {
-	if(!execute_packet(pack) )
+	if(!execute_packet(pack, from) )
 	{
 		throw net6::basic_parameter::bad_value(
 			"Unexpected command: " + pack.get_command()
@@ -260,14 +282,32 @@ template<typename selector_type>
 void basic_server_document_info<selector_type>::obby_user_join(const user& user)
 {
 	basic_document_info<selector_type>::obby_user_join(user);
-	m_jupiter.client_add(user);
 }
 
 template<typename selector_type>
 void basic_server_document_info<selector_type>::obby_user_part(const user& user)
 {
 	basic_document_info<selector_type>::obby_user_part(user);
-	m_jupiter.client_remove(user);
+}
+
+template<typename selector_type>
+void basic_server_document_info<selector_type>::
+	user_subscribe(const user& user)
+{
+	// Call base function
+	basic_document_info<selector_type>::user_subscribe(user);
+	// Add client to jupiter
+	m_jupiter->client_add(user);
+}
+
+template<typename selector_type>
+void basic_server_document_info<selector_type>::
+	user_unsubscribe(const user& user)
+{
+	// Remove client from jupiter
+	m_jupiter->client_remove(user);
+	// Call base function
+	basic_document_info<selector_type>::user_unsubscribe(user);
 }
 
 template<typename selector_type>
@@ -275,7 +315,7 @@ void basic_server_document_info<selector_type>::
 	insert_impl(position pos, const std::string& text, const user* author)
 {
 	insert_operation op(pos, text);
-	m_jupiter.local_op(op, author);
+	m_jupiter->local_op(op, author);
 }
 
 template<typename selector_type>
@@ -285,13 +325,13 @@ void basic_server_document_info<selector_type>::
 	// TODO: unreversible delete_operation only with len
 	delete_operation op(
 		pos,
-		basic_document_info<selector_type>::get_document().get_slice(
+		basic_document_info<selector_type>::get_content().get_slice(
 			pos,
 			len
 		)
 	);
 
-	m_jupiter.local_op(op, author);
+	m_jupiter->local_op(op, author);
 }
 
 template<typename selector_type>
@@ -345,7 +385,7 @@ void basic_server_document_info<selector_type>::
 	unsigned int index = 2;
 	record rec(pack, index);
 
-	m_jupiter.remote_op(rec, from);
+	m_jupiter->remote_op(rec, &from);
 }
 
 template<typename selector_type>
@@ -384,8 +424,17 @@ template<typename selector_type>
 const basic_server_buffer<selector_type>&
 basic_server_document_info<selector_type>::get_buffer() const
 {
-	return dynamic_cast<basic_server_buffer<selector_type>&>(
+	return dynamic_cast<const basic_server_buffer<selector_type>&>(
 		basic_document_info<selector_type>::m_buffer
+	);
+}
+
+template<typename selector_type>
+net6::basic_server<selector_type>&
+basic_server_document_info<selector_type>::get_net6()
+{
+	return dynamic_cast<net6::basic_server<selector_type>&>(
+		basic_document_info<selector_type>::m_net
 	);
 }
 
@@ -393,7 +442,7 @@ template<typename selector_type>
 const net6::basic_server<selector_type>&
 basic_server_document_info<selector_type>::get_net6() const
 {
-	return dynamic_cast<net6::basic_server<selector_type>&>(
+	return dynamic_cast<const net6::basic_server<selector_type>&>(
 		basic_document_info<selector_type>::m_net
 	);
 }

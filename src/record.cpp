@@ -30,11 +30,13 @@ obby::record::record(const vector_time& timestamp, operation* op)
 
 obby::record::record(const net6::packet& pack, unsigned int& index)
  : m_timestamp(
-	pack.get_param(index ++).as<int>(),
-	pack.get_param(index ++).as<int>()
+	pack.get_param(index).as<int>(),
+	pack.get_param(index + 1).as<int>()
    ),
-   m_operation(operation::from_packet(pack, index).release() )
+   m_operation(NULL)
 {
+	index += 2;
+	m_operation = operation::from_packet(pack, index);
 }
 
 const obby::operation& obby::record::get_operation() const

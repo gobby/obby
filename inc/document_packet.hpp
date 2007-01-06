@@ -42,7 +42,7 @@ public:
 		*this << info << command;
 	}
 
-	document_packet(const net6::packet& base);
+	explicit document_packet(const net6::packet& base);
 
 	const std::string& get_command() const;
 	const net6::basic_parameter& get_param(unsigned int index) const;

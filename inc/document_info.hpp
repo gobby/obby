@@ -51,7 +51,7 @@ public:
 	> user_iterator;
 
 	basic_document_info(const basic_buffer<selector_type>& buffer,
-	                    const net6::basic_object<selector_type>& net,
+	                    net6::basic_object<selector_type>& net,
 	                    const user* owner, unsigned int id,
 	                    const std::string& title);
 
@@ -155,7 +155,7 @@ protected:
 	void release_document();
 
 	const basic_buffer<selector_type>& m_buffer;
-	const net6::basic_object<selector_type>& m_net;
+	net6::basic_object<selector_type>& m_net;
 
 	const user* m_owner;
 	unsigned int m_id;
@@ -168,10 +168,16 @@ protected:
 	signal_subscribe_type m_signal_subscribe;
 	signal_unsubscribe_type m_signal_unsubscribe;
 
-private:
+public:
 	/** Returns the buffer to which this document_info belongs.
 	 */
 	const basic_buffer<selector_type>& get_buffer() const;
+
+private:
+	/** Returns the underlaying net6 object through which requests are
+	 * transmitted.
+	 */
+	net6::basic_object<selector_type>& get_net6();
 
 	/** Returns the underlaying net6 object through which requests are
 	 * transmitted.
@@ -237,7 +243,7 @@ typedef basic_document_info<net6::selector> document_info;
 template<typename selector_type>
 basic_document_info<selector_type>::
 	basic_document_info(const basic_buffer<selector_type>& buffer,
-	                    const net6::basic_object<selector_type>& net,
+	                    net6::basic_object<selector_type>& net,
 	                    const user* owner, unsigned int id,
 	                    const std::string& title)
  : m_buffer(buffer), m_net(net), m_owner(owner), m_id(id), m_title(title)
@@ -393,6 +399,13 @@ const basic_buffer<selector_type>&
 basic_document_info<selector_type>::get_buffer() const
 {
 	return m_buffer;
+}
+
+template<typename selector_type>
+net6::basic_object<selector_type>&
+basic_document_info<selector_type>::get_net6()
+{
+	return m_net;
 }
 
 template<typename selector_type>

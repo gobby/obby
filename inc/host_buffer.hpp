@@ -81,8 +81,7 @@ public:
 	 * the resulting obby::document.
 	 */
 	virtual void document_create(const std::string& title,
-	                             const std::string& content,
-	                             bool open_as_edited = false);
+	                             const std::string& content);
 
 	/** Sets a new colour for the local user.
 	 */
@@ -221,8 +220,7 @@ void basic_host_buffer<selector_type>::send_message(const std::string& message)
 
 template<typename selector_type>
 void basic_host_buffer<selector_type>::
-	document_create(const std::string& title, const std::string& content,
-	                bool open_as_edited)
+	document_create(const std::string& title, const std::string& content)
 {
 	if(m_self == NULL)
 		throw std::logic_error("obby::host_buffer::document_create");
@@ -232,7 +230,7 @@ void basic_host_buffer<selector_type>::
 	// Create document with local user as owner instead of NULL indicating
 	// that it is the server's docuent.
 	basic_server_buffer<selector_type>::document_create_impl(
-		title, content, m_self, id, open_as_edited
+		title, content, m_self, id
 	);
 }
 

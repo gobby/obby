@@ -40,7 +40,7 @@ class basic_host_document_info :
 public:
 	basic_host_document_info(
 		const basic_host_buffer<selector_type>& buffer,
-		const net6::basic_host<selector_type>& net,
+		net6::basic_host<selector_type>& net,
 		const user* owner, unsigned int id,
 		const std::string& title
 	);
@@ -67,13 +67,26 @@ public:
 	 */
 	virtual void unsubscribe();
 
-private:
+protected:
+	/** Internally subscribes a user to this document.
+	 */
+	virtual void user_subscribe(const user& user);
+
+	/** Internally unsubscribes a user from this document.
+	 */
+	virtual void user_unsubscribe(const user& user);
+
+public:
 	/** Returns the buffer to which this document_info belongs.
 	 */
 	const basic_host_buffer<selector_type>& get_buffer() const;
 
-	/** Returns the underlaying net6 object through which requests are
-	 * transmitted.
+private:
+	/** Returns the underlaying net6 object.
+	 */
+	net6::basic_host<selector_type>& get_net6();
+
+	/** Returns the underlaying net6 object.
 	 */
 	const net6::basic_host<selector_type>& get_net6() const;
 };
@@ -83,13 +96,22 @@ typedef basic_host_document_info<net6::selector> host_document_info;
 template<typename selector_type>
 basic_host_document_info<selector_type>::basic_host_document_info(
 	const basic_host_buffer<selector_type>& buffer,
-	const net6::basic_host<selector_type>& net,
+	net6::basic_host<selector_type>& net,
 	const user* owner, unsigned int id,
 	const std::string& title
 ) : basic_document_info<selector_type>(buffer, net, owner, id, title),
     basic_local_document_info<selector_type>(buffer, net, owner, id, title),
     basic_server_document_info<selector_type>(buffer, net, owner, id, title)
 {
+	// Server adds owner automagically to jupiter algo. If the local user
+	// is the owner, it does not need to be added to jupiter.
+	// TODO: Find a better solution here, maybe another server_document_info
+	// ctor
+	if(&buffer.get_self() == owner)
+	{
+		basic_server_document_info<selector_type>::
+			m_jupiter->client_remove(*owner);
+	}
 }
 
 template<typename selector_type>
@@ -122,7 +144,7 @@ void basic_host_document_info<selector_type>::
 {
 	// TODO: Call a base-class method that does not try to sync the document
 	// contents to the user, it is not senseful in our case.
-	basic_document_info<selector_type>::
+	basic_server_document_info<selector_type>::
 		subscribe_user(get_buffer().get_self() );
 }
 
@@ -130,8 +152,44 @@ template<typename selector_type>
 void basic_host_document_info<selector_type>::
 	unsubscribe()
 {
-	basic_document_info<selector_type>::
+	// TODO: Same here
+	basic_server_document_info<selector_type>::
 		unsubscribe_user(get_buffer().get_self() );
+}
+
+template<typename selector_type>
+void basic_host_document_info<selector_type>::
+	user_subscribe(const user& user)
+{
+	// TODO: Clean this up by a function like add_client_to_jupiter /
+	// remove_client_from_jupiter that the host may overload to prevent
+	// from adding the local client to jupiter
+
+	// Do not call server function because it will add the client to
+	// jupiter in any case.
+	basic_document_info<selector_type>::user_subscribe(user);
+
+	// Add client to jupiter if it is not the local client
+	if(&user != &get_buffer().get_self() )
+	{
+		basic_server_document_info<selector_type>::
+			m_jupiter->client_add(user);
+	}
+}
+
+template<typename selector_type>
+void basic_host_document_info<selector_type>::
+	user_unsubscribe(const user& user)
+{
+	// Remove client from jupiter if is is not the local client
+	if(&user != &get_buffer().get_self() )
+	{
+		basic_server_document_info<selector_type>::
+			m_jupiter->client_remove(user);
+	}
+
+	// Call base function
+	basic_document_info<selector_type>::user_unsubscribe(user);
 }
 
 template<typename selector_type>
@@ -140,6 +198,15 @@ basic_host_document_info<selector_type>::get_buffer() const
 {
 	return dynamic_cast<const basic_host_buffer<selector_type>&>(
 		basic_document_info<selector_type>::m_buffer
+	);
+}
+
+template<typename selector_type>
+net6::basic_host<selector_type>&
+basic_host_document_info<selector_type>::get_net6()
+{
+	return dynamic_cast<net6::basic_host<selector_type>&>(
+		basic_document_info<selector_type>::m_net
 	);
 }
 

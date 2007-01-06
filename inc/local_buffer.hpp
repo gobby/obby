@@ -73,13 +73,6 @@ public:
 	signal_user_colour_failed_type user_colour_failed_event() const;
 
 protected:
-        /** Creates a new document info object according to the current type
-	 * of buffer.
-	 */
-	virtual document_info* new_document_info(const user* owner,
-	                                         unsigned int id,
-	                                         const std::string& title) = 0;
-
 	signal_user_colour_failed_type m_signal_user_colour_failed;
 };
 

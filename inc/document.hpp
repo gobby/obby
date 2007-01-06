@@ -51,16 +51,16 @@ public:
 	std::string get_slice(position from, position len) const;
 
 	/** Inserts text into the document.
-	 * @pos Position where to insert text.
-	 * @text Text to insert.
-	 * @author User that has written this text.
+	 * @param pos Position where to insert text.
+	 * @param text Text to insert.
+	 * @param author User that has written this text.
 	 */
 	void insert(position pos, const std::string& text, const user* author);
 
 	/** Removes text from the document.
-	 * @pos Beginning of the range where to delete text.
-	 * @len Amount of bytes to delete.
-	 * @author User who deleted the text.
+	 * @param pos Beginning of the range where to delete text.
+	 * @param len Amount of bytes to delete.
+	 * @param author User who deleted the text.
 	 */
 	void erase(position pos, position len, const user* author);
 

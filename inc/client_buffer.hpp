@@ -36,7 +36,10 @@ template<typename selector_type>
 class basic_client_buffer : virtual public basic_local_buffer<selector_type>
 {
 public:
-	typedef basic_client_document_info<selector_type> document_info;
+	typedef typename basic_buffer<selector_type>::base_document_info
+		base_document_info;
+	typedef basic_client_document_info<selector_type>
+		document_info;
 
 	typedef net6::default_accumulator<bool, false> password_accumulator;
 
@@ -83,14 +86,13 @@ public:
 	 * authorised the creation process.
 	 */
 	virtual void document_create(const std::string& title,
-	                             const std::string& content = "",
-	                             bool open_as_edited = false);
+	                             const std::string& content = "");
 
 	/** Requests the deletion of a document at the server.
 	 * signal_document_remove will be emitted if the server
 	 * authorized the deletion.
 	 */
-	virtual void document_remove(document_info& doc);
+	virtual void document_remove(base_document_info& doc);
 
 	/** Looks for a document with the given ID which belongs to the user
 	 * with the given owner ID. Note that we do not take a real user object
@@ -299,8 +301,7 @@ void basic_client_buffer<selector_type>::
 
 template<typename selector_type>
 void basic_client_buffer<selector_type>::
-	document_create(const std::string& title, const std::string& content,
-	                bool open_as_edited)
+	document_create(const std::string& title, const std::string& content)
 {
 	// TODO: Special handling if not connected
 	// Choose new ID
@@ -317,19 +318,20 @@ void basic_client_buffer<selector_type>::
 	// Assign new document to info, subscribe local user
 	// TODO: Do it otherwhere. Maybe another client_document_info
 	// constructor that is called somehow...
-	info.obby_local_init(content, open_as_edited);
-	info.obby_sync_subscribe(*m_self);
+	info.obby_local_init(content);
+	// info.obby_sync_subscribe(*m_self);
 	// Emit subscription signal: TODO: Do it in obby_sync_subscribe
+	// and/or obby_local_init
 	info.subscribe_event().emit(*m_self);
 	// Tell others
 	net6::packet request_pack("obby_document_create");
-	request_pack << id << title << content << open_as_edited;
+	request_pack << id << title << content;
 	net6_client().send(request_pack);
 }
 
 template<typename selector_type>
 void basic_client_buffer<selector_type>::
-	document_remove(document_info& document)
+	document_remove(base_document_info& document)
 {
 	// Send remove request
 	net6::packet request_pack("obby_document_remove");
@@ -665,14 +667,17 @@ void basic_client_buffer<selector_type>::
 	}
 
 	// Add new document
-	document_info& new_doc =
-		basic_buffer<selector_type>::document_add(owner, id, title);
+	document_info& new_doc = dynamic_cast<document_info&>(
+		basic_buffer<selector_type>::document_add(owner, id, title)
+	);
 
 	// TODO: document_add should emit this signal
 	basic_buffer<selector_type>::m_signal_document_insert.emit(new_doc);
 	// Emit subscription signal for owner
 	// TODO: Should be done implicitly by calling some other function, like
-	// new_doc.obby_sync_subscribe(owner)
+	// new_doc.obby_sync_subscribe(owner) or, better, another
+	// client_document_info constructor
+	new_doc.obby_sync_subscribe(*owner);
 	new_doc.subscribe_event().emit(*owner);
 }
 
@@ -848,7 +853,7 @@ void basic_client_buffer<selector_type>::
 
 	// TODO: Rename this function. Think about providing a signal that may
 	// be emitted.
-	info.on_net_record(document_packet(pack) );
+	info.on_net_packet(document_packet(pack) );
 }
 
 template<typename selector_type>

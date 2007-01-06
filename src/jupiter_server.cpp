@@ -76,6 +76,8 @@ void obby::jupiter_server::remote_op(const record& rec, const user* from)
 
 	// Transform operation
 	std::auto_ptr<operation> op = iter->second->remote_op(rec);
+	// Apply to local document
+	op->apply(m_document, from);
 
 	// Delegate to other clients
 	for(iter = m_clients.begin(); iter != m_clients.end(); ++ iter)

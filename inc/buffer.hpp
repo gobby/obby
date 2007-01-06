@@ -38,6 +38,7 @@ template<typename selector_type>
 class basic_buffer : private net6::non_copyable, public sigc::trackable
 {
 public:
+	typedef basic_document_info<selector_type> base_document_info;
 	typedef basic_document_info<selector_type> document_info;
 
 	// Document iterator typedef
@@ -87,13 +88,12 @@ public:
 	 * signal_document_insert will be emitted if it has been created.
 	 */
 	virtual void document_create(const std::string& title,
-	                             const std::string& content,
-	                             bool open_as_edited) = 0;
+	                             const std::string& content) = 0;
 
 	/** Removes an existing document. signal_document_remove will be
 	 * emitted if the document has been removed.
 	 */
-	virtual void document_remove(document_info& doc) = 0;
+	virtual void document_remove(base_document_info& doc) = 0;
 	
 	/** Looks for a document with the given ID which belongs to the user
 	 * with the given owner ID. Note that we do not take a real user object

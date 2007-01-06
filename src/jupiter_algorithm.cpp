@@ -184,7 +184,7 @@ void obby::jupiter_algorithm::check_preconditions(const record& rec) const
 	}
 
 	// #3
-	if(rec.get_time().get_local() > m_time.get_remote() )
+	if(rec.get_time().get_local() != m_time.get_remote() )
 	{
 		throw std::logic_error(
 			"obby::jupiter_algorithm::check_preconditions (#3)"

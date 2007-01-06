@@ -42,7 +42,7 @@ class basic_client_document_info
 public:
 	basic_client_document_info(
 		const basic_client_buffer<selector_type>& buffer,
-		const net6::basic_client<selector_type>& net,
+		net6::basic_client<selector_type>& net,
 		const user* owner, unsigned int id,
 	        const std::string& title
 	);
@@ -139,10 +139,15 @@ protected:
 
 	std::auto_ptr<jupiter_client> m_jupiter;
 
-private:
+public:
 	/** Returns the buffer to which this document_info belongs.
 	 */
 	const basic_client_buffer<selector_type>& get_buffer() const;
+
+private:
+	/** Returns the underlaying net6 obejct.
+	 */
+	net6::basic_client<selector_type>& get_net6();
 
 	/** Returns the underlaying net6 obejct.
 	 */
@@ -154,10 +159,11 @@ typedef basic_client_document_info<net6::selector> client_document_info;
 template<typename selector_type>
 basic_client_document_info<selector_type>::basic_client_document_info(
 	const basic_client_buffer<selector_type>& buffer,
-	const net6::basic_client<selector_type>& net,
+	net6::basic_client<selector_type>& net,
 	const user* owner, unsigned int id,
 	const std::string& title
-) : basic_local_document_info<selector_type>(buffer, net, owner, id, title)
+) : basic_document_info<selector_type>(buffer, net, owner, id, title),
+    basic_local_document_info<selector_type>(buffer, net, owner, id, title)
 {
 }
 
@@ -190,7 +196,7 @@ void basic_client_document_info<selector_type>::
 	// TODO: unreversible delete_operation only with len
 	delete_operation op(
 		pos,
-		basic_document_info<selector_type>::get_document().get_slice(
+		basic_document_info<selector_type>::get_content().get_slice(
 			pos,
 			len
 		)
@@ -278,7 +284,8 @@ void basic_client_document_info<selector_type>::
 	// Subscribe local user
 	user_subscribe(get_buffer().get_self() );
 	// Add initial content
-	basic_document_info<selector_type>::m_document->insert(content, NULL);
+	basic_document_info<selector_type>::
+		m_document->insert(0, content, NULL);
 }
 
 template<typename selector_type>
@@ -300,11 +307,9 @@ void basic_client_document_info<selector_type>::user_subscribe(const user& user)
 		}
 
 		// Create jupiter algorithm to merge changes
-		m_jupiter.reset(
-			new jupiter_client(
-				basic_document_info<selector_type>::m_document
-			)
-		);
+		m_jupiter.reset(new jupiter_client(
+			*basic_document_info<selector_type>::m_document
+		) );
 
 		// Connect signal handlers
 		m_jupiter->local_event().connect(
@@ -451,7 +456,7 @@ void basic_client_document_info<selector_type>::
 	const user* new_user =
 		pack.get_param(0).net6::basic_parameter::as<user*>();
 
-	basic_document_info<selector_type>::user_subscribe(*new_user);
+	user_subscribe(*new_user);
 }
 
 template<typename selector_type>
@@ -461,7 +466,7 @@ void basic_client_document_info<selector_type>::
 	const user* old_user =
 		pack.get_param(0).net6::basic_parameter::as<user*>();
 
-	basic_document_info<selector_type>::user_unsubscribe(*old_user);
+	user_unsubscribe(*old_user);
 }
 
 template<typename selector_type>
@@ -481,6 +486,15 @@ basic_client_document_info<selector_type>::get_buffer() const
 {
 	return dynamic_cast<const basic_client_buffer<selector_type>&>(
 		basic_document_info<selector_type>::m_buffer
+	);
+}
+
+template<typename selector_type>
+net6::basic_client<selector_type>&
+basic_client_document_info<selector_type>::get_net6()
+{
+	return dynamic_cast<net6::basic_client<selector_type>&>(
+		basic_document_info<selector_type>::m_net
 	);
 }
 

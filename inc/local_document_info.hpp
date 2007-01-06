@@ -39,7 +39,7 @@ class basic_local_document_info
 public:
 	basic_local_document_info(
 		const basic_local_buffer<selector_type>& buffer,
-		const net6::basic_local<selector_type>& net,
+		net6::basic_local<selector_type>& net,
 		const user* owner, unsigned int id,
 		const std::string& title
 	);
@@ -54,10 +54,15 @@ public:
 	 */
 	virtual void unsubscribe() = 0;
 
-private:
+public:
 	/** Returns the buffer this document belongs to.
 	 */
 	const basic_local_buffer<selector_type>& get_buffer() const;
+
+private:
+	/** Returns the underlaying net6 object.
+	 */
+	net6::basic_local<selector_type>& get_net6();
 
 	/** Returns the underlaying net6 object.
 	 */
@@ -69,7 +74,7 @@ typedef basic_local_document_info<net6::selector> local_document_info;
 template<typename selector_type>
 basic_local_document_info<selector_type>::basic_local_document_info(
 	const basic_local_buffer<selector_type>& buffer,
-	const net6::basic_local<selector_type>& net,
+	net6::basic_local<selector_type>& net,
 	const user* owner, unsigned int id,
 	const std::string& title
 ) : basic_document_info<selector_type>(buffer, net, owner, id, title)
@@ -82,6 +87,15 @@ basic_local_document_info<selector_type>::get_buffer() const
 {
 	return dynamic_cast<const basic_local_buffer<selector_type>&>(
 		basic_document_info<selector_type>::m_buffer
+	);
+}
+
+template<typename selector_type>
+net6::basic_local<selector_type>&
+basic_local_document_info<selector_type>::get_net6()
+{
+	return dynamic_cast<net6::basic_local<selector_type>&>(
+		basic_document_info<selector_type>::m_net
 	);
 }
 

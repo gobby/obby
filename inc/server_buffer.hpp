@@ -35,7 +35,10 @@ template<typename selector_type>
 class basic_server_buffer : virtual public basic_buffer<selector_type>
 {
 public: 
-	typedef basic_server_document_info<selector_type> document_info;
+	typedef typename basic_buffer<selector_type>::base_document_info
+		base_document_info;
+	typedef basic_server_document_info<selector_type>
+		document_info;
 
 	typedef sigc::signal<void, const net6::user&> signal_connect_type;
 	typedef sigc::signal<void, const net6::user&> signal_disconnect_type;
@@ -59,12 +62,11 @@ public:
 	 * the resulting obby::document_info.
 	 */
 	virtual void document_create(const std::string& title,
-	                             const std::string& content = "",
-	                             bool open_as_edited = false);
+	                             const std::string& content = "");
 
 	/** Removes an existing document.
 	 */
-	virtual void document_remove(document_info& doc);
+	virtual void document_remove(base_document_info& doc);
 
 	/** Looks for a document with the given ID which belongs to the user
 	 * with the given owner ID. Note that we do not take a real user object
@@ -115,8 +117,7 @@ protected:
 	void document_create_impl(const std::string& title,
 	                          const std::string& content,
 	                          const obby::user* owner,
-	                          unsigned int id,
-	                          bool open_as_edited = false);
+	                          unsigned int id);
 
 	/** Internal function send a message to all users that comes from
 	 * the user <em>writer</em>.
@@ -267,8 +268,7 @@ void basic_server_buffer<selector_type>::
 
 template<typename selector_type>
 void basic_server_buffer<selector_type>::
-	document_create(const std::string& title, const std::string& content,
-	                bool open_as_edited)
+	document_create(const std::string& title, const std::string& content)
 {
 	// TODO: m_doc_counter should not be declared in basic_buffer
 	// but client_buffer / server_buffer separately
@@ -276,11 +276,12 @@ void basic_server_buffer<selector_type>::
 
 	// Create the document with the special owner NULL which means that
 	// this document was created by the server.
-	document_create_impl(title, content, NULL, id, open_as_edited);
+	document_create_impl(title, content, NULL, id);
 }
 
 template<typename selector_type>
-void basic_server_buffer<selector_type>::document_remove(document_info& info)
+void basic_server_buffer<selector_type>::
+	document_remove(base_document_info& info)
 {
 	// Emit unsubscribe signal for all users that were
 	// subscribed to this document
@@ -296,7 +297,7 @@ void basic_server_buffer<selector_type>::document_remove(document_info& info)
 
 	// Tell other clients about removal
 	net6::packet remove_pack("obby_document_remove");
-	remove_pack << info;
+	remove_pack << static_cast<basic_document_info<selector_type>&>(info);
 	net6_server().send(remove_pack);
 
 	// Delete document
@@ -343,7 +344,7 @@ template<typename selector_type>
 void basic_server_buffer<selector_type>::
 	document_create_impl(const std::string& title,
 	                     const std::string& content, const user* owner,
-	                     unsigned int id, bool open_as_edited)
+	                     unsigned int id)
 {
 	// Create document
 	document_info& info = dynamic_cast<document_info&>(
@@ -369,14 +370,23 @@ void basic_server_buffer<selector_type>::
 			net6_server().send(pack, iter->get_net6() );
 	}
 
-	// Emit insertion signal (TODO: Should be done by document_add)
-	basic_buffer<selector_type>::m_signal_document_insert.emit(info);
 	// TODO: Call another document_info constructor because normally, this
-	// call would perform a sync to clients. Currently, no client is sub-
-	// scribed, but it should be cleaner the other way...
+	// call would perform a sync to clients. Currently, no client except of
+	// the owner is subscribed (which causes problems on files with content
+	// because the owner gets the content twice), but it should be cleaner
+	// the other way...
 	// Additionally, the host_document would not mark the new document
 	// as written by itself...
 	info.insert(0, content);
+	// Emit insertion signal (TODO: Should be done by document_add, but make
+	// sure that the content has been inserted before - like a ctor or
+	// something).
+	// TODO: Maybe use two document_info constructors - one with content
+	// for immediately implicit subscriptions and one for others... at least
+	// on client side. Server should always subscribe owner...)
+	// TODO: Make also sure that a subscribe_event for the owner is emitted
+	// _after_ the document_insert signal.
+	basic_buffer<selector_type>::m_signal_document_insert.emit(info);
 	// Emit subscription signal for the owner.
 	// TODO: Do this elsewhere. (Should already be done in infos ctor, but
 	// nobody can be connected at this point - is this necessary?)
@@ -425,7 +435,7 @@ void basic_server_buffer<selector_type>::
 	             << token
 	             << m_public.get_n().get_str(36)
 	             << m_public.get_k().get_str(36);
-	net6_server().send(welcome_pack);
+	net6_server().send(welcome_pack, user6);
 
 	// User connected
 	m_signal_connect.emit(user6);
@@ -722,7 +732,7 @@ bool basic_server_buffer<selector_type>::
 	if(pack.get_command() == "obby_user_colour")
 		{ on_net_user_colour(pack, from); return true; }
 
-	if(pack.get_command() == "obby_user_document")
+	if(pack.get_command() == "obby_document")
 		{ on_net_document(pack, from); return true; }
 }
 
@@ -736,10 +746,8 @@ void basic_server_buffer<selector_type>::
 		pack.get_param(1).net6::basic_parameter::as<std::string>();
 	const std::string& content =
 		pack.get_param(2).net6::basic_parameter::as<std::string>();
-	bool open_as_edited =
-		pack.get_param(3).net6::basic_parameter::as<bool>();
 
-	document_create_impl(title, content, &from, id, open_as_edited);
+	document_create_impl(title, content, &from, id);
 }
 
 template<typename selector_type>
@@ -821,7 +829,7 @@ void basic_server_buffer<selector_type>::
 
 	// TODO: Rename this function. Think about providing a signal that may
 	// be emitted.
-	info.on_net_record(pack, from);
+	info.on_net_packet(document_packet(pack), from);
 }
 
 template<typename selector_type>
