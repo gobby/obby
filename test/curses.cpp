@@ -362,11 +362,12 @@ void curses_editor::on_sync()
 	    iter != m_buffer.document_end();
 	    ++ iter)
 	{
-		m_screen = new screen(*iter);
-		m_document = &(*iter);
+		on_document_insert(*iter);
+/*		m_screen = new screen(*iter);
+		m_document = &(*iter);*/
 	}
-		
-	// TODO: Sync document content
+
+	m_screen->on_insert(0, m_document->get_whole_buffer() );
 	m_synced = true;
 }
 
