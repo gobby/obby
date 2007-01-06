@@ -20,6 +20,7 @@
 #define _OBBY_CLIENT_BUFFER_HPP_
 
 #include "error.hpp"
+#include "rsa.hpp"
 #include "local_buffer.hpp"
 #include "client_document_info.hpp"
 
@@ -33,6 +34,7 @@ class client_buffer : public local_buffer,
                       public sigc::trackable
 {
 public:
+	typedef sigc::signal<void>               signal_welcome_type;
 	typedef sigc::signal<void>               signal_sync_type;
 	typedef sigc::signal<void>               signal_close_type;
 	typedef sigc::signal<void, login::error> signal_login_failed_type;
@@ -92,6 +94,10 @@ public:
 	 */
 	virtual const std::string& get_name() const;
 
+	/** Returns the public key of the remote server.
+	 */
+	const RSA::Key& get_public_key() const;
+
 	/** Waits indefinitly for incoming events.
 	 */
 	virtual void select();
@@ -107,6 +113,11 @@ public:
 	/** Set user password.
 	 */
 	void set_password(const std::string& password);
+
+	/** Signal which will be emitted after the first packet, the welcome
+	 * packet, is received.
+	 */
+	signal_welcome_type welcome_event() const;
 
 	/** Signal which will be emitted if the initial synchronization of the
 	 * user list and the document list has been completed.
@@ -160,12 +171,16 @@ protected:
 	 */
 	virtual bool execute_packet(const net6::packet& pack);
 
+	/** Welcome handling.
+	 */
+	void on_net_welcome(const net6::packet& pack);
+
 	/** Document concerning network commands.
 	 */
 	void on_net_document_create(const net6::packet& pack);
 	void on_net_document_remove(const net6::packet& pack);
 
-	/** messaging commands.
+	/** Messaging commands.
 	 */
 	void on_net_message(const net6::packet& pack);
 
@@ -189,6 +204,10 @@ protected:
 	std::string m_global_password;
 	std::string m_user_password;
 
+	std::string m_token;
+	RSA::Key m_public;
+
+	signal_welcome_type m_signal_welcome;
 	signal_sync_type m_signal_sync;
 	signal_close_type m_signal_close;
 	signal_login_failed_type m_signal_login_failed;

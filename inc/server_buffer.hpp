@@ -19,6 +19,7 @@
 #ifndef _OBBY_SERVER_BUFFER_HPP_
 #define _OBBY_SERVER_BUFFER_HPP_
 
+#include "rsa.hpp"
 #include "buffer.hpp"
 #include "server_document_info.hpp"
 
@@ -39,6 +40,8 @@ public:
 	/** Creates a new server buffer listening on port <em>port</em>.
 	 */
 	server_buffer(unsigned int port);
+	server_buffer(unsigned int port, const RSA::Key& public_key,
+	              const RSA::Key& private_key);
 	virtual ~server_buffer();
 
 	/** Waits indefinitely for incoming events.
@@ -154,6 +157,17 @@ protected:
 	/** net6 server object.
 	 */
 	net6::server* m_server;
+
+	/** This map temporarily caches all tokens issued to the various
+	 * clients, they get removed as soon as they are copied into the
+	 * corresponding user object.
+	 */
+	std::map<net6::peer*, std::string> m_tokens;
+
+	/** RSA keys to enable secure authentication.
+	 */
+	RSA::Key m_public;
+	RSA::Key m_private;
 
 	/** Global session password. Only people who know this password are
 	 * allowed to join the session.

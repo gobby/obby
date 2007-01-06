@@ -110,6 +110,10 @@ public:
 	 */
 	int get_blue() const;
 
+	/** Returns the random token set for this user.
+	 */
+	const std::string& get_token() const;
+
 	/** Returns the password for this user (only available with server
 	 * or host buffers).
 	 */
@@ -118,6 +122,10 @@ public:
 	/** Returns the flags that are currently set for this user.
 	 */
 	flags get_flags() const;
+
+	/** Changes the token to the one the server generated for this user.
+	 */
+	void set_token(const std::string& token);
 
 	/** Changes the password for this user
 	 */
@@ -184,6 +192,7 @@ protected:
 	int m_green;
 	int m_blue;
 
+	std::string m_token;
 	std::string m_password;
 
 	flags m_flags;

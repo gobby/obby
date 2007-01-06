@@ -158,6 +158,11 @@ void obby::server_buffer::send_message_impl(const std::string& message,
 
 void obby::server_buffer::on_connect(net6::server::peer& peer)
 {
+	net6::packet pack("obby_welcome");
+	mpz_class t = /* [... TODO 48 bit zufallszahl] */ 0;
+	std::string token = t.get_str(36);
+	pack << token << m_private.get_n() << m_public.get_k();
+	m_tokens[&peer] = token;
 	m_signal_connect.emit(peer);
 }
 
@@ -282,8 +287,11 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 	// Non-empty password?
 	if(!m_global_password.empty() )
 	{
+		assert(m_tokens.find(&peer) != m_tokens.end() );
+
 		// Compare passwords
-		if(global_password != m_global_password)
+		if(global_password !=
+		   SHA1::hash(m_tokens[&peer] + m_global_password))
 		{
 			error = login::ERROR_WRONG_GLOBAL_PASSWORD;
 			return false;
@@ -295,7 +303,8 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 	if(user && !user->get_password().empty() )
 	{
 		// Compare passwords
-		if(user_password != user->get_password() )
+		if(user_password !=
+		   SHA1::hash(m_tokens[&peer] + user->get_password() ))
 		{
 			error = login::ERROR_WRONG_USER_PASSWORD;
 			return false;
@@ -315,6 +324,11 @@ unsigned int obby::server_buffer::on_login(net6::server::peer& peer,
 
 	// Insert user into list
 	user* new_user = m_usertable.add_user(peer, red, green, blue);
+
+	std::map<net6::peer*, std::string>::iterator i = m_tokens.find(&peer);
+	assert(i != m_tokens.end() );
+	new_user->set_token(i->second);
+	m_tokens.erase(i);
 
 	// Tell net6 to use already existing ID, if any
 	return new_user->get_id();
@@ -436,7 +450,8 @@ void obby::server_buffer::on_net_user_password(const net6::packet& pack,
                                                user& from)
 {
 	// Set password for this user
-	from.set_password(pack.get_param(0).as<std::string>() );
+	from.set_password(RSA::decrypt(m_private,
+		pack.get_param(0).as<std::string>() ));
 }
 
 void obby::server_buffer::on_net_document(const net6::packet& pack, user& from)

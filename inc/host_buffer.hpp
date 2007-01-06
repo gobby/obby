@@ -41,6 +41,9 @@ public:
 	 */
 	host_buffer(unsigned int port, const std::string& username, int red,
 	            int green, int blue);
+	host_buffer(unsigned int port, const std::string& username, int red,
+	            int green, int blue, const RSA::Key& public_key,
+	            const RSA::Key& private_key);
 	virtual ~host_buffer();
 
 	/** Looks for a document with the given ID which belongs to the user

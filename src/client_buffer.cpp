@@ -17,17 +17,9 @@
  */
 
 #include <iostream>
+#include "sha1.hpp"
 #include "client_document.hpp"
 #include "client_buffer.hpp"
-
-/** These variables are used to store the wished user color from the login()
- * call to the login_extend signal handler.
- * TODO: This is not thread-safe. But, does anyone want to use threads to login
- * with two client_buffers at the same time..?
- * Another solution would be to establish the connection to the login_extend
- * just in the login() call and bind the colour components to it.
- */
-/*namespace { int st_red, st_green, st_blue; std::string st_password; }*/
 
 obby::client_buffer::client_buffer()
  : buffer(), m_client(NULL), m_self(NULL)
@@ -154,8 +146,13 @@ void obby::client_buffer::set_password(const std::string& password)
 {
 	// Sets a user password
 	net6::packet pack("obby_user_password");
-	pack << password;
+	pack << RSA::encrypt(m_public, password);
 	m_client->send(pack);
+}
+
+obby::client_buffer::signal_welcome_type obby::client_buffer::welcome_event() const
+{
+	return m_signal_welcome;
 }
 
 obby::client_buffer::signal_sync_type obby::client_buffer::sync_event() const
@@ -290,13 +287,20 @@ void obby::client_buffer::on_login_failed(net6::login::error error)
 
 void obby::client_buffer::on_login_extend(net6::packet& pack)
 {
-	pack << m_red << m_green << m_blue << m_global_password
-	     << m_user_password;
+	pack << m_red << m_green << m_blue
+	     << SHA1::hash(m_token + m_global_password)
+	     << SHA1::hash(m_token + m_user_password);
 }
 
 bool obby::client_buffer::execute_packet(const net6::packet& pack)
 {
 	// TODO: std::map from command to function
+	if(pack.get_command() == "obby_welcome")
+	{
+		on_net_welcome(pack);
+		return true;
+	}
+
 	if(pack.get_command() == "obby_document_create")
 	{
 		// Create document request
@@ -348,6 +352,20 @@ bool obby::client_buffer::execute_packet(const net6::packet& pack)
 
 	// Command not understood
 	return false;
+}
+
+void obby::client_buffer::on_net_welcome(const net6::packet& pack)
+{
+	// Get token and the public key of the server out of the
+	// welcome packet.
+
+	// The token creates some randomness within the hashed result
+	// we send over the line.
+	m_token = pack.get_param(0).as<std::string>();
+	m_public.set_n(mpz_class(pack.get_param(1).as<std::string>() ), 36);
+	m_public.set_k(mpz_class(pack.get_param(2).as<std::string>() ), 36);
+
+	m_signal_welcome.emit();
 }
 
 void obby::client_buffer::on_net_document_create(const net6::packet& pack)
