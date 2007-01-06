@@ -1,9 +1,9 @@
-noinst_LIBRARIES = libserialise.a
-libserialise_a_CPPFLAGS = $(libobby_CFLAGS) -I../inc @extra_includes@
+noinst_LTLIBRARIES = libserialise.la
+libserialise_la_CPPFLAGS = $(libobby_CFLAGS) -I../inc @extra_includes@
 
-libserialise_a_SOURCES = error.cpp
-libserialise_a_SOURCES += token.cpp
-libserialise_a_SOURCES += attribute.cpp
-libserialise_a_SOURCES += object.cpp
-libserialise_a_SOURCES += parser.cpp
+libserialise_la_SOURCES = error.cpp
+libserialise_la_SOURCES += token.cpp
+libserialise_la_SOURCES += attribute.cpp
+libserialise_la_SOURCES += object.cpp
+libserialise_la_SOURCES += parser.cpp
 
