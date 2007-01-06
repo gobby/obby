@@ -18,8 +18,10 @@
 
 #include "client_buffer.hpp"
 
-obby::client_buffer::client_buffer(const std::string& hostname, unsigned int port)
- : buffer(), m_unsynced(), m_connection(hostname, port, false)
+obby::client_buffer::client_buffer(const std::string& hostname,
+                                   unsigned int port)
+ : buffer(), m_unsynced(),
+   m_connection(net6::ipv4_address::create_from_hostname(hostname, port) )
 {
 }
 
@@ -30,12 +32,12 @@ obby::client_buffer::~client_buffer()
 		delete *iter;
 }
 
-obby::client_buffer::select()
+void obby::client_buffer::select()
 {
 	m_connection.select();
 }
 
-obby::client_buffer::select(unsigned int timeout)
+void obby::client_buffer::select(unsigned int timeout)
 {
 	m_connection.select(timeout);
 }

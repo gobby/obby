@@ -24,6 +24,8 @@
 #include <sigc++/signal.h>
 #include <net6/client.hpp>
 #include "record.hpp"
+#include "insert_record.hpp"
+#include "delete_record.hpp"
 #include "buffer.hpp"
 
 namespace obby
