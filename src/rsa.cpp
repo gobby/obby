@@ -114,7 +114,7 @@ namespace
 		mpz_class r = rclass.get_z_bits(bits);
 		if((r % 2) == 0)
 			r += 1;
-		// TODO: Ten is quire large. Smaller values should be faster.
+		// TODO: Ten is quite large. Smaller values should be faster.
 		while(!mpz_probab_prime_p(r.get_mpz_t(), 10) )
 			r += 2;
 		return r;
@@ -129,8 +129,6 @@ namespace
 	inline void decrypt_num_to_str(const obby::RSA::Key& key,
 		                       const mpz_class& num, std::string& res)
 	{
-		// TODO: Mit Armin klaeren, ob das wirklich stimmt...
-		// Testcare, ob das nicht den String rueckwaerts gibt oder so.
 		mpz_class t(key.apply(num) );
 		do
 		{
@@ -148,8 +146,8 @@ std::pair<obby::RSA::Key, obby::RSA::Key> obby::RSA::generate(
 	mpz_class q = generate_large_prime_number(rclass, bits);
 	mpz_class n = p * q;
 	mpz_class f = (p - 1) * (q - 1);
-	mpz_class e;
-	for(e = rclass.get_z_bits(bits / 32); e < (f - 1); ++e)
+	mpz_class e = rclass.get_z_bits(8);
+	for(e = e > 2 ? e : 2; e < (f - 1); ++e)
 	{
 		mpz_class gcd;
 		mpz_gcd(gcd.get_mpz_t(), f.get_mpz_t(), e.get_mpz_t() );
@@ -168,12 +166,19 @@ std::string obby::RSA::encrypt(const Key& key, const std::string& msg)
 {
 	mpz_class t;
 	std::string result;
-	for(std::string::size_type i = 0; i < msg.length(); ++i)
+	// Well, we are using the reverse here mainly because 
+	// decrypt_num_to_str was easier this way. However, the
+	// reverse string here should probably be optimised. But
+	// please beware from breaking the things submitted over
+	// the wire or the protocol itself breaks just again.
+	std::string str(msg);
+	std::reverse(str.begin(), str.end() );
+	for(std::string::size_type i = 0; i < str.length(); ++i)
 	{
 		// Perhaps we could optimise here by checking the bit
 		// count of both numbers. [TODO]
 		t <<= 8;
-		t |= mpz_class(msg[i]);
+		t |= mpz_class(str[i]);
 
 		// When the number gets bigger than the RSA modulus, we
 		// need to split it up, otherwise the algorithm fails.
@@ -182,7 +187,7 @@ std::string obby::RSA::encrypt(const Key& key, const std::string& msg)
 			t >>= 8;
 			encrypt_num_to_str(key, t, result);
 			result += '|'; // Separation of the values
-			t = msg[i];
+			t = str[i];
 		}
 	}
 	encrypt_num_to_str(key, t, result);
