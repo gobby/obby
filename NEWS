@@ -1,6 +1,17 @@
 obby
 ====
 
+Version 0.4.0:
+ * This version is neither protocol, nor ABI-compatible nor API-compatible
+   to the 0.3.x series!
+ * Documents are now templated to prevent a superfluous copy in memory owned
+   by obby
+ * Improved text handling through chunks
+ * Guarantee encrypted connections through the new net6 TLS facitity
+ * Documents with the same name are suffixed with a number
+ * New command subsystem
+ * Removal of SHA1 and RSA routines, thus losing the GMP dependency
+
 Version 0.3.0:
  * This version is *not* protocol, ABI- or API compatible to the 0.2.x series!
  * New merging algorithm (Jupiter)
