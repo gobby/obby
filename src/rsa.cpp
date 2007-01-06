@@ -18,8 +18,10 @@
 
 #include "rsa.hpp"
 
+// TODO: mpz_class("ffffffffffffffff", 16) as const static member
 obby::RSA::Key::Key(const mpz_class& n, const mpz_class& k)
- : m_n(n), m_k(k), m_id((n & mpz_class("ffffffffffffffff", 16)).get_str(16))
+ : m_n(n), m_k(k),
+   m_id(mpz_class(n & mpz_class("ffffffffffffffff", 16)).get_str(16))
 {
 }
 
@@ -79,7 +81,7 @@ namespace
 		mpz_class t(key.apply(num) );
 		do
 		{
-			res += (t & 0xff);
+			res += mpz_class(t & mpz_class(0xff) ).get_ui();
 			t >>= 8;
 		} while(t != 0);
 	}
@@ -100,7 +102,7 @@ std::string obby::RSA::encrypt(const Key& key, const std::string& msg)
 		// Perhaps we could optimise here by checking the bit
 		// count of both numbers. [TODO]
 		t <<= 8;
-		t |= msg[i];
+		t |= mpz_class(msg[i]);
 
 		// When the number gets bigger than the RSA modulus, we
 		// need to split it up, otherwise the algorithm fails.
