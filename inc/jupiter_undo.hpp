@@ -22,7 +22,6 @@
 #include <net6/non_copyable.hpp>
 #include "ring.hpp"
 #include "user.hpp"
-#include "document.hpp"
 #include "operation.hpp"
 
 namespace obby
@@ -37,6 +36,7 @@ class jupiter_undo: private net6::non_copyable
 {
 public:
 	typedef Document document_type;
+	typedef operation<document_type> operation_type;
 
 	jupiter_undo(const document_type& doc);
 	~jupiter_undo();
@@ -51,11 +51,11 @@ public:
 
         /** Operation <em>op</em> has been performed locally by <em>from</em>.
          */
-	void local_op(const operation& op, const user* from);
+	void local_op(const operation_type& op, const user* from);
 
 	/** Operation <em>op</em> has been performed remotely by <em>from</em>.
 	 */
-	void remote_op(const operation& op, const user* from);
+	void remote_op(const operation_type& op, const user* from);
 
 	/** Returns TRUE if the user can undo its last operation.
 	 */
@@ -63,7 +63,7 @@ public:
 
 	/** Returns an operation that undoes the last operation of this user.
 	 */
-	std::auto_ptr<operation> undo();
+	std::auto_ptr<operation_type> undo();
 protected:
 	const document_type& m_doc;
 };
@@ -90,12 +90,14 @@ void jupiter_undo<Document>::client_remove(const user& client)
 }
 
 template<typename Document>
-void jupiter_undo<Document>::local_op(const operation& op, const user* from)
+void jupiter_undo<Document>::local_op(const operation_type& op,
+                                      const user* from)
 {
 }
 
 template<typename Document>
-void jupiter_undo<Document>::remote_op(const operation& op, const user* from)
+void jupiter_undo<Document>::remote_op(const operation_type& op,
+                                       const user* from)
 {
 }
 
@@ -106,7 +108,8 @@ bool jupiter_undo<Document>::can_undo()
 }
 
 template<typename Document>
-std::auto_ptr<operation> jupiter_undo<Document>::undo()
+std::auto_ptr<typename jupiter_undo<Document>::operation_type>
+jupiter_undo<Document>::undo()
 {
 	throw std::logic_error(
 		"obby::jupiter_undo::undo:\n"

@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -18,6 +18,7 @@
 
 #include "no_operation.hpp"
 
+#if 0
 obby::no_operation::no_operation()
  : operation()
 {
@@ -69,5 +70,4 @@ void obby::no_operation::append_packet(net6::packet& pack) const
 	pack << "noop";
 	// Nothing to append
 }
-
-
+#endif

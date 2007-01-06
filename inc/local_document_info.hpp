@@ -38,6 +38,9 @@ class basic_local_document_info:
 	virtual public basic_document_info<Document, Selector>
 {
 public:
+	typedef typename basic_document_info<Document, Selector>::document_type
+		document_type;
+
 	typedef basic_local_buffer<Document, Selector> buffer_type;
 	typedef typename buffer_type::net_type net_type;
 

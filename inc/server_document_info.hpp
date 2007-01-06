@@ -22,6 +22,8 @@
 #include <net6/server.hpp>
 #include "serialise/object.hpp"
 #include "serialise/attribute.hpp"
+#include "no_operation.hpp"
+#include "split_operation.hpp"
 #include "insert_operation.hpp"
 #include "delete_operation.hpp"
 #include "record.hpp"
@@ -43,9 +45,13 @@ class basic_server_document_info:
 	virtual public basic_document_info<Document, Selector>
 {
 public:
+	typedef typename basic_document_info<Document, Selector>::document_type
+		document_type;
+
 	typedef basic_server_buffer<Document, Selector> buffer_type;
 	typedef typename buffer_type::net_type net_type;
 	typedef jupiter_server<Document> jupiter_type;
+	typedef typename jupiter_type::record_type record_type;
 
 	basic_server_document_info(const buffer_type& buffer,
 	                           net_type& net,
@@ -150,7 +156,7 @@ protected:
 	/** Callback from jupiter implementation with a record
 	 * that may be sent to the given user.
 	 */
-	virtual void on_jupiter_record(const record& rec, const user& user,
+	virtual void on_jupiter_record(const record_type& rec, const user& user,
 	                               const obby::user* from);
 
 	std::auto_ptr<jupiter_type> m_jupiter;
@@ -351,7 +357,7 @@ void basic_server_document_info<Document, Selector>::
 	            const std::string& text,
 	            const user* author)
 {
-	insert_operation op(pos, text);
+	insert_operation<document_type> op(pos, text);
 	m_jupiter->local_op(op, author);
 }
 
@@ -361,7 +367,7 @@ void basic_server_document_info<Document, Selector>::
 	           position len,
 	           const user* author)
 {
-	delete_operation op(pos, len);
+	delete_operation<document_type> op(pos, len);
 	m_jupiter->local_op(op, author);
 }
 
@@ -420,7 +426,7 @@ void basic_server_document_info<Document, Selector>::
 {
 	unsigned int index = 2;
 
-	record rec(
+	record_type rec(
 		pack,
 		index,
 		basic_document_info<Document, Selector>::
@@ -448,7 +454,7 @@ void basic_server_document_info<Document, Selector>::
 
 template<typename Document, typename Selector>
 void basic_server_document_info<Document, Selector>::
-	on_jupiter_record(const record& rec,
+	on_jupiter_record(const record_type& rec,
 	                  const user& user,
 	                  const obby::user* from)
 {

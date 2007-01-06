@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -18,6 +18,7 @@
 
 #include "record.hpp"
 
+#if 0
 obby::record::record(const vector_time& timestamp, const operation& op)
  : m_timestamp(timestamp), m_operation(op.clone() )
 {
@@ -56,3 +57,4 @@ void obby::record::append_packet(net6::packet& pack) const
 	pack << m_timestamp.get_local() << m_timestamp.get_remote();
 	m_operation->append_packet(pack);
 }
+#endif

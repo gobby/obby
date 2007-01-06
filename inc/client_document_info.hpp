@@ -21,8 +21,11 @@
 
 #include <net6/client.hpp>
 #include "format_string.hpp"
+#include "no_operation.hpp"
+#include "split_operation.hpp"
 #include "insert_operation.hpp"
 #include "delete_operation.hpp"
+#include "record.hpp"
 #include "jupiter_client.hpp"
 #include "local_document_info.hpp"
 
@@ -40,9 +43,13 @@ class basic_client_document_info:
 	virtual public basic_local_document_info<Document, Selector>
 {
 public:
+	typedef typename basic_local_document_info<Document, Selector>::
+		document_type document_type;
+
 	typedef basic_client_buffer<Document, Selector> buffer_type;
 	typedef typename buffer_type::net_type net_type;
 	typedef jupiter_client<Document> jupiter_type;
+	typedef typename jupiter_type::record_type record_type;
 
 	/** Constructor which does not automatically create an underlaying
 	 * document.
@@ -161,7 +168,8 @@ protected:
 	/** Callback from jupiter implementation with record of local operation
 	 * that has to be sent to the server.
 	 */
-	virtual void on_jupiter_record(const record& rec, const user* from);
+	virtual void on_jupiter_record(const record_type& rec,
+	                               const user* from);
 
 	std::auto_ptr<jupiter_type> m_jupiter;
 
@@ -331,7 +339,7 @@ void basic_client_document_info<Document, Selector>::
 		);
 	}
 
-	insert_operation op(pos, text);
+	insert_operation<document_type> op(pos, text);
 	m_jupiter->local_op(op, &get_buffer().get_self() );
 }
 
@@ -348,7 +356,7 @@ void basic_client_document_info<Document, Selector>::
 		);
 	}
 
-	delete_operation op(pos, len);
+	delete_operation<document_type> op(pos, len);
 	m_jupiter->local_op(op, &get_buffer().get_self() );
 }
 
@@ -585,7 +593,7 @@ void basic_client_document_info<Document, Selector>::
 	// Extract record from packet (TODO: virtualness for document_packet,
 	// would allow to remove "+ 2" here)
 	unsigned int index = 1 + 2;
-	record rec(
+	record_type rec(
 		pack,
 		index,
 		basic_document_info<Document, Selector>::
@@ -674,7 +682,7 @@ void basic_client_document_info<Document, Selector>::
 
 template<typename Document, typename Selector>
 void basic_client_document_info<Document, Selector>::
-	on_jupiter_record(const record& rec,
+	on_jupiter_record(const record_type& rec,
 	                  const user* from)
 {
 	// Build packet with record

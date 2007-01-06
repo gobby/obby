@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -20,18 +20,20 @@
 #define _OBBY_OPERATION_HPP_
 
 #include <net6/non_copyable.hpp>
-#include "document.hpp"
+#include <net6/packet.hpp>
+#include "position.hpp"
+#include "user.hpp"
 
 namespace obby
 {
 
 /** An operation describes a change in the document.
  */
-class operation : private net6::non_copyable
+template<typename Document>
+class operation: private net6::non_copyable
 {
 public:
-	operation();
-	virtual ~operation();
+	typedef Document document_type;
 
 	/** Creates a copy of this operation.
 	 */
@@ -40,13 +42,13 @@ public:
 	/** Creates the reverse operation of this one.
 	 * @param doc Document to receive additional information from.
 	 */
-	virtual operation* reverse(const document& doc) const = 0;
+	virtual operation* reverse(const document_type& doc) const = 0;
 
 	/** Applies this operation to a document.
 	 * @param doc Document to apply this operation to.
 	 * @param author User who performed this operation.
 	 */
-	virtual void apply(document& doc, const user* author) const = 0;
+	virtual void apply(document_type& doc, const user* author) const = 0;
 
 	/** Transforms <em>base_op</em> against this operation.
 	 */
@@ -73,11 +75,74 @@ public:
 	 * information from.
 	 */
 	static std::auto_ptr<operation>
-		from_packet(const net6::packet& pack,
-	                    unsigned int& index,
-	                    const user_table& user_table);
+	from_packet(const net6::packet& pack,
+	            unsigned int& index,
+	            const user_table& user_table);
 protected:
 };
+
+template<typename Document>
+class no_operation;
+
+template<typename Document>
+class split_operation;
+
+template<typename Document>
+class insert_operation;
+
+template<typename Document>
+class delete_operation;
+
+template<typename Document>
+class reversible_insert_operation;
+
+template<typename Document>
+std::auto_ptr<operation<Document> >
+operation<Document>::from_packet(const net6::packet& pack,
+                                 unsigned int& index,
+                                 const user_table& user_table)
+{
+	const std::string& type = pack.get_param(index ++).net6::parameter::as<std::string>();
+	std::auto_ptr<operation<Document> > op;
+
+	if(type == "ins")
+	{
+		op.reset(new insert_operation<Document>(pack, index) );
+	}
+	else if(type == "del")
+	{
+		op.reset(new delete_operation<Document>(pack, index) );
+	}
+	else if(type == "split")
+	{
+		op.reset(
+			new split_operation<Document>(
+				pack,
+				index,
+				user_table)
+		);
+	}
+	else if(type == "noop")
+	{
+		op.reset(new no_operation<Document>(pack, index) );
+	}
+/*	else if(type == "revins")
+	{
+		op.reset(
+			new reversible_insert_operation<Document>(
+				pack,
+				index,
+				user_table
+			)
+		);
+	}*/
+	else
+	{
+		throw net6::bad_value("Unexpected record type: " + type);
+	}
+
+	return op;
+}
 
 } // namespace obby
 

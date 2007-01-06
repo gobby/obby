@@ -34,18 +34,20 @@ class jupiter_algorithm: private net6::non_copyable
 {
 public:
 	typedef Document document_type;
+	typedef operation<document_type> operation_type;
+	typedef record<document_type> record_type;
 
 	jupiter_algorithm();
 	~jupiter_algorithm();
 
 	/** Returns a record the given local operation.
 	 */
-	std::auto_ptr<record> local_op(const operation& op);
+	std::auto_ptr<record_type> local_op(const operation_type& op);
 
 	/** Returns a transformed operation after a remote host sent
 	 * the given record.
 	 */
-	std::auto_ptr<operation> remote_op(const record& rec);
+	std::auto_ptr<operation_type> remote_op(const record_type& rec);
 protected:
 	/** Helper class that stores an operation with the current local
 	 * operation count.
@@ -56,12 +58,12 @@ protected:
 		/** Constructor taking a copy from op.
 		 */
 		operation_storage(unsigned int count,
-		                  const operation& op);
+		                  const operation_type& op);
 
 		/** Constructor taking the ownership of op.
 		 */
 		operation_storage(unsigned int count,
-		                  std::auto_ptr<operation> op);
+		                  std::auto_ptr<operation_type> op);
 
 		/** Returns the local operation count of this operation.
 		 */
@@ -69,32 +71,32 @@ protected:
 
 		/** Returns the wrapped operation.
 		 */
-		const operation& get_operation() const;
+		const operation_type& get_operation() const;
 
 		/** Replaces the wrapped operation by the copy of another one.
 		 */
-		void reset_operation(const operation& new_op);
+		void reset_operation(const operation_type& new_op);
 
 		/** Replaces the wrapped operation by another one.
 		 */
-		void reset_operation(std::auto_ptr<operation> new_op);
+		void reset_operation(std::auto_ptr<operation_type> new_op);
 	protected:
 		unsigned int m_count;
-		std::auto_ptr<operation> m_operation;
+		std::auto_ptr<operation_type> m_operation;
 	};
 
 	/** Discard from the remote site acknowledged operations.
 	 */
-	void discard_operations(const record& rec);
+	void discard_operations(const record_type& rec);
 
 	/** Transform the given operation by the local ones that have not
 	 * been acknowledged by the remote site.
 	 */
-	std::auto_ptr<operation> transform(const operation& op) const;
+	std::auto_ptr<operation_type> transform(const operation_type& op) const;
 
 	/** Checks preconditions that have to be fulfilled before transforming.
 	 */
-	void check_preconditions(const record& rec) const;
+	void check_preconditions(const record_type& rec) const;
 
 protected:
 	typedef std::list<operation_storage*> ack_list_type;
@@ -106,7 +108,7 @@ protected:
 template<typename Document>
 jupiter_algorithm<Document>::operation_storage::
 	operation_storage(unsigned int count,
-	                  const operation& op):
+	                  const operation_type& op):
 	m_count(count), m_operation(op.clone() )
 {
 }
@@ -114,7 +116,7 @@ jupiter_algorithm<Document>::operation_storage::
 template<typename Document>
 jupiter_algorithm<Document>::operation_storage::
 	operation_storage(unsigned int count,
-	                  std::auto_ptr<operation> op):
+	                  std::auto_ptr<operation_type> op):
 	m_count(count), m_operation(op)
 {
 }
@@ -126,7 +128,7 @@ unsigned int jupiter_algorithm<Document>::operation_storage::get_count() const
 }
 
 template<typename Document>
-const operation&
+const typename jupiter_algorithm<Document>::operation_type&
 jupiter_algorithm<Document>::operation_storage::get_operation() const
 {
 	return *m_operation;
@@ -134,14 +136,14 @@ jupiter_algorithm<Document>::operation_storage::get_operation() const
 
 template<typename Document>
 void jupiter_algorithm<Document>::operation_storage::
-	reset_operation(const operation& new_op)
+	reset_operation(const operation_type& new_op)
 {
 	m_operation.reset(new_op.clone() );
 }
 
 template<typename Document>
 void jupiter_algorithm<Document>::operation_storage::
-	reset_operation(std::auto_ptr<operation> new_op)
+	reset_operation(std::auto_ptr<operation_type> new_op)
 {
 	m_operation = new_op;
 }
@@ -164,28 +166,28 @@ jupiter_algorithm<Document>::~jupiter_algorithm()
 }
 
 template<typename Document>
-std::auto_ptr<record>
-jupiter_algorithm<Document>::local_op(const operation& op)
+std::auto_ptr<typename jupiter_algorithm<Document>::record_type>
+jupiter_algorithm<Document>::local_op(const operation_type& op)
 {
-	std::auto_ptr<record> rec(new record(m_time, op) );
+	std::auto_ptr<record_type> rec(new record_type(m_time, op) );
 	m_ack_list.push_back(new operation_storage(m_time.get_local(), op) );
 	m_time.inc_local();
 	return rec;
 }
 
 template<typename Document>
-std::auto_ptr<operation>
-jupiter_algorithm<Document>::remote_op(const record& rec)
+std::auto_ptr<typename jupiter_algorithm<Document>::operation_type>
+jupiter_algorithm<Document>::remote_op(const record_type& rec)
 {
 	check_preconditions(rec);
 	discard_operations(rec);
-	std::auto_ptr<operation> op(transform(rec.get_operation()) );
+	std::auto_ptr<operation_type> op(transform(rec.get_operation()) );
 	m_time.inc_remote();
 	return op;
 }
 
 template<typename Document>
-void jupiter_algorithm<Document>::discard_operations(const record& rec)
+void jupiter_algorithm<Document>::discard_operations(const record_type& rec)
 {
 	typename ack_list_type::iterator iter;
 	for(iter = m_ack_list.begin(); iter != m_ack_list.end(); ++ iter)
@@ -210,21 +212,24 @@ void jupiter_algorithm<Document>::discard_operations(const record& rec)
 }
 
 template<typename Document>
-std::auto_ptr<operation>
-jupiter_algorithm<Document>::transform(const operation& op) const
+std::auto_ptr<typename jupiter_algorithm<Document>::operation_type>
+jupiter_algorithm<Document>::transform(const operation_type& op) const
 {
-	std::auto_ptr<operation> new_op(op.clone() );
+	std::auto_ptr<operation_type> new_op(op.clone() );
 
 	for(typename ack_list_type::const_iterator iter = m_ack_list.begin();
 	    iter != m_ack_list.end();
 	    ++ iter)
 	{
-		const operation* existing_op = &(*iter)->get_operation();
-		operation* new_trans_op = existing_op->transform(*new_op);
-		operation* existing_trans_op = new_op->transform(*existing_op);
+		const operation_type* existing_op =
+			&(*iter)->get_operation();
+		operation_type* new_trans_op =
+			existing_op->transform(*new_op);
+		operation_type* existing_trans_op =
+			new_op->transform(*existing_op);
 
 		(*iter)->reset_operation(
-			std::auto_ptr<operation>(existing_trans_op)
+			std::auto_ptr<operation_type>(existing_trans_op)
 		);
 
 		new_op.reset(new_trans_op);
@@ -235,7 +240,7 @@ jupiter_algorithm<Document>::transform(const operation& op) const
 
 template<typename Document>
 void obby::jupiter_algorithm<Document>::
-	check_preconditions(const record& rec) const
+	check_preconditions(const record_type& rec) const
 {
 	if(!m_ack_list.empty() &&
 	   rec.get_time().get_remote() < m_ack_list.front()->get_count() )

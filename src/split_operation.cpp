@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -18,6 +18,7 @@
 
 #include "split_operation.hpp"
 
+#if 0
 obby::split_operation::split_operation(const operation& first,
                                        const operation& second)
  : operation(), m_first(first.clone() ), m_second(second.clone() )
@@ -103,3 +104,4 @@ void obby::split_operation::append_packet(net6::packet& pack) const
 	m_first->append_packet(pack);
 	m_second->append_packet(pack);
 }
+#endif

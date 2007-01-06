@@ -27,6 +27,7 @@
 #include "common.hpp"
 #include "format_string.hpp"
 #include "user_table.hpp"
+#include "document.hpp"
 #include "chat.hpp"
 #include "document_info.hpp"
 

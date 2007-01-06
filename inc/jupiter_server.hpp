@@ -38,8 +38,10 @@ public:
 	typedef Document document_type;
 	typedef jupiter_algorithm<document_type> algorithm_type;
 	typedef jupiter_undo<document_type> undo_type;
+	typedef operation<document_type> operation_type;
+	typedef record<document_type> record_type;
 
-	typedef sigc::signal<void, const record&, const user&, const user*>
+	typedef sigc::signal<void, const record_type&, const user&, const user*>
 		signal_record_type;
 
 	/** Creates a new jupiter_server which uses the given document.
@@ -60,13 +62,13 @@ public:
 	 * will be emitted for each client with a corresponding
 	 * record that may be transmitted to it.
 	 */
-	void local_op(const operation& op, const user* from);
+	void local_op(const operation_type& op, const user* from);
 
 	/** Performs a remote operation by the user <em>from</em>. record_event
 	 * will be emitted for each client except <em>from</em> with a record
 	 * that may be transmitted to it.
 	 */
-	void remote_op(const record& rec, const user* from);
+	void remote_op(const record_type& rec, const user* from);
 
 	/** Undoes the last operation by the user <em>from</em>. record_event
 	 * will be emitted for each client with a corresponding record that
@@ -136,7 +138,8 @@ void jupiter_server<Document>::client_remove(const user& client)
 }
 
 template<typename Document>
-void jupiter_server<Document>::local_op(const operation& op, const user* from)
+void jupiter_server<Document>::local_op(const operation_type& op,
+                                        const user* from)
 {
 	op.apply(m_document, from);
 	m_undo.local_op(op, from);
@@ -145,13 +148,14 @@ void jupiter_server<Document>::local_op(const operation& op, const user* from)
 	    iter != m_clients.end();
 	    ++ iter)
 	{
-		std::auto_ptr<record> rec = iter->second->local_op(op);
+		std::auto_ptr<record_type> rec = iter->second->local_op(op);
 		m_signal_record.emit(*rec, *iter->first, from);
 	}
 }
 
 template<typename Document>
-void jupiter_server<Document>::remote_op(const record& rec, const user* from)
+void jupiter_server<Document>::remote_op(const record_type& rec,
+                                         const user* from)
 {
 	typename client_map::iterator iter = m_clients.find(from);
 	if(iter == m_clients.end() )
@@ -162,7 +166,7 @@ void jupiter_server<Document>::remote_op(const record& rec, const user* from)
 		);
 	}
 
-	std::auto_ptr<operation> op = iter->second->remote_op(rec);
+	std::auto_ptr<operation_type> op = iter->second->remote_op(rec);
 	op->apply(m_document, from);
 	m_undo.remote_op(*op, from);
 
@@ -170,7 +174,9 @@ void jupiter_server<Document>::remote_op(const record& rec, const user* from)
 	{
 		if(iter->first != from)
 		{
-			std::auto_ptr<record> rec = iter->second->local_op(*op);
+			std::auto_ptr<record_type> rec =
+				iter->second->local_op(*op);
+
 			m_signal_record.emit(*rec, *iter->first, from);
 		}
 	}
@@ -179,14 +185,14 @@ void jupiter_server<Document>::remote_op(const record& rec, const user* from)
 template<typename Document>
 void jupiter_server<Document>::undo_op(const user* from)
 {
-	std::auto_ptr<operation> op = m_undo.undo();
+	std::auto_ptr<operation_type> op = m_undo.undo();
 	op->apply(m_document, from);
 
 	for(typename client_map::iterator iter = m_clients.begin();
 	    iter != m_clients.end();
 	    ++ iter)
 	{
-		std::auto_ptr<record> rec = iter->second->local_op(*op);
+		std::auto_ptr<record_type> rec = iter->second->local_op(*op);
 		m_signal_record.emit(*rec, *iter->first, from);
 	}
 }

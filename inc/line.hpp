@@ -155,6 +155,10 @@ public:
 	 */
 	author_iterator author_end() const;
 
+	/** TODO: Doc me. Implement others.
+	 */
+	bool operator<(const std::string& other) const;
+
 protected:
 	/** Internal function that simplifies the m_authors vector without
 	 * losing data.

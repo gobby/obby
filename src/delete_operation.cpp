@@ -16,6 +16,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "delete_operation.hpp"
+
+#if 0
 #include "no_operation.hpp"
 #include "split_operation.hpp"
 #include "delete_operation.hpp"
@@ -144,3 +147,4 @@ void obby::delete_operation::append_packet(net6::packet& pack) const
 {
 	pack << "del" << m_pos << m_len;
 }
+#endif

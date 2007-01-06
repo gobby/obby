@@ -310,6 +310,11 @@ obby::line::author_iterator obby::line::author_end() const
 	return m_authors.end();
 }
 
+bool obby::line::operator<(const std::string& other) const
+{
+	return m_line < other;
+}
+
 void obby::line::compress_authors()
 {
 	std::vector<user_pos> new_vec;

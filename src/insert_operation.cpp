@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -17,6 +17,8 @@
  */
 
 #include "insert_operation.hpp"
+
+#if 0
 #include "delete_operation.hpp"
 
 obby::insert_operation::insert_operation(position pos, const std::string& text)
@@ -112,3 +114,4 @@ void obby::insert_operation::append_packet(net6::packet& pack) const
 {
 	pack << "ins" << m_pos << m_text;
 }
+#endif

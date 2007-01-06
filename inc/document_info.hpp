@@ -21,10 +21,10 @@
 
 #include <sigc++/signal.h>
 #include <net6/object.hpp>
+#include "position.hpp"
 #include "ptr_iterator.hpp"
 #include "format_string.hpp"
 #include "user.hpp"
-#include "document.hpp"
 #include "document_packet.hpp"
 #include "serialise/object.hpp"
 
@@ -247,7 +247,7 @@ protected:
 	std::string m_title;
 
 	std::auto_ptr<privileges_table> m_priv_table;
-	std::auto_ptr<document> m_document;
+	std::auto_ptr<document_type> m_document;
 	std::list<const user*> m_users;
 
 	signal_rename_type m_signal_rename;
