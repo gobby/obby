@@ -140,7 +140,7 @@ public:
 
 	/** Checks if the given user is subscribed to this document.
 	 */
-	bool is_subscribed(const user& user) const;
+	virtual bool is_subscribed(const user& user) const;
 
 	/** Returns the begin of the list of subscribed users.
 	 */

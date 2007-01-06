@@ -61,6 +61,15 @@ public:
 	 */
 	virtual void unsubscribe() = 0;
 
+	/** Returns whether the local user is subscribed to this document.
+	 */
+	virtual bool is_subscribed() const;
+
+	/** Returns whether the given user <em>user</em> is subscribed to
+	 * this document.
+	 */
+	virtual bool is_subscribed(const user& user) const;
+
 public:
 	/** Returns the buffer this document belongs to.
 	 */
@@ -97,6 +106,19 @@ basic_local_document_info<selector_type>::basic_local_document_info(
 ):
 	basic_document_info<selector_type>(buffer, net, obj)
 {
+}
+
+template<typename selector_type>
+bool basic_local_document_info<selector_type>::is_subscribed() const
+{
+	return is_subscribed(get_buffer().get_self() );
+}
+
+template<typename selector_type>
+bool basic_local_document_info<selector_type>::
+	is_subscribed(const user& user) const
+{
+	return basic_document_info<selector_type>::is_subscribed(user);
 }
 
 template<typename selector_type>
