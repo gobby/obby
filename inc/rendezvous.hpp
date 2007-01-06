@@ -49,7 +49,13 @@ public:
 	 * participant. */
 	void discover();
 
+	/** Process all rendezvous events. This procedure does not return,
+	 * so it should be used in an own thread. */
 	void select();
+
+	/** Process all available rendezvous events in a timeframe of
+	 * <em>msecs</em> milliseconds. A value of 0 will prevent the command
+	 * from blocking the caller. */
 	void select(unsigned int msecs);
 	
 	signal_discover_type discover_event() const;
