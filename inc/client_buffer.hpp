@@ -31,7 +31,7 @@
 namespace obby
 {
 
-class client_buffer : public buffer
+class client_buffer : public buffer, public sigc::trackable
 {
 public:
 	typedef sigc::signal<void, const insert_record&> signal_insert_type;
@@ -55,6 +55,12 @@ public:
 	signal_login_failed_type login_failed_event() const;
 
 protected:
+	void on_join(net6::client::peer& peer);
+	void on_part(net6::client::peer& peer);
+	void on_close();
+	void on_data(const net6::packet& pack);
+	void on_login_failed(const std::string& reason);
+
 	std::list<record*> m_unsynced;
 	net6::client m_connection;
 

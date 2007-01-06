@@ -23,6 +23,16 @@ obby::client_buffer::client_buffer(const std::string& hostname,
  : buffer(), m_unsynced(),
    m_connection(net6::ipv4_address::create_from_hostname(hostname, port) )
 {
+	m_connection.join_event().connect(
+		sigc::mem_fun(*this, &client_buffer::on_join) );
+	m_connection.part_event().connect(
+		sigc::mem_fun(*this, &client_buffer::on_part) );
+	m_connection.close_event().connect(
+		sigc::mem_fun(*this, &client_buffer::on_close) );
+	m_connection.data_event().connect(
+		sigc::mem_fun(*this, &client_buffer::on_data) );
+	m_connection.login_failed_event().connect(
+		sigc::mem_fun(*this, &client_buffer::on_login_failed) );
 }
 
 obby::client_buffer::~client_buffer()
@@ -73,5 +83,33 @@ obby::client_buffer::signal_login_failed_type
 obby::client_buffer::login_failed_event() const
 {
 	return m_signal_login_failed;
+}
+
+void obby::client_buffer::on_join(net6::client::peer& peer)
+{
+	m_signal_join.emit(peer);
+}
+
+void obby::client_buffer::on_part(net6::client::peer& peer)
+{
+	m_signal_part.emit(peer);
+}
+
+void obby::client_buffer::on_close()
+{
+	m_signal_close.emit();
+}
+
+void obby::client_buffer::on_data(const net6::packet& pack)
+{
+	if(pack.get_command() == "obby_record")
+	{
+		// TODO: Implement me!
+	}
+}
+
+void obby::client_buffer::on_login_failed(const std::string& reason)
+{
+	m_signal_login_failed.emit(reason);
 }
 
