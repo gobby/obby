@@ -1,0 +1,65 @@
+# Jupiter test suite
+# 0x539 dev group, 2005
+
+# Syntax: One test per line. A test looks like this:
+# init|site->operation(desc),site->operation(desc),...|expected_result
+
+# "init" is the initial document content, "expected_result" the expected
+# result after all sites applied all operations.
+
+# site may be either 1 (Server) or 2 (Client). More sites will follow as soon
+# as the whole Client/Server architecture has been implemented.
+
+# operation may be either "ins" or "del"
+
+# If the operation is "ins", "desc" must be something like "text@pos", where
+# "text" is the text to insert and "pos" the position where to insert text.
+
+# If the operation is "del", "desc" must be something like "from-to", where
+# "from" is the beginning of the range of text to delete and "to" is the end
+# of that range.
+
+# All operations are immediately applied at the local site. After all local
+# operations have been applied, they will be applied at the remote (other)
+# site.
+
+# Lines beginning with a '#' are ignored
+
+# See existing tests below for some examples and feel free to add more,
+# especially more complex, tests.
+
+# Test of test routine
+abc||abc
+
+# one-site character wise deletion
+abc|1->del(0-1),1->del(0-1),1->del(0-1)|
+abc|1->del(0-1),1->del(1-2),1->del(0-1)|
+abc|1->del(1-2),1->del(0-1),1->del(0-1)|
+abc|1->del(1-2),1->del(1-2),1->del(0-1)|
+abc|1->del(2-3),1->del(0-1),1->del(0-1)|
+abc|1->del(2-3),1->del(1-2),1->del(0-1)|
+
+# one-site character wise insertion
+|1->ins(a@0),1->ins(c@1),1->ins(b@1)|abc
+|1->ins(a@0),1->ins(b@1),1->ins(c@2)|abc
+|1->ins(b@0),1->ins(a@0),1->ins(c@2)|abc
+|1->ins(b@0),1->ins(c@1),1->ins(a@0)|abc
+|1->ins(c@0),1->ins(a@0),1->ins(b@1)|abc
+|1->ins(c@0),1->ins(b@0),1->ins(a@0)|abc
+
+# concurrent deletion
+abc|1->del(0-1),2->del(2-3)|b
+abc|2->del(0-1),1->del(2-3)|b
+abc|1->del(0-2),2->del(2-3)|
+abc|1->del(0-1),2->del(1-3)|
+abc|1->del(0-2),2->del(1-3)|
+abc|1->del(1-3),2->del(0-2)|
+abc|1->del(0-3),2->del(0-3)|
+abc|1->del(0-1),1->del(1-2),2->del(1-2)|
+
+# concurrent insertion
+abc|1->ins(1@0),2->ins(2@1)|1a2bc
+abc|1->ins(2@1),2->ins(1@0)|1a2bc
+
+# Server (1) should be preferred
+abc|1->ins(1@0),2->ins(2@0)|12abc
