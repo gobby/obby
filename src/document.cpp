@@ -229,3 +229,9 @@ void obby::document::position_to_coord(position pos,
 	col = m_lines[i].length() + 1 - (cur_pos - pos);
 }
 
+obby::position obby::document::position_eob() const
+{
+	return coord_to_position(m_lines.size() - 1,
+	       	m_lines[m_lines.size() - 1].length() );
+}
+

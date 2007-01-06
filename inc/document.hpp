@@ -116,6 +116,10 @@ public:
 	                       unsigned int& row,
 	                       unsigned int& col) const;
 
+	/** Returns an obby::position pointing at the end of the buffer.
+	 */
+	position position_eob() const;
+
 	/** Called by the buffer if another user changed anything.
 	 */
 	virtual void on_net_record(record& rec) = 0;
