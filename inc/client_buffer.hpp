@@ -367,8 +367,6 @@ void basic_client_buffer<Document, Selector>::
 	}
 
 	// Create connection object
-	// TODO: Make the same with server_buffer
-	// (create object, register signal handlers, open server)
 	basic_buffer<Document, Selector>::m_net.reset(new_net() );
 
 	// Register signal handlers
@@ -843,7 +841,7 @@ void basic_client_buffer<Document, Selector>::
 {
 	// Get owner, id and title
 	const user* owner = pack.get_param(0).net6::parameter::as<const user*>(
-		::serialise::hex_context<const user*>(
+		::serialise::hex_context_from<const user*>(
 			basic_buffer<Document, Selector>::get_user_table()
 		)
 	);
@@ -892,7 +890,9 @@ void basic_client_buffer<Document, Selector>::
 	document_info_type& doc = dynamic_cast<document_info_type&>(
 		*pack.get_param(0).net6::parameter::as<
 			base_document_info_type*
-		>(::serialise::hex_context<base_document_info_type*>(*this))
+		>(::serialise::hex_context_from<base_document_info_type*>(
+			*this
+		))
 	);
 
 	// Emit unsubscribe singal for users who were subscribed to this doc
@@ -914,7 +914,7 @@ void basic_client_buffer<Document, Selector>::
 	on_net_message(const net6::packet& pack)
 {
 	const user* writer = pack.get_param(0).net6::parameter::as<const user*>(
-		::serialise::hex_context<const user*>(
+		::serialise::hex_context_from<const user*>(
 			basic_buffer<Document, Selector>::get_user_table()
 		)
 	);
@@ -944,7 +944,7 @@ void basic_client_buffer<Document, Selector>::
 	on_net_emote_message(const net6::packet& pack)
 {
 	const user* writer = pack.get_param(0).net6::parameter::as<const user*>(
-		::serialise::hex_context<const user*>(
+		::serialise::hex_context_from<const user*>(
 			basic_buffer<Document, Selector>::get_user_table()
 		)
 	);
@@ -971,7 +971,7 @@ void basic_client_buffer<Document, Selector>::
 	on_net_user_colour(const net6::packet& pack)
 {
 	const user* from = pack.get_param(0).net6::parameter::as<const user*>(
-		::serialise::hex_context<const user*>(
+		::serialise::hex_context_from<const user*>(
 			basic_buffer<Document, Selector>::get_user_table()
 		)
 	);
@@ -1038,7 +1038,7 @@ void basic_client_buffer<Document, Selector>::
 {
 	// Get data from packet
 	const user* owner = pack.get_param(0).net6::parameter::as<const user*>(
-		::serialise::hex_context<const user*>(
+		::serialise::hex_context_from<const user*>(
 			basic_buffer<Document, Selector>::get_user_table()
 		)
 	);
@@ -1078,7 +1078,9 @@ void basic_client_buffer<Document, Selector>::
 	document_info_type& info = dynamic_cast<document_info_type&>(
 		*pack.get_param(0).net6::parameter::as<
 			base_document_info_type*
-		>(::serialise::hex_context<base_document_info_type*>(*this))
+		>(::serialise::hex_context_from<base_document_info_type*>(
+			*this
+		))
 	);
 
 	// TODO: Rename this function. Think about providing a signal that may

@@ -950,7 +950,9 @@ void basic_server_buffer<Document, Selector>::
 	document_info_type& doc = dynamic_cast<document_info_type&>(
 		*pack.get_param(0).net6::parameter::as<
 			base_document_info_type*
-		>(::serialise::hex_context<base_document_info_type*>(*this))
+		>(::serialise::hex_context_from<base_document_info_type*>(
+			*this
+		))
 	);
 
 	// TODO: AUTH
@@ -1009,7 +1011,9 @@ void basic_server_buffer<Document, Selector>::
 	document_info_type& info = dynamic_cast<document_info_type&>(
 		*pack.get_param(0).net6::parameter::as<
 			base_document_info_type*
-		>(::serialise::hex_context<base_document_info_type*>(*this))
+		>(::serialise::hex_context_from<base_document_info_type*>(
+			*this
+		))
 	);
 
 	// TODO: Rename this function. Think about providing a signal that may

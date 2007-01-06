@@ -103,7 +103,11 @@ obby::chat::user_message::user_message(const serialise::object& obj,
                                        const user_table& user_table):
 	message(obj, user_table),
 	m_user(
-		*obj.get_required_attribute("user").as<const user*>(user_table)
+		*obj.get_required_attribute("user").as<const user*>(
+			::serialise::default_context_from<const user*>(
+				user_table
+			)
+		)
 	)
 {
 }

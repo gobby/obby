@@ -44,8 +44,8 @@ public:
 	template<typename data_type>
 	attribute(const std::string& name,
 	          const data_type& value,
-	          const ::serialise::context<data_type>& ctx =
-	          ::serialise::context<data_type>());
+	          const ::serialise::context_base_to<data_type>& ctx =
+	          ::serialise::default_context_to<data_type>());
 
 	/** Creates a new attribute with the serialised value given.
 	 */
@@ -66,8 +66,8 @@ public:
 	 */
 	template<typename data_type>
 	void set_value(const data_type& value,
-	               const ::serialise::context<data_type>& ctx =
-	               ::serialise::context<data_type>());
+	               const ::serialise::context_base_to<data_type>& ctx =
+	               ::serialise::default_context_to<data_type>());
 
 	/** Changes the value of the attribute.
 	 */
@@ -90,8 +90,8 @@ public:
 	 * the context <em>ctx</em>.
 	 */
 	template<typename data_type>
-	data_type as(const ::serialise::context<data_type>& ctx =
-	             ::serialise::context<data_type>()) const;
+	data_type as(const ::serialise::context_base_from<data_type>& ctx =
+	             ::serialise::default_context_from<data_type>()) const;
 private:
 	std::string m_name;
 	::serialise::data m_value;
@@ -101,20 +101,21 @@ private:
 template<typename data_type>
 attribute::attribute(const std::string& name,
 	             const data_type& value,
-	             const ::serialise::context<data_type>& ctx):
+	             const ::serialise::context_base_to<data_type>& ctx):
 	m_name(name), m_value(value, ctx), m_line(0)
 {
 }
 
 template<typename data_type>
 void attribute::set_value(const data_type& value,
-                          const ::serialise::context<data_type>& ctx)
+                          const ::serialise::context_base_to<data_type>& ctx)
 {
 	m_value = ::serialise::data(value, ctx);
 }
 
 template<typename data_type>
-data_type attribute::as(const ::serialise::context<data_type>& ctx) const
+data_type attribute::
+	as(const ::serialise::context_base_from<data_type>& ctx) const
 {
 	try
 	{

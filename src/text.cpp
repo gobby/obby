@@ -68,7 +68,7 @@ obby::text::chunk::chunk(const net6::packet& pack,
 	m_text(pack.get_param(index + 0).as<std::string>() ),
 	m_author(
 		pack.get_param(index + 1).as<const user*>(
-			::serialise::hex_context<const user*>(table)
+			::serialise::hex_context_from<const user*>(table)
 		)
 	)
 {
@@ -80,7 +80,7 @@ obby::text::chunk::chunk(const serialise::object& obj,
 	m_text(obj.get_required_attribute("content").as<std::string>() ),
 	m_author(
 		obj.get_required_attribute("author").as<const user*>(
-			::serialise::context<const user*>(table)
+			::serialise::default_context_from<const user*>(table)
 		)
 	)
 {

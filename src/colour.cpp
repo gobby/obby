@@ -51,8 +51,8 @@ bool obby::colour::similar_colour(const colour& colour) const
 	       abs(m_blue - colour.m_blue) < 32;
 }
 
-std::string
-serialise::context<obby::colour>::to_string(const obby::colour& from) const
+std::string serialise::default_context_to<obby::colour>::
+	to_string(const obby::colour& from) const
 {
 	unsigned int val =
 		(from.get_red()   << 16) |
@@ -64,8 +64,8 @@ serialise::context<obby::colour>::to_string(const obby::colour& from) const
 	return stream.str();
 }
 
-obby::colour
-serialise::context<obby::colour>::from_string(const std::string& string) const
+obby::colour serialise::default_context_from<obby::colour>::
+	from_string(const std::string& string) const
 {
 	unsigned int val;
 	std::stringstream stream(string);

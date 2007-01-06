@@ -68,10 +68,21 @@ namespace serialise
  * is quite common and also human-readable.
  */
 template<>
-class context<obby::colour>
+class default_context_to<obby::colour>:
+	public context_base_to<obby::colour>
 {
 public:
 	virtual std::string to_string(const obby::colour& from) const;
+};
+
+/** Normal context prints colour in hexadecimal format because RRGGBB format
+ * is quite common and also human-readable.
+ */
+template<>
+class default_context_from<obby::colour>:
+	public context_base_from<obby::colour>
+{
+public:
 	virtual obby::colour from_string(const std::string& string) const;
 };
 

@@ -19,12 +19,13 @@
 #ifndef _OBBY_USER_HPP_
 #define _OBBY_USER_HPP_
 
+#include <string>
 #include <net6/packet.hpp>
 #include <net6/user.hpp>
 #include <net6/address.hpp>
 #include <net6/non_copyable.hpp>
-#include <string>
 #include "serialise/object.hpp"
+#include "format_string.hpp"
 #include "colour.hpp"
 
 namespace obby
@@ -34,8 +35,7 @@ class user_table;
 
 /** User in a obby session.
  */
-	
-class user : private net6::non_copyable
+class user: private net6::non_copyable
 {
 public:
 	/** Flags that belong to a user.
@@ -204,57 +204,160 @@ protected:
 namespace serialise
 {
 
-template<>
-class context<obby::user*>
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Equivalent to user_table.find(index). Implemented in user.cpp. Required
+// to resolve the caller to user_table::find without having included
+// user_table.hpp here.
+const obby::user* user_table_find(const obby::user_table& user_table,
+                                  unsigned int index);
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+
+/** Base class for context that converts user references to a string.
+ */
+template<typename User>
+class user_context_to: public context_base_to<User>
 {
 public:
-	context();
-	context(const obby::user_table& user_table);
+	typedef User data_type;
 
-	virtual std::string to_string(const obby::user* from) const;
-	virtual const obby::user* from_string(const std::string& string) const;
+	virtual std::string to_string(const data_type& from) const;
 
-protected:
-	virtual void on_stream_setup(std::stringstream& stream) const;
-
-	const obby::user_table* m_user_table;
-};
-
-template<>
-class context<const obby::user*>: public context<obby::user*>
-{
-public:
-	context():
-		context<obby::user*>() {}
-	context(const obby::user_table& user_table):
-		context<obby::user*>(user_table) {}
 protected:
 	virtual void on_stream_setup(std::stringstream& stream) const;
 };
 
+/** Converts obby::user* to a string.
+ */
 template<>
-class hex_context<obby::user*>: public context<obby::user*>
+class default_context_to<obby::user*>:
+	public user_context_to<obby::user*>
+{
+};
+
+/** Converts const obby::user* to a string.
+ */
+template<>
+class default_context_to<const obby::user*>:
+	public user_context_to<const obby::user*>
+{
+};
+
+/** Base class that converts a string to a user reference using
+ * a user table.
+ */
+template<typename User>
+class user_context_from:
+	public context_base_from<User>
 {
 public:
-	hex_context():
-		context<obby::user*>() {}
-	hex_context(const obby::user_table& user_table):
-		context<obby::user*>(user_table) {}
+	typedef User data_type;
+
+	user_context_from(const obby::user_table& user_table);
+	virtual data_type from_string(const std::string& from) const;
+
+protected:
+	virtual void on_stream_setup(std::stringstream& stream) const;
+
+	const obby::user_table& m_user_table;
+};
+
+/** Stores the user ID in a hexadecimal representation.
+ */
+template<typename User>
+class user_hex_context_from: public user_context_from<User>
+{
+public:
+	user_hex_context_from(const obby::user_table& user_table);
+
 protected:
 	virtual void on_stream_setup(std::stringstream& stream) const;
 };
 
+/** Converts a string to const obby::user*.
+ */
 template<>
-class hex_context<const obby::user*>: public context<const obby::user*>
+class default_context_from<const obby::user*>:
+	public user_context_from<const obby::user*>
 {
 public:
-	hex_context():
-		context<const obby::user*>() {}
-	hex_context(const obby::user_table& user_table):
-		context<const obby::user*>(user_table) {}
-protected:
-	virtual void on_stream_setup(std::stringstream& stream) const;
+	default_context_from(const obby::user_table& user_table);
 };
+
+/** Converts a string to const obby::user*.
+ */
+template<>
+class hex_context_from<const obby::user*>:
+	public user_hex_context_from<const obby::user*>
+{
+public:
+	hex_context_from(const obby::user_table& user_table);
+};
+
+template<typename User>
+std::string user_context_to<User>::to_string(const data_type& from) const
+{
+	std::stringstream stream;
+	on_stream_setup(stream);
+	stream << ( (from != NULL) ? (from->get_id()) : (0) );
+	return stream.str();
+}
+
+template<typename User>
+void user_context_to<User>::on_stream_setup(std::stringstream& stream) const
+{
+}
+
+template<typename User>
+user_context_from<User>::user_context_from(const obby::user_table& user_table):
+	m_user_table(user_table)
+{
+}
+
+template<typename User>
+typename user_context_from<User>::data_type
+user_context_from<User>::from_string(const std::string& from) const
+{
+	unsigned int user_id;
+	std::stringstream stream(from);
+	on_stream_setup(stream);
+	stream >> user_id;
+
+	if(stream.bad() )
+		throw conversion_error("User ID must be an integer");
+
+	// Special meaning "no user"
+	if(user_id == 0) return NULL;
+
+	data_type user = user_table_find(m_user_table, user_id);
+
+	if(user == NULL)
+	{
+		obby::format_string str("User ID %0% does not exist");
+		str << user_id;
+		throw conversion_error(str.str());
+	}
+
+	return user;
+}
+
+template<typename User>
+void user_context_from<User>::on_stream_setup(std::stringstream& stream) const
+{
+}
+
+template<typename User>
+user_hex_context_from<User>::
+	user_hex_context_from(const obby::user_table& user_table):
+	user_context_from<User>(user_table)
+{
+}
+
+template<typename User>
+void user_hex_context_from<User>::
+	on_stream_setup(std::stringstream& stream) const
+{
+	stream >> std::hex;
+}
 
 } // namespace serialise
 

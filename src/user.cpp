@@ -156,82 +156,24 @@ void obby::user::remove_flags(flags old_flags)
 	m_flags &= ~old_flags;
 }
 
-serialise::context<obby::user*>::context():
-	m_user_table(NULL)
+const obby::user* serialise::user_table_find(const obby::user_table& user_table,
+                                             unsigned int index)
 {
-}
-
-serialise::context<obby::user*>::context(const obby::user_table& user_table):
-	m_user_table(&user_table)
-{
-}
-
-std::string
-serialise::context<obby::user*>::to_string(const obby::user* from) const
-{
-	std::stringstream stream;
-	on_stream_setup(stream);
-	stream << ( (from != NULL) ? (from->get_id()) : (0) );
-	return stream.str();
-}
-
-const obby::user*
-serialise::context<obby::user*>::from_string(const std::string& string) const
-{
-	// We need a user table to lookup the user ID
-	if(m_user_table == NULL)
-		throw conversion_error("User table required");
-
-	// Extract user ID from stream
-	unsigned int user_id;
-	std::stringstream stream(string);
-	on_stream_setup(stream);
-	stream >> user_id;
-
-	// Not a valid ID?
-	if(stream.bad() )
-		throw conversion_error("User ID must be an integer");
-
-	// "No user"
-	if(user_id == 0) return NULL;
-
-	// Find user
-	const obby::user* user = m_user_table->find(
-		user_id,
+	return user_table.find(
+		index,
 		obby::user::flags::NONE,
 		obby::user::flags::NONE
 	);
-
-	if(user == NULL)
-	{
-		// Not in user table
-		obby::format_string str("User ID %0% does not exist");
-		str << user_id;
-		throw conversion_error(str.str() );
-	}
-
-	// Deserialisation successful
-	return user;
 }
 
-void serialise::context<obby::user*>::
-	on_stream_setup(std::stringstream& stream) const
+serialise::default_context_from<const obby::user*>::
+	default_context_from(const obby::user_table& user_table):
+	user_context_from<const obby::user*>(user_table)
 {
 }
 
-void serialise::context<const obby::user*>::
-	on_stream_setup(std::stringstream& stream) const
+serialise::hex_context_from<const obby::user*>::
+	hex_context_from(const obby::user_table& user_table):
+	user_hex_context_from<const obby::user*>(user_table)
 {
-}
-
-void serialise::hex_context<obby::user*>::
-	on_stream_setup(std::stringstream& stream) const
-{
-	stream >> std::hex;
-}
-
-void serialise::hex_context<const obby::user*>::
-	on_stream_setup(std::stringstream& stream) const
-{
-	stream >> std::hex;
 }

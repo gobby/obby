@@ -125,11 +125,13 @@ public:
 
 	/** @brief Accesses the <em>index</em>th element and tries to
 	 * convert it to the given type.
+	 *
+	 * TODO: command_context_from deriving from default_context_from!
 	 */
 	template<typename data_type>
 	data_type get(unsigned int index,
-	              const ::serialise::context<data_type>& context =
-	              ::serialise::context<data_type>() )
+	              const ::serialise::context_base_from<data_type>& context =
+	              ::serialise::default_context_from<data_type>() )
 	{
 		return context.from_string(m_params.at(index) );
 	}

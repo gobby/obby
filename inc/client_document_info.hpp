@@ -282,7 +282,7 @@ basic_client_document_info<Document, Selector>::
 		// Get user
 		const user* cur_user =
 			init_pack.get_param(i).net6::parameter::as<const user*>(
-				::serialise::hex_context<const user*>(
+				::serialise::hex_context_from<const user*>(
 					buffer.get_user_table()
 				)
 			);
@@ -602,7 +602,7 @@ void basic_client_document_info<Document, Selector>::
 
 	// Get author of record
 	const user* author = pack.get_param(0).net6::parameter::as<const user*>(
-		::serialise::hex_context<const user*>(
+		::serialise::hex_context_from<const user*>(
 			get_buffer().get_user_table()
 		)
 	);
@@ -657,7 +657,7 @@ void basic_client_document_info<Document, Selector>::
 	base_type::m_document->append(
 		pack.get_param(0).net6::parameter::as<std::string>(),
 		pack.get_param(1).net6::parameter::as<const user*>(
-			::serialise::hex_context<
+			::serialise::hex_context_from<
 				const user*
 			>(base_type::m_buffer.get_user_table() )
 		)
@@ -670,7 +670,7 @@ void basic_client_document_info<Document, Selector>::
 {
 	const user* new_user =
 		pack.get_param(0).net6::parameter::as<const user*>(
-			::serialise::hex_context<const user*>(
+			::serialise::hex_context_from<const user*>(
 				get_buffer().get_user_table()
 			)
 		);
@@ -687,12 +687,12 @@ void basic_client_document_info<Document, Selector>::
 {
 	const user* old_user =
 		pack.get_param(0).net6::parameter::as<const user*>(
-			::serialise::hex_context<const user*>(
+			::serialise::hex_context_from<const user*>(
 				get_buffer().get_user_table()
 			)
 		);
 
-	// TODO: Throw bad value when already subscribed? Would be redundant
+	// TODO: Throw bad value when not subscribed? Would be redundant
 	// check...
 
 	user_unsubscribe(*old_user);

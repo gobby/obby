@@ -269,8 +269,10 @@ basic_server_document_info<Document, Selector>::
 
 		base_type::m_document->append(
 			content_attr.as<std::string>(),
-			author_attr.as<const obby::user*>(
-				buffer.get_user_table()
+			author_attr.as<const user*>(
+				::serialise::default_context_from<const user*>(
+					buffer.get_user_table()
+				)
 			)
 		);
 	}
