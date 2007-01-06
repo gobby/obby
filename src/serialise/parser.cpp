@@ -51,9 +51,26 @@ void obby::serialise::parser::deserialise(std::istream& stream)
 
 	// Initial preallocation
 	result.reserve(bufsize << 3);
+
+#ifdef WIN32
+	// Other effort (see below) seems not to work on WIN32, the eofflag is
+	// set after the first 1024 Bytes have been read. Is this a bug in
+	// mingw?
+	std::string line;
+	while(std::getline(stream, line) )
+	{
+		// More preallocation, if the following line exceeds the
+		// current capacity
+		if(result.capacity() < result.length() + bufsize)
+			result.reserve(result.capacity() * 2);
+
+		result += line;
+		result += '\n';
+	}
+#else
 	while(stream)
 	{
-		// More preallocation, if the following 1024 byte exceed the
+		// More preallocation, if the following 1024 byte exceeds the
 		// current capacity
 		if(result.capacity() < result.length() + bufsize)
 			result.reserve(result.capacity() * 2);
@@ -62,6 +79,7 @@ void obby::serialise::parser::deserialise(std::istream& stream)
 		stream.read(readbuf, bufsize);
 		result.append(readbuf, stream.gcount() );
 	}
+#endif
 
 	deserialise_memory(result);
 }
