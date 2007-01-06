@@ -60,9 +60,9 @@ public:
 	 * @param red Red color component for the user color.
 	 * @param green Green color component for the user color.
 	 * @param blue Blue color component for the user color.
-	 * @global_password Password that is used as a global session password.
-	 * If it is not provided, signal_global_password will be emitted to
-	 * prompt for a session password.
+	 * @param global_password Password that is used as a global session
+	 * password. If it is not provided, signal_global_password will be
+	 * emitted to prompt for a session password.
 	 */
 	void login(const std::string& name, int red, int green, int blue,
 	           const std::string& global_password = "",

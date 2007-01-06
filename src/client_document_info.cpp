@@ -257,7 +257,7 @@ void obby::client_document_info::on_net_sync_line(const net6::packet& pack)
 		return;
 	}
 
-	line new_line(pack, get_buffer().get_user_table() );
+	line new_line(pack);
 	get_document()->add_line(new_line);
 }
 

@@ -41,7 +41,7 @@ obby::line::line(const string_type& text, const user_type* author)
 	m_authors.push_back(pos);
 }
 
-obby::line::line(const net6::packet& pack, const user_table& user_table)
+obby::line::line(const net6::packet& pack)
 {
 	// Parameter 0 is the document ID which we do not need here.
 	m_line = pack.get_param(2).as<std::string>();
