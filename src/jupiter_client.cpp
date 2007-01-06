@@ -39,8 +39,8 @@ void obby::jupiter_client::local_op(const operation& op, const user* from)
 	op.apply(m_document, from);
 	// Generate record
 	std::auto_ptr<record> rec(m_algorithm.local_op(op) );
-	// Emit local signal
-	m_signal_local.emit(*rec, from);
+	// Emit record signal
+	m_signal_record.emit(*rec, from);
 }
 
 void obby::jupiter_client::remote_op(const record& rec, const user* from)
@@ -51,9 +51,13 @@ void obby::jupiter_client::remote_op(const record& rec, const user* from)
 	op->apply(m_document, from);
 }
 
-obby::jupiter_client::signal_local_type
-obby::jupiter_client::local_event() const
+void obby::jupiter_client::undo_op(const user* from)
 {
 	return m_signal_local;
 }
 
+obby::jupiter_client::signal_record_type
+obby::jupiter_client::record_event() const
+{
+	return m_signal_record;
+}

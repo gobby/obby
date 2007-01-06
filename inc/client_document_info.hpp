@@ -158,7 +158,7 @@ protected:
 	/** Callback from jupiter implementation with record of local operation
 	 * that has to be sent to the server.
 	 */
-	virtual void on_jupiter_local(const record& rec, const user* from);
+	virtual void on_jupiter_record(const record& rec, const user* from);
 
 	std::auto_ptr<jupiter_client> m_jupiter;
 
@@ -425,10 +425,10 @@ void basic_client_document_info<selector_type>::user_subscribe(const user& user)
 			m_jupiter->client_add(*iter);
 		}
 
-		m_jupiter->local_event().connect(
+		m_jupiter->record_event().connect(
 			sigc::mem_fun(
 				*this,
-				&basic_client_document_info::on_jupiter_local
+				&basic_client_document_info::on_jupiter_record
 			)
 		);
 	}
@@ -595,7 +595,7 @@ void basic_client_document_info<selector_type>::
 
 template<typename selector_type>
 void basic_client_document_info<selector_type>::
-	on_jupiter_local(const record& rec, const user* from)
+	on_jupiter_record(const record& rec, const user* from)
 {
 	// Build packet with record
 	document_packet pack(*this, "record");

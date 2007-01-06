@@ -34,7 +34,7 @@ class jupiter_client: private net6::non_copyable
 {
 public:
 	typedef sigc::signal<void, const record&, const user*>
-		signal_local_type;
+		signal_record_type;
 
 	/** Creates a new jupiter_client which uses the given document.
 	 * Local and remote changes are applied to this document.
@@ -62,14 +62,19 @@ public:
 	/** Signal which will be emitted when a local operation has been
 	 * applied.
 	 */
-	signal_local_type local_event() const;
+	void undo_op(const user* from);
+
+	/** Signal which will be emitted when a record has to be transmitted to
+	 * the server.
+	 */
+	signal_record_type record_event() const;
 
 protected:
 	jupiter_algorithm m_algorithm;
 	jupiter_undo m_undo;
 
 	document& m_document;
-	signal_local_type m_signal_local;
+	signal_record_type m_signal_record;
 };
 
 } // namespace obby
