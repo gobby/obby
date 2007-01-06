@@ -40,6 +40,9 @@ public:
 	void erase(const position& from, const position& to);
 
 protected:
+	void insert_lines(unsigned int pos, unsigned int count);
+	void erase_lines(unsigned int pos, unsigned int count);
+
 	std::list<record*> m_history;
 	unsigned int m_revision;
 	std::vector<std::string> m_lines;
