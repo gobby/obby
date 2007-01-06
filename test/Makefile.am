@@ -1,40 +1,32 @@
-# These tests are now self-contained and link against the libtool library
-# in ../.libs, so they compile without libobby being installed.
-#
-# This has two drawbacks:
-#  1) You are not reminded to ``make install'' the library before there are
-#     new functions available not only for the tests.
-#  2) libtool will create some strange wrapper scripts around the actual
-#     tests, but they are not installed anyway.
-LDADD = -L../src/.libs -lobby $(libobby_LIBS)
-AM_CPPFLAGS = -I../inc/ $(libobby_CFLAGS)
+check_PROGRAMS = serialise text jupiter
+TESTS = serialise text jupiter
 
-#if WITH_HOWL
-#LDADD       += $(libhowl_LIBS)
-#AM_CPPFLAGS += $(libhowl_CFLAGS)
-#endif
+AM_CPPFLAGS        = -I../inc/ $(libobby_CFLAGS)
+LDADD              = $(libobby_LIBS)
 
-noinst_PROGRAMS = \
-	ring \
-	serialise \
-	text \
-	jupiter
+serialise_SOURCES  = test_serialise.cpp
+serialise_LDADD    = -L../src/serialise -lserialise
+serialise_SOURCES += ../src/common.cpp # gettext
 
-#noinst_PROGRAMS += buffer
-#noinst_PROGRAMS += curses
+text_SOURCES       = test_text.cpp
+text_SOURCES      += ../src/text.cpp
+text_LDADD         = -L../src/serialise -lserialise
+text_SOURCES      += ../src/user.cpp
+text_SOURCES      += ../src/user_table.cpp
+text_SOURCES      += ../src/colour.cpp
+text_SOURCES      += ../src/common.cpp # gettext
 
-#bufferd_SOURCES = bufferd.cpp
-
-#curses_SOURCES = curses.cpp
-#curses_LDADD = $(LDADD) -lncurses
-
-ring_SOURCES = ring.cpp
-serialise_SOURCES = serialise.cpp
-text_SOURCES = text.cpp
-jupiter_SOURCES = jupiter.cpp
-
-#if WITH_HOWL
-#noinst_PROGRAMS += discover
-#discover_SOURCES = discover.cpp
-#endif
+jupiter_SOURCES    = test_jupiter.cpp
+jupiter_SOURCES   += ../src/jupiter_algorithm.cpp
+jupiter_SOURCES   += ../src/jupiter_client.cpp
+jupiter_SOURCES   += ../src/jupiter_server.cpp
+jupiter_SOURCES   += ../src/jupiter_error.cpp
+jupiter_SOURCES   += ../src/jupiter_undo.cpp
+jupiter_LDADD      = -L../src/serialise -lserialise
+jupiter_SOURCES   += ../src/text.cpp
+jupiter_SOURCES   += ../src/document.cpp
+jupiter_SOURCES   += ../src/user.cpp
+jupiter_SOURCES   += ../src/user_table.cpp
+jupiter_SOURCES   += ../src/colour.cpp
+jupiter_SOURCES   += ../src/common.cpp # gettext
 

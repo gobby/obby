@@ -45,10 +45,12 @@ const char* obby_package()
 	return PACKAGE;
 }
 
+#ifdef LOCALEDIR
 const char* obby_localedir()
 {
 	return LOCALEDIR;
 }
+#endif
 
 #if defined(WITH_HOWL) || defined(WITH_AVAHI)
 /* This is an entry point for which external scripts could check. */
