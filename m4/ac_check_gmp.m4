@@ -124,4 +124,5 @@ LIBS="$ac_save_LIBS"
 
 dnl We use libtool, therefore we take $LTLIBGMPXX, not $LIBGMPXX.
 gmp_library_option="$LTLIBGMPXX"
+gmp_includes_option="-I$with_libgmpxx_prefix/include"
 ])
