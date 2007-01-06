@@ -141,8 +141,8 @@ sw_result zeroconf_howl::handle_browse_reply(sw_discovery discovery,
 		case SW_DISCOVERY_BROWSE_ADD_SERVICE:
 		{
 			sw_result result;
-			if ((result = sw_discovery_resolve(session, 0, name,
-				type, domain,
+			if ((result = sw_discovery_resolve(session,
+				interface_index, name, type, domain,
 				&zeroconf_howl::handle_resolve_reply,
 				extra, &oid)) != SW_OKAY)
 			{
