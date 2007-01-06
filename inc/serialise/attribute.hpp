@@ -123,8 +123,8 @@ data_type attribute::as(const ::serialise::context<data_type>& ctx) const
 	{
 		// TODO: Localise this. This would depend on a call to _
 		// in a header file!
-		format_string str("Attribute '%0%' has unexpected type");
-		str << m_name;
+		format_string str("Attribute '%0%' has unexpected type: %1%");
+		str << m_name << e.what();
 		throw error(str.str(), m_line);
 	}
 }
