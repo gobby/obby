@@ -1,0 +1,14 @@
+obby
+====
+
+Synopsis
+--------
+libobby is a library which provides synced document buffers. It supports
+multiple documents in one session and is portable to both Windows and
+Unix-like platforms.
+
+Dependencies
+------------
+ * sigc++-2.0
+ * net6-1.0
+
