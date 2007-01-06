@@ -126,6 +126,26 @@ std::string obby::chat::user_message::repr() const
 	return str.str();
 }
 
+obby::chat::emote_message::emote_message(const std::string& text,
+                                         std::time_t timestamp,
+                                         const user& from):
+	user_message(text, timestamp, from)
+{
+}
+
+obby::chat::emote_message::emote_message(const serialise::object& obj,
+                                         const user_table& user_table):
+	user_message(obj, user_table)
+{
+}
+
+std::string obby::chat::emote_message::repr() const
+{
+	format_string str(" * %0% %1%");
+	str << m_user.get_name() << m_text;
+	return str.str();
+}
+
 obby::chat::server_message::server_message(const std::string& text,
                                            std::time_t timestamp):
 	message(text, timestamp)
@@ -180,7 +200,10 @@ void obby::chat::serialise(serialise::object& obj) const
 		serialise::object& child = obj.add_child();
 
 		// Set child name according to message type
-		if(dynamic_cast<user_message*>(msg) != NULL)
+		// TODO: virtual call that gets this string
+		if(dynamic_cast<emote_message*>(msg) != NULL)
+			child.set_name("emote_message");
+		else if(dynamic_cast<user_message*>(msg) != NULL)
 			child.set_name("user_message");
 		else if(dynamic_cast<server_message*>(msg) != NULL)
 			child.set_name("server_message");
@@ -202,7 +225,11 @@ void obby::chat::deserialise(const serialise::object& obj,
 	    iter != obj.children_end();
 	    ++ iter)
 	{
-		if(iter->get_name() == "user_message")
+		if(iter->get_name() == "emote_message")
+		{
+			add_message(new emote_message(*iter, user_table) );
+		}
+		else if(iter->get_name() == "user_message")
 		{
 			add_message(new user_message(*iter, user_table) );
 		}
@@ -242,6 +269,12 @@ void obby::chat::add_user_message(const std::string& text,
                                   const user& from)
 {
 	add_message(new user_message(text, std::time(NULL), from) );
+}
+
+void obby::chat::add_emote_message(const std::string& text,
+                                   const user& from)
+{
+	add_message(new emote_message(text, std::time(NULL), from) );
 }
 
 void obby::chat::add_server_message(const std::string& text)
@@ -301,4 +334,3 @@ void obby::chat::on_user_part(const user& user)
 	str << user.get_name();
 	add_message(new system_message(str.str(), std::time(NULL)) );
 }
-

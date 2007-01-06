@@ -78,6 +78,20 @@ public:
 		const user& m_user;
 	};
 
+	/** @brief Emote message by /me command.
+	 */
+	class emote_message: public user_message
+	{
+	public:
+		emote_message(const std::string& text,
+		              std::time_t timestamp,
+		              const user& from);
+		emote_message(const serialise::object& obj,
+		              const user_table& user_table);
+
+		virtual std::string repr() const;
+	};
+
 	/** Message sent by server.
 	 */
 	class server_message: public message
@@ -144,6 +158,11 @@ public:
 	 */
 	void add_user_message(const std::string& text,
 	                      const user& from);
+
+	/** @brief Adds a new emote message to the history.
+	 */
+	void add_emote_message(const std::string& text,
+	                       const user& from);
 
 	/** Adds a new server message to the history.
 	 */

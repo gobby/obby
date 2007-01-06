@@ -32,6 +32,7 @@ libobby_la_SOURCES += sha1.cpp
 libobby_la_SOURCES += colour.cpp
 libobby_la_SOURCES += user.cpp
 libobby_la_SOURCES += user_table.cpp
+libobby_la_SOURCES += command.cpp
 libobby_la_SOURCES += chat.cpp
 libobby_la_SOURCES += text.cpp
 libobby_la_SOURCES += document.cpp

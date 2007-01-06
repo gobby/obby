@@ -19,6 +19,7 @@
 #ifndef _OBBY_LOCAL_BUFFER_HPP_
 #define _OBBY_LOCAL_BUFFER_HPP_
 
+#include "command.hpp"
 #include "buffer.hpp"
 #include "local_document_info.hpp"
 
@@ -73,6 +74,14 @@ public:
 	 */
 	virtual void set_colour(const colour& colour) = 0;
 
+	/** @brief Sends a command query to the server to be executed.
+	 */
+	virtual void send_command(const command_query& query) = 0;
+
+	/** @brief Returns the command queue associated with this buffer.
+	 */
+	const command_queue& get_command_queue() const;
+
 	/** Signal which will be emitted if a user colour changecd failed at
 	 * the server.
 	 */
@@ -90,6 +99,7 @@ protected:
 
 protected:
 	signal_user_colour_failed_type m_signal_user_colour_failed;
+	command_queue m_command_queue;
 };
 
 typedef basic_local_buffer<obby::document, net6::selector> local_buffer;
@@ -114,6 +124,13 @@ basic_local_buffer<Document, Selector>::document_find(unsigned int owner_id,
 	return dynamic_cast<document_info_type*>(
 		basic_buffer<Document, Selector>::document_find(owner_id, id)
 	);
+}
+
+template<typename Document, typename Selector>
+const obby::command_queue& basic_local_buffer<Document, Selector>::
+	get_command_queue() const
+{
+	return m_command_queue;
 }
 
 template<typename Document, typename Selector>

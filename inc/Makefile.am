@@ -16,6 +16,7 @@ pkginclude_HEADERS += sha1.hpp
 pkginclude_HEADERS += colour.hpp
 pkginclude_HEADERS += user.hpp
 pkginclude_HEADERS += user_table.hpp
+pkginclude_HEADERS += command.hpp
 pkginclude_HEADERS += chat.hpp
 pkginclude_HEADERS += text.hpp
 pkginclude_HEADERS += document.hpp

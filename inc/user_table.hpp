@@ -199,6 +199,8 @@ public:
 	               user::flags exc_flags) const;
 
 	/** Returns the end of the user list.
+	 *
+	 * TODO: No need for flags here?
 	 */
 	iterator end(user::flags inc_flags,
 	             user::flags exc_flags) const;

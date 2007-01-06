@@ -25,6 +25,7 @@
 #include "error.hpp"
 #include "sha1.hpp"
 #include "rsa.hpp"
+#include "command.hpp"
 #include "buffer.hpp"
 #include "server_document_info.hpp"
 
@@ -84,10 +85,6 @@ public:
 	/** Closes the obby session.
 	 */
 	virtual void close();
-
-	/** Returns true if the obby session has been opened.
-	 */
-	//bool is_open() const;
 
 	/** Changes the global password for this session.
 	 */
@@ -214,6 +211,16 @@ protected:
 	virtual void on_net_document(const net6::packet& pack,
 	                             const user& from);
 
+	/** Command commands ;-)
+	 */
+	virtual void on_net_command_query(const net6::packet& pack,
+	                                  const user& from);
+
+	/** Commands.
+	 */
+	command_result on_command_emote(const user& from,
+	                                const std::string& paramlist);
+
 	/** @brief Closes a session.
 	 */
 	virtual void session_close();
@@ -241,6 +248,8 @@ protected:
 
 	signal_connect_type m_signal_connect;
 	signal_disconnect_type m_signal_disconnect;
+
+	command_map m_command_map;
 private:
 	/** This function provides access to the underlaying net6::basic_server
 	 * object.
@@ -266,6 +275,16 @@ basic_server_buffer<Document, Selector>::
 	);
 
 	m_public = keys.first; m_private = keys.second;
+
+	// Note that the command description is translated on server side.
+	// We cannot just send a number or something that the client converts
+	// to localised text since the client does not know the available
+	// commands (and neither their descriptions).
+	m_command_map.add_command(
+		"me",
+		_("Sends an action to the chat."),
+		sigc::mem_fun(*this, &basic_server_buffer::on_command_emote)
+	);
 }
 
 template<typename Document, typename Selector>
@@ -275,6 +294,11 @@ basic_server_buffer<Document, Selector>::
 	basic_buffer<Document, Selector>(),
 	m_public(public_key), m_private(private_key)
 {
+	m_command_map.add_command(
+		"me",
+		_("Sends an action to the chat."),
+		sigc::mem_fun(*this, &basic_server_buffer::on_command_emote)
+	);
 }
 
 template<typename Document, typename Selector>
@@ -405,14 +429,6 @@ void basic_server_buffer<Document, Selector>::close()
 	// user subscribed
 	session_close();
 }
-
-#if 0
-template<typename Document, typename Selector>
-bool basic_server_buffer<Document, Selector>::is_open() const
-{
-	return basic_buffer<Document, Selector>::m_net.get() != NULL;
-}
-#endif
 
 template<typename Document, typename Selector>
 void basic_server_buffer<Document, Selector>::
@@ -944,6 +960,9 @@ bool basic_server_buffer<Document, Selector>::
 	if(pack.get_command() == "obby_document")
 		{ on_net_document(pack, from); return true; }
 
+	if(pack.get_command() == "obby_command_query")
+		{ on_net_command_query(pack, from); return true; }
+
 	return false;
 }
 
@@ -1041,6 +1060,52 @@ void basic_server_buffer<Document, Selector>::
 	// TODO: Rename this function. Think about providing a signal that may
 	// be emitted.
 	info.on_net_packet(document_packet(pack), from);
+}
+
+template<typename Document, typename Selector>
+void basic_server_buffer<Document, Selector>::
+	on_net_command_query(const net6::packet& pack,
+	                     const user& from)
+{
+	unsigned int index = 0;
+	command_query query(pack, index);
+
+	command_result result = m_command_map.exec_command(from, query);
+
+	net6::packet reply_pack("obby_command_result");
+	result.append_packet(reply_pack);
+
+	net6_server().send(reply_pack, from.get_net6() );
+}
+
+template<typename Document, typename Selector>
+command_result basic_server_buffer<Document, Selector>::
+	on_command_emote(const user& from,
+	                 const std::string& paramlist)
+{
+	user_table& table = basic_buffer<Document, Selector>::m_user_table;
+
+	net6::packet pack("obby_emote_message");
+	pack << &from << paramlist;
+
+	for(user_table::iterator iter =
+		table.begin(user::flags::CONNECTED, user::flags::NONE);
+	    iter != table.end(user::flags::CONNECTED, user::flags::NONE);
+	    ++ iter)
+	{
+		// command_result will be sent to sender automatically, so
+		// there is no need to send emote message packet extra
+		if(&(*iter) == &from) continue;
+
+		net6_server().send(pack, iter->get_net6() );
+	}
+
+	basic_buffer<Document, Selector>::m_chat.add_emote_message(
+		paramlist,
+		from
+	);
+
+	return command_result(command_result::NO_REPLY);
 }
 
 template<typename Document, typename Selector>
