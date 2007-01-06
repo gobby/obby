@@ -1,5 +1,9 @@
-libobby
-=======
+obby
+====
+
+Version 0.3.0:
+ * This version is *not* protocol, ABI- or API compatible to the 0.2.x series!
+ * New merging algorithm (Jupiter)
 
 Version 0.2.0:
  * This version is *not* protocol compatible to 0.1.0!
