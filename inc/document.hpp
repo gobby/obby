@@ -43,6 +43,10 @@ public:
 
 	document();
 
+	/** Serialises the document into a serialisation object.
+	 */
+	void serialise(serialise::object& obj) const;
+
 	/** Deserialises the document.
 	 * TODO: Should be ctor?
 	 */
@@ -118,6 +122,7 @@ public:
 
 protected:
 	// TODO: Add history
+	// TODO: Use std::vector<line*>?
 	std::vector<line> m_lines;
 
 	signal_insert_type m_signal_insert;

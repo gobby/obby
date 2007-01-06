@@ -120,6 +120,10 @@ public:
 	 */
 	user(const serialise::object& obj);
 
+	/** Serialises a user to a serialisation object.
+	 */
+	void serialise(serialise::object& obj) const;
+
 	/** Releases the underlaying net6::user object from this user.
 	 * This is useful if this object gets deleted because the
 	 * corresponding client left the obby session. The obby::user object

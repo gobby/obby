@@ -30,8 +30,8 @@ namespace
 		std::string& src
 	)
 	{
-		std::string::size_type pos;
-		while( (pos = src.find_first_of("\n\t\\")) != std::string::npos)
+		std::string::size_type pos = 0;
+		while( (pos = src.find_first_of("\n\t\\\"", pos)) != std::string::npos)
 		{
 			std::string replace_with;
 
@@ -46,6 +46,9 @@ namespace
 			case '\\':
 				replace_with = "\\\\";
 				break;
+			case '\"':
+				replace_with = "\\\"";
+				break;
 			}
 
 			src.replace(pos, 1, replace_with);
@@ -58,8 +61,8 @@ namespace
 		unsigned int src_line
 	)
 	{
-		std::string::size_type pos;
-		while( (pos = src.find('\\')) != std::string::npos)
+		std::string::size_type pos = 0;
+		while( (pos = src.find('\\', pos)) != std::string::npos)
 		{
 			char replace_with;
 
@@ -75,6 +78,9 @@ namespace
 				break;
 			case 't':
 				replace_with = '\t';
+				break;
+			case '\"':
+				replace_with = '\"';
 				break;
 			default:
 				obby::format_string str(

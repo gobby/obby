@@ -29,6 +29,16 @@ obby::user_table::~user_table()
 	clear();
 }
 
+void obby::user_table::serialise(serialise::object& obj) const
+{
+	for(base_iterator i = m_user_map.begin(); i != m_user_map.end(); ++ i)
+	{
+		serialise::object& user = obj.add_child();
+		user.set_name("user");
+		i->second->serialise(user);
+	}
+}
+
 void obby::user_table::deserialise(const serialise::object& obj)
 {
 	for(serialise::object::child_iterator iter = obj.children_begin();

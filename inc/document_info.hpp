@@ -95,6 +95,10 @@ public:
 	                    net6::basic_object<selector_type>& net,
 	                    const serialise::object& obj);
 
+	/** Serialises the document into the given serialisation object.
+	 */
+	void serialise(serialise::object& obj) const;
+
 	/** Returns the owner of this document. It may return NULL if the
 	 * document has no owner (indicating that the server created the
 	 * document).
@@ -287,7 +291,7 @@ namespace serialise
 {
 
 // TODO: Make a specialised version with const data_type in net6 for const
-// objects.
+// objects?
 template<typename selector_type>
 class context<obby::basic_document_info<selector_type>*>
 {
@@ -475,6 +479,20 @@ basic_document_info<selector_type>::
 }
 
 template<typename selector_type>
+void basic_document_info<selector_type>::serialise(serialise::object& obj) const
+{
+	/* Cannot serialise an object whose content we do not have */
+	if(m_document.get() == NULL)
+		throw std::logic_error("obby::basic_document_info::serialise");
+
+	obj.add_attribute("owner").set_value(m_owner);
+	obj.add_attribute("id").set_value(m_id);
+	obj.add_attribute("title").set_value(m_title);
+
+	m_document->serialise(obj);
+}
+
+template<typename selector_type>
 const user* basic_document_info<selector_type>::get_owner() const
 {
 	return m_owner;
@@ -505,7 +523,11 @@ template<typename selector_type>
 const document& basic_document_info<selector_type>::get_content() const
 {
 	if(m_document.get() == NULL)
-		throw std::logic_error("obby::document_info::get_content");
+	{
+		throw std::logic_error(
+			"obby::basic_document_info::get_content"
+		);
+	}
 
 	return *m_document;
 }
@@ -586,7 +608,11 @@ template<typename selector_type>
 void basic_document_info<selector_type>::user_subscribe(const user& user)
 {
 	if(is_subscribed(user) )
-		throw std::logic_error("basic_document_info::user_subscribe");
+	{
+		throw std::logic_error(
+			"obby::basic_document_info::user_subscribe"
+		);
+	}
 
 	m_users.push_back(&user);
 	m_signal_subscribe.emit(user);
@@ -596,7 +622,11 @@ template<typename selector_type>
 void basic_document_info<selector_type>::user_unsubscribe(const user& user)
 {
 	if(!is_subscribed(user) )
-		throw std::logic_error("basic_document_info::user_unsubscribe");
+	{
+		throw std::logic_error(
+			"obby::basic_document_info::user_unsubscribe"
+		);
+	}
 
 	m_users.erase(
 		std::remove(m_users.begin(), m_users.end(), &user),

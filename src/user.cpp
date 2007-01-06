@@ -67,6 +67,15 @@ obby::user::user(const serialise::object& obj):
 	m_privs = privileges::NONE;
 }
 
+void obby::user::serialise(serialise::object& obj) const
+{
+	obj.add_attribute("id").set_value(m_id);
+	obj.add_attribute("name").set_value(m_name);
+	obj.add_attribute("red").set_value(m_red);
+	obj.add_attribute("green").set_value(m_green);
+	obj.add_attribute("blue").set_value(m_blue);
+}
+
 void obby::user::release_net6()
 {
 	// User must be already connected

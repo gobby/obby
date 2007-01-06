@@ -98,6 +98,27 @@ obby::line::line(const serialise::object& obj,
 	}
 }
 
+void obby::line::serialise(serialise::object& obj) const
+{
+	for(author_iterator iter = author_begin();
+	    iter != author_end();
+	    ++ iter)
+	{
+		std::string::size_type to_pos = m_line.length();
+		author_iterator to_iter = iter; ++ to_iter;
+		if(to_iter != author_end() ) to_pos = to_iter->position;
+
+		serialise::object& part = obj.add_child();
+		part.set_name("part");
+
+		part.add_attribute("content").set_value(
+			m_line.substr(iter->position, to_pos - iter->position)
+		);
+
+		part.add_attribute("author").set_value(iter->author);
+	}
+}
+
 obby::line::line(const line& other)
  : m_line(other.m_line), m_authors(other.m_authors)
 {

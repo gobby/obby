@@ -155,9 +155,9 @@ void obby::serialise::object::deserialise(
 	// our parent (or grandparent...).
 	if(iter != tokens.end() && iter->get_type() != token::TYPE_INDENTATION)
 	{
-		obby::format_string str(_(
-			"Expected child object instead of '%0%'"
-		) );
+		obby::format_string str(
+			_("Expected child object instead of '%0%'")
+		);
 		str << iter->get_text();
 		throw error(str.str(), iter->get_line() );
 	}
@@ -190,7 +190,9 @@ obby::serialise::attribute& obby::serialise::object::add_attribute(
 	const std::string& name
 )
 {
-	return m_attributes[name];
+	return m_attributes.insert(
+		std::make_pair(name, attribute(name))
+	).first->second;
 }
 
 obby::serialise::attribute*
@@ -215,7 +217,7 @@ obby::serialise::object::get_required_attribute(const std::string& name)
 	attribute_map::iterator iter = m_attributes.find(name);
 	if(iter == m_attributes.end() )
 	{
-		format_string str("Object '%0%' requires attribute '%1%'");
+		format_string str(_("Object '%0%' requires attribute '%1%'") );
 		str << m_name << name;
 		throw error(str.str(), m_line);
 	}
@@ -229,7 +231,7 @@ obby::serialise::object::get_required_attribute(const std::string& name) const
 	attribute_map::const_iterator iter = m_attributes.find(name);
 	if(iter == m_attributes.end() )
 	{
-		format_string str("Object '%0%' requires attribute '%1%'");
+		format_string str(_("Object '%0%' requires attribute '%1%'") );
 		str << m_name << name;
 		throw error(str.str(), m_line);
 	}

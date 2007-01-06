@@ -91,6 +91,10 @@ public:
 	 */
 	line& operator=(const line& other);
 
+	/** Serialises the line into a serialisation object.
+	 */
+	void serialise(serialise::object& obj) const;
+
 	/** Appends the line to a packet.
 	 */
 	void append_packet(net6::packet& pack) const;
@@ -138,11 +142,11 @@ public:
 	 */
 	line substr(size_type from, size_type len = npos) const;
 
-	/** Returns the begin of the authors list.
+	/** Returns the begin of the author list.
 	 */
 	author_iterator author_begin() const;
 
-	/** Returns the end of the authors list.
+	/** Returns the end of the author list.
 	 */
 	author_iterator author_end() const;
 

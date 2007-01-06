@@ -23,6 +23,7 @@
 #include <gmpxx.h>
 #include <net6/main.hpp>
 #include <net6/object.hpp>
+#include "serialise/parser.hpp"
 #include "common.hpp"
 #include "format_string.hpp"
 #include "document_info.hpp"
@@ -35,7 +36,7 @@ namespace obby
  * that are synchronised through many users and a user list.
  */
 template<typename selector_type>
-class basic_buffer : private net6::non_copyable, public sigc::trackable
+class basic_buffer: private net6::non_copyable, public sigc::trackable
 {
 public:
 	typedef basic_document_info<selector_type> base_document_info;
@@ -83,6 +84,10 @@ public:
 	/** Returns the selector of the underlaying net6 network object.
 	 */
 	const selector_type& get_selector() const;
+
+	/** Serialises the complete obby session into <em>file</em>.
+	 */
+	void serialise(const std::string& file) const;
 
 	/* Creates a new document with predefined content.
 	 * signal_document_insert will be emitted if it has been created.
@@ -256,6 +261,34 @@ const selector_type& basic_buffer<selector_type>::get_selector() const
 {
 	if(!m_net) throw std::logic_error("obby::basic_buffer::get_selector");
 	return m_net->get_selector();
+}
+
+template<typename selector_type>
+void basic_buffer<selector_type>::serialise(const std::string& session) const
+{
+	serialise::parser parser;
+	parser.set_type("obby");
+
+	serialise::object& root = parser.get_root();
+	root.set_name("session");
+
+	serialise::object& user_table = root.add_child();
+	user_table.set_name("user_table");
+	m_user_table.serialise(user_table);
+
+	for(document_iterator iter = document_begin();
+	    iter != document_end();
+	    ++ iter)
+	{
+		// Do not serialise this document if we do not have its content
+		try { iter->get_content(); } catch(...) { continue; }
+
+		serialise::object& doc = root.add_child();
+		doc.set_name("document");
+		iter->serialise(doc);
+	}
+
+	parser.serialise(session);
 }
 
 template<typename selector_type>

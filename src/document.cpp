@@ -24,6 +24,18 @@ obby::document::document()
 {
 }
 
+void obby::document::serialise(serialise::object& obj) const
+{
+	for(std::vector<line>::const_iterator iter = m_lines.begin();
+	    iter != m_lines.end();
+	    ++ iter)
+	{
+		serialise::object& line = obj.add_child();
+		line.set_name("line");
+		iter->serialise(line);
+	}
+}
+
 void obby::document::deserialise(const serialise::object& obj,
                                  const user_table& user_table)
 {
@@ -42,7 +54,7 @@ void obby::document::deserialise(const serialise::object& obj,
 		{
 			// Unexpected child node
 			// TODO: unexpected_child_error
-			format_string str("Unexpected child node: '%0%'");
+			format_string str(_("Unexpected child node: '%0%'") );
 			str << iter->get_name();
 			throw serialise::error(str.str(), iter->get_line() );
 		}

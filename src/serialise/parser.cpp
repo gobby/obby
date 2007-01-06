@@ -26,9 +26,7 @@ obby::serialise::parser::parser()
 {
 }
 
-void obby::serialise::parser::deserialise(
-	const std::string& file
-)
+void obby::serialise::parser::deserialise(const std::string& file)
 {
 	std::ifstream in(file.c_str() );
 
@@ -45,9 +43,7 @@ void obby::serialise::parser::deserialise(
 	deserialise(in);
 }
 
-void obby::serialise::parser::deserialise(
-	std::istream& stream
-)
+void obby::serialise::parser::deserialise(std::istream& stream)
 {
 	const unsigned int bufsize = 1024;
 	char readbuf[bufsize];
@@ -70,9 +66,7 @@ void obby::serialise::parser::deserialise(
 	deserialise_memory(result);
 }
 
-void obby::serialise::parser::deserialise_memory(
-	const std::string& mem
-)
+void obby::serialise::parser::deserialise_memory(const std::string& mem)
 {
 	token_list list;
 	list.deserialise(mem);
@@ -138,9 +132,7 @@ void obby::serialise::parser::deserialise_memory(
 	}
 }
 
-void obby::serialise::parser::serialise(
-	const std::string& file
-) const
+void obby::serialise::parser::serialise(const std::string& file) const
 {
 	std::ofstream out(file.c_str() );
 	if(!out)
@@ -155,9 +147,7 @@ void obby::serialise::parser::serialise(
 	serialise(out);
 }
 
-void obby::serialise::parser::serialise(
-	std::ostream& stream
-) const
+void obby::serialise::parser::serialise(std::ostream& stream) const
 {
 	// Get string
 	std::string result;
@@ -168,9 +158,7 @@ void obby::serialise::parser::serialise(
 	stream.flush();
 }
 
-void obby::serialise::parser::serialise_memory(
-	std::string& mem
-) const
+void obby::serialise::parser::serialise_memory(std::string& mem) const
 {
 	// Empty list
 	token_list list;
@@ -192,9 +180,7 @@ const std::string& obby::serialise::parser::get_type() const
 	return m_type;
 }
 
-void obby::serialise::parser::set_type(
-	const std::string& type
-)
+void obby::serialise::parser::set_type(const std::string& type)
 {
 	m_type = type;
 }

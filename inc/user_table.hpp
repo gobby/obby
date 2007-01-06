@@ -147,6 +147,10 @@ public:
 	user_table();
 	virtual ~user_table();
 
+	/** Serialises a user_table to a serialisation object.
+	 */
+	void serialise(serialise::object& obj) const;
+
 	/** Deserialises a user_table from a serialisation object.
 	 */
 	void deserialise(const serialise::object& obj);
