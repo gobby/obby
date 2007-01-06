@@ -51,6 +51,8 @@ public:
 
 	position& operator+=(const position& other);
 	position operator+(const position& other) const;
+
+	void sub_range(const position& from, const position& to);
 private:
 	unsigned int m_line;
 	unsigned int m_col;

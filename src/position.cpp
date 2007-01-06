@@ -137,3 +137,10 @@ obby::position obby::position::operator+(const position& other) const
 	return(position(*this) += other);
 }
 
+void obby::position::sub_range(const position& from, const position& to)
+{
+	if(to.m_line == m_line)
+		m_col -= to.m_col - from.m_col;
+
+	m_line -= to.m_line - from.m_line;
+}

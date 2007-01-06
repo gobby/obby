@@ -55,18 +55,12 @@ void obby::insert_record::on_delete(const position& from, const position& to)
 {
 	if(m_pos >= from && m_pos < to)
 	{
+		// The position where to insert text has been deleted
 		invalidate();
 	}
 	else if(m_pos >= to)
 	{
-		// TODO: Put this into a method of position?
-		if(to.get_line() == m_pos.get_line() )
-			m_pos.move_by(
-				from.get_line() - to.get_line(),
-				from.get_col() - to.get_col()
-			);
-		else
-			m_pos.move_by(from.get_line() - to.get_line(), 0);
+		m_pos.sub_range(from, to);
 	}
 }
 
