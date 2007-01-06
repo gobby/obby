@@ -259,7 +259,8 @@ void obby::client_buffer::on_net_document_create(const net6::packet& pack)
 	
 	unsigned int author_id = pack.get_param(2).as_int();
 	const std::string& content = pack.get_param(3).as_string();
-	new_doc.insert_nosync(insert_record(0, content, id, 0, author_id, 0) );
+	insert_record rec(0, content, id, 0, author_id, 0);
+	new_doc.insert_nosync(rec);
 
 	m_signal_insert_document.emit(new_doc);
 }
