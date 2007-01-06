@@ -61,9 +61,7 @@ abc|0->del(0-1),0->del(1-2),1->del(1-2)|
 abc|1->ins(1@0)|1abc
 abc|0->ins(1@0),1->ins(2@1)|1a2bc
 abc|0->ins(2@1),1->ins(1@0)|1a2bc
-
-# Server (1) should be preferred, request of client 1 should arrive before
-# request of client 2
+abcdef|1->ins(2@1),2->ins(4@4)|a2bcd4ef
 abc|0->ins(1@0),1->ins(2@0),2->ins(3@0)|123abc
 
 # concurrent insertion and deletion

@@ -17,7 +17,8 @@ AM_CPPFLAGS = -I../inc/ $(libobby_CFLAGS)
 noinst_PROGRAMS = \
 	ring \
 	serialise \
-	text
+	text \
+	jupiter
 
 #noinst_PROGRAMS += buffer
 #noinst_PROGRAMS += curses
@@ -30,6 +31,7 @@ noinst_PROGRAMS = \
 ring_SOURCES = ring.cpp
 serialise_SOURCES = serialise.cpp
 text_SOURCES = text.cpp
+jupiter_SOURCES = jupiter.cpp
 
 #if WITH_HOWL
 #noinst_PROGRAMS += discover

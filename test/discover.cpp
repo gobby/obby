@@ -5,7 +5,6 @@
 using namespace std;
 using namespace obby;
 using namespace net6;
-// ^ - kranker Troll :(
 
 void on_discover(const string& name, const ipv4_address& addr)
 {
