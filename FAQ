@@ -1,8 +1,8 @@
 libobby FAQ
 ===========
 
-1) Why is libobby called ``libobby''?
-     
+1) Why is obby called ``obby''?
+
   This answer to this one is trivial, but it only sounds funny to those familiar
   with development. The library should be called lobby, and in fact the compiler
   sees it as -lobby when it's linked. Thus, we will call it ``Lobby'' in the
