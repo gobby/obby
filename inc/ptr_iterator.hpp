@@ -32,7 +32,7 @@ public:
 	ptr_iterator()
 	 : base_iterator() { }
 	ptr_iterator(const base_iterator& iter)
-	 : base_iterator() { }
+	 : base_iterator(iter) { }
 
 	ptr_iterator& operator=(const base_iterator& iter) {
 		return static_cast<ptr_iterator&>(
