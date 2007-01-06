@@ -117,15 +117,15 @@ void obby::server_buffer::on_data(const net6::packet& pack,
 		rec->apply(*this);
 
 		// Redo the changes to reach the current revision
-		-- iter;
 		do
 		{
+			-- iter;
+
 			// Apply the current change to the new record
 			(*iter)->apply(*rec);
 
 			// Re-apply this revision to the buffer
 			(*iter)->apply(*this);
-			-- iter;
 		} while(iter != m_history.begin() );
 
 		// Increment revision
