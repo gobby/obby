@@ -150,9 +150,15 @@ sw_result obby::zeroconf::handle_resolve_reply(sw_discovery discovery,
 	sw_port port, sw_octets text_record, sw_ulong text_record_len,
 	sw_opaque extra)
 {
-	static_cast<obby::zeroconf*>(extra)->discover_event().emit(
-		name, net6::ipv4_address::create_from_address(
-		sw_ipv4_address_saddr(address), port));
+	// At least newer revisions of OS X emit 0.0.0.0 as a second pseudo
+	// entry when discovering the local host as the IPv6 address gets
+	// parsed as a IPv4 address anywhere within Howl which does not yet
+	// support service discovery on IPv6.
+	uint32_t ip(sw_ipv4_address_saddr(address));
+	if(ip != 0)
+		static_cast<obby::zeroconf*>(extra)->discover_event().emit(
+			name, net6::ipv4_address::create_from_address(
+			ip, port));
 	return SW_OKAY;
 }
 
