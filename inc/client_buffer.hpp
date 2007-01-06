@@ -377,9 +377,28 @@ void basic_client_buffer<Document, Selector>::
 	// lose a welcome packet if the remote site sends the packet between
 	// the connection and the signal handler registration (which _may_
 	// occur with connections to localhost).
-	net6_client().connect(
-		net6::ipv4_address::create_from_hostname(hostname, port)
-	);
+	try
+	{
+		net6_client().connect(
+			net6::ipv4_address::create_from_hostname(
+				hostname,
+				port
+			)
+		);
+	}
+	catch(net6::error& e)
+	{
+#ifdef USE_IPV6
+		net6_client().connect(
+			net6::ipv6_address::create_from_hostname(
+				hostname,
+				port
+			)
+		);
+#else
+		throw e;
+#endif
+	}
 
 	net6_client().set_enable_keepalives(m_enable_keepalives);
 }
