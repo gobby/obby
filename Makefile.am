@@ -13,6 +13,7 @@ pkginclude_HEADERS = \
 	inc/rendezvous.hpp
 
 libobby_la_SOURCES = \
+	src/common.cpp \
 	src/position.cpp \
 	src/record.cpp \
 	src/insert_record.cpp \
