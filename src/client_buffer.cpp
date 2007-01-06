@@ -42,6 +42,11 @@ obby::client_buffer::~client_buffer()
 		delete *iter;
 }
 
+void obby::client_buffer::login(const std::string& name)
+{
+	m_connection.login(name);
+}
+
 void obby::client_buffer::select()
 {
 	m_connection.select();

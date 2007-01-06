@@ -43,6 +43,8 @@ public:
 	
 	client_buffer(const std::string& hostname, unsigned int port);
 	~client_buffer();
+	
+	void login(const std::string& name);
 
 	void select();
 	void select(unsigned int timeout);

@@ -19,7 +19,7 @@
 #include "server_buffer.hpp"
 
 obby::server_buffer::server_buffer(unsigned int port)
- : buffer(), m_server(port)
+ : buffer(), m_server(port, false)
 {
 	m_server.join_event().connect(
 		sigc::mem_fun(*this, &server_buffer::on_join) );
