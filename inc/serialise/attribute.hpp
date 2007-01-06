@@ -33,8 +33,7 @@ class attribute
 public:
 	attribute(
 		const std::string& name = "Unnamed",
-		const std::string& value = "Unassigned",
-		unsigned int line = 0
+		const std::string& value = "Unassigned"
 	);
 
 	void serialise(

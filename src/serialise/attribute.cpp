@@ -23,10 +23,9 @@
 
 obby::serialise::attribute::attribute(
 	const std::string& name,
-	const std::string& value,
-	unsigned int line
+	const std::string& value
 ) :
-	m_name(name), m_value(value), m_line(line)
+	m_name(name), m_value(value), m_line(0)
 {
 }
 
