@@ -60,6 +60,8 @@ void obby::zeroconf::publish(const std::string& name, unsigned int port)
 void obby::zeroconf::unpublish(const std::string& name)
 {
 	if(!m_published[name])
+		// TODO: throw exception here? We could remove
+		// <iostream> inclusion...
 		std::cerr << "unpublish not possible for \"" << name << "\""
 			<< std::endl;
 	else

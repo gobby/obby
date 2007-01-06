@@ -19,8 +19,6 @@
 #ifndef _OBBY_HOST_BUFFER_HPP_
 #define _OBBY_HOST_BUFFER_HPP_
 
-#include <iostream>
-
 #include <sigc++/signal.h>
 #include <net6/host.hpp>
 #include "host_document_info.hpp"

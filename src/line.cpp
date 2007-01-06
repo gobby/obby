@@ -17,7 +17,6 @@
  */
 
 #include <cassert>
-#include <iostream>
 #include "buffer.hpp"
 #include "line.hpp"
 
