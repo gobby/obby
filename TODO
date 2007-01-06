@@ -12,7 +12,6 @@ Normal:
   * Implement records to (un)indent lines of text (#30)
   * Undo/Redo (#39)
   * Exchange version information (#42)
-  * Authentication: Basic user authentication for reconnects (#55)
   * Authentication: Database-based authentication using user/password (#57)
   * Authentication: Access control lists (#58)
 
@@ -50,13 +49,6 @@ We need a proper undo/redo handling in libobby.
 The client should send it's version of libobby when sending the login 
 packet. The server may compare the versions and detect protocol 
 incompability and drop a corresponding error message.
-
-55: Authentication: Basic user authentication for reconnects
-------------------------------------------------------------
-''libobby'' should provide the following mean of authentication:
- * If a user logs in the first time since the host restarted a password 
-specified by the user will be set on the server with which it could 
-authenticate itself after a connection loss.
 
 57: Authentication: Database-based authentication using user/password
 ---------------------------------------------------------------------
