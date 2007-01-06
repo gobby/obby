@@ -1173,7 +1173,7 @@ template<typename Document, typename Selector>
 typename basic_server_buffer<Document, Selector>::base_net_type*
 basic_server_buffer<Document, Selector>::new_net()
 {
-	return new net_type(false);
+	return new net_type(IPV6_ENABLED);
 }
 
 template<typename Document, typename Selector>

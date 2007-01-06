@@ -388,16 +388,14 @@ void basic_client_buffer<Document, Selector>::
 	}
 	catch(net6::error& e)
 	{
-#ifdef USE_IPV6
+		if(!IPV6_ENABLED) throw e;
+
 		net6_client().connect(
 			net6::ipv6_address::create_from_hostname(
 				hostname,
 				port
 			)
 		);
-#else
-		throw e;
-#endif
 	}
 
 	net6_client().set_enable_keepalives(m_enable_keepalives);

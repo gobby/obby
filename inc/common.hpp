@@ -46,6 +46,8 @@ void init_gettext(net6::gettext_package& package);
  */
 const char* _(const char* msgid);
 
+extern const bool IPV6_ENABLED;
+
 }
 
 #endif // _OBBY_COMMON_HPP_

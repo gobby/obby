@@ -76,3 +76,9 @@ const char* obby::_(const char* msgid)
 	return msgid;
 #endif
 }
+
+#ifdef USE_IPV6
+const bool obby::IPV6_ENABLED = true;
+#else
+const bool obby::IPV6_ENABLED = false;
+#endif
