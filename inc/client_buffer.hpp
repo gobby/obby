@@ -100,7 +100,10 @@ public:
 	 */
 	void connect(const std::string& hostname, unsigned int port = 6522);
 
-	/** Disconnects from a server.
+	/** Disconnects from a server. Note that documents and users are
+	 * still available until reconnection. get_self() will still return
+	 * the local user. is_logged_in() will returns false since the
+	 * connection is lost.
 	 */
 	void disconnect();
 
@@ -370,11 +373,22 @@ void basic_client_buffer<Document, Selector>::disconnect()
 		);
 	}
 
-	// TODO: Keep documents and users until reconnection
-	basic_buffer<Document, Selector>::document_clear();
-	basic_buffer<Document, Selector>::m_user_table.clear();
+	// Remove all users from table. Note that this still keeps the users
+	// including their colors but just drops their reference to the
+	// underlaying net6::user.
+	user_table& table =
+		basic_buffer<Document, Selector>::m_user_table;
+
+	for(user_table::iterator iter =
+		table.begin(user::flags::CONNECTED, user::flags::NONE);
+	    iter != table.end(user::flags::CONNECTED, user::flags::NONE);
+	    ++ iter)
+	{
+		table.remove_user(*iter);
+	}
+
+	// Keep documents and users until reconnection
 	basic_buffer<Document, Selector>::m_net.reset(NULL);
-	m_self = NULL;
 
 	// Empty passwords
 	m_settings.global_password = m_settings.user_password = "";
@@ -389,9 +403,16 @@ bool basic_client_buffer<Document, Selector>::is_connected() const
 template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::request_encryption()
 {
+	if(!is_connected() )
+	{
+		throw std::logic_error(
+			"obby::basic_client_buffer::request_encryption:\n"
+			"Client buffer is not connected"
+		);
+	}
+
 	net6_client().request_encryption();
 }
-
 
 template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::login(const std::string& name,
@@ -416,7 +437,13 @@ void basic_client_buffer<Document, Selector>::login(const std::string& name,
 template<typename Document, typename Selector>
 bool basic_client_buffer<Document, Selector>::is_logged_in() const
 {
-	return m_self != NULL;
+	// TODO: Return true or false when being disconnected and still
+	// having an old session?
+	//
+	// Some functions like document_remove depend on the current
+	// behavior. Change them accordingly if you change something here!
+	if(basic_buffer<Document, Selector>::m_net.get() == NULL) return false;
+	return net6_client().is_logged_in();
 }
 
 template<typename Document, typename Selector>
@@ -425,8 +452,15 @@ void basic_client_buffer<Document, Selector>::
 	                const std::string& encoding,
 	                const std::string& content)
 {
-	// TODO: Special handling if not connected
-	// Choose new ID
+	// TODO: Allow this and create the document just locally?
+	if(!is_logged_in() )
+	{
+		throw std::logic_error(
+			"obby::basic_client_buffer::document_create:\n"
+			"Cannot create document without being logged in"
+		);
+	}
+
 	// TODO: m_doc_counter does not belong into the base class
 	unsigned int id = ++ basic_buffer<Document, Selector>::m_doc_counter;
 	// Create document
@@ -444,10 +478,31 @@ template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::
 	document_remove(base_document_info_type& document)
 {
-	// Send remove request
-	net6::packet request_pack("obby_document_remove");
-	request_pack << &document;
-	net6_client().send(request_pack);
+	if(is_logged_in() )
+	{
+		// Send remove request, remove document on server reply
+		// to ensure synchronisation
+		net6::packet request_pack("obby_document_remove");
+		request_pack << &document;
+		net6_client().send(request_pack);
+	}
+	else
+	{
+		// We are not logged in, so there should no users
+		// be subscribed to the document. They should have been
+		// unsubscribed on disconnection.
+		if(document.user_count() > 0)
+		{
+			throw std::logic_error(
+				"obby::basic_client_buffer::document_remove:\n"
+				"Users are still subscribed to document "
+				"without being connected"
+			);
+		}
+
+		// Delete document
+		basic_buffer<Document, Selector>::document_delete(document);
+	}
 }
 
 template<typename Document, typename Selector>
@@ -490,31 +545,67 @@ template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::
 	send_message(const std::string& message)
 {
-	net6::packet message_pack("obby_message");
-	message_pack << message;
-	net6_client().send(message_pack);
+	if(is_logged_in() )
+	{
+		// Wait for server response to ensure synchronisation
+		net6::packet message_pack("obby_message");
+		message_pack << message;
+		net6_client().send(message_pack);
+	}
+	else
+	{
+		// If we have never been connected to a session we have no
+		// user that might send this message
+		if(m_self == NULL)
+		{
+			throw std::logic_error(
+				"obby::basic_client_buffer::send_message:\n"
+				"No self user available. Probably the client "
+				"buffer never has been connected to a session."
+			);
+		}
 
-	// Do not add directly, wait for confirmation to ensure synchronisation
-/*	basic_buffer<obby::document, selector_type>::m_chat.add_user_message(
-		message, get_self()
-	);*/
+		basic_buffer<Document, Selector>::m_chat.add_user_message(
+			message, get_self()
+		);
+	}
 }
 
 template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::
 	set_password(const std::string& password)
 {
-	net6::packet password_pack("obby_user_password");
-	password_pack << RSA::encrypt(m_public, password);
-	net6_client().send(password_pack);
+	if(is_logged_in() )
+	{
+		net6::packet password_pack("obby_user_password");
+		password_pack << RSA::encrypt(m_public, password);
+		net6_client().send(password_pack);
+	}
+	else
+	{
+		throw std::logic_error(
+			"obby::basic_client_buffer::set_password:\n"
+			"Cannot set password without being logged in"
+		);
+	}
 }
 
 template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::set_colour(const colour& colour)
 {
-	net6::packet colour_pack("obby_user_colour");
-	colour_pack << colour;
-	net6_client().send(colour_pack);
+	if(is_logged_in() )
+	{
+		net6::packet colour_pack("obby_user_colour");
+		colour_pack << colour;
+		net6_client().send(colour_pack);
+	}
+	else
+	{
+		throw std::logic_error(
+			"obby::basic_client_buffer::::set_colour:\n"
+			"Cannot change colour without being logged in"
+		);
+	}
 }
 
 template<typename Document, typename Selector>
@@ -923,6 +1014,13 @@ template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::
 	on_net_sync_init(const net6::packet& pack)
 {
+	// Login was successful, synchronisation begins. Clear users and
+	// documents from old session that have been kept to be able to still
+	// access them while being disconnected.
+	basic_buffer<Document, Selector>::m_user_table.clear();
+	basic_buffer<Document, Selector>::document_clear();
+	m_self = NULL;
+
 	basic_buffer<Document, Selector>::m_signal_sync_init.emit(
 		pack.get_param(0).net6::parameter::as<unsigned int>()
 	);
