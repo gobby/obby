@@ -39,15 +39,36 @@ template<typename selector_type>
 class basic_document_info : private net6::non_copyable, public sigc::trackable
 {
 public:
-	// TODO: auto-generate privileges class
-	enum privileges {
-		PRIV_NONE      = 0x00,
-		PRIV_SUBSCRIBE = 0x01, // User may subscribe to document
-		PRIV_MODIFY    = 0x02, // User may modify the document
-		PRIV_CLOSE     = 0x04, // User may close the document (completly)
-		PRIV_RENAME    = 0x08, // TODO: Implement rename in Gobby :)
-		PRIV_ADMIN     = 0x10, // User may change user's privileges
-		PRIV_ALL       = ~PRIV_NONE // All of the above
+	class privileges
+	{
+	public:
+		static const privileges NONE;
+		static const privileges SUBSCRIBE;
+		static const privileges MODIFY;
+		static const privileges CLOSE;
+		static const privileges RENAME;
+		static const privileges ADMIN;
+		static const privileges ALL;
+
+        	privileges operator|(privileges other) const { return privileges(m_value | other.m_value); }
+	        privileges operator&(privileges other) const { return privileges(m_value & other.m_value); }
+        	privileges operator^(privileges other) const { return privileges(m_value ^ other.m_value); }
+	        privileges& operator|=(privileges other) { m_value |= other.m_value; return *this; }
+        	privileges& operator&=(privileges other) { m_value &= other.m_value; return *this; }
+	        privileges& operator^=(privileges other) { m_value ^= other.m_value; return *this; }
+        	privileges operator~() const { return privileges(~m_value); }
+
+		operator bool() const { return m_value != NONE.m_value; }
+		bool operator!() const { return m_value == NONE.m_value; }
+	        bool operator==(privileges other) const { return m_value == other.m_value; }
+        	bool operator!=(privileges other) const { return m_value != other.m_value; }
+
+	        unsigned int get_value() const { return m_value; }
+
+	protected:
+        	explicit privileges(unsigned int value) : m_value(value) { }
+
+	        unsigned int m_value;
 	};
 
 	class privileges_table;
@@ -198,6 +219,21 @@ private:
 	const net6::basic_object<selector_type>& get_net6() const;
 };
 
+template<typename selector_type>
+const typename basic_document_info<selector_type>::privileges basic_document_info<selector_type>::privileges::NONE = typename basic_document_info<selector_type>::privileges(0x00000000);
+template<typename selector_type>
+const typename basic_document_info<selector_type>::privileges basic_document_info<selector_type>::privileges::SUBSCRIBE = typename basic_document_info<selector_type>::privileges(0x00000001);
+template<typename selector_type>
+const typename basic_document_info<selector_type>::privileges basic_document_info<selector_type>::privileges::MODIFY = typename basic_document_info<selector_type>::privileges(0x00000002);
+template<typename selector_type>
+const typename basic_document_info<selector_type>::privileges basic_document_info<selector_type>::privileges::CLOSE = typename basic_document_info<selector_type>::privileges(0x00000004);
+template<typename selector_type>
+const typename basic_document_info<selector_type>::privileges basic_document_info<selector_type>::privileges::RENAME = typename basic_document_info<selector_type>::privileges(0x00000008);
+template<typename selector_type>
+const typename basic_document_info<selector_type>::privileges basic_document_info<selector_type>::privileges::ADMIN = typename basic_document_info<selector_type>::privileges(0x00000010);
+template<typename selector_type>
+const typename basic_document_info<selector_type>::privileges basic_document_info<selector_type>::privileges::ALL = typename basic_document_info<selector_type>::privileges(~basic_document_info<selector_type>::privileges::NONE);
+
 /** Table that stores the privileges for multiple users.
  */
 template<typename selector_type>
@@ -220,7 +256,7 @@ public:
 	/** Queries the privileges for the given user.
 	 */
 	privileges privileges_query(const user& user,
-	                            privileges privs = PRIV_ALL) const;
+	                            privileges privs = privileges::ALL) const;
 
 	/** Changes the privileges of a user.
 	 */
@@ -238,48 +274,6 @@ protected:
 
 	signal_privileges_changed_type m_signal_privileges_changed;
 };
-
-// typename basic_document_info<selector_type>::privileges combination operators
-template<typename selector_type>
-inline typename basic_document_info<selector_type>::privileges operator|(typename basic_document_info<selector_type>::privileges lhs, typename basic_document_info<selector_type>::privileges rhs) {
-	return static_cast<typename basic_document_info<selector_type>::privileges>(
-		static_cast<int>(lhs) | static_cast<int>(rhs)
-	);
-}
-
-template<typename selector_type>
-inline typename basic_document_info<selector_type>::privileges operator&(typename basic_document_info<selector_type>::privileges lhs, typename basic_document_info<selector_type>::privileges rhs) {
-	return static_cast<typename basic_document_info<selector_type>::privileges>(
-		static_cast<int>(lhs) & static_cast<int>(rhs)
-	);
-}
-
-template<typename selector_type>
-inline typename basic_document_info<selector_type>::privileges operator^(typename basic_document_info<selector_type>::privileges lhs, typename basic_document_info<selector_type>::privileges rhs) {
-	return static_cast<typename basic_document_info<selector_type>::privileges>(
-		static_cast<int>(lhs) ^ static_cast<int>(rhs)
-	);
-}
-
-template<typename selector_type>
-inline typename basic_document_info<selector_type>::privileges& operator|=(typename basic_document_info<selector_type>::privileges& lhs, typename basic_document_info<selector_type>::privileges rhs) {
-	return lhs = (lhs | rhs);
-}
-
-template<typename selector_type>
-inline typename basic_document_info<selector_type>::privileges& operator&=(typename basic_document_info<selector_type>::privileges& lhs, typename basic_document_info<selector_type>::privileges rhs) {
-	return lhs = (lhs & rhs);
-}
-
-template<typename selector_type>
-inline typename basic_document_info<selector_type>::privileges& operator^=(typename basic_document_info<selector_type>::privileges& lhs, typename basic_document_info<selector_type>::privileges rhs) {
-	return lhs = (lhs ^ rhs);
-}
-
-template<typename selector_type>
-inline typename basic_document_info<selector_type>::privileges operator~(typename basic_document_info<selector_type>::privileges rhs) {
-	return static_cast<typename basic_document_info<selector_type>::privileges>(~static_cast<int>(rhs) );
-}
 
 } // namespace obby
 
@@ -341,9 +335,11 @@ basic_document_info<selector_type>::
 	basic_document_info(const basic_buffer<selector_type>& buffer,
 	                    net6::basic_object<selector_type>& net,
 	                    const user* owner, unsigned int id,
-	                    const std::string& title)
- : m_buffer(buffer), m_net(net), m_owner(owner), m_id(id), m_title(title),
-   m_priv_table(new privileges_table(PRIV_SUBSCRIBE/* | PRIV_MODIFY*/))
+	                    const std::string& title) :
+	m_buffer(buffer), m_net(net), m_owner(owner), m_id(id), m_title(title),
+	m_priv_table(
+		new privileges_table(privileges::SUBSCRIBE | privileges::MODIFY)
+	)
 {
 }
 
