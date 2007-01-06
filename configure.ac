@@ -34,6 +34,17 @@ AC_SUBST(extra_requires)
 # Initialise pkg-config.
 PKG_CHECK_MODULES([libraries], [$extra_requires])
 
+# IPv6 support
+AC_ARG_ENABLE([ipv6],
+              AS_HELP_STRING([--enable-ipv6],
+	                     [enable IPv6 support]),
+              [ipv6=$withval], [ipv6=no])
+AC_CACHE_CHECK([whether to enable IPv6 support],
+               [ipv6], [ipv6=no])
+if test "x$ipv6" = "xyes" ; then
+  AC_DEFINE([USE_IPV6], 1, [Enable IPv6 support.])
+fi
+
 # Zeroconf support
 AC_ARG_WITH([zeroconf],
             AS_HELP_STRING([--with-zeroconf],
