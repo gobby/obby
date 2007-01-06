@@ -69,7 +69,7 @@ public:
 
 	/** Returns the amount of unsynced changes.
 	 */
-	unsigned int get_unsynced_changes_count() const;
+	std::list<record*>::size_type unsynced_count() const;
 protected:
 	std::list<record*> m_unsynced;
 	net6::client& m_client;

@@ -122,7 +122,7 @@ public:
 
 	/** Returns the size of the document list.
 	 */
-	std::list<document*>::size_type document_size() const;
+	std::list<document*>::size_type document_count() const;
 
 	/** Returns the begin of the user list.
 	 */
@@ -134,7 +134,7 @@ public:
 
 	/** Returns the size of the user list.
 	 */
-	std::list<user*>::size_type user_size() const;
+	std::list<user*>::size_type user_count() const;
 
 	/** Sends a global chat message to all users.
 	 */

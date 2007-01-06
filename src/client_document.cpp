@@ -64,7 +64,8 @@ void obby::client_document::erase(position from, position to)
 	m_client.send(rec->to_packet() );
 }
 
-unsigned int obby::client_document::get_unsynced_changes_count() const
+std::list<obby::record*>::size_type
+obby::client_document::unsynced_count() const
 {
 	// Just return size of list which is the amount of unsynced changes
 	return m_unsynced.size();

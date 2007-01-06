@@ -77,7 +77,7 @@ obby::buffer::document_iterator obby::buffer::document_end() const
 	return static_cast<document_iterator>(m_doclist.end() );
 }
 
-std::list<obby::document*>::size_type obby::buffer::document_size() const
+std::list<obby::document*>::size_type obby::buffer::document_count() const
 {
 	return m_doclist.size();
 }
@@ -92,7 +92,7 @@ obby::buffer::user_iterator obby::buffer::user_end() const
 	return static_cast<user_iterator>(m_userlist.end() );
 }
 
-std::list<obby::user*>::size_type obby::buffer::user_size() const
+std::list<obby::user*>::size_type obby::buffer::user_count() const
 {
 	return m_userlist.size();
 }
