@@ -59,8 +59,7 @@ public:
 	 */
 	void remote_op(const record& rec, const user* from);
 
-	/** Signal which will be emitted when a local operation has been
-	 * applied.
+	/** Undoes the last operation.
 	 */
 	void undo_op(const user* from);
 

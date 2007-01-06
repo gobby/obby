@@ -37,6 +37,8 @@ void obby::jupiter_client::local_op(const operation& op, const user* from)
 {
 	// Apply operation locally
 	op.apply(m_document, from);
+	// Tell undo manager
+	m_undo.local_op(op, from);
 	// Generate record
 	std::auto_ptr<record> rec(m_algorithm.local_op(op) );
 	// Emit record signal
@@ -49,11 +51,20 @@ void obby::jupiter_client::remote_op(const record& rec, const user* from)
 	std::auto_ptr<operation> op(m_algorithm.remote_op(rec) );
 	// Apply to document
 	op->apply(m_document, from);
+	// Tell undo manager
+	m_undo.remote_op(*op, from);
 }
 
 void obby::jupiter_client::undo_op(const user* from)
 {
-	return m_signal_local;
+	// Request undo operation from undo manager
+	std::auto_ptr<operation> op = m_undo.undo();
+	// Apply operation locally
+	op->apply(m_document, from);
+	// Generate record
+	std::auto_ptr<record> rec(m_algorithm.local_op(*op) );
+	// Emit record signal
+	m_signal_record.emit(*rec, from);
 }
 
 obby::jupiter_client::signal_record_type
