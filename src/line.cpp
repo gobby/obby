@@ -56,8 +56,8 @@ obby::line::line(const net6::packet& pack,
 		// Get position and author
 		unsigned int pos =
 			pack.get_param(index ++).as<unsigned int>();
-		const user* author =
-			pack.get_param(index ++).as<const user*>(user_table);
+		const user* author = pack.get_param(index ++).as<const user*>(
+			::serialise::hex_context<const user*>(user_table));
 
 		// Add to vector
 		user_pos upos = { author, pos };
@@ -77,7 +77,11 @@ obby::line::line(const serialise::object& obj,
 			// Part of the line
 			user_pos pos = {
 				iter->get_required_attribute("author").
-					as<const user*>(user_table),
+					as<const user*>(
+						::serialise::context<
+							const user*
+						>(user_table)
+					),
 				m_line.length()
 			};
 

@@ -492,17 +492,19 @@ basic_document_info<selector_type>::
 	m_buffer(buffer), m_net(net),
 	m_owner(
 		obj.get_required_attribute("owner").
-			serialise::attribute::as<const user*>(
-				buffer.get_user_table()
+			obby::serialise::attribute::as<const user*>(
+				::serialise::context<const user*>(
+					buffer.get_user_table()
+				)
 			)
 	),
 	m_id(
 		obj.get_required_attribute("id").
-			serialise::attribute::as<unsigned int>()
+			obby::serialise::attribute::as<unsigned int>()
 	),
 	m_title(
 		obj.get_required_attribute("title").
-			serialise::attribute::as<std::string>()
+			obby::serialise::attribute::as<std::string>()
 	),
 	m_priv_table(
 		new privileges_table(privileges::SUBSCRIBE | privileges::MODIFY)

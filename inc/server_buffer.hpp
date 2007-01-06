@@ -850,13 +850,16 @@ void basic_server_buffer<selector_type>::
 	on_net_document_remove(const net6::packet& pack, const user& from)
 {
 	// Get document to remove
-	obby::document_info* doc = pack.get_param(0).net6::
-		parameter::as<obby::document_info*>(*this);
+	document_info& doc = dynamic_cast<document_info&>(
+		*pack.get_param(0).net6::parameter::as<obby::document_info*>(
+			::serialise::hex_context<obby::document_info*>(*this)
+		)
+	);
 
 	// TODO: AUTH
 
 	// Remove it
-	document_remove(*doc);
+	document_remove(doc);
 }
 
 template<typename selector_type>
@@ -907,9 +910,9 @@ void basic_server_buffer<selector_type>::
 	on_net_document(const net6::packet& pack, const user& from)
 {
 	document_info& info = dynamic_cast<document_info&>(
-		*pack.get_param(0).net6::parameter::as<
-			obby::document_info*
-		>(*this)
+		*pack.get_param(0).net6::parameter::as<obby::document_info*>(
+			::serialise::hex_context<obby::document_info*>(*this)
+		)
 	);
 
 	// TODO: Rename this function. Think about providing a signal that may

@@ -30,6 +30,9 @@ const char* obby_localedir();
 
 }
 
+/**
+ * @brief Foo!
+ */
 namespace obby
 {
 

@@ -238,13 +238,13 @@ basic_client_document_info<selector_type>::basic_client_document_info(
 ) : basic_document_info<selector_type>(
 	buffer, net,
 	init_pack.get_param(0).net6::parameter::as<const user*>(
-		buffer.get_user_table()
+		::serialise::hex_context<const user*>(buffer.get_user_table())
 	), init_pack.get_param(1).net6::parameter::as<unsigned int>(),
 	init_pack.get_param(2).net6::parameter::as<std::string>()
    ), basic_local_document_info<selector_type>(
 	buffer, net,
 	init_pack.get_param(0).net6::parameter::as<const user*>(
-		buffer.get_user_table()
+		::serialise::hex_context<const user*>(buffer.get_user_table())
 	), init_pack.get_param(1).net6::parameter::as<unsigned int>(),
 	init_pack.get_param(2).net6::parameter::as<std::string>()
    )
@@ -253,8 +253,12 @@ basic_client_document_info<selector_type>::basic_client_document_info(
 	for(unsigned int i = 3; i < init_pack.get_param_count(); ++ i)
 	{
 		// Get user
-		const user* cur_user = init_pack.get_param(i).net6::
-			parameter::as<const user*>(buffer.get_user_table());
+		const user* cur_user =
+			init_pack.get_param(i).net6::parameter::as<const user*>(
+				::serialise::hex_context<const user*>(
+					buffer.get_user_table()
+				)
+			);
 
 		// Must not be local user (who just joined the session and now
 		// synchronises the document list)
@@ -509,8 +513,11 @@ void basic_client_document_info<selector_type>::
 	}
 
 	// Get author of record
-	const user* author = pack.get_param(0).net6::
-		parameter::as<const user*>(get_buffer().get_user_table());
+	const user* author = pack.get_param(0).net6::parameter::as<const user*>(
+		::serialise::hex_context<const user*>(
+			get_buffer().get_user_table()
+		)
+	);
 
 	// Extract record from packet (TODO: virtualness for document_packet,
 	// would allow to remove "+ 2" here)
@@ -577,8 +584,12 @@ template<typename selector_type>
 void basic_client_document_info<selector_type>::
 	on_net_subscribe(const document_packet& pack)
 {
-	const user* new_user = pack.get_param(0).net6::
-		parameter::as<const user*>(get_buffer().get_user_table() );
+	const user* new_user =
+		pack.get_param(0).net6::parameter::as<const user*>(
+			::serialise::hex_context<const user*>(
+				get_buffer().get_user_table()
+			)
+		);
 
 	user_subscribe(*new_user);
 }
@@ -587,8 +598,12 @@ template<typename selector_type>
 void basic_client_document_info<selector_type>::
 	on_net_unsubscribe(const document_packet& pack)
 {
-	const user* old_user = pack.get_param(0).net6::
-		parameter::as<const user*>(get_buffer().get_user_table() );
+	const user* old_user =
+		pack.get_param(0).net6::parameter::as<const user*>(
+			::serialise::hex_context<const user*>(
+				get_buffer().get_user_table()
+			)
+		);
 
 	user_unsubscribe(*old_user);
 }

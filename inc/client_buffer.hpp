@@ -714,8 +714,12 @@ void basic_client_buffer<selector_type>::
 	on_net_document_create(const net6::packet& pack)
 {
 	// Get owner, id and title
-	const user* owner = pack.get_param(0).net6::parameter::
-		as<const user*>(basic_buffer<selector_type>::get_user_table());
+	const user* owner = pack.get_param(0).net6::parameter::as<const user*>(
+		::serialise::hex_context<const user*>(
+			basic_buffer<selector_type>::get_user_table()
+		)
+	);
+
 	unsigned int id =
 		pack.get_param(1).net6::parameter::as<unsigned int>();
 	const std::string& title =
@@ -751,26 +755,33 @@ void basic_client_buffer<selector_type>::
 	on_net_document_remove(const net6::packet& pack)
 {
 	// Get document to remove
-	obby::document_info* doc = pack.get_param(0).net6::
-		parameter::as<obby::document_info*>(*this);
+	document_info& doc = dynamic_cast<document_info&>(
+		*pack.get_param(0).net6::parameter::as<obby::document_info*>(
+			::serialise::hex_context<obby::document_info*>(*this)
+		)
+	);
 
 	// Emit unsubscribe singal for users who were subscribed to this doc
 	// TODO: Do this is in document_delete!
-	for(typename document_info::user_iterator user_iter = doc->user_begin();
-	    user_iter != doc->user_end();
+	for(typename document_info::user_iterator user_iter = doc.user_begin();
+	    user_iter != doc.user_end();
 	    ++ user_iter)
-		doc->unsubscribe_event().emit(*user_iter);
+		doc.unsubscribe_event().emit(*user_iter);
 
 	// Delete document
-	basic_buffer<selector_type>::document_delete(*doc);
+	basic_buffer<selector_type>::document_delete(doc);
 }
 
 template<typename selector_type>
 void basic_client_buffer<selector_type>::
 	on_net_message(const net6::packet& pack)
 {
-	const user* writer = pack.get_param(0).net6::parameter::
-		as<const user*>(basic_buffer<selector_type>::get_user_table() );
+	const user* writer = pack.get_param(0).net6::parameter::as<const user*>(
+		::serialise::hex_context<const user*>(
+			basic_buffer<selector_type>::get_user_table()
+		)
+	);
+
 	const std::string& message =
 		pack.get_param(1).net6::parameter::as<std::string>();
 
@@ -795,8 +806,11 @@ template<typename selector_type>
 void basic_client_buffer<selector_type>::
 	on_net_user_colour(const net6::packet& pack)
 {
-	const user* from = pack.get_param(0).net6::parameter::
-		as<const user*>(basic_buffer<selector_type>::get_user_table() );
+	const user* from = pack.get_param(0).net6::parameter::as<const user*>(
+		::serialise::hex_context<const user*>(
+			basic_buffer<selector_type>::get_user_table()
+		)
+	);
 
 	basic_buffer<selector_type>::m_user_table.set_user_colour(
 		*from,
@@ -851,8 +865,12 @@ void basic_client_buffer<selector_type>::
 	on_net_sync_doclist_document(const net6::packet& pack)
 {
 	// Get data from packet
-	const user* owner = pack.get_param(0).net6::parameter::
-		as<const user*>(basic_buffer<selector_type>::get_user_table() );
+	const user* owner = pack.get_param(0).net6::parameter::as<const user*>(
+		::serialise::hex_context<const user*>(
+			basic_buffer<selector_type>::get_user_table()
+		)
+	);
+
 	unsigned int id =
 		pack.get_param(1).net6::parameter::as<unsigned int>();
 //	const std::string& title =
@@ -888,9 +906,9 @@ void basic_client_buffer<selector_type>::
 {
 	// Get document, forward packet
 	document_info& info = dynamic_cast<document_info&>(
-		*pack.get_param(0).net6::parameter::as<
-			obby::document_info*
-		>(*this)
+		*pack.get_param(0).net6::parameter::as<obby::document_info*>(
+			::serialise::hex_context<obby::document_info*>(*this)
+		)
 	);
 
 	// TODO: Rename this function. Think about providing a signal that may
