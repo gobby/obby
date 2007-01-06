@@ -7,6 +7,7 @@
 #include "buffer.hpp"
 #include "client_buffer.hpp"
 #include "server_buffer.hpp"
+#include "rendezvous.hpp"
 
 int port = 6521;
 bool quit = false;
@@ -141,10 +142,17 @@ int server_main(int argc, char* argv[])
 	buffer.part_event().connect(sigc::ptr_fun(&server_part) );
 	buffer.insert_event().connect(sigc::bind(sigc::ptr_fun(&server_insert), sigc::ref(buffer)) );
 	buffer.delete_event().connect(sigc::bind(sigc::ptr_fun(&server_delete), sigc::ref(buffer)) );
+
+	obby::rendezvous rendezvous;
+	rendezvous.publish("Testing daemon", port);
 	
 	while(!quit)
-		buffer.select();
-
+	{
+		rendezvous.select(0);
+		buffer.select(0);
+		usleep(200000);
+	}
+	
 	return 0;
 }
 #endif

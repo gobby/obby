@@ -8,9 +8,7 @@ using namespace obby;
 void on_discover(const string& name, const string& ip,
 	unsigned int port)
 {
-	cout << name << endl;
-	cout << ip << endl;
-	cout << port << endl;
+	cout << std::time(0) << " " << name << " " << ip << " " << port << endl;
 }
 
 int main()
