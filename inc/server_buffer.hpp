@@ -251,6 +251,8 @@ protected:
 
 	command_map m_command_map;
 private:
+	void reopen_impl(unsigned int port);
+
 	/** This function provides access to the underlaying net6::basic_server
 	 * object.
 	 */
@@ -282,6 +284,28 @@ basic_server_buffer<Document, Selector>::
 }
 
 template<typename Document, typename Selector>
+void basic_server_buffer<Document, Selector>::reopen_impl(unsigned int port)
+{
+	if(IPV6_ENABLED)
+	{
+		// Prefer IPv6 when compiled with IPv6 support,
+		// fallback to IPv4
+		try
+		{
+			net6_server().reopen(port, true);
+		}
+		catch(net6::error& e)
+		{
+			net6_server().reopen(port, false);
+		}
+	}
+	else
+	{
+		net6_server().reopen(port, false);
+	}
+}
+
+template<typename Document, typename Selector>
 void basic_server_buffer<Document, Selector>::open(unsigned int port)
 {
 	if(basic_buffer<Document, Selector>::is_open() )
@@ -295,7 +319,7 @@ void basic_server_buffer<Document, Selector>::open(unsigned int port)
 	basic_buffer<Document, Selector>::m_net.reset(new_net());
 	register_signal_handlers();
 
-	net6_server().reopen(port);
+	reopen_impl(port);
 
 	// Clear previous documents and users
 	basic_buffer<Document, Selector>::document_clear();
@@ -322,7 +346,7 @@ void basic_server_buffer<Document, Selector>::open(const std::string& session,
 	basic_buffer<Document, Selector>::m_net.reset(new_net());
 	register_signal_handlers();
 
-	net6_server().reopen(port);
+	reopen_impl(port);
 
 	// Deserialise file
 	serialise::parser parser;
@@ -1173,7 +1197,7 @@ template<typename Document, typename Selector>
 typename basic_server_buffer<Document, Selector>::base_net_type*
 basic_server_buffer<Document, Selector>::new_net()
 {
-	return new net_type(IPV6_ENABLED);
+	return new net_type();
 }
 
 template<typename Document, typename Selector>
