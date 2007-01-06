@@ -19,21 +19,15 @@
 #include "document_info.hpp"
 #include "buffer.hpp"
 
-obby::document_info::document_info(const basic_buffer<net6::selector>& buf, const user* owner,
-                                   unsigned int id, const std::string& title)
- : m_buffer(buf), m_owner(owner), m_id(id), m_title(title), m_document(NULL)
+obby::document_info::document_info(const user* owner, unsigned int id,
+                                   const std::string& title)
+ : m_owner(owner), m_id(id), m_title(title)
 {
-	// Subscribe the owner to the document
-	// TODO: DO NOT DO THIS. If we create a document, the owner parts,
-	// another user joins and document list is synced, the original owner
-	// seems to be subscribed!
-	if(owner) m_userlist.push_back(owner);
 }
 
-obby::document_info::~document_info()
+const obby::user* obby::document_info::get_owner() const
 {
-	// Release underlaying document
-	release_document();
+	return m_owner;
 }
 
 unsigned int obby::document_info::get_id() const
@@ -46,52 +40,36 @@ const std::string& obby::document_info::get_title() const
 	return m_title;
 }
 
-const obby::basic_buffer<net6::selector>& obby::document_info::get_buffer() const
+const obby::document& obby::document_info::get_content() const
 {
-	return m_buffer;
+	if(m_document.get() == NULL)
+		throw std::logic_error("obby::document_info::get_content");
+
+	return *m_document;
 }
 
-obby::document* obby::document_info::get_document()
+bool obby::document_info::is_subscribed(const user& user) const
 {
-	return m_document;
-}
-
-const obby::document* obby::document_info::get_document() const
-{
-	return m_document;
-}
-
-const obby::user* obby::document_info::get_owner() const
-{
-	return m_owner;
-}
-
-const obby::user* obby::document_info::find_user(unsigned int id) const
-{
-	for(user_iterator iter = user_begin(); iter != user_end(); ++ iter)
-		if(iter->get_id() == id)
-			return &(*iter);
-	return NULL;
-}
-
-bool obby::document_info::is_subscribed(const user& from) const
-{
-	return find_user(from.get_id() ) != NULL;
+	return std::find(
+		m_users.begin(),
+		m_users.end(),
+		&user
+	) != m_users.end();
 }
 
 obby::document_info::user_iterator obby::document_info::user_begin() const
 {
-	return m_userlist.begin();
+	return m_users.begin();
 }
 
 obby::document_info::user_iterator obby::document_info::user_end() const
 {
-	return m_userlist.end();
+	return m_users.end();
 }
 
 obby::document_info::user_size_type obby::document_info::user_count() const
 {
-	return m_userlist.size();
+	return m_users.size();
 }
 
 obby::document_info::signal_rename_type
@@ -112,33 +90,41 @@ obby::document_info::unsubscribe_event() const
 	return m_signal_unsubscribe;
 }
 
-void obby::document_info::release_document()
-{
-	delete m_document;
-	m_document = NULL;
-}
-
-void obby::document_info::obby_user_join(const user& new_user)
+void obby::document_info::obby_user_join(const user& user)
 {
 }
 
-void obby::document_info::obby_user_part(const user& existing_user)
-{ 
-	for(std::list<const user*>::iterator iter = m_userlist.begin();
-	    iter != m_userlist.end();
-	    ++ iter)
-	{
-		// Is the user that has part the session in this document's
-		// subscription list?
-		if((*iter)->get_id() == existing_user.get_id() )
-		{
-			// Emit signal that the user unsubscribed
-			m_signal_unsubscribe.emit(existing_user);
-			// Remove it from the list
-			m_userlist.erase(iter);
-			// User has been removed, nothing to do anymore
-			break;
-		}
-	}
+void obby::document_info::obby_user_part(const user& user)
+{
+	// User left the session: Unsubscribe from document
+	user_unsubscribe(user);
+}
+
+void obby::document_info::user_subscribe(const user& user)
+{
+	// Add to list
+	m_users.push_back(&user);
+	// Emit subscription signal
+	m_signal_subscribe.emit(user);
+}
+
+void obby::document_info::user_unsubscribe(const user& user)
+{
+	// Remove user from list
+	m_users.erase(
+		std::remove(m_users.begin(), m_users.end(), &user),
+		m_users.end()
+	);
+
+	// Emit unsubscription signal
+	m_signal_unsubscribe.emit(user);
+}
+
+void obby::document_info::rename_impl(const std::string& title)
+{
+	// Rename
+	m_title = title;
+	// Emit corresponding signal
+	m_signal_rename.emit(title);
 }
 

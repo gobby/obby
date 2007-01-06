@@ -23,17 +23,14 @@
 #include "ptr_iterator.hpp"
 #include "user.hpp"
 #include "document.hpp"
+#include "document_packet.hpp"
 
 namespace obby
 {
 
-template<typename selector_type>
-class basic_buffer;
-
 /** Information about a document that is provided without being subscribed to
  * a document.
  */
-
 class document_info : private net6::non_copyable
 {
 public:
@@ -48,9 +45,14 @@ public:
 		std::list<const user*>::const_iterator
 	> user_iterator;
 
-	document_info(const basic_buffer<net6::selector>& buf, const user* owner, unsigned int id,
+	document_info(const user* owner, unsigned int id,
 	              const std::string& title);
-	~document_info();
+
+	/** Returns the owner of this document. It may return NULL if the
+	 * document has no owner (indicating that the server created the
+	 * document).
+	 */
+	const user* get_owner() const;
 
 	/** Returns a unique ID for this document.
 	 */
@@ -60,36 +62,18 @@ public:
 	 */
 	const std::string& get_title() const;
 
-	/** Returns the buffer to which the document is assigned.
+	/** Returns the content of the document, if available.
 	 */
-	const basic_buffer<net6::selector>& get_buffer() const;
-
-	/** Returns the document for this info, if one is assigned.
-	 */
-	document* get_document();
-
-	/** Returns the document for this info, if one is assigned.
-	 */
-	const document* get_document() const;
-
-	/** Returns the owner of this document. It may return NULL if the
-	 * document has no owner (indicating that the server created the
-	 * document).
-	 */
-	const user* get_owner() const;
+	const document& get_content() const;
 
 	/** Renames the document or requests a rename operation.
 	 * signal_rename will be emitted if the document has been renamed.
 	 */
 	virtual void rename(const std::string& new_title) = 0;
 
-	/** Looks if the user with the given ID is subscribed to this document.
-	 */
-	const user* find_user(unsigned int id) const;
-
 	/** Checks if the given user is subscribed to this document.
 	 */
-	bool is_subscribed(const user& from) const;
+	bool is_subscribed(const user& user) const;
 
 	/** Returns the begin of the list of subscribed users.
 	 */
@@ -99,7 +83,7 @@ public:
 	 */
 	user_iterator user_end() const;
 
-	/** Retruns the amount of subscribed users.
+	/** Returns the amount of subscribed users.
 	 */
 	user_size_type user_count() const;
 
@@ -115,37 +99,47 @@ public:
 	 */
 	signal_unsubscribe_type unsubscribe_event() const;
 
-	/** Called by the buffer when a user has joined the obby session.
+	/** Called by the buffer when a network packet concerning this document
+	 * was received.
 	 */
-	virtual void obby_user_join(const user& new_user);
-	
-	/** Called by the buffer when a user has left the obby session.
+	virtual void on_net_packet(const document_packet& pack) = 0;
+
+	/** Called by the buffer when a user has joined.
+	 * TODO: Replace by a signal connection to the buffer.
 	 */
-	virtual void obby_user_part(const user& existing_user);
+	virtual void obby_user_join(const user& user);
+
+	/** Called by the buffer when a user has left.
+	 * TODO: Replace by a signal connection to the buffer.
+	 */
+	virtual void obby_user_part(const user& user);
 
 protected:
-	/** Assigns a document to the document info.
+	/** Subscribes a user to this document.
 	 */
-	virtual void assign_document() = 0;
+	virtual void user_subscribe(const user& user);
 
-	/** Releases the underlaying document from the info.
+	/** Unsubscribes a user from this document.
 	 */
-	void release_document();
+	virtual void user_unsubscribe(const user& user);
 
-	const basic_buffer<net6::selector>& m_buffer;
+	/** Internally renames the document.
+	 */
+	void rename_impl(const std::string& title);
+
 	const user* m_owner;
 	unsigned int m_id;
 	std::string m_title;
-	document* m_document;
 
-	std::list<const user*> m_userlist;
+	std::auto_ptr<document> m_document;
+	std::list<const user*> m_users;
 
 	signal_rename_type m_signal_rename;
 	signal_subscribe_type m_signal_subscribe;
 	signal_unsubscribe_type m_signal_unsubscribe;
 };
 
-}
+} // namespace obby
 
 namespace net6
 {
@@ -168,7 +162,7 @@ public:
 		obby::document_info* document = as<obby::document_info*>();
 
 		int owner_id = 0;
-		if(document->get_owner() )
+		if(document->get_owner() != NULL)
 			owner_id = document->get_owner()->get_id();
 
 		std::stringstream stream;
@@ -186,6 +180,6 @@ public:
 	 : parameter<obby::document_info*>(&const_cast<obby::document_info&>(document) ) { }
 };
 
-}
+} // namespace net6
 
 #endif // _OBBY_DOCUMENT_INFO_HPP_
