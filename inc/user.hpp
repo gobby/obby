@@ -19,7 +19,6 @@
 #ifndef _OBBY_USER_HPP_
 #define _OBBY_USER_HPP_
 
-#include "ptr_iterator.hpp"
 #include <net6/packet.hpp>
 #include <net6/user.hpp>
 #include <net6/address.hpp>

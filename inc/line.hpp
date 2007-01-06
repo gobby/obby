@@ -133,11 +133,6 @@ public:
 	 */
 	author_iterator author_end() const;
 
-	/** Converts the line into a net6::packet to send it through the net.
-	 * @param doc Document this line belongs to.
-	 */
-	net6::packet to_packet(const document& doc) const;
-
 protected:
 	/** Internal function that simplifies the m_authors vector without
 	 * losing data.

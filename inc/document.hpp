@@ -19,56 +19,28 @@
 #ifndef _OBBY_DOCUMENT_HPP_
 #define _OBBY_DOCUMENT_HPP_
 
+#include "position.hpp"
 #include "duplex_signal.hpp"
+#include "user.hpp"
 #include "line.hpp"
-#include "insert_record.hpp"
-#include "delete_record.hpp"
 
 namespace obby
 {
 
-class document_info;
-
-template<typename selector_type>
-class basic_buffer;
-
-/** Abstract base class for obby documents. A document contains an amount of
- * text that is synchronised to all participants that are subscribed to this
- * document.
+/** Contains the content of a document. Note that all positions pointing into
+ * the document refer to byte offsets.
  */
-
 class document : private net6::non_copyable
 {
 public:
-	typedef duplex_signal<sigc::signal<void, const insert_record&> >
-		signal_insert_type;
-	typedef duplex_signal<sigc::signal<void, const delete_record&> >
-		signal_delete_type;
-	typedef duplex_signal<sigc::signal<void> >
-		signal_change_type;
+	typedef duplex_signal<
+		sigc::signal<void, position, const std::string&, const user*>
+	> signal_insert_type;
+	typedef duplex_signal<
+		sigc::signal<void, position, position, const user*>
+	> signal_delete_type;
 
-	document(const document_info& info);
-	virtual ~document();
-
-	/** Returns a unique ID for this document.
-	 */
-	unsigned int get_id() const;
-
-	/** Returns the title set for this document.
-	 */
-	const std::string& get_title() const;
-
-	/** Returns the document info for this document.
-	 */
-	const document_info& get_info() const;
-
-	/** Returns the buffer that is associated to this document.
-	 */
-	const basic_buffer<net6::selector>& get_buffer() const;
-
-	/** Returns the current revision number for this document.
-	 */
-	unsigned int get_revision() const;
+	document();
 
 	/** Returns the whole content of the document.
 	 */
@@ -76,29 +48,21 @@ public:
 
 	/** Returns a part of the document's contents.
 	 */
-	std::string get_slice(position from, position to) const;
+	std::string get_slice(position from, position len) const;
 
-	/** Inserts <em>text</em> at <em>pos</em> and synchronises this change
-	 * to other users.
+	/** Inserts text into the document.
+	 * @pos Position where to insert text.
+	 * @text Text to insert.
+	 * @author User that has written this text.
 	 */
-	virtual void insert(position pos, const std::string& text) = 0;
+	void insert(position pos, const std::string& text, const user* author);
 
-	/** Remove the text at the speciefied position and synchronises this
-	 * change to other users.
+	/** Removes text from the document.
+	 * @pos Beginning of the range where to delete text.
+	 * @len Amount of bytes to delete.
+	 * @author User who deleted the text.
 	 */
-	virtual void erase(position from, position to) = 0;
-
-	/** Inserts text without syncing it to other users. This is a low-level
-	 * function libobby uses within itself, so USE WITH CARE! You may
-	 * destroy the complete obby session by performing unsynced operations.
-	 */
-	void insert_nosync(const insert_record& record);
-
-	/** Removes text without syncing it to other users. This is a low-level
-	 * function libobby uses within itself, so USE WITH CARE! You may
-	 * destroy the complete obby session by performing unsynced operations.
-	 */
-	void erase_nosync(const delete_record& record);
+	void erase(position pos, position len, const user* author);
 
 	/** Signal which will be emitted if text has been inserted into the
 	 * document.
@@ -109,13 +73,6 @@ public:
 	 * document.
 	 */
 	signal_delete_type delete_event() const;
-
-	/** Signal whill will be emitted if a change in the document will be
-	 * performed. Between the before and after change call, any number of
-	 * insert/delete events may be raised to ensure synchronisation in the
-	 * obby session.
-	 */
-	signal_change_type change_event() const;
 
 	/** Returns the given line of text.
 	 */
@@ -139,20 +96,12 @@ public:
 	 */
 	position position_eob() const;
 
-	/** Called by the buffer if another user changed anything.
-	 */
-//	virtual void on_net_record(record& rec) = 0;
-
 protected:
-	const document_info& m_info;
-	std::list<record*> m_history;
-	unsigned int m_revision;
-
+	// TODO: Add history
 	std::vector<line> m_lines;
 
 	signal_insert_type m_signal_insert;
 	signal_delete_type m_signal_delete;
-	signal_change_type m_signal_change;
 };
 
 }

@@ -43,7 +43,7 @@ obby::line::line(const string_type& text, const user_type* author)
 obby::line::line(const net6::packet& pack)
 {
 	// Parameter 0 is the document ID which we do not need here.
-	m_line = pack.get_param(2).as<std::string>();
+/*	m_line = pack.get_param(2).as<std::string>();
 
 	// Reserve space in author vector
 	m_authors.reserve( (pack.get_param_count() - 3) / 2);
@@ -58,7 +58,7 @@ obby::line::line(const net6::packet& pack)
 		// Add to vector
 		user_pos upos = { author, pos };
 		m_authors.push_back(upos);
-	}
+	}*/
 }
 
 obby::line::line(const line& other)
@@ -267,18 +267,5 @@ void obby::line::compress_authors()
 	}
 
 	m_authors.swap(new_vec);
-}
-
-net6::packet obby::line::to_packet(const document& doc) const
-{
-	net6::packet pack("obby_document", net6::packet::DEFAULT_PRIORITY,
-	                  2 + m_authors.size() * 2);
-	pack << doc.get_info() << "sync_line" << m_line;
-
-	std::vector<user_pos>::const_iterator iter;
-	for(iter = m_authors.begin(); iter != m_authors.end(); ++ iter)
-		pack << static_cast<int>(iter->position) << iter->author;
-
-	return pack;
 }
 

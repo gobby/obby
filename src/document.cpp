@@ -16,109 +16,72 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <cassert>
-#include <iostream>
 #include "document.hpp"
-#include "buffer.hpp"
 
-obby::document::document(const obby::document_info& info)
- : m_info(info), m_history(), m_revision(0), m_lines(1, line())
+obby::document::document()
+ : m_lines(1, line() )
 {
-}
-
-obby::document::~document()
-{
-	std::list<record*>::iterator iter;
-	for(iter = m_history.begin(); iter != m_history.end(); ++ iter)
-		delete *iter;
-}
-
-unsigned int obby::document::get_id() const
-{
-	return m_info.get_id();
-}
-
-const std::string& obby::document::get_title() const
-{
-	return m_info.get_title();
-}
-
-const obby::document_info& obby::document::get_info() const
-{
-	return m_info;
-}
-
-const obby::basic_buffer<net6::selector>& obby::document::get_buffer() const
-{
-	return m_info.get_buffer();
-}
-
-unsigned int obby::document::get_revision() const
-{
-	return m_revision;
 }
 
 std::string obby::document::get_text() const
 {
+	// TODO: Preallocation
 	std::string content;
 	std::vector<line>::const_iterator iter;
+
 	for(iter = m_lines.begin(); iter != m_lines.end(); ++ iter)
 	{
 		content += *iter;
 		content += (iter != m_lines.end() - 1) ? "\n" : "";
 	}
+
 	return content;
 }
 
-std::string obby::document::get_slice(position from, position to) const
+std::string obby::document::get_slice(position from, position len) const
 {
+	// Find range to extract
 	unsigned int from_row, from_col, to_row, to_col;
 	position_to_coord(from, from_row, from_col);
-	position_to_coord(to, to_row, to_col);
+	position_to_coord(from + len, to_row, to_col);
 
-	assert(to >= from);
-	assert(to_row < m_lines.size() );
-	assert(to_col <= m_lines[to_row].length() );
-
+	// Preallocate memory
 	std::string buffer;
-	std::vector<line>::size_type i;
-	for(i = from_row; i <= to_row; ++ i)
+	buffer.reserve(len);
+
+	// Iterate through affected rows
+	for(std::vector<line>::size_type i = from_row; i <= to_row; ++ i)
 	{
+		// Find columns in this row where to extract text
 		std::string::size_type begin = 0, end = m_lines[i].length();
 		if(i == from_row)
 			begin = from_col;
 		if(i == to_row)
 			end = to_col;
 
+		// Append to target buffer
 		buffer += m_lines[i].substr(begin, end - begin);
+
+		// Append newline, if this is not the last line
 		if(i != to_row)
 			buffer += "\n";
 	}
+
+	// Verify that the returned length is the same as the required one
+	if(buffer.length() != len)
+		throw std::logic_error("obby::document::get_slice");
+
 	return buffer;
 }
 
-void obby::document::insert_nosync(const insert_record& record)
+void obby::document::insert(position pos, const std::string& text,
+                            const user* author)
 {
 	// Convert position to row and column
 	unsigned int pos_row, pos_col;
-	position_to_coord(record.get_position(), pos_row, pos_col);
+	position_to_coord(pos, pos_row, pos_col);
 
-	// Verify them
-	assert(pos_row < m_lines.size() );
-	assert(pos_col <= m_lines[pos_row].length() );
-
-	// Get user_table from the buffer
-	const user_table& user_table = get_buffer().get_user_table();
-
-	// Get author from record
-	const user* author = record.get_user();
-
-	// Move line iterator to the line where to insert text
-	// TODO: std::vector::iterator is a random access iterator, we can
-	// do things like +=
-	std::vector<line>::iterator iter = m_lines.begin();
-	for(unsigned int i = 0; i < pos_row; ++ i)
-		++ iter;
+	std::vector<line>::iterator iter = m_lines.begin() + pos_row;
 
 	// Line that holds a carry from the first line when text contains
 	// a newline
@@ -126,11 +89,10 @@ void obby::document::insert_nosync(const insert_record& record)
 	unsigned int ins_col = pos_col;
 
 	// Notify signal handlers before making any changes
-	m_signal_insert.before().emit(record);
-	
+	m_signal_insert.before().emit(pos, text, author);
+
 	// Insert line by line
 	std::string::size_type nl_pos = 0, nl_prev = 0;
-	const std::string& text = record.get_text();
 	while( (nl_pos = text.find('\n', nl_pos)) != std::string::npos)
 	{
 		// First line?
@@ -138,19 +100,16 @@ void obby::document::insert_nosync(const insert_record& record)
 		{
 			// Store rest of line in first_line_carry
 			first_line_carry = iter->substr(pos_col);
-			// and remove it from the source line
+			// and remove it from source line
 			iter->erase(pos_col);
 			// Insert the line at the beginning of the next line
 			ins_col = 0;
 		}
 
-		// Append the text to this newline onto this line
+		// Append line
 		iter->append(text.substr(nl_prev, nl_pos - nl_prev), author);
-		// Insert next line
-		++ iter;
-		iter = m_lines.insert(iter, line());
-
-		// Store newline position for substringing next line
+		// Insert new line
+		iter = m_lines.insert(++ iter, line() );
 		nl_prev = ++ nl_pos;
 	}
 
@@ -158,62 +117,42 @@ void obby::document::insert_nosync(const insert_record& record)
 	iter->insert(ins_col, first_line_carry);
 	iter->insert(ins_col, text.substr(nl_prev), author);
 
-	// Notify signal handlers after changes have been performed
-	m_signal_insert.after().emit(record);
+	// Notify signal handlers after operation
+	m_signal_insert.after().emit(pos, text, author);
 }
 
-void obby::document::erase_nosync(const delete_record& record)
+void obby::document::erase(position pos, position len, const user* author)
 {
-	// Convert positions to rows and columns
+	// Convert position into row/column pairs
 	unsigned int from_row, from_col, to_row, to_col;
-	position_to_coord(record.get_begin(), from_row, from_col);
-	position_to_coord(record.get_end(), to_row, to_col);
+	position_to_coord(pos, from_row, from_col);
+	position_to_coord(pos + len, to_row, to_col);
+
+	// Get first affected line
+	std::vector<line>::iterator iter = m_lines.begin() + from_row;
 	
-	// Verify them
-	// TODO: record ensures already that end >= begin, doesn't it?
-	assert(record.get_end() >= record.get_begin() );
-	assert(to_row < m_lines.size() );
-	assert(to_col <= m_lines[to_row].length() );
+	// Tell signal handlers before doing anything
+	m_signal_delete.before().emit(pos, len, author);
 
-	// Get user_table from the buffer
-	const user_table& user_table = get_buffer().get_user_table();
-
-	// Get author from record
-	const user* author = record.get_user();
-
-	// Find the iterator for the given row
-	// TODO: std::vector::iterator is a random access iterator, we can
-	// do things like +=
-	std::vector<line>::iterator iter = m_lines.begin();
-	for(unsigned int i = 0; i < from_row; ++ i)
-		++ iter;
-
-	// Notify signal handlers before making any changes
-	m_signal_delete.before().emit(record);
-
-	// Do not remove any lines?
 	if(from_row == to_row)
 	{
-		// Just erase text from the line
+		// Only one row affected: Delete given range
 		iter->erase(from_col, to_col - from_col);
 	}
 	else
 	{
-		// Erase the rest of this line
+		// Erase text right from start point in first line
 		iter->erase(from_col);
-		// And append the rest of the last line
+		// Append rest of last line
 		iter->append(m_lines[to_row].substr(to_col) );
 
-		// Remove all lines between the first and the last one
+		// Remove other lines
 		++ iter;
-		std::vector<line>::iterator end_iter = iter;
-		for(unsigned int i = from_row + 1; i <= to_row; ++ i)
-			++ end_iter;
-		m_lines.erase(iter, end_iter);
+		m_lines.erase(iter, iter + (to_row - from_row) );
 	}
 
-	// Notify signal handlers after changes have been performed
-	m_signal_delete.after().emit(record);
+	// Notify signal handlers after operation
+	m_signal_delete.after().emit(pos, len, author);
 }
 
 obby::document::signal_insert_type obby::document::insert_event() const
@@ -226,14 +165,11 @@ obby::document::signal_delete_type obby::document::delete_event() const
 	return m_signal_delete;
 }
 
-obby::document::signal_change_type obby::document::change_event() const
-{
-	return m_signal_change;
-}
-
 const obby::line& obby::document::get_line(unsigned int index) const
 {
-	assert(index < m_lines.size() );
+	if(index >= m_lines.size() )
+		throw std::logic_error("obby::document::get_line");
+
 	return m_lines[index];
 }
 
@@ -245,14 +181,16 @@ unsigned int obby::document::get_line_count() const
 obby::position obby::document::coord_to_position(unsigned int row,
                                                  unsigned int col) const
 {
-	assert(row < m_lines.size() );
-	assert(col <= m_lines[row].length() );
+	if(row >= m_lines.size() )
+		throw std::logic_error("obby::document::coord_to_position");
+	if(col > m_lines[row].length() )
+		throw std::logic_error("obby::document::coord_to_position");
 
 	position pos = 0;
 	for(std::vector<std::string>::size_type i = 0; i < row; ++ i)
 		pos += m_lines[i].length() + 1;
-	pos += col;
-	return pos;
+
+	return pos + col;
 }
 
 void obby::document::position_to_coord(position pos,
@@ -261,8 +199,8 @@ void obby::document::position_to_coord(position pos,
 {
 	row = col = 0;
 	position cur_pos = 0;
-	std::vector<std::string>::size_type i;
 
+	std::vector<std::string>::size_type i;
 	for(i = 0; i < m_lines.size(); ++ i)
 	{
 		cur_pos += m_lines[i].length() + 1;
@@ -272,7 +210,9 @@ void obby::document::position_to_coord(position pos,
 			++ row;
 	}
 
-	assert(i < m_lines.size() );
+	if(i >= m_lines.size() )
+		throw std::logic_error("obby::document::position_to_coord");
+
 	col = m_lines[i].length() + 1 - (cur_pos - pos);
 }
 

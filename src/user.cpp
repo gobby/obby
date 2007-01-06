@@ -16,10 +16,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <cassert>
 #include <net6/server.hpp>
 #include "user.hpp"
-#include "document_info.hpp"
 
 obby::user::user(const net6::user& user6, int red, int green, int blue)
  : m_user6(&user6), m_id(user6.get_id() ), m_name(user6.get_name() ),
@@ -44,10 +42,12 @@ void obby::user::assign_net6(const net6::user& user6, int red, int green,
                              int blue)
 {
 	// User must not be already connected
-	assert(~get_flags() & CONNECTED);
+	if(get_flags() & CONNECTED)
+		throw std::logic_error("obby::user::assign_net6");
 
 	// Name must be the same
-	assert(m_name == user6.get_name() );
+	if(m_name != user6.get_name() )
+		throw std::logic_error("obby::user::assign_net6");
 
 	m_user6 = &user6;
 	m_red = red;
