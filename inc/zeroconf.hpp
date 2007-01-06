@@ -20,7 +20,7 @@
 #define _OBBY_ZEROCONF_HPP_
 
 #include <string>
-#include <vector>
+#include <map>
 
 #include <sigc++/signal.h>
 #include <howl.h>
@@ -46,6 +46,14 @@ public:
 	 * when other users are discovering this record. */
 	void publish(const std::string& name, unsigned int port);
 
+	/** Unpublishes a record.
+	 */
+	void unpublish(const std::string& name);
+
+	/** Unpublishes all records.
+	 */
+	void unpublish_all();
+
 	/** Discovers other users in the local network within the default
 	 * domain (.local). It searches for participants with the service
 	 * identifier set to _lobby._tcp. It emits a signal when a new user
@@ -66,7 +74,7 @@ public:
 	signal_leave_type leave_event() const;
 	
 protected:
-	std::vector<sw_discovery_oid> m_published;
+	std::map<std::string, sw_discovery_oid> m_published;
 
 	sw_discovery m_session;
 	sw_salt m_salt;

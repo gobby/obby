@@ -16,10 +16,10 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "zeroconf.hpp"
-
 #include <stdexcept>
 #include <sstream>
+#include <iostream>
+#include "zeroconf.hpp"
 
 obby::zeroconf::zeroconf()
 {
@@ -31,11 +31,7 @@ obby::zeroconf::zeroconf()
 
 obby::zeroconf::~zeroconf()
 {
-	for(std::vector<sw_discovery_oid>::iterator i = m_published.begin();
-		i != m_published.end(); ++i)
-	{
-		sw_discovery_cancel(m_session, *i);
-	}
+	unpublish_all();
 	sw_discovery_fina(m_session);
 }
 
@@ -57,7 +53,27 @@ void obby::zeroconf::publish(const std::string& name, unsigned int port)
 	}
 	else
 	{
-		m_published.push_back(oid);
+		m_published[name] = oid;
+	}
+}
+
+void obby::zeroconf::unpublish(const std::string& name)
+{
+	if(!m_published[name])
+	{
+		std::cerr << "unpublish not possible for \"" << name << "\""
+			<< std::endl;
+	}
+
+	sw_discovery_cancel(m_session, m_published[name]);
+}
+
+void obby::zeroconf::unpublish_all()
+{
+	std::map<std::string, sw_discovery_oid>::iterator i;
+	for(i = m_published.begin(); i != m_published.end(); ++i)
+       	{
+		sw_discovery_cancel(m_session, i->second);
 	}
 }
 
