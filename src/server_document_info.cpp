@@ -29,8 +29,6 @@ obby::server_document_info::server_document_info(const server_buffer& buf,
 {
 	// Server documents are always assigned.
 	assign_document();
-	// Subscribe the owner to the document
-	if(owner) m_userlist.push_back(owner);
 }
 
 obby::server_document_info::server_document_info(const server_buffer& buf,

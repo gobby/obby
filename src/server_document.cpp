@@ -57,7 +57,8 @@ void obby::server_document::apply_record(const record& rec_)
 	// may be removed, too. Maybe, a mysterious bug will also be fixed
 	// with this, which strangly merges texts if two users begin to
 	// type at the same position.
-	record& rec = const_cast<record&>(rec_);
+	//record& rec = const_cast<record&>(rec_);
+	record& rec = *rec_.clone();
 
 	// Look for wished revision
 	std::list<record*>::iterator iter;
@@ -92,7 +93,7 @@ void obby::server_document::apply_record(const record& rec_)
 	rec.set_revision(++ m_revision);
 
 	// Add change to history
-	m_history.push_front(rec.clone() );
+	m_history.push_front(&rec); //.clone() );
 
 	// Changes have been performed
 	m_signal_change.after().emit();
