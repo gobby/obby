@@ -35,11 +35,12 @@ class client_buffer : public local_buffer,
 {
 public:
 	typedef sigc::signal<void>               signal_welcome_type;
-	typedef sigc::signal<void>               signal_sync_type;
-	typedef sigc::signal<void>               signal_close_type;
 	typedef sigc::signal<void, login::error> signal_login_failed_type;
 	typedef sigc::signal<bool, std::string&> signal_global_password_type;
 	typedef sigc::signal<bool, std::string&> signal_user_password_type;
+	typedef sigc::signal<void, unsigned int> signal_sync_init_type;
+	typedef sigc::signal<void>               signal_sync_final_type;
+	typedef sigc::signal<void>               signal_close_type;
 
 	/** Creates a new client_buffer and connects to <em>hostname</em>
 	 * at <em>port</em>
@@ -119,10 +120,15 @@ public:
 	 */
 	signal_welcome_type welcome_event() const;
 
-	/** Signal which will be emitted if the initial synchronization of the
+	/** Signal which will be emitted if the initial synchronisation begins.
+	 * This means, that the client has logged in successfully.
+	 */
+	signal_sync_init_type sync_init_event() const;
+
+	/** Signal which will be emitted if the initial synchronisation of the
 	 * user list and the document list has been completed.
 	 */
-	signal_sync_type sync_event() const;
+	signal_sync_final_type sync_final_event() const;
 
 	/** Signal which will be emitted if the connection to the server
 	 * has been lost.
@@ -186,6 +192,7 @@ protected:
 
 	/** Synchronisation commands.
 	 */
+	void on_net_sync_init(const net6::packet& pack);
 	void on_net_sync_usertable_user(const net6::packet& pack);
 	void on_net_sync_doclist_document(const net6::packet& pack);
 	void on_net_sync_final(const net6::packet& pack);
@@ -208,7 +215,8 @@ protected:
 	RSA::Key m_public;
 
 	signal_welcome_type m_signal_welcome;
-	signal_sync_type m_signal_sync;
+	signal_sync_init_type m_signal_sync_init;
+	signal_sync_final_type m_signal_sync_final;
 	signal_close_type m_signal_close;
 	signal_login_failed_type m_signal_login_failed;
 	signal_global_password_type m_signal_global_password;

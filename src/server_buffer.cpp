@@ -213,6 +213,12 @@ void obby::server_buffer::on_join(net6::server::peer& peer)
 		return;
 	}
 
+	// Send initial sync packet
+	net6::packet init_pack("obby_sync_init");
+	init_pack << (m_usertable.user_count<user::CONNECTED, true>() +
+	             document_count() );
+	m_server->send(init_pack, peer);
+
 	// Synchronise not-connected users.
 	for(user_table::user_iterator<user::CONNECTED, true> iter =
 		m_usertable.user_begin<user::CONNECTED, true>();

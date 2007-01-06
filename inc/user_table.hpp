@@ -280,6 +280,18 @@ public:
 	user* find_user(const std::string& name) const {
 		return find_user<user::NONE, false>(name);
 	}
+
+	/** Counts users.
+	 */
+	template<user::flags matching_flags, bool inverse>
+	unsigned int user_count() const {
+		unsigned int c = 0;
+		for(user_iterator<matching_flags, inverse> iter =
+			user_begin<matching_flags, inverse>();
+		    iter != user_end<matching_flags, inverse>();
+		    ++ iter, ++ c) ;
+		return c;
+	}
 protected:
 	/** List holding the users.
 	 */

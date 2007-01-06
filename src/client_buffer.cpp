@@ -163,14 +163,16 @@ obby::client_buffer::signal_welcome_type obby::client_buffer::welcome_event() co
 	return m_signal_welcome;
 }
 
-obby::client_buffer::signal_sync_type obby::client_buffer::sync_event() const
+obby::client_buffer::signal_sync_init_type
+obby::client_buffer::sync_init_event() const
 {
-	return m_signal_sync;
+	return m_signal_sync_init;
 }
 
-obby::client_buffer::signal_close_type obby::client_buffer::close_event() const
+obby::client_buffer::signal_sync_final_type
+obby::client_buffer::sync_final_event() const
 {
-	return m_signal_close;
+	return m_signal_sync_final;
 }
 
 obby::client_buffer::signal_login_failed_type
@@ -189,6 +191,11 @@ obby::client_buffer::signal_user_password_type
 obby::client_buffer::user_password_event() const
 {
 	return m_signal_user_password;
+}
+
+obby::client_buffer::signal_close_type obby::client_buffer::close_event() const
+{
+	return m_signal_close;
 }
 
 void obby::client_buffer::on_join(net6::client::peer& peer,
@@ -330,6 +337,13 @@ bool obby::client_buffer::execute_packet(const net6::packet& pack)
 		return true;
 	}
 
+	if(pack.get_command() == "obby_sync_init")
+	{
+		// Initial synchronisation begin
+		on_net_sync_init(pack);
+		return true;
+	}
+
 	if(pack.get_command() == "obby_sync_usertable_user")
 	{
 		// Usertable synchronisation
@@ -445,6 +459,12 @@ void obby::client_buffer::on_net_message(const net6::packet& pack)
 	}
 }
 
+void obby::client_buffer::on_net_sync_init(const net6::packet& pack)
+{
+	// Sync begins: Emit signal
+	m_signal_sync_init.emit(pack.get_param(0).as<int>() );
+}
+
 void obby::client_buffer::on_net_sync_usertable_user(const net6::packet& pack)
 {
 	// User that was already in the obby session, but isn't anymore. The
@@ -494,7 +514,7 @@ void obby::client_buffer::on_net_sync_doclist_document(const net6::packet& pack)
 void obby::client_buffer::on_net_sync_final(const net6::packet& pack)
 {
 	// Sync has been completed: Emit signal
-	m_signal_sync.emit();
+	m_signal_sync_final.emit();
 }
 
 void obby::client_buffer::on_net_document(const net6::packet& pack)
