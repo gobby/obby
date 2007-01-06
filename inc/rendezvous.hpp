@@ -32,7 +32,8 @@ class rendezvous
 public:
 	typedef sigc::signal<void, const std::string&, const std::string&,
 		unsigned int> signal_discover_type;
-
+	typedef sigc::signal<void, const std::string&> signal_leave_type;
+	
 	rendezvous();
 	~rendezvous();
 
@@ -59,12 +60,14 @@ public:
 	void select(unsigned int msecs);
 	
 	signal_discover_type discover_event() const;
-
+	signal_leave_type leave_event() const;
+	
 protected:
 	sw_discovery m_session;
 	sw_salt m_salt;
 	
 	signal_discover_type m_signal_discover;
+	signal_leave_type m_signal_leave;
 
 private:
 	static sw_result handle_publish_reply(sw_discovery discovery,

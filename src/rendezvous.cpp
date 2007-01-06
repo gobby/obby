@@ -84,6 +84,12 @@ obby::rendezvous::discover_event() const
 	return m_signal_discover;
 }
 
+obby::rendezvous::signal_leave_type
+obby::rendezvous::leave_event() const
+{
+	return m_signal_leave;
+}
+
 sw_result obby::rendezvous::handle_publish_reply(sw_discovery discovery,
 	sw_discovery_oid oid, sw_discovery_publish_status status,
 	sw_opaque extra)
@@ -126,6 +132,13 @@ sw_result obby::rendezvous::handle_browse_reply(sw_discovery discovery,
 			}
 			break;
 		}
+
+		case SW_DISCOVERY_BROWSE_REMOVE_SERVICE:
+		{
+			static_cast<obby::rendezvous*>(
+				extra)->leave_event().emit(name);
+			break;
+		}
 	}
 	
 	return SW_OKAY;
@@ -140,7 +153,7 @@ sw_result obby::rendezvous::handle_resolve_reply(sw_discovery discovery,
 	char ipv4_address[16];
 	sw_ipv4_address_name(address, ipv4_address, 16);
 	static_cast<obby::rendezvous*>(extra)->discover_event().emit(
-		ipv4_address, name, port);
+		name, ipv4_address, port);
 	return SW_OKAY;
 }
 
