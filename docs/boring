@@ -1,3 +1,6 @@
+# This file lists all other files which darcs should ignore when it looks
+# for new ones not present in the repository.
+
 # Boring file regexps:
 \.hi$
 \.o$
@@ -27,6 +30,7 @@
 \.libs$
 \.deps$
 \.lo$
+\.loT$
 \.la$
 \.log$
 \.status$
@@ -34,3 +38,11 @@
 ^libtool$
 ^Makefile$
 ^Makefile\.in$
+(^|/)docs/html($|/)
+(^|/)docs/latex($|/)
+\.gdb_history$
+aclocal\.m4$
+configure$
+\.pc$
+stamp-h1$
+(^|/)autom4te\.cache($|/)
