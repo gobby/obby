@@ -217,8 +217,8 @@ public:
 	void quit();
 
 protected:
-	void on_join(net6::client::peer& peer);
-	void on_part(net6::client::peer& peer);
+	void on_join(obby::user& user);
+	void on_part(obby::user& user);
 	void on_close();
 	void on_sync();
 	void on_login_failed(const std::string& reason);
@@ -236,7 +236,7 @@ curses_editor::curses_editor(int argc, char* argv[])
  : m_port(argc > 3 ? strtol(argv[3], NULL, 10) : 6521), m_quit(true),
    m_synced(false), m_buffer(argv[2], m_port), m_screen(m_buffer)
 {
-	m_buffer.login(argv[1]);
+	m_buffer.login(argv[1], 64, 0, 0);
 
 	m_buffer.join_event().connect(
 		sigc::mem_fun(*this, &curses_editor::on_join) );
@@ -315,11 +315,11 @@ void curses_editor::quit()
 	m_quit = true;
 }
 
-void curses_editor::on_join(net6::client::peer& peer)
+void curses_editor::on_join(obby::user& user)
 {
 }
 
-void curses_editor::on_part(net6::client::peer& peer)
+	void curses_editor::on_part(obby::user& user)
 {
 }
 

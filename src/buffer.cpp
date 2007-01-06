@@ -29,6 +29,10 @@ obby::buffer::~buffer()
 	std::list<record*>::iterator iter;
 	for(iter = m_history.begin(); iter != m_history.end(); ++ iter)
 		delete *iter;
+
+	std::list<user*>::iterator user_i;
+	for(user_i = m_userlist.begin(); user_i != m_userlist.end(); ++ user_i)
+		delete *user_i;
 }
 
 const std::string& obby::buffer::get_whole_buffer() const
@@ -113,6 +117,24 @@ unsigned int obby::buffer::get_line_count() const
 	return m_lines.size() + 1;
 }
 
+obby::user* obby::buffer::find(unsigned int id) const
+{
+	std::list<user*>::const_iterator iter;
+	for(iter = m_userlist.begin(); iter != m_userlist.end(); ++ iter)
+		if( (*iter)->get_id() == id)
+			return *iter;
+	return NULL;
+}
+
+obby::user* obby::buffer::find(const std::string& name) const
+{
+	std::list<user*>::const_iterator iter;
+	for(iter = m_userlist.begin(); iter != m_userlist.end(); ++ iter)
+		if( (*iter)->get_name() == name)
+			return *iter;
+	return NULL;
+}
+
 obby::position obby::buffer::coord_to_position(unsigned int x,
                                                unsigned int y) const
 {
@@ -142,5 +164,13 @@ void obby::buffer::position_to_coord(position pos, unsigned int& x,
 		x = pos;
 	else
 		x = pos - (*(--iter) ) - 1;
+}
+
+obby::user* obby::buffer::add_user(net6::peer& peer, int red, int green,
+                                   int blue)
+{
+	user* new_user = new user(peer, red, green, blue);
+	m_userlist.push_back(new_user);
+	return new_user;
 }
 

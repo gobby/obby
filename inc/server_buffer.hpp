@@ -32,11 +32,11 @@ class server_buffer : public buffer, public sigc::trackable
 {
 public: 
 	typedef sigc::signal<void, net6::server::peer&> signal_join_type;
-	typedef sigc::signal<void, net6::server::peer&> signal_login_type;
+	typedef sigc::signal<void, user&> signal_login_type;
 	typedef sigc::signal<void, net6::server::peer&> signal_part_type;
 
 	server_buffer(unsigned int port);
-	~server_buffer();
+	virtual ~server_buffer();
 
 	void select();
 	void select(unsigned int timeout);
@@ -50,9 +50,12 @@ public:
 
 protected:
 	void on_join(net6::server::peer& peer);
-	void on_login(net6::server::peer& peer);
+	void on_login(net6::server::peer& peer, const net6::packet& pack);
 	void on_part(net6::server::peer& peer);
 	void on_data(const net6::packet& pack, net6::server::peer& from);
+	bool on_auth(net6::server::peer& peer, const net6::packet& pack,
+	             std::string& reason);
+	void on_extend(net6::server::peer& peer, net6::packet& pack);
 
 	net6::server m_server;
 

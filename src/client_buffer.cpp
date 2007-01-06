@@ -43,9 +43,12 @@ obby::client_buffer::~client_buffer()
 		delete *iter;
 }
 
-void obby::client_buffer::login(const std::string& name)
+void obby::client_buffer::login(const std::string& name, int red, int green,
+                                int blue)
 {
-	m_connection.login(name);
+	net6::packet login_pack("net6_client_login");
+	login_pack << name << red << green << blue;
+	m_connection.custom_login(login_pack);
 }
 
 net6::client::peer* obby::client_buffer::get_self() const
@@ -117,14 +120,25 @@ obby::client_buffer::login_failed_event() const
 	return m_signal_login_failed;
 }
 
-void obby::client_buffer::on_join(net6::client::peer& peer)
+void obby::client_buffer::on_join(net6::client::peer& peer,
+                                  const net6::packet& pack)
 {
-	m_signal_join.emit(peer);
+	if(pack.get_param_count() < 5) return;
+	if(pack.get_param(2).get_type() != net6::packet::param::INT) return;
+	if(pack.get_param(3).get_type() != net6::packet::param::INT) return;
+	if(pack.get_param(4).get_type() != net6::packet::param::INT) return;
+
+	int red = pack.get_param(2).as_int();
+	int green = pack.get_param(3).as_int();
+	int blue = pack.get_param(4).as_int();
+
+	user* new_user = add_user(peer, red, green, blue);
+	m_signal_join.emit(*new_user);
 }
 
 void obby::client_buffer::on_part(net6::client::peer& peer)
 {
-	m_signal_part.emit(peer);
+	m_signal_part.emit(*find(peer.get_id()) );
 }
 
 void obby::client_buffer::on_close()

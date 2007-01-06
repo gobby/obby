@@ -10,6 +10,7 @@ INCLUDES = $(libobby_CFLAGS) -I../inc/
 
 pkginclude_HEADERS = \
 	inc/position.hpp \
+	inc/user.hpp \
 	inc/record.hpp \
 	inc/delete_record.hpp \
 	inc/insert_record.hpp \
@@ -21,6 +22,7 @@ pkginclude_HEADERS = \
 libobby_la_SOURCES = \
 	src/common.cpp \
 	src/position.cpp \
+	src/user.cpp \
 	src/record.cpp \
 	src/insert_record.cpp \
 	src/delete_record.cpp \

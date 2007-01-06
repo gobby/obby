@@ -9,13 +9,13 @@
 #include "server_buffer.hpp"
 #include "rendezvous.hpp"
 
-int port = 6521;
+int port = 6522;
 bool quit = false;
 
 #ifdef CLIENT_TEST
-void client_join(net6::client::peer& peer, obby::client_buffer& buffer)
+void client_join(obby::user& user, obby::client_buffer& buffer)
 {
-	std::cout << peer.get_name() << " has joined." << std::endl;
+	std::cout << user.get_name() << " has joined." << std::endl;
 }
 
 void client_sync(obby::client_buffer& buffer)
@@ -30,9 +30,9 @@ void client_sync(obby::client_buffer& buffer)
 	buffer.insert(0, "B");
 }
 
-void client_part(net6::client::peer& peer)
+void client_part(obby::user& user)
 {
-	std::cout << peer.get_name() << " has quit." << std::endl;
+	std::cout << user.get_name() << " has quit." << std::endl;
 }
 
 void client_close()
@@ -77,7 +77,7 @@ int client_main(int argc, char* argv[])
 		port = strtol(argv[3], NULL, 10);
 
 	obby::client_buffer buffer(argv[2], port);
-	buffer.login(argv[1]);
+	buffer.login(argv[1], 128, 0, 0);
 
 	buffer.join_event().connect(sigc::bind(sigc::ptr_fun(&client_join), sigc::ref(buffer)) );
 	buffer.sync_event().connect(sigc::bind(sigc::ptr_fun(&client_sync), sigc::ref(buffer)) );
@@ -99,9 +99,9 @@ void server_join(net6::server::peer& peer)
 	std::cout << "Connection from " << peer.get_address().get_name() << "." << std::endl;
 }
 
-void server_login(net6::server::peer& peer)
+void server_login(obby::user& user)
 {
-	std::cout << peer.get_address().get_name() << " logged in as " << peer.get_name() << "." << std::endl;
+	std::cout << user.get_address().get_name() << " logged in as " << user.get_name() << "." << std::endl;
 }
 
 void server_part(net6::server::peer& peer)

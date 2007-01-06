@@ -25,6 +25,10 @@ obby::server_buffer::server_buffer(unsigned int port)
 		sigc::mem_fun(*this, &server_buffer::on_join) );
 	m_server.login_event().connect(
 		sigc::mem_fun(*this, &server_buffer::on_login) );
+	m_server.login_auth_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_auth) );
+	m_server.login_extend_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_extend) );
 	m_server.part_event().connect(
 		sigc::mem_fun(*this, &server_buffer::on_part) );
 	m_server.data_event().connect(
@@ -79,8 +83,14 @@ void obby::server_buffer::on_join(net6::server::peer& peer)
 	m_signal_join.emit(peer);
 }
 
-void obby::server_buffer::on_login(net6::server::peer& peer)
+void obby::server_buffer::on_login(net6::server::peer& peer,
+                                   const net6::packet& pack)
 {
+	int red = pack.get_param(1).as_int();
+	int green = pack.get_param(2).as_int();
+	int blue = pack.get_param(3).as_int();
+	user* new_user = add_user(peer, red, green, blue);
+
 	// Client logged in. Synchronise the complete buffer, but
 	// seperate it into multiple packets to not block other high-priority
 	// network packets like chat packets.
@@ -104,7 +114,7 @@ void obby::server_buffer::on_login(net6::server::peer& peer)
 	net6::packet final_sync("obby_sync_final");
 	m_server.send(final_sync, peer);
 
-	m_signal_login.emit(peer);
+	m_signal_login.emit(*new_user);
 }
 
 void obby::server_buffer::on_part(net6::server::peer& peer)
@@ -165,5 +175,55 @@ void obby::server_buffer::on_data(const net6::packet& pack,
 		// Emit changed signal
 		rec->emit_buffer_signal(*this);
 	}
+}
+
+#include <iostream>
+bool obby::server_buffer::on_auth(net6::server::peer& peer,
+                                  const net6::packet& pack,
+				  std::string& reason)
+{
+	reason = "Invalid login request";
+	if(pack.get_param_count() < 4) return false;
+	if(pack.get_param(1).get_type() != net6::packet::param::INT)
+		return false;
+	if(pack.get_param(2).get_type() != net6::packet::param::INT)
+		return false;
+	if(pack.get_param(3).get_type() != net6::packet::param::INT)
+		return false;
+	reason.clear();
+
+	int red = pack.get_param(1).as_int();
+	int green = pack.get_param(2).as_int();
+	int blue = pack.get_param(3).as_int();
+
+	std::list<user*>::iterator iter;
+	for(iter = m_userlist.begin(); iter != m_userlist.end(); ++ iter)
+	{
+		std::cout << "Checking color of " << (*iter)->get_name() << std::endl;
+
+		std::cout << red << " vs. " << (*iter)->get_red() << std::endl;
+		std::cout << green << " vs. " << (*iter)->get_green() << std::endl;
+		std::cout << blue << " vs. " << (*iter)->get_blue() << std::endl;
+		if(abs(red   - (*iter)->get_red()) < 32 &&
+		   abs(green - (*iter)->get_green()) < 32 &&
+		   abs(blue  - (*iter)->get_blue()) < 32)
+		{
+			std::cout << "Denied!" << std::endl;
+			reason = "Color is already in use";
+			return false;
+		}
+	}
+
+	return true;
+}
+
+void obby::server_buffer::on_extend(net6::server::peer& peer,
+                                    net6::packet& pack)
+{
+	user* ideq_user = find(peer.get_id() );
+	if(!ideq_user) return;
+
+	pack << ideq_user->get_red() << ideq_user->get_green()
+	     << ideq_user->get_blue();
 }
 

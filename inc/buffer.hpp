@@ -23,6 +23,7 @@
 #include <list>
 #include <sigc++/signal.h>
 #include "position.hpp"
+#include "user.hpp"
 #include "record.hpp"
 #include "insert_record.hpp"
 #include "delete_record.hpp"
@@ -37,7 +38,7 @@ public:
 	typedef sigc::signal<void, const delete_record&> signal_delete_type;
 
 	buffer();
-	~buffer();
+	virtual ~buffer();
 
 	const std::string& get_whole_buffer() const;
 	std::string get_sub_buffer(position from, position to) const;
@@ -55,15 +56,22 @@ public:
 	unsigned int get_line_count() const;
 	unsigned int get_line_position(unsigned int line) const { return m_lines[line]; }
 
+	user* find(unsigned int id) const;
+	user* find(const std::string& name) const;
+
 	position coord_to_position(unsigned int x, unsigned int y) const;
 	void position_to_coord(position pos, unsigned int& x,
 	                       unsigned int& y) const;
 protected:
+	user* add_user(net6::peer& peer, int red, int green, int blue);
+
 	std::list<record*> m_history;
 	unsigned int m_revision;
 
 	std::string m_buffer;
 	std::vector<position> m_lines;
+
+	std::list<user*> m_userlist;
 
 	signal_insert_type m_signal_insert;
 	signal_delete_type m_signal_delete;

@@ -24,6 +24,7 @@
 #include <sigc++/signal.h>
 #include <net6/client.hpp>
 #include "record.hpp"
+#include "user.hpp"
 #include "insert_record.hpp"
 #include "delete_record.hpp"
 #include "buffer.hpp"
@@ -34,16 +35,16 @@ namespace obby
 class client_buffer : public buffer, public sigc::trackable
 {
 public:
-	typedef sigc::signal<void, net6::client::peer&> signal_join_type;
-	typedef sigc::signal<void> signal_sync_type;
-	typedef sigc::signal<void, net6::client::peer&> signal_part_type;
-	typedef sigc::signal<void>                      signal_close_type;
+	typedef sigc::signal<void, user&>              signal_join_type;
+	typedef sigc::signal<void>                     signal_sync_type;
+	typedef sigc::signal<void, user&>              signal_part_type;
+	typedef sigc::signal<void>                     signal_close_type;
 	typedef sigc::signal<void, const std::string&> signal_login_failed_type;
 	
 	client_buffer(const std::string& hostname, unsigned int port);
-	~client_buffer();
+	virtual ~client_buffer();
 	
-	void login(const std::string& name);
+	void login(const std::string& name, int red, int green, int blue);
 	net6::client::peer* get_self() const;
 
 	void select();
@@ -59,7 +60,7 @@ public:
 	signal_login_failed_type login_failed_event() const;
 
 protected:
-	void on_join(net6::client::peer& peer);
+	void on_join(net6::client::peer& peer, const net6::packet& pack);
 	void on_part(net6::client::peer& peer);
 	void on_close();
 	void on_data(const net6::packet& pack);

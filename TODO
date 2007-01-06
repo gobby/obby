@@ -10,7 +10,6 @@ Serious:
 
 Important:
  * Implement automatic service announcement and discovery.
- * Implement color management
  * Implement chat 
  * Implement host_buffer, using server_buffer as parent but creating net6::host
    instead of net6::server.
