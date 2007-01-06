@@ -38,7 +38,7 @@ function make_http_args($args_)
   $str = '';
   foreach($args_ as $arg=>$val)
     if($val !== NULL)
-      $str .= '&amp;' . $arg . '=' . $val;
+      $str .= '&amp;' . $arg . '=' . urlencode($val);
   return $str ? '?' . $str : ''; // $str == '' == false
 }
 
@@ -49,11 +49,15 @@ function make_link($args_)
     $str = $GLOBALS['rewrite'];
     if(isset($args_['file']) )
     {
-      $str .= $args_['file'];
+      $str .= urlencode($args_['file']);
       if(isset($args_['document']) )
-        $str .= '/' . $args_['document'];
+      {
+        $str .= '/' . urlencode($args_['document']);
+        if(isset($args_['suffix']) && $args_['suffix'] !== NULL)
+          $str .= '/' . urlencode($args_['suffix']);
+      }
     }
-    $args_['file'] = NULL; $args_['document'] = NULL;
+    $args_['file'] = NULL; $args_['document'] = NULL; $args_['suffix'] = NULL;
     return $str . make_http_args($args_);
   }
   else
@@ -410,7 +414,15 @@ class parser
       if($children[$i]->get_name() == 'document')
       {
         $title = htmlentities($children[$i]->get_attribute('title') );
-        echo '<li><a href="' . make_link(array('file' => $GLOBALS['_GET']['file'], 'document' => $title)) . '">' . $title . '</a></li>';
+        $suffix = intval($children[$i]->get_attribute('suffix') );
+        echo '<li><a href="' . make_link(
+          array('file' => $GLOBALS['_GET']['file'],
+                'document' => $title,
+                'suffix' => ($suffix != 1) ? $suffix : NULL)) . '">';
+        echo $title;
+        if($suffix != 1)
+          echo ' (' . $suffix . ')';
+        echo '</a></li>';
       }
     }
     echo '<li><a href="' . make_link(array('file' => $GLOBALS['_GET']['file'])) . '">Chat log</a></li>';
@@ -488,7 +500,7 @@ class parser
     return new user_table($user_table);
   }
 
-  function print_document($document, &$error)
+  function print_document($document, $suffix, &$error)
   {
     // Get document
     $children = $this->m_root->get_children();
@@ -497,7 +509,8 @@ class parser
     for($i = 0; $i < $count; ++ $i)
       if($children[$i]->get_name() == 'document')
         if($children[$i]->get_attribute('title') == $document)
-          $docobj = $children[$i];
+          if(intval($children[$i]->get_attribute('suffix')) == $suffix)
+            $docobj = $children[$i];
 
     if(!$docobj)
     {
@@ -510,14 +523,14 @@ class parser
 
     if($count == 0)
     {
-      $error->set_msg('Document has not been loaded');
+      $error->set_msg('Document is empty');
       return false;
     }
 
     echo "<pre class=\"document\">\n";
     for($i = 0; $i < $count; ++ $i)
     {
-      // Only process lines (TODO: omit this check because all children have to be lines?
+      // Line processing (old format; 0.3.0)
       if($children[$i]->get_name() == 'line')
       {
         // Iterate through parts
@@ -533,6 +546,15 @@ class parser
         }
 
         echo "\n";
+      }
+      // Chunk handling (new format; since 0.4.0)
+      elseif($children[$i]->get_name() == 'chunk')
+      {
+        $chunk = $children[$i]->get_attribute('content');
+        $user = intval($children[$i]->get_attribute('author'));
+        $content = htmlentities($chunk);
+        $content = str_replace('\n', "\n", $content); // Expand newlines
+        echo '<span class="user_' . $user . '">' . $content . '</span>';
       }
     }
 
@@ -625,7 +647,7 @@ else
      This is a temporary measure until I find a nice replacement for
      addslashes which prevents double dot attacks. */
   ini_set('open_basedir', getcwd());
-  $filename = isset($_GET['file']) ? addslashes($_GET['file']) : NULL;
+  $filename = isset($_GET['file']) ? addslashes(urldecode($_GET['file'])) : NULL;
   if(NULL == $filename)
     $error->set_msg('No file specified, bailing out!');
   else if(!file_exists($filename))
@@ -645,8 +667,9 @@ if($fp)
     $user_table =& $parser->get_user_table($error);
 }
 
-$document = isset($_GET['document']) ? $_GET['document'] : NULL;
-$refresh = isset($_GET['refresh']) ? $_GET['refresh'] : NULL;
+$document = isset($_GET['document']) ? urldecode($_GET['document'])    : NULL;
+$suffix   = isset($_GET['suffix'])   ? (int)urldecode($_GET['suffix']) : 1;
+$refresh  = isset($_GET['refresh'])  ? $_GET['refresh']                : NULL;
 
 echo '<?xml version="1.0" encoding="UTF-8" ?>';
 ?>
@@ -744,7 +767,7 @@ echo '<?xml version="1.0" encoding="UTF-8" ?>';
 
     if($document != NULL) {
       echo '<h2>' . $document . '</h2>';
-      $parser->print_document($document, $error);
+      $parser->print_document($document, $suffix, $error);
 
       if(!$error->is_empty() )
         echo '<p class="error">Error: ' . $error->get_msg() . '</p>';
