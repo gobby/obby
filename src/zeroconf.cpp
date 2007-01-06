@@ -60,21 +60,19 @@ void obby::zeroconf::publish(const std::string& name, unsigned int port)
 void obby::zeroconf::unpublish(const std::string& name)
 {
 	if(!m_published[name])
-	{
 		std::cerr << "unpublish not possible for \"" << name << "\""
 			<< std::endl;
-	}
-
-	sw_discovery_cancel(m_session, m_published[name]);
+	else
+		sw_discovery_cancel(m_session, m_published[name]);
+	m_published.erase(name);
 }
 
 void obby::zeroconf::unpublish_all()
 {
 	std::map<std::string, sw_discovery_oid>::iterator i;
 	for(i = m_published.begin(); i != m_published.end(); ++i)
-       	{
 		sw_discovery_cancel(m_session, i->second);
-	}
+	m_published.clear();
 }
 
 void obby::zeroconf::discover()
