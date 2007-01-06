@@ -15,6 +15,7 @@ pkginclude_HEADERS += rsa.hpp
 pkginclude_HEADERS += sha1.hpp
 pkginclude_HEADERS += user.hpp
 pkginclude_HEADERS += user_table.hpp
+pkginclude_HEADERS += chat.hpp
 pkginclude_HEADERS += line.hpp
 pkginclude_HEADERS += document.hpp
 pkginclude_HEADERS += operation.hpp

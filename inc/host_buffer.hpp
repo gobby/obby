@@ -195,6 +195,8 @@ void basic_host_buffer<selector_type>::open(unsigned int port)
 		basic_buffer<selector_type>::m_user_table.find_free_id(),
 		net6_host().get_self(), m_red, m_green, m_blue
 	);
+
+	basic_buffer<selector_type>::m_signal_user_join.emit(*m_self);
 }
 
 template<typename selector_type>
@@ -208,6 +210,8 @@ void basic_host_buffer<selector_type>::open(const std::string& content,
 		basic_buffer<selector_type>::m_user_table.find_free_id(),
 		net6_host().get_self(), m_red, m_green, m_blue
 	);
+
+	basic_buffer<selector_type>::m_signal_user_join.emit(*m_self);
 }
 
 template<typename selector_type>
@@ -244,7 +248,6 @@ void basic_host_buffer<selector_type>::send_message(const std::string& message)
 
 	// Send message from local user instead of server
 	// TODO: Move signal emission to send_message_impl
-	basic_buffer<selector_type>::m_signal_message.emit(*m_self, message);
 	basic_server_buffer<selector_type>::send_message_impl(message, m_self);
 }
 

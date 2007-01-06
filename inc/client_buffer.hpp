@@ -430,6 +430,11 @@ void basic_client_buffer<selector_type>::
 	net6::packet message_pack("obby_message");
 	message_pack << message;
 	net6_client().send(message_pack);
+
+	// Do not add directly, wait for confirmation to ensure synchronisation
+/*	basic_buffer<selector_type>::m_chat.add_user_message(
+		message, get_self()
+	);*/
 }
 
 template<typename selector_type>
@@ -773,13 +778,14 @@ void basic_client_buffer<selector_type>::
 	// the server sent the message directly
 	if(writer != NULL)
 	{
-		basic_buffer<selector_type>::m_signal_message.emit(
-			*writer, message
+		basic_buffer<selector_type>::m_chat.add_user_message(
+			message,
+			*writer
 		);
 	}
 	else
 	{
-		basic_buffer<selector_type>::m_signal_server_message.emit(
+		basic_buffer<selector_type>::m_chat.add_server_message(
 			message
 		);
 	}

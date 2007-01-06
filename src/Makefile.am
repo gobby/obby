@@ -31,6 +31,7 @@ libobby_la_SOURCES += rsa.cpp
 libobby_la_SOURCES += sha1.cpp
 libobby_la_SOURCES += user.cpp
 libobby_la_SOURCES += user_table.cpp
+libobby_la_SOURCES += chat.cpp
 libobby_la_SOURCES += line.cpp
 libobby_la_SOURCES += document.cpp
 libobby_la_SOURCES += operation.cpp

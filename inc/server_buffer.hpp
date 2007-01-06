@@ -288,8 +288,17 @@ void basic_server_buffer<selector_type>::open(const std::string& session,
 		if(iter->get_name() == "user_table")
 		{
 			// Stored user table
-			basic_buffer<selector_type>::
-				m_user_table.deserialise(*iter);
+			basic_buffer<selector_type>::m_user_table.deserialise(
+				*iter
+			);
+		}
+		else if(iter->get_name() == "chat")
+		{
+			// Stored chat history
+			basic_buffer<selector_type>::m_chat.deserialise(
+				*iter,
+				basic_buffer<selector_type>::m_user_table
+			);
 		}
 		else if(iter->get_name() == "document")
 		{
@@ -383,12 +392,8 @@ template<typename selector_type>
 void basic_server_buffer<selector_type>::
 	send_message(const std::string& message)
 {
-	// Server sent a message
-	// TODO: Emit signal in send_message_impl
-	basic_buffer<selector_type>::m_signal_server_message.emit(message);
-
 	// send_message_impl relays the message to the clients
-	send_message_impl(message, 0);
+	send_message_impl(message, NULL);
 }
 
 template<typename selector_type>
@@ -442,6 +447,20 @@ void basic_server_buffer<selector_type>::
 	net6::packet message_pack("obby_message");
 	message_pack << writer << message;
 	net6_server().send(message_pack);
+
+	if(writer == NULL)
+	{
+		basic_buffer<selector_type>::m_chat.add_server_message(
+			message
+		);
+	}
+	else
+	{
+		basic_buffer<selector_type>::m_chat.add_user_message(
+			message,
+			*writer
+		);
+	}
 }
 
 template<typename selector_type>
@@ -816,8 +835,6 @@ void basic_server_buffer<selector_type>::
 	const std::string message =
 		pack.get_param(0).net6::parameter::as<std::string>();
 
-	// TODO: Move signal emission to send_message_impl
-	basic_buffer<selector_type>::m_signal_message.emit(from, message);
 	send_message_impl(message, &from);
 }
 

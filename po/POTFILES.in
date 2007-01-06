@@ -2,6 +2,7 @@
 
 src/error.cpp
 src/user_table.cpp
+src/chat.cpp
 src/line.cpp
 src/document.cpp
 src/serialise/token.cpp

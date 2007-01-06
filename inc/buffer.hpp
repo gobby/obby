@@ -26,8 +26,9 @@
 #include "serialise/parser.hpp"
 #include "common.hpp"
 #include "format_string.hpp"
-#include "document_info.hpp"
 #include "user_table.hpp"
+#include "chat.hpp"
+#include "document_info.hpp"
 
 namespace obby
 {
@@ -65,10 +66,6 @@ public:
 		signal_document_rename_type;
 	typedef sigc::signal<void, document_info&>
 		signal_document_remove_type;
-	typedef sigc::signal<void, const user&, const std::string&>
-		signal_message_type;
-	typedef sigc::signal<void, const std::string&>
-		signal_server_message_type;
 
 	basic_buffer();
 	virtual ~basic_buffer();
@@ -76,6 +73,10 @@ public:
 	/** Returns the user table associated with the buffer.
 	 */
 	const user_table& get_user_table() const;
+
+	/** Returns the obby::chat for this buffer.
+	 */
+	const chat& get_chat() const;
 
 	/** Returns the selector of the underlaying net6 network object.
 	 */
@@ -159,16 +160,6 @@ public:
 	 */
 	signal_document_remove_type document_remove_event() const;
 
-	/** Signal which will be emitted when another participant in the
-	 * obby session sends a chat packet.
-	 */
-	signal_message_type message_event() const;
-
-	/** Signal which will be emitted when the server of the
-	 * obby session sends a chat packet.
-	 */
-	signal_server_message_type server_message_event() const;
-
 	/** Current obby protocol version.
 	 */
 	static const unsigned long PROTOCOL_VERSION;
@@ -184,6 +175,14 @@ protected:
 	/** Internal function to clear the whole document list.
 	 */
 	void document_clear();
+
+	signal_user_join_type m_signal_user_join;
+	signal_user_part_type m_signal_user_part;
+	signal_user_colour_type m_signal_user_colour;
+
+	signal_document_insert_type m_signal_document_insert;
+	signal_document_rename_type m_signal_document_rename;
+	signal_document_remove_type m_signal_document_remove;
 
 	/** net6 main object to keep net6 initialised during the obby session.
 	 */
@@ -201,6 +200,10 @@ protected:
 	 */
 	user_table m_user_table;
 
+	/** Chat buffer and history.
+	 */
+	chat m_chat;
+
 	/** List of documents.
 	 */
 	std::list<document_info*> m_docs;
@@ -208,17 +211,6 @@ protected:
 	/** Counter for document IDs.
 	 */
 	unsigned int m_doc_counter;
-
-	signal_user_join_type m_signal_user_join;
-	signal_user_part_type m_signal_user_part;
-	signal_user_colour_type m_signal_user_colour;
-
-	signal_document_insert_type m_signal_document_insert;
-	signal_document_rename_type m_signal_document_rename;
-	signal_document_remove_type m_signal_document_remove;
-
-	signal_message_type m_signal_message;
-	signal_server_message_type m_signal_server_message;
 };
 
 typedef basic_buffer<net6::selector> buffer;
@@ -228,7 +220,7 @@ const unsigned long basic_buffer<selector_type>::PROTOCOL_VERSION = 3;
 
 template<typename selector_type>
 basic_buffer<selector_type>::basic_buffer()
- : m_rclass(GMP_RAND_ALG_LC, 16), m_doc_counter(0)
+ : m_rclass(GMP_RAND_ALG_LC, 16), m_chat(*this, 0xff), m_doc_counter(0)
 {
 	// Initialize gettext
 	init_gettext();
@@ -247,6 +239,12 @@ template<typename selector_type>
 const user_table& basic_buffer<selector_type>::get_user_table() const
 {
 	return m_user_table;
+}
+
+template<typename selector_type>
+const chat& basic_buffer<selector_type>::get_chat() const
+{
+	return m_chat;
 }
 
 template<typename selector_type>
@@ -279,6 +277,10 @@ void basic_buffer<selector_type>::serialise(const std::string& session) const
 	serialise::object& user_table = root.add_child();
 	user_table.set_name("user_table");
 	m_user_table.serialise(user_table);
+
+	serialise::object& chat = root.add_child();
+	chat.set_name("chat");
+	m_chat.serialise(chat);
 
 	for(document_iterator iter = document_begin();
 	    iter != document_end();
@@ -400,20 +402,6 @@ typename basic_buffer<selector_type>::signal_document_remove_type
 basic_buffer<selector_type>::document_remove_event() const
 {
 	return m_signal_document_remove;
-}
-
-template<typename selector_type>
-typename basic_buffer<selector_type>::signal_message_type
-basic_buffer<selector_type>::message_event() const
-{
-	return m_signal_message;
-}
-
-template<typename selector_type>
-typename basic_buffer<selector_type>::signal_server_message_type
-basic_buffer<selector_type>::server_message_event() const
-{
-	return m_signal_server_message;
 }
 
 template<typename selector_type>
