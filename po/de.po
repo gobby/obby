@@ -1,0 +1,21 @@
+# obby l10n German Translation
+# Copyright (C) 2005 0x539 dev group
+# This file is distributed under the same license as the obby package.
+# Philipp Kern <phil@0x539.de>, 2005.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: obby 0.2.0\n"
+"Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
+"POT-Creation-Date: 2005-06-18 13:02+0200\n"
+"PO-Revision-Date: 2005-06-19 10:01+0200\n"
+"Last-Translator: Philipp Kern <phil@0x539.de>\n"
+"Language-Team: German Translation Team <crew@0x539.de>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/error.cpp:31
+msgid "Colour is already in use"
+msgstr "Farbe wird bereits benutzt"
