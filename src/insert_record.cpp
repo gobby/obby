@@ -16,6 +16,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <cassert>
 #include "insert_record.hpp"
 #include "buffer.hpp"
 
@@ -53,6 +54,8 @@ void obby::insert_record::on_insert(const position& pos,
 
 void obby::insert_record::on_delete(const position& from, const position& to)
 {
+	assert(to >= from);
+
 	if(m_pos >= from && m_pos < to)
 	{
 		// The position where to insert text has been deleted

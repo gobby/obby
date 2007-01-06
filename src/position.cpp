@@ -16,6 +16,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <cassert>
 #include "position.hpp"
 
 obby::position::position()
@@ -139,6 +140,8 @@ obby::position obby::position::operator+(const position& other) const
 
 void obby::position::sub_range(const position& from, const position& to)
 {
+	assert(to >= from);
+
 	if(to.m_line == m_line)
 		m_col -= to.m_col - from.m_col;
 

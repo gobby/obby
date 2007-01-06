@@ -16,6 +16,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <cassert>
 #include "delete_record.hpp"
 #include "buffer.hpp"
 
@@ -23,6 +24,7 @@ obby::delete_record::delete_record(const position& begin, const position& end,
                                    unsigned int revision, unsigned int from)
  : record(revision, from), m_from(begin), m_to(end)
 {
+	assert(end > begin);
 }
 
 obby::delete_record::delete_record(const position& begin, const position& end,
@@ -30,6 +32,7 @@ obby::delete_record::delete_record(const position& begin, const position& end,
                                    unsigned int id)
  : record(revision, from, id), m_from(begin), m_to(end)
 {
+	assert(end > begin);
 }
 
 obby::delete_record::~delete_record()
@@ -54,7 +57,7 @@ void obby::delete_record::on_insert(const position& pos,
 
 void obby::delete_record::on_delete(const position& from, const position& to)
 {
-	assert(to >= from)
+	assert(to >= from);
 
 	// Deletion after the range
 	if(from >= m_to)
