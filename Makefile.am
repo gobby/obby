@@ -11,7 +11,9 @@ pkginclude_HEADERS = \
 	inc/record.hpp \
 	inc/server_buffer.hpp
 
-libobby_la_SOURCES = 
+libobby_la_SOURCES = \
+	src/position.cpp \
+	src/record.cpp
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = lobby-1.0.pc
