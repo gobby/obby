@@ -243,17 +243,22 @@ void obby::server_buffer::on_part(net6::server::peer& peer)
 
 bool obby::server_buffer::on_auth(net6::server::peer& peer,
                                   const net6::packet& pack,
-				  net6::login::error& error)
+                                  net6::login::error& error)
 {
+	// Extract user name
+	std::string name = pack.get_param(0).as<std::string>();
+
 	// Extract colour components
 	int red = pack.get_param(1).as<int>();
 	int green = pack.get_param(2).as<int>();
 	int blue = pack.get_param(3).as<int>();
 
 	// Get password, if given
-	std::string global_password;
+	std::string global_password, user_password;
 	if(pack.get_param_count() > 4)
 		global_password = pack.get_param(4).as<std::string>();
+	if(pack.get_param_count() > 5)
+		user_password = pack.get_param(5).as<std::string>();
 
 	// Check for existing colors
 	// TODO: Check for colors that non-connected user occupy?
@@ -279,6 +284,18 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 		if(global_password != m_global_password)
 		{
 			error = login::ERROR_WRONG_GLOBAL_PASSWORD;
+			return false;
+		}
+	}
+
+	// Check user password
+	obby::user* user = m_usertable.find_user<user::CONNECTED, true>(name);
+	if(user && !user->get_password().empty() )
+	{
+		// Compare passwords
+		if(user_password != user->get_password() )
+		{
+			error = login::ERROR_WRONG_USER_PASSWORD;
 			return false;
 		}
 	}
@@ -364,6 +381,13 @@ bool obby::server_buffer::execute_packet(const net6::packet& pack, user& from)
 		return true;
 	}
 
+	if(pack.get_command() == "obby_user_password")
+	{
+		// User password
+		on_net_user_password(pack, from);
+		return true;
+	}
+
 	if(pack.get_command() == "obby_document")
 	{
 		// Forward to the document sub system
@@ -404,6 +428,13 @@ void obby::server_buffer::on_net_message(const net6::packet& pack, user& from)
 	// Send it
 	m_signal_message.emit(from, message);
 	send_message_impl(message, &from);
+}
+
+void obby::server_buffer::on_net_user_password(const net6::packet& pack,
+                                               user& from)
+{
+	// Set password for this user
+	from.set_password(pack.get_param(0).as<std::string>() );
 }
 
 void obby::server_buffer::on_net_document(const net6::packet& pack, user& from)

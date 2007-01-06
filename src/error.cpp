@@ -24,8 +24,10 @@ const obby::login::error obby::login::ERROR_COLOR_IN_USE =
 	net6::login::ERROR_MAX + 1;
 const obby::login::error obby::login::ERROR_WRONG_GLOBAL_PASSWORD =
 	net6::login::ERROR_MAX + 2;
+const obby::login::error obby::login::ERROR_WRONG_USER_PASSWORD =
+	net6::login::ERROR_MAX + 3;
 const obby::login::error obby::login::ERROR_MAX =
-	net6::login::ERROR_MAX + 2;
+	net6::login::ERROR_MAX + 3;
 
 std::string obby::login::errstring(error err)
 {
@@ -33,6 +35,8 @@ std::string obby::login::errstring(error err)
 		return _("Colour is already in use");
 	if(err == ERROR_WRONG_GLOBAL_PASSWORD)
 		return _("Wrong session password");
+	if(err == ERROR_WRONG_USER_PASSWORD)
+		return _("Wrong user password");
 	else
 		return net6::login::errstring(err);
 }

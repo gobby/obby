@@ -27,6 +27,11 @@ obby::local_buffer::~local_buffer()
 {
 }
 
+const std::string& obby::local_buffer::get_name() const
+{
+	return get_self().get_name();
+}
+
 obby::local_document_info*
 obby::local_buffer::find_document(unsigned int owner_id, unsigned int id) const
 {

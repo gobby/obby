@@ -110,9 +110,18 @@ public:
 	 */
 	int get_blue() const;
 
+	/** Returns the password for this user (only available with server
+	 * or host buffers).
+	 */
+	const std::string& get_password() const;
+
 	/** Returns the flags that are currently set for this user.
 	 */
 	flags get_flags() const;
+
+	/** Changes the password for this user
+	 */
+	void set_password(const std::string& password);
 
 	/** Adds the given flags to this user's flags.
 	 */
@@ -122,6 +131,9 @@ public:
 	 */
 	void remove_flags(flags old_flags);
 
+	// WTF? Users can't be identical because the IDs are unique..?
+	//  - armin
+#if 0
 	/** Checks if both objects are identical by comparing their id.
 	 */
 	bool operator==(const user& other) { return m_id == other.m_id; }
@@ -129,6 +141,7 @@ public:
 	/** Checks if both objects differ by comparing their id.
 	 */
 	bool operator!=(const user& other) { return m_id != other.m_id; }
+#endif
 
 #if 0
 	/** Adds this document to the user's list of subscribed documents.
@@ -164,13 +177,14 @@ public:
 #endif
 protected:
 	net6::peer* m_peer;
-//	std::list<document_info*> m_documents;
 
 	unsigned int m_id;
 	std::string m_name;
 	int m_red;
 	int m_green;
 	int m_blue;
+
+	std::string m_password;
 
 	flags m_flags;
 };

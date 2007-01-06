@@ -95,9 +95,19 @@ int obby::user::get_blue() const
 	return m_blue;
 }
 
+const std::string& obby::user::get_password() const
+{
+	return m_password;
+}
+
 obby::user::flags obby::user::get_flags() const
 {
 	return m_flags;
+}
+
+void obby::user::set_password(const std::string& password)
+{
+	m_password = password;
 }
 
 void obby::user::add_flags(flags new_flags)

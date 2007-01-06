@@ -37,6 +37,7 @@ public:
 	typedef sigc::signal<void>               signal_close_type;
 	typedef sigc::signal<void, login::error> signal_login_failed_type;
 	typedef sigc::signal<bool, std::string&> signal_global_password_type;
+	typedef sigc::signal<bool, std::string&> signal_user_password_type;
 
 	/** Creates a new client_buffer and connects to <em>hostname</em>
 	 * at <em>port</em>
@@ -54,7 +55,8 @@ public:
 	 * prompt for a session password.
 	 */
 	void login(const std::string& name, int red, int green, int blue,
-	           const std::string& global_password = "");
+	           const std::string& global_password = "",
+	           const std::string& user_password = "");
 
 	/** Requests a new document at the server and sync its initial
 	 * contents. signal_document_insert will be emitted if the server
@@ -85,6 +87,11 @@ public:
 	 */
 	virtual const user& get_self() const;
 
+	/** Returns the name of the local user even if the login process has
+	 * not already completed.
+	 */
+	virtual const std::string& get_name() const;
+
 	/** Waits indefinitly for incoming events.
 	 */
 	virtual void select();
@@ -96,6 +103,10 @@ public:
 	/** Sends a global message to all users.
 	 */
 	virtual void send_message(const std::string& message);
+
+	/** Set user password.
+	 */
+	void set_password(const std::string& password);
 
 	/** Signal which will be emitted if the initial synchronization of the
 	 * user list and the document list has been completed.
@@ -114,6 +125,10 @@ public:
 	/** Signal which will be emitted if a global password is required.
 	 */
 	signal_global_password_type global_password_event() const;
+
+	/** Signal which will be emitted if a user password is required.
+	 */
+	signal_user_password_type user_password_event() const;
 
 protected:
 	/** Private constructor which may be used by derived objects from
@@ -172,11 +187,13 @@ protected:
 	int m_green;
 	int m_blue;
 	std::string m_global_password;
+	std::string m_user_password;
 
 	signal_sync_type m_signal_sync;
 	signal_close_type m_signal_close;
 	signal_login_failed_type m_signal_login_failed;
 	signal_global_password_type m_signal_global_password;
+	signal_user_password_type m_signal_user_password;
 };
 
 }

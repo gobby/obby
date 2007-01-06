@@ -42,6 +42,12 @@ public:
 	 */
 	virtual const user& get_self() const = 0;
 
+	/** Returns the name of the local user. This method is overwritten
+	 * by client_buffer to provide access to the user's name even if the
+	 * login process has not completed.
+	 */
+	virtual const std::string& get_name() const;
+
 	/** Looks for a document with the given ID which belongs to the user
 	 * with the given owner ID. Note that we do not take a real user object
 	 * here because the ID is enough and one might not have a user object

@@ -61,13 +61,15 @@ obby::client_buffer::~client_buffer()
 }
 
 void obby::client_buffer::login(const std::string& name, int red, int green,
-                                int blue, const std::string& global_password)
+                                int blue, const std::string& global_password,
+                                const std::string& user_password)
 {
 	m_name = name;
 	m_red = red;
 	m_green = green;
 	m_blue = blue;
 	m_global_password = global_password;
+	m_user_password = user_password;
 
 	m_client->login(name);
 }
@@ -122,6 +124,14 @@ const obby::user& obby::client_buffer::get_self() const
 	return *m_self;
 }
 
+const std::string& obby::client_buffer::get_name() const
+{
+	if(m_self)
+		return local_buffer::get_name();
+
+	return m_name;
+}
+
 void obby::client_buffer::select()
 {
 	m_client->select();
@@ -137,6 +147,14 @@ void obby::client_buffer::send_message(const std::string& message)
 	// Sends a chat message
 	net6::packet pack("obby_message");
 	pack << message;
+	m_client->send(pack);
+}
+
+void obby::client_buffer::set_password(const std::string& password)
+{
+	// Sets a user password
+	net6::packet pack("obby_user_password");
+	pack << password;
 	m_client->send(pack);
 }
 
@@ -160,6 +178,12 @@ obby::client_buffer::signal_global_password_type
 obby::client_buffer::global_password_event() const
 {
 	return m_signal_global_password;
+}
+
+obby::client_buffer::signal_user_password_type
+obby::client_buffer::user_password_event() const
+{
+	return m_signal_user_password;
 }
 
 void obby::client_buffer::on_join(net6::client::peer& peer,
@@ -232,7 +256,30 @@ void obby::client_buffer::on_login_failed(net6::login::error error)
 		if(m_signal_global_password.emit(global_password) )
 		{
 			// Retry login
-			login(m_name, m_red, m_green, m_blue, global_password);
+			login(
+				m_name,
+				m_red,
+				m_green,
+				m_blue,
+				global_password,
+				m_user_password
+			);
+		}
+	}
+	else if(error == login::ERROR_WRONG_USER_PASSWORD)
+	{
+		std::string user_password;
+		if(m_signal_user_password.emit(user_password) )
+		{
+			// Retry login
+			login(
+				m_name,
+				m_red,
+				m_green,
+				m_blue,
+				m_global_password,
+				user_password
+			);
 		}
 	}
 	else
@@ -243,7 +290,8 @@ void obby::client_buffer::on_login_failed(net6::login::error error)
 
 void obby::client_buffer::on_login_extend(net6::packet& pack)
 {
-	pack << m_red << m_green << m_blue << m_global_password;
+	pack << m_red << m_green << m_blue << m_global_password
+	     << m_user_password;
 }
 
 bool obby::client_buffer::execute_packet(const net6::packet& pack)

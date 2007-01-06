@@ -145,6 +145,7 @@ protected:
 	/** Messaging commands.
 	 */
 	void on_net_message(const net6::packet& pack, user& from);
+	void on_net_user_password(const net6::packet& pack, user& from);
 
 	/** Forwarding commands.
 	 */
