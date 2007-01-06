@@ -8,11 +8,14 @@ Critical:
 Major:
 
 Normal:
-  * Provide some means of authentication (#21)
   * Hide equivalent insert / change calls (#28)
   * Implement records to (un)indent lines of text (#30)
   * Undo/Redo (#39)
   * Exchange version information (#42)
+  * Authentication: Basic user authentication for reconnects (#55)
+  * Authentication: Simple global password (#56)
+  * Authentication: Database-based authentication using user/password (#57)
+  * Authentication: Access control lists (#58)
 
 Minor:
 
@@ -22,22 +25,6 @@ Enhancement:
   * Session serialisation (#20)
   * Implement server-side commands for remote actions (#29)
 
-
-21: Provide some means of authentication
-----------------------------------------
-''libobby'' should provide some means of authentication. There should be 
-several possibilities of authentication schemes (maybe this ticket should 
-be splitted when they are getting implemented one-by-one):
-
- * If a user logs in the first time since the host restarted a password 
-specified by the user will be set on the server with which it could 
-authenticate itself after a connection loss.
- * A simple global password is need to login into a server, known to all 
-users of it.
- * The server checks a user/password combination against a user database, 
-useful for dedicated private ''obby'' servers.
- * Single documents could be get some kind of password or access control 
-list protection, but #10 has to be implemented first.
 
 28: Hide equivalent insert / change calls
 -----------------------------------------
@@ -64,6 +51,31 @@ We need a proper undo/redo handling in libobby.
 The client should send it's version of libobby when sending the login 
 packet. The server may compare the versions and detect protocol 
 incompability and drop a corresponding error message.
+
+55: Authentication: Basic user authentication for reconnects
+------------------------------------------------------------
+''libobby'' should provide the following mean of authentication:
+ * If a user logs in the first time since the host restarted a password 
+specified by the user will be set on the server with which it could 
+authenticate itself after a connection loss.
+
+56: Authentication: Simple global password
+------------------------------------------
+''libobby'' should provide the following mean of authentication:
+ * A simple global password is need to login into a server, known to all 
+users of it.
+
+57: Authentication: Database-based authentication using user/password
+---------------------------------------------------------------------
+''libobby'' should provide the following mean of authentication:
+ * The server checks a user/password combination against a user database, 
+useful for dedicated private ''obby'' servers.
+
+58: Authentication: Access control lists
+----------------------------------------
+''libobby'' should provide the following mean of authentication:
+ * Single documents should be get some kind of password or access control 
+list protection.
 
 20: Session serialisation
 -------------------------
