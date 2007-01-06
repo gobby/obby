@@ -34,3 +34,5 @@ if WITH_HOWL
 pkginclude_HEADERS += zeroconf.hpp
 endif
 
+noinst_HEADERS = gettext.hpp
+

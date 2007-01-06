@@ -4,7 +4,7 @@
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
  * License as published by the Free Software Foundation; either
- i* version 2 of the License, or (at your option) any later version.
+ * version 2 of the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,19 +16,27 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "error.hpp"
-#include "gettext.hpp"
+/* This file must not be used in other header files. */
 
-// Login error codes
-const obby::login::error obby::login::ERROR_COLOR_IN_USE =
-	net6::login::ERROR_MAX + 1;
-const obby::login::error obby::login::ERROR_MAX =
-	net6::login::ERROR_MAX + 1;
+#include "config.hpp"
 
-std::string obby::login::errstring(error err)
+const char* obby_version()
 {
-	if(err == ERROR_COLOR_IN_USE)
-		return _("Colour is already in use");
-	else
-		return net6::login::errstring(err);
+	return PACKAGE_VERSION;
 }
+
+#ifdef ENABLE_NLS
+#include <libintl.h>
+
+template<typename char_type>
+inline const char_type* _(const char_type* text) {
+	return dgettext(PACKAGE, text);
+}
+#else
+/* This functions is a no-op for systems without a useable GNU gettext. */
+template<typename char_type>
+inline const char_type* _(const char_type* text) {
+	return text;
+}
+#endif
+
