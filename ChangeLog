@@ -1,5 +1,254 @@
-Sat Jun  4 17:01:55 UTC 2005  Armin Burgmeier <armin@0x539.de>
-  * Undone a patch which depends on net6-1.1.0
+Fri Jul 29 19:40:28 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Updated net6 dependency
+
+Fri Jul 29 19:16:56 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Cleanup commit
+
+Thu Jul 28 14:49:00 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Fixed typo in Makefile.am
+
+Thu Jul 28 14:09:14 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Do not subscribe document owners twice in server_document_info
+
+Thu Jul 28 11:03:06 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Removed obsolete help notice
+
+Wed Jul 27 17:40:11 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added French translation by Peer Janssen
+
+Wed Jul 27 16:43:27 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * use dynamic_cast to upcast net6::server to net6::host
+
+Tue Jul 26 21:06:27 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Do not change the colour when check_colour failed
+
+Tue Jul 26 15:11:18 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Derived obby::user from net6::non_copyable
+
+Mon Jul 25 07:40:17 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Format string fixes
+
+Mon Jul 25 03:00:02 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Sun Jul 24 22:48:15 UTC 2005  Philipp Kern <phil@0x539.de>
+  * This release is API- and ABI-incompatible to the previous ones
+
+Sun Jul 24 22:48:01 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Depend on net6's 1.1.x API
+
+Sun Jul 24 22:00:31 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Do not send created documents back to owner
+
+Sun Jul 24 17:31:12 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Moved gettext initialisation around
+
+Sun Jul 24 14:45:31 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added missing gettext initialisation [fixes #40]
+
+Sun Jul 24 08:53:48 UTC 2005  Philipp Kern <phil@0x539.de>
+  * The host now checks its own colour for correctness
+
+Sat Jul 23 22:58:34 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added some release notes directly to the sources
+
+Sat Jul 23 22:38:43 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added unpublish'ing facility
+
+Sat Jul 23 16:16:04 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Fixes to the colour change code
+
+Sat Jul 23 15:52:07 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Allow user colour changes
+
+Thu Jul 21 16:55:32 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Changes by libtool
+
+Thu Jul 21 15:23:53 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Using new default_accumulator for the password callbacks
+
+Thu Jul 21 15:15:34 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Some test cleanup
+
+Thu Jul 21 15:07:01 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Iterate backwards in the RSA code
+
+Thu Jul 21 03:00:02 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Wed Jul 20 19:55:34 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Use the right generated key as the public one
+
+Wed Jul 20 19:20:38 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed denial of subscription if document owner left the session
+
+Wed Jul 20 17:09:58 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Corrected typo in src/error.cpp
+
+Wed Jul 20 16:12:37 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Use correct parameter indizes in welcome packet.
+
+Wed Jul 20 16:11:56 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Virtualised network handling methods
+
+Wed Jul 20 11:30:58 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Check for protocol compatibility [fixes #42]
+
+Tue Jul 19 21:12:47 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Some fixes to the key generator and the encryption module
+
+Tue Jul 19 19:21:16 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Removed ; after namespace declaration
+
+Tue Jul 19 19:17:03 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Bugfix: Welcome packet was built but not sent
+
+Tue Jul 19 18:07:49 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Added sync_final singal to client buffer
+
+Mon Jul 18 19:45:33 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added gmpxx linking to configure.in
+
+Mon Jul 18 19:16:57 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Exception if login without having received welcome packet
+
+Mon Jul 18 19:16:48 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * obby_version was defined twice
+
+Mon Jul 18 19:03:27 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Key & token generation
+
+Mon Jul 18 18:16:16 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Implemented the key generator
+
+Mon Jul 18 18:07:29 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * SHA1 hash function implementation
+
+Mon Jul 18 16:41:27 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * rsa.cpp build fixes
+
+Mon Jul 18 15:35:57 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Unpublish Zeroconf entries before cancelling the session
+
+Mon Jul 18 15:34:48 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Integrated hashing and RSA encryption into the buffers
+
+Mon Jul 18 15:33:10 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added SHA1 class header, some RSA fixes
+
+Mon Jul 18 12:50:21 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Removed obsolete Makefile.am content
+
+Mon Jul 18 12:36:52 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Preliminary RSA implementation, key generation pending
+
+Mon Jul 18 12:33:26 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Ignore config.hpp.in
+
+Mon Jul 18 08:22:53 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Increased the maximum error count to avoid conflicts
+
+Sun Jul 17 23:53:45 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Translated two more strings
+
+Mon Jul 18 04:34:38 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Sun Jul 17 13:17:30 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Basic user authentication [fixes #55]
+
+Sun Jul 17 03:00:01 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Fri Jul 15 14:18:59 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Simple global password [fixes #56]
+
+Fri Jul 15 03:00:02 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Thu Jun 30 19:21:54 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added operator== and operator!= to obby::user
+
+Sat Jun 25 03:00:02 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Fri Jun 24 21:35:18 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Shuffle gettext Makefile to get built correctly
+
+Fri Jun 24 21:34:39 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added missing cassert include in src/user.cpp
+
+Fri Jun 24 08:36:34 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Bumped SONAME as obby 0.2.0 is ABI incompatible to 0.1.0
+
+Thu Jun 23 20:08:29 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Implemented Document Owners, changes according to net6's new type system [fixes #38]
+
+Wed Jun 15 07:06:23 UTC 2005  Benjamin Herr <ben@0x539.de>
+  * Fixed order of base constructor calls in some multi-inheriting classes
+
+Wed Jun 15 07:05:28 UTC 2005  Benjamin Herr <ben@0x539.de>
+  * Added return *this in random operators where appropriate
+
+Thu Jun 23 19:38:27 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added missing ABOUT-NLS
+
+Sun Jun 19 08:07:56 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Fixed German translation
+
+Sun Jun 19 08:02:32 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added German translation
+
+Sun Jun 19 03:00:01 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Sat Jun 18 11:08:42 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Implemented internationalisation [fixes #40]
+
+Sat Jun 18 06:09:03 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Updated NEWS with 0.2.0 information
+
+Thu Jun 16 20:42:10 UTC 2005  Philipp Kern <phil@0x539.de>
+  * obby depends on net6-1.1.0
+
+Thu Jun 16 20:35:29 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Removed autogen.sh, it is superseded by autoreconf
+
+Wed Jun 15 03:00:02 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Tue Jun 14 21:36:59 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Ignore the 0.0.0.0 Zeroconf entry for IPv6 addresses
+
+Tue Jun 14 17:41:01 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Introduced format_string [fixes #37]
+
+Tue Jun 14 03:00:01 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Mon Jun 13 20:13:24 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Synchronise documents on request [fixes #10]
+
+Wed Jun  8 03:00:01 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Tue Jun  7 21:23:21 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Introduces flags for obby::user, moved all user stuff to user_table [fixes #8, fixes #41]
+
+Tue Jun  7 03:00:02 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Mon Jun  6 19:10:21 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Do not build the tests by default
+
+Mon Jun  6 16:29:21 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Adjusted for error code transmission (#16)
+
+Mon Jun  6 03:00:02 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Sat Jun  4 21:37:01 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Updated ChangeLog for release
 
 Fri Jun  3 15:03:58 UTC 2005  Armin Burgmeier <armin@0x539.de>
   * Adjustment for a net6 API change
