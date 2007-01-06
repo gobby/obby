@@ -20,56 +20,52 @@
 #include "split_operation.hpp"
 #include "delete_operation.hpp"
 
-obby::delete_operation::delete_operation(position pos, const std::string& text)
- : operation(), m_pos(pos), m_text(text)
+obby::delete_operation::delete_operation(position pos, position len)
+ : operation(), m_pos(pos), m_len(len)
 {
 }
 
-obby::delete_operation::delete_operation(position pos, const std::string& text,
+obby::delete_operation::delete_operation(position pos, position len,
                                          const operation& original)
- : operation(original), m_pos(pos), m_text(text)
+ : operation(original), m_pos(pos), m_len(len)
 {
 }
 
-obby::delete_operation::delete_operation(position pos, const std::string& text,
+obby::delete_operation::delete_operation(position pos, position len,
                                          original_operation* original)
- : operation(original), m_pos(pos), m_text(text)
+ : operation(original), m_pos(pos), m_len(len)
 {
 }
 
 obby::delete_operation::delete_operation(const net6::packet& pack,
                                          unsigned int& index)
  : operation(),
-   m_pos(pack.get_param(index ++).as<int>() ),
-   m_text(pack.get_param(index ++).as<std::string>() )
-   // TODO: unreversible delete_operation with only len instead of m_text
+   m_pos(pack.get_param(index + 1).as<int>() ),
+   m_len(pack.get_param(index + 2).as<int>() )
 {
 }
 
 obby::operation* obby::delete_operation::clone() const
 {
-	return new delete_operation(m_pos, m_text, m_original);
+	return new delete_operation(m_pos, m_len, m_original);
 }
 
 void obby::delete_operation::apply(document& doc, const user* author) const
 {
-	if(doc.get_slice(m_pos, m_text.length()) != m_text)
-		throw std::logic_error("obby::delete_operation::apply");
-
-	doc.erase(m_pos, m_text.length(), author);
+	doc.erase(m_pos, m_len, author);
 }
 
 obby::operation*
 obby::delete_operation::transform(const operation& base_op) const
 {
-	return base_op.transform_delete(m_pos, m_text.length() );
+	return base_op.transform_delete(m_pos, m_len);
 }
 
 obby::operation*
 obby::delete_operation::transform_insert(position pos,
                                          const std::string& text) const
 {
-	if(m_pos + m_text.length() < pos)
+	if(m_pos + m_len < pos)
 	{
 		// Case 6
 		return clone();
@@ -79,7 +75,7 @@ obby::delete_operation::transform_insert(position pos,
 		// Case 7
 		return new delete_operation(
 			m_pos + text.length(),
-			m_text,
+			m_len,
 			*this
 		);
 	}
@@ -91,12 +87,12 @@ obby::delete_operation::transform_insert(position pos,
 		return new split_operation(
 			new delete_operation(
 				m_pos,
-				m_text.substr(0, pos - m_pos),
+				pos - m_pos,
 				*this
 			),
 			new delete_operation(
 				pos + text.length(),
-				m_text.substr(pos - m_pos),
+				m_len - (pos - m_pos),
 				*this
 			)
 			// TODO: What about split_operation's original
@@ -107,7 +103,7 @@ obby::delete_operation::transform_insert(position pos,
 obby::operation*
 obby::delete_operation::transform_delete(position pos, position len) const
 {
-	if(m_pos + m_text.length() < pos)
+	if(m_pos + m_len < pos)
 	{
 		// Case 9
 		return clone();
@@ -115,28 +111,28 @@ obby::delete_operation::transform_delete(position pos, position len) const
 	else if(m_pos >= pos + len)
 	{
 		// Case 10
-		return new delete_operation(m_pos - len, m_text, *this);
+		return new delete_operation(m_pos - len, m_len, *this);
 	}
-	else if(pos <= m_pos && pos + len >= m_pos + m_text.length() )
+	else if(pos <= m_pos && pos + len >= m_pos + m_len)
 	{
 		// Case 11
 		return new no_operation(*this);
 	}
-	else if(pos <= m_pos && pos + len < m_pos + m_text.length() )
+	else if(pos <= m_pos && pos + len < m_pos + m_len)
 	{
 		// Case 12
 		return new delete_operation(
 			pos,
-			m_text.substr(pos + len - m_pos),
+			m_len - (pos + len - m_pos),
 			*this
 		);
 	}
-	else if(pos > m_pos && pos + len >= m_pos + m_text.length() )
+	else if(pos > m_pos && pos + len >= m_pos + m_len)
 	{
 		// Case 13
 		return new delete_operation(
 			m_pos,
-			m_text.substr(0, pos - m_pos),
+			pos - m_pos,
 			*this
 		);
 	}
@@ -145,8 +141,7 @@ obby::delete_operation::transform_delete(position pos, position len) const
 		// Case 14
 		return new delete_operation(
 			m_pos,
-			m_text.substr(0, pos - m_pos) +
-			m_text.substr(pos + len - m_pos),
+			m_len - len,
 			*this
 		);
 	}
@@ -154,6 +149,6 @@ obby::delete_operation::transform_delete(position pos, position len) const
 
 void obby::delete_operation::append_packet(net6::packet& pack) const
 {
-	pack << "del" << m_pos << m_text;
+	pack << "del" << m_pos << m_len;
 }
 

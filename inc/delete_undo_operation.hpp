@@ -16,32 +16,30 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef _OBBY_DELETE_OPERATION_HPP_
-#define _OBBY_DELETE_OPERATION_HPP_
+#ifndef _OBBY_DELETE_UNDO_OPERATION_HPP_
+#define _OBBY_DELETE_UNDO_OPERATION_HPP_
 
 #include "operation.hpp"
+#include "line.hpp"
 
 namespace obby
 {
 
-/** delete_operation inserts an amount of text at a specified position in
- * the document.
+/** delete_undo_operation deletes an amount of text at a specified position in
+ * the document and remembers the string and the authors of the respective
+ * substrings.
  */
-class delete_operation : public operation
+class delete_undo_operation : public operation
 {
 public:
 	/** Standard constructor with no original operation assigned.
 	 */
-	delete_operation(position pos, position len);
+	delete_undo_operation(position pos, const line& text);
 
 	/** Constructor taking a given operation as the original one.
 	 */
-	delete_operation(position pos, position len,
-	                 const operation& original);
-
-	/** Reads a delete_operation from the given network packet.
-	 */
-	delete_operation(const net6::packet& pack, unsigned int& index);
+	delete_undo_operation(position pos, const line& text,
+	                      const operation& original);
 
 	/** Creates a copy of this operation.
 	 */
@@ -71,13 +69,13 @@ public:
 protected:
 	/** Constructor taking an original_operation struct.
 	 */
-	delete_operation(position pos, position len,
-	                 original_operation* original);
+	delete_undo_operation(position pos, const line& text,
+	                      original_operation* original);
 
 	position m_pos;
-	position m_len;
+	line m_text;
 };
 
 } // namespace obby
 
-#endif // _OBBY_DELETE_OPERATION_HPP_
+#endif // _OBBY_DELETE_UNDO_OPERATION_HPP_
