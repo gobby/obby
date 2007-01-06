@@ -8,6 +8,10 @@ Serious:
  * Test libobby under realtime conditions
 
 Important:
+ * Call insert/erase signals in *_nosync.
+ * Provide duplexsignal or somehting which may be called before and after a
+   certain operation took place (here: Before having inserted the text
+   and after).
 
 Normal:
  * Implement automatic service announcement and discovery
@@ -22,6 +26,7 @@ Normal:
 Minor:
  * Implement indent_record and unindent_record to (un)indent lines of text
  * Grep for TODOs in the Code :)
+ * document::get_title should return const std::string&?
 
 Wishlist:
  * Implement paintchat

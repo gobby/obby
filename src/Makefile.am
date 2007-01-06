@@ -16,6 +16,7 @@ libobby_la_CPPFLAGS = $(libobby_CFLAGS) -I../inc
 
 libobby_la_SOURCES = common.cpp
 libobby_la_SOURCES += position.cpp
+libobby_la_SOURCES += duplexsignal.cpp
 libobby_la_SOURCES += user.cpp
 libobby_la_SOURCES += record.cpp
 libobby_la_SOURCES += insert_record.cpp
