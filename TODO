@@ -13,6 +13,7 @@ Normal:
   * Implement server-side commands for remote actions (#29)
   * Implement records to (un)indent lines of text (#30)
   * Undo/Redo (#39)
+  * libobby localisation (#40)
 
 Minor:
 
@@ -22,6 +23,8 @@ Enhancement:
   * Flags for obby::user (#8)
   * Syncronise documents on request (#10)
   * Session serialisation (#20)
+  * Document owners (#38)
+  * Reintroduce user table (#41)
 
 
 21: Provide some means of authentication
@@ -67,6 +70,10 @@ The current undo/redo implementation is taken directly from GtkSourceView.
 This is not good because text that other people have written may be undone. 
 We need a proper undo/redo handling in libobby.
 
+40: libobby localisation
+------------------------
+libobby has one string to be localised (see src/error.cpp).
+
 8: Flags for obby::user
 -----------------------
 Extend obby::user with a 'flags' field. The idea behind is to introduce a 
@@ -109,4 +116,24 @@ implemented:
  * Load/save documents to/from file and/or memory (while preserving 
 history)
  * Load/save complete obby session
+
+38: Document owners
+-------------------
+Documents should store their author. This would allow two possibilites:
+
+ * The owner could give different people privilegies to access his 
+document, such as ''none'', ''read'', ''read/write''.
+ * The document itself is no longer identified by its ID but by its ID 
+'''and''' the ID of the document owner. This allows that a document appears 
+immediately on the client side without waiting for server acknowledegment 
+because the identifications for a document cannot conflict.
+
+41: Reintroduce user table
+--------------------------
+Remove all the user stuff from obby::buffer (which is quite much) and move 
+it to user_table to get a cleaner obby::buffer class. user_table should 
+provide the user_iterator that the obby::buffer class currently provides as 
+well as methods to find user by ids, names and flags.
+
+Depends on #8.
 
