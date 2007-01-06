@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <sigc++/bind.h>
 #include <curses.h>
+#include <time.h>
 
 // net6/socket.hpp overwrites ERR
 const int CURSES_ERR = ERR;
@@ -240,9 +241,14 @@ curses_editor::curses_editor(int argc, char* argv[])
  : m_port(argc > 3 ? strtol(argv[3], NULL, 10) : 6522), m_quit(true),
    m_synced(false), m_buffer(argv[2], m_port), m_screen(m_buffer)
 {
+	srand( time(NULL) );
+	unsigned int red = rand() % 255;
+	unsigned int green = rand() % 255;
+	unsigned int blue = rand() % 255;
+	
 	m_buffer.login_failed_event().connect(
 		sigc::mem_fun(*this, &curses_editor::on_login_failed) );
-	m_buffer.login(argv[1], 64, 0, 0);
+	m_buffer.login(argv[1], red, green, blue);
 
 	m_buffer.join_event().connect(
 		sigc::mem_fun(*this, &curses_editor::on_join) );
