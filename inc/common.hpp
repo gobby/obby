@@ -33,7 +33,7 @@ const char* obby_localedir();
 namespace obby
 {
 
-/** Initializes gettext for usage with libobby. The constructor of the main
+/** Initialises gettext for usage with libobby. The constructor of the main
  * libobby objects (basic_buffer and derivates) call this function.
  */
 void init_gettext(net6::gettext_package& package);

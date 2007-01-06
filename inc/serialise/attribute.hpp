@@ -22,6 +22,7 @@
 #include <string>
 #include <sstream>
 #include <net6/serialise.hpp>
+#include "../common.hpp"
 #include "../format_string.hpp"
 #include "error.hpp"
 #include "token.hpp"
@@ -121,9 +122,10 @@ data_type attribute::as(const ::serialise::context<data_type>& ctx) const
 	}
 	catch(::serialise::conversion_error& e)
 	{
-		// TODO: Localise this. This would depend on a call to _
-		// in a header file!
-		format_string str("Attribute '%0%' has unexpected type: %1%");
+		format_string str(
+			_("Attribute '%0%' has unexpected type: %1%")
+		);
+
 		str << m_name << e.what();
 		throw error(str.str(), m_line);
 	}
