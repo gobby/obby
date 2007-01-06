@@ -124,7 +124,8 @@ protected:
 	void on_part(net6::server::peer& peer);
 	bool on_auth(net6::server::peer& peer, const net6::packet& pack,
 	             std::string& reason);
-	void on_login(net6::server::peer& peer, const net6::packet& pack);
+	unsigned int on_login(net6::server::peer& peer,
+	                      const net6::packet& pack);
 	void on_extend(net6::server::peer& peer, net6::packet& pack);
 	void on_data(net6::server::peer& from, const net6::packet& pack);
 

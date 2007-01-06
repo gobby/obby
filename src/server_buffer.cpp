@@ -255,8 +255,8 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 	return true;
 }
 
-void obby::server_buffer::on_login(net6::server::peer& peer,
-                                   const net6::packet& pack)
+unsigned int obby::server_buffer::on_login(net6::server::peer& peer,
+                                           const net6::packet& pack)
 {
 	// Get colour from packet
 	int red = pack.get_param(1).as_int();
@@ -265,6 +265,7 @@ void obby::server_buffer::on_login(net6::server::peer& peer,
 
 	// Insert user into list
 	add_user(peer, red, green, blue);
+	return 0;
 }
 
 void obby::server_buffer::on_extend(net6::server::peer& peer,
