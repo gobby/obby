@@ -50,6 +50,11 @@ obby::server_buffer::~server_buffer()
 	}
 }
 
+const obby::server_user_table& obby::server_buffer::get_user_table() const
+{
+	return *static_cast<server_user_table*>(m_usertable);
+}
+
 void obby::server_buffer::select()
 {
 	m_server->select();

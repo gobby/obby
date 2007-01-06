@@ -64,6 +64,11 @@ obby::client_buffer::~client_buffer()
 	}
 }
 
+const obby::client_user_table& obby::client_buffer::get_user_table() const
+{
+	return *static_cast<client_user_table*>(m_usertable);
+}
+
 void obby::client_buffer::login(const std::string& name, int red, int green,
                                 int blue)
 {

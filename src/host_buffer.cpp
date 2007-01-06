@@ -60,6 +60,11 @@ obby::host_buffer::~host_buffer()
 	}
 }
 
+const obby::host_user_table& obby::host_buffer::get_user_table() const
+{
+	return *static_cast<host_user_table*>(m_usertable);
+}
+
 obby::user& obby::host_buffer::get_self()
 {
 	return *m_self;

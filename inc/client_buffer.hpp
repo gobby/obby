@@ -47,7 +47,11 @@ public:
 	 */
 	client_buffer(const std::string& hostname, unsigned int port);
 	virtual ~client_buffer();
-	
+
+	/** Returns the user table associated with the buffer.
+	 */
+	const client_user_table& get_user_table() const;
+
 	/** Sends a login request for this client.
 	 * @param name User name for this client.
 	 * @param red Red color component for the user color.

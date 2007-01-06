@@ -71,6 +71,11 @@ obby::buffer::~buffer()
 		delete *user_i;
 }
 
+const obby::user_table& obby::buffer::get_user_table() const
+{
+	return *m_usertable;
+}
+
 obby::document* obby::buffer::find_document(unsigned int id) const
 {
 	std::list<document*>::const_iterator iter;

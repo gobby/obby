@@ -43,6 +43,10 @@ public:
 	server_buffer(unsigned int port);
 	virtual ~server_buffer();
 
+	/** Returns the user table associated with the buffer.
+	 */
+	const server_user_table& get_user_table() const;
+
 	/** Waits indefinitely for incoming events.
 	 */
 	virtual void select();

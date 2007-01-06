@@ -74,6 +74,10 @@ public:
 	buffer();
 	virtual ~buffer();
 
+	/** Returns the user table associated with the buffer.
+	 */
+	const user_table& get_user_table() const;
+
 	/** Waits indefinitely for incoming events.
 	 */
 	virtual void select() = 0;

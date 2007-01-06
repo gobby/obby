@@ -40,6 +40,10 @@ public:
 	            int green, int blue);
 	virtual ~host_buffer();
 
+	/** Returns the user table associated with the buffer.
+	 */
+	const host_user_table& get_user_table() const;
+
 	/** Returns the local user.
 	 */
 	user& get_self();
