@@ -87,7 +87,8 @@ protected:
 	virtual document& add_document(unsigned int id);
 
 	void on_join(net6::server::peer& peer);
-	void on_login(net6::server::peer& peer, const net6::packet& pack);
+	void on_pre_login(net6::server::peer& peer, const net6::packet& pack);
+	void on_post_login(net6::server::peer& peer, const net6::packet& pack);
 	void on_part(net6::server::peer& peer);
 	void on_data(const net6::packet& pack, net6::server::peer& from);
 	bool on_auth(net6::server::peer& peer, const net6::packet& pack,
