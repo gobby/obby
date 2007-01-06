@@ -182,7 +182,7 @@ void screen::redraw()
 		if(new_text.length() > COLS)
 			new_text = new_text.substr(0, COLS);
 
-		printw(new_text.c_str() );
+		printw("%s", new_text.c_str() );
 	}
 
 	unsigned int cursor_x, cursor_y;
@@ -313,7 +313,7 @@ void curses_editor::dispatch_key(int c)
 		m_document->erase(first, last);
 		m_screen->on_erase(first, last);
 		break;
-	case 'q':
+	case KEY_F(10):
 		quit();
 		break;
 	}
