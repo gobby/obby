@@ -30,7 +30,7 @@ namespace obby
 
 /** Jupiter server implementation.
  */
-class jupiter_server : private net6::non_copyable
+class jupiter_server: private net6::non_copyable
 {
 public:
 	typedef sigc::signal<void, const record&, const user&, const user*>

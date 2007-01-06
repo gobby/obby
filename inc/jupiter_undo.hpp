@@ -57,9 +57,6 @@ public:
 	/** Returns an operation that undoes the last operation of this user.
 	 */
 	std::auto_ptr<operation> undo(const user* user);
-
-	// TODO: Redo!
-	// TODO: Signals
 protected:
 	typedef ring<operation*> operation_ring;
 	typedef std::map<const user*, operation_ring*> operation_map;

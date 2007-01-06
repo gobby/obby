@@ -23,13 +23,14 @@
 #include "operation.hpp"
 #include "record.hpp"
 #include "jupiter_algorithm.hpp"
+#include "jupiter_undo.hpp"
 
 namespace obby
 {
 
 /** Jupiter client implementation.
  */
-class jupiter_client : private net6::non_copyable
+class jupiter_client: private net6::non_copyable
 {
 public:
 	typedef sigc::signal<void, const record&, const user*>
@@ -39,6 +40,14 @@ public:
 	 * Local and remote changes are applied to this document.
 	 */
 	jupiter_client(document& doc);
+
+	/** Adds a new client to the jupiter algorithm.
+	 */
+	void client_add(const user& client);
+
+	/** Removes a client from the jupiter algorithm.
+	 */
+	void client_remove(const user& client);
 
 	/** Performs a local operation by the user <em>from</em>. local_event
 	 * will be emitted with a resulting record that may be transmitted
@@ -57,8 +66,9 @@ public:
 
 protected:
 	jupiter_algorithm m_algorithm;
-	document& m_document;
+	jupiter_undo m_undo;
 
+	document& m_document;
 	signal_local_type m_signal_local;
 };
 

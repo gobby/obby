@@ -368,7 +368,11 @@ void basic_client_document_info<selector_type>::
 	obby_sync_subscribe(const user& user)
 {
 	// Subscribe user to info
-	basic_document_info<selector_type>::user_subscribe(user);
+	// TODO: Why did we call the base method here?
+	// - armin, 10-31-2005
+	//basic_document_info<selector_type>::user_subscribe(user);
+
+	user_subscribe(user);
 }
 
 template<typename selector_type>
@@ -389,6 +393,11 @@ void basic_client_document_info<selector_type>::user_subscribe(const user& user)
 {
 	// Call base function
 	basic_document_info<selector_type>::user_subscribe(user);
+
+	// Add client to jupiter algo if we are subscribed
+	if(m_jupiter.get() != NULL)
+		m_jupiter->client_add(user);
+
 	if(&get_buffer().get_self() == &user)
 	{
 		// Note that the document must be there at this point because
@@ -407,7 +416,15 @@ void basic_client_document_info<selector_type>::user_subscribe(const user& user)
 			*basic_document_info<selector_type>::m_document
 		) );
 
-		// Connect signal handlers
+		// Add existing clients
+		for(typename basic_document_info<selector_type>::user_iterator
+			iter = basic_document_info<selector_type>::user_begin();
+		    iter != basic_document_info<selector_type>::user_end();
+		    ++ iter)
+		{
+			m_jupiter->client_add(*iter);
+		}
+
 		m_jupiter->local_event().connect(
 			sigc::mem_fun(
 				*this,
@@ -421,6 +438,10 @@ template<typename selector_type>
 void basic_client_document_info<selector_type>::
 	user_unsubscribe(const user& user)
 {
+	// Remove user from jupiter if we are subscribed
+	if(m_jupiter.get() != NULL)
+		m_jupiter->client_remove(user);
+
 	// Call base function
 	basic_document_info<selector_type>::user_unsubscribe(user);
 

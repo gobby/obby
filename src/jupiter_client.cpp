@@ -19,8 +19,18 @@
 #include "jupiter_client.hpp"
 
 obby::jupiter_client::jupiter_client(document& doc)
- : m_document(doc)
+ : m_undo(doc), m_document(doc)
 {
+}
+
+void obby::jupiter_client::client_add(const user& client)
+{
+	m_undo.client_add(client);
+}
+
+void obby::jupiter_client::client_remove(const user& client)
+{
+	m_undo.client_remove(client);
 }
 
 void obby::jupiter_client::local_op(const operation& op, const user* from)
