@@ -20,9 +20,12 @@
 #define _OBBY_SERIALISE_TOKEN_HPP_
 
 #include <string>
-#include <slist>
+#include <list>
 
-namespace obby::serialise
+namespace obby
+{
+
+namespace serialise
 {
 
 class token
@@ -57,7 +60,7 @@ private:
 class token_list
 {
 public:
-	typedef std::slist<token> list_type;
+	typedef std::list<token> list_type;
 	typedef list_type::const_iterator iterator;
 
 	token_list();
@@ -84,9 +87,10 @@ public:
 	) const;
 private:
 	list_type m_list;
-	iterator m_last;
 };
 
-} // namespace obby::serialise
+} // namespace serialise
+
+} // namespace obby
 
 #endif // _OBBY_SERIALISE_TOKEN_HPP_

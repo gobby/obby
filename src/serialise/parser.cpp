@@ -16,6 +16,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <fstream>
 #include "gettext.hpp"
 #include "format_string.hpp"
 #include "serialise/error.hpp"
@@ -25,7 +26,9 @@ obby::serialise::parser::parser()
 {
 }
 
-void obby::serialise::parser::deserialise(const std::string& file)
+void obby::serialise::parser::deserialise(
+	const std::string& file
+)
 {
 	std::ifstream in(file.c_str() );
 
@@ -42,7 +45,9 @@ void obby::serialise::parser::deserialise(const std::string& file)
 	deserialise(in);
 }
 
-void obby::serialise::parser::deserialise(std::ifstream& stream)
+void obby::serialise::parser::deserialise(
+	std::istream& stream
+)
 {
 	const unsigned int bufsize = 1024;
 	char readbuf[bufsize];
@@ -127,7 +132,9 @@ void obby::serialise::parser::deserialise(std::ifstream& stream)
 	}
 }
 
-void obby::serialise::parser::serialise(const std::string& file)
+void obby::serialise::parser::serialise(
+	const std::string& file
+) const
 {
 	std::ofstream out(file.c_str() );
 	if(!out)
@@ -142,7 +149,9 @@ void obby::serialise::parser::serialise(const std::string& file)
 	serialise(out);
 }
 
-void obby::serialise::parser::serialise(std::ofstream& stream)
+void obby::serialise::parser::serialise(
+	std::ostream& stream
+) const
 {
 	// Empty list
 	token_list list;
@@ -171,7 +180,9 @@ const std::string& obby::serialise::parser::get_type() const
 	return m_type;
 }
 
-void obby::serialise::parser::set_type(const std::string& type)
+void obby::serialise::parser::set_type(
+	const std::string& type
+)
 {
 	m_type = type;
 }

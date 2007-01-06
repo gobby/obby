@@ -21,7 +21,10 @@
 
 #include <stdexcept>
 
-namespace obby::serialise
+namespace obby
+{
+
+namespace serialise
 {
 
 /** Error with obby serialisation. Mostly, incorrect input causes such errors.
@@ -40,6 +43,8 @@ protected:
 	unsigned int m_line;
 };
 
-} // namespace obby::serialise
+} // namespace serialise
+
+} // namespace obby
 
 #endif // _OBBY_SERIALISE_ERROR_HPP_

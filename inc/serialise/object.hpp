@@ -16,42 +16,45 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef _OBBY_SERIALISE_PARSER_HPP_
-#define _OBBY_SERIALISE_PARSER_HPP_
+#ifndef _OBBY_SERIALISE_OBJECT_HPP_
+#define _OBBY_SERIALISE_OBJECT_HPP_
 
-#include <vector>
-#include <slist>
+#include <map>
+#include <list>
 #include "serialise/token.hpp"
 #include "serialise/attribute.hpp"
 
-namespace obby::serialise
+namespace obby
+{
+
+namespace serialise
 {
 
 class object
 {
 public:
 	typedef std::map<std::string, attribute> attribute_map;
-	class attribute_iterator : public attribute_map::iterator
+	class attribute_iterator : public attribute_map::const_iterator
 	{
 	public:
 		typedef attribute value_type;
-		typedef attribute_map::iterator base_iterator;
+		typedef attribute_map::const_iterator base_iterator;
 
 		attribute_iterator(
 			const base_iterator& base
 		);
 
-		value_type& operator*();
+		//value_type& operator*();
 		const value_type& operator*() const;
 
-		value_type* operator->();
+		//value_type* operator->();
 		const value_type* operator->() const;
 	};
 
-	typedef std::slist<object>::const_iterator child_iterator;
+	typedef std::list<object>::const_iterator child_iterator;
 
 	object(
-		object* parent = NULL
+		const object* parent = NULL
 	);
 
 	void serialise(
@@ -62,6 +65,8 @@ public:
 		const token_list& tokens,
 		token_list::iterator& iter
 	);
+
+	const object* get_parent() const;
 
 	object& add_child();
 
@@ -75,7 +80,7 @@ public:
 		const std::string& name
 	);
 
-	attribute* get_attriubte(
+	attribute* get_attribute(
 		const std::string& name
 	);
 
@@ -94,16 +99,15 @@ public:
 	unsigned int get_indentation() const;
 
 protected:
-	object* m_parent;
+	const object* m_parent;
 	std::string m_name;
 	attribute_map m_attributes;
-	std::slist<object> m_children;
+	std::list<object> m_children;
 	unsigned int m_line;
-
-private:
-	std::slist<object>::iterator m_last_child;
 };
 
-} // namespace obby::serialise
+} // namespace serialise
 
-#endif // _OBBY_SERIALISE_PARSER_HPP_
+} // namespace obby
+
+#endif // _OBBY_SERIALISE_OBJECT_HPP_

@@ -19,7 +19,15 @@
 #ifndef _OBBY_SERIALISE_PARSER_HPP_
 #define _OBBY_SERIALISE_PARSER_HPP_
 
-namespace obby::serialise
+#include <string>
+#include <iostream>
+#include <net6/non_copyable.hpp>
+#include "serialise/object.hpp"
+
+namespace obby
+{
+
+namespace serialise
 {
 
 class parser : private net6::non_copyable
@@ -32,7 +40,7 @@ public:
 	);
 
 	void deserialise(
-		std::ifstream& stream
+		std::istream& stream
 	);
 
 	void serialise(
@@ -40,10 +48,11 @@ public:
 	) const;
 
 	void serialise(
-		std::ofstream& stream
+		std::ostream& stream
 	) const;
 
 	const std::string& get_type() const;
+
 	void set_type(
 		const std::string& type
 	);
@@ -56,6 +65,8 @@ protected:
 	object m_object;
 };
 
-} // namespace obby::serialise
+} // namespace serialise
+
+} // namespace obby
 
 #endif // _OBBY_SERIALISE_PARSER_HPP_

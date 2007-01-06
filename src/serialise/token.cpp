@@ -49,7 +49,7 @@ namespace
 			}
 
 			src.replace(pos, 1, replace_with);
-			pos += replace_with;
+			pos += replace_with.length();
 		}
 	}
 
@@ -85,7 +85,7 @@ namespace
 				throw error(str.str(), src_line);
 			}
 
-			src.replace(pos, 2, replace_with);
+			src.replace(pos, 2, 1, replace_with);
 			++ pos;
 		}
 	}
@@ -209,7 +209,7 @@ namespace
 				{
 					// Parse it
 					++ iter;
-					tokenise_identation(
+					tokenise_indentation(
 						list, src, iter, line
 					);
 				}
@@ -296,14 +296,13 @@ unsigned int obby::serialise::token::get_line() const
 	return m_line;
 }
 
-obby::serialise::token_list::token_list() :
-	m_last(m_list.end() )
+obby::serialise::token_list::token_list()
 {
 }
 
 void obby::serialise::token_list::serialise(
 	std::string& string
-)
+) const
 {
 }
 
@@ -314,13 +313,13 @@ void obby::serialise::token_list::deserialise(
 	tokenise(*this, string);
 }
 
-obby::serialize::token_list::add(
+void obby::serialise::token_list::add(
 	token::type type,
 	const std::string& text,
 	unsigned int line
 )
 {
-	m_last = m_list.insert_after(m_last, token(type, text, line) );
+	m_list.push_back(token(type, text, line) );
 }
 
 obby::serialise::token_list::iterator obby::serialise::token_list::begin() const
@@ -337,10 +336,8 @@ void obby::serialise::token_list::next_token(
 	iterator& iter
 ) const
 {
-	unsigned int orig_line = iter.get_line();
-	++ iter;
-
-	if(iter == m_list.end() )
+	unsigned int orig_line = iter->get_line();
+	if(++ iter == m_list.end() )
 		throw error(_("Unexpected end of input"), orig_line);
 }
 

@@ -27,25 +27,25 @@ obby::serialise::object::attribute_iterator::attribute_iterator(
 	base_iterator(base)
 {
 }
-
+/*
 obby::serialise::object::attribute_iterator::value_type&
 obby::serialise::object::attribute_iterator::operator*()
 {
 	return base_iterator::operator->()->second;
 }
-
+*/
 const obby::serialise::object::attribute_iterator::value_type&
 obby::serialise::object::attribute_iterator::operator*() const
 {
 	return base_iterator::operator->()->second;
 }
-
+/*
 obby::serialise::object::attribute_iterator::value_type*
 obby::serialise::object::attribute_iterator::operator->()
 {
 	return &base_iterator::operator->()->second;
 }
-
+*/
 const obby::serialise::object::attribute_iterator::value_type*
 obby::serialise::object::attribute_iterator::operator->() const
 {
@@ -53,9 +53,9 @@ obby::serialise::object::attribute_iterator::operator->() const
 }
 
 obby::serialise::object::object(
-	object* parent
+	const object* parent
 ) :
-	m_parent(parent), m_name(), m_line(0), m_last_child(m_children.end() )
+	m_parent(parent), m_name(), m_line(0)
 {
 }
 
@@ -150,7 +150,7 @@ void obby::serialise::object::deserialise(
 
 	// An object _must_ follow even if it is not a child of us but one of
 	// our parent (or grandparent...).
-	if(iter != tokens.end() && tokens->type() != token::TYPE_INDENTATION)
+	if(iter != tokens.end() && iter->get_type() != token::TYPE_INDENTATION)
 	{
 		obby::format_string str(_(
 			"Expected child object instead of '%0%'"
@@ -160,10 +160,15 @@ void obby::serialise::object::deserialise(
 	}
 }
 
+const obby::serialise::object* obby::serialise::object::get_parent() const
+{
+	return m_parent;
+}
+
 obby::serialise::object& obby::serialise::object::add_child()
 {
-	m_last_child = m_children.insert_after(object(this) );
-	return *m_last_child;
+	m_children.push_back(object(this) );
+	return m_children.back();
 }
 
 const std::string& obby::serialise::object::get_name() const
@@ -204,13 +209,13 @@ const obby::serialise::attribute* obby::serialise::object::get_attribute(
 }
 
 obby::serialise::object::attribute_iterator
-obby::serialise::object::attribute_begin() const
+obby::serialise::object::attributes_begin() const
 {
 	return attribute_iterator(m_attributes.begin() );
 }
 
 obby::serialise::object::attribute_iterator
-obby::serialise::object::attribute_end() const
+obby::serialise::object::attributes_end() const
 {
 	return attribute_iterator(m_attributes.end() );
 }

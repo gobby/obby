@@ -44,7 +44,7 @@ void obby::serialise::attribute::deserialise(
 )
 {
 	// Get attribute name from identifier's name
-	m_name = iter.get_text();
+	m_name = iter->get_text();
 	tokens.next_token(iter);
 
 	// Next token must be assignment

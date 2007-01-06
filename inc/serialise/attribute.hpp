@@ -22,15 +22,18 @@
 #include <string>
 #include "serialise/token.hpp"
 
-namespace obby::serialise
+namespace obby
+{
+
+namespace serialise
 {
 
 class attribute
 {
 public:
 	attribute(
-		const std::string& name,
-		const std::string& value = ""
+		const std::string& name = "Unnamed",
+		const std::string& value = "Unassigned"
 	);
 
 	void serialise(
@@ -46,14 +49,16 @@ public:
 		const std::string& value
 	);
 
-	const std::string& get_value();
+	const std::string& get_value() const;
 
-	const std::string& get_name();
+	const std::string& get_name() const;
 private:
 	std::string m_name;
 	std::string m_value;
 };
 
-} // namespace obby::serialise
+} // namespace serialise
+
+} // namespace obby
 
 #endif // _OBBY_SERIALISE_ATTRIBUTE_HPP_
