@@ -99,7 +99,6 @@ void obby::client_buffer::select(unsigned int timeout)
 void obby::client_buffer::send_message(const std::string& message)
 {
 	net6::packet pack("obby_message");
-	pack << m_self->get_id();
 	pack << message;
 	m_client->send(pack);
 }
