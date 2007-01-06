@@ -16,6 +16,8 @@ pkginclude_HEADERS += insert_operation.hpp
 pkginclude_HEADERS += delete_operation.hpp
 pkginclude_HEADERS += record.hpp
 pkginclude_HEADERS += jupiter_algorithm.hpp
+pkginclude_HEADERS += jupiter_client.hpp
+pkginclude_HEADERS += jupiter_server.hpp
 
 pkginclude_HEADERS += local_document.hpp
 pkginclude_HEADERS += client_document.hpp
