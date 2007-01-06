@@ -20,7 +20,10 @@
 #define _OBBY_CLIENT_DOCUMENT_INFO_HPP_
 
 #include <net6/client.hpp>
-#include "client_document.hpp"
+#include "format_string.hpp"
+#include "insert_operation.hpp"
+#include "delete_operation.hpp"
+#include "jupiter_client.hpp"
 #include "local_document_info.hpp"
 
 namespace obby
@@ -32,26 +35,25 @@ class basic_client_buffer;
 /** Information about a document that is provided without being subscribed to
  * a document.
  */
-
-class client_document_info : public local_document_info
+template<typename selector_type>
+class basic_client_document_info
+ : virtual public basic_local_document_info<selector_type>
 {
 public:
-	client_document_info(const basic_client_buffer<net6::selector>& buf, net6::client& client,
-	                     const user* owner, unsigned int id,
-	                     const std::string& title);
-	~client_document_info();
+	basic_client_document_info(
+		const basic_client_buffer<selector_type>& buffer,
+		const net6::basic_client<selector_type>& net,
+		const user* owner, unsigned int id,
+	        const std::string& title
+	);
 
-	/** Returns the buffer to which the document is assigned.
+	/** Inserts the given text at the given position into the document.
 	 */
-	const basic_client_buffer<net6::selector>& get_buffer() const;
+	virtual void insert(position pos, const std::string& text);
 
-	/** Returns the document for this info, if one is assigned.
+	/** Erases the given range from the document.
 	 */
-	client_document* get_document();
-
-	/** Returns the document for this info, if one is assigned.
-	 */
-	const client_document* get_document() const;
+	virtual void erase(position pos, position len);
 
 	/** Sends a rename request for the document.
 	 */
@@ -67,21 +69,21 @@ public:
 	 */
 	virtual void unsubscribe();
 
-	// TODO: Make the following functions friend to client buffer.
 	/** Called by the buffer if a network event occured that belongs to the
-	 * document. Parameter 0 has to be the document ID, parameter 1 a kind
-	 * of sub-command, what to do. The real packet command is
-	 * "obby_document" to notify that the packet belongs to a document.
+	 * document.
 	 */
-	virtual void obby_data(const net6::packet& pack);
+	virtual void on_net_packet(const document_packet& pack);
 
-	/** Called by the client buffer when user synchronisation begings.
+	/** Called by the client buffer when user synchronisation begins.
 	 * This clears all the correcntly subscribed users.
+	 * TODO: Make another function here. Maybe something like
+	 * on_net_sync(const net6::packet& pack)
 	 */
 	virtual void obby_sync_init();
 
 	/** Adds a user to the list of subscribed users. This function is
 	 * called by the buffer while synchronising the document list.
+	 * TODO: Merge with TODO item above
 	 */
 	virtual void obby_sync_subscribe(const user& user);
 
@@ -89,46 +91,390 @@ public:
 	 * document content is assigned immediately in this case because
 	 * the clients does not wait for server acknowledgement to show the
 	 * new document without delay.
+	 * TODO: Make something other with this...
 	 */
-	virtual void obby_local_init(const std::string& initial_content,
-	                             bool open_as_edited = false);
+	virtual void obby_local_init(const std::string& initial_content);
 
 protected:
-	/** Assigns a document to the document info.
+	/** Subscribes a user to this document.
 	 */
-	virtual void assign_document();
+	virtual void user_subscribe(const user& user);
+
+	/** Unsubscribes a user from this document.
+	 */
+	virtual void user_unsubscribe(const user& user);
 
 	/** Executes a packet.
 	 */
-	bool execute_packet(const net6::packet& pack);
+	bool execute_packet(const document_packet& pack);
 
 	/** Rename command.
 	 */
-	void on_net_rename(const net6::packet& pack);
+	virtual void on_net_rename(const document_packet& pack);
 
 	/** Record command: Change in the document.
 	 */
-	void on_net_record(const net6::packet& pack);
+	virtual void on_net_record(const document_packet& pack);
 
 	/** Synchronisation initialisation command.
 	 */
-	void on_net_sync_init(const net6::packet& pack);
+	virtual void on_net_sync_init(const document_packet& pack);
 
 	/** Synchronisation of a line of the document.
 	 */
-	void on_net_sync_line(const net6::packet& pack);
+	virtual void on_net_sync_line(const document_packet& pack);
 
 	/** User subscription command.
 	 */
-	void on_net_subscribe(const net6::packet& pack);
+	virtual void on_net_subscribe(const document_packet& pack);
 
 	/** User unsubscription.
 	 */
-	void on_net_unsubscribe(const net6::packet& pack);
+	virtual void on_net_unsubscribe(const document_packet& pack);
 
-	net6::client& m_client;
+	/** Callback from jupiter implementation with record of local operation
+	 * that has to be sent to the server.
+	 */
+	virtual void on_jupiter_local(const record& rec);
+
+	/** Returns the buffer to which this document_info belongs.
+	 */
+	const basic_client_buffer<selector_type>& get_buffer() const;
+
+	/** Returns the underlatying net6 obejct.
+	 */
+	const net6::basic_client<selector_type>& get_net6() const;
+
+	std::auto_ptr<jupiter_client> m_jupiter;
 };
 
+typedef basic_client_document_info<net6::selector> client_document_info;
+
+template<typename selector_type>
+basic_client_document_info<selector_type>::basic_client_document_info(
+	const basic_client_buffer<selector_type>& buffer,
+	const net6::basic_client<selector_type>& net,
+	const user* owner, unsigned int id,
+	const std::string& title
+) : basic_local_document_info<selector_type>(buffer, net, owner, id, title)
+{
 }
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::
+	insert(position pos, const std::string& text)
+{
+	if(m_jupiter.get() == NULL)
+	{
+		throw std::logic_error(
+			"obby::basic_client_document_info::insert"
+		);
+	}
+
+	insert_operation op(pos, text);
+	m_jupiter->local_op(op, &get_buffer().get_self() );
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::
+	erase(position pos, position len)
+{
+	if(m_jupiter.get() == NULL)
+	{
+		throw std::logic_error(
+			"obby::basic_client_document_info::erase"
+		);
+	}
+
+	// TODO: unreversible delete_operation only with len
+	delete_operation op(
+		pos,
+		basic_document_info<selector_type>::get_document().get_slice(
+			pos,
+			len
+		)
+	);
+
+	m_jupiter->local_op(op, &get_buffer().get_self() );
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::
+	rename(const std::string& new_title)
+{
+	document_packet pack(*this, "rename");
+	pack << new_title;
+	get_net6().send(pack);
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::
+	subscribe()
+{
+	// Already subscribed
+	if(m_jupiter.get() != NULL)
+	{
+		throw std::logic_error(
+			"obby::basic_client_document_info::subscribe"
+		);
+	}
+
+	// Send request
+	document_packet pack(*this, "subscribe");
+	get_net6().send(pack);
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::
+	unsubscribe()
+{
+	// Not subscribed?
+	if(m_jupiter.get() == NULL)
+	{
+		throw std::logic_error(
+			"obby::basic_client_document_info::unsubscribe"
+		);
+	}
+
+	// Send request
+	document_packet pack(*this, "unsubscribe");
+	get_net6().send(pack);
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::
+	on_net_packet(const document_packet& pack)
+{
+	if(!execute_packet(pack) )
+	{
+		throw net6::basic_parameter::bad_value(
+			"Unexpected command: " + pack.get_command()
+		);
+	}
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::obby_sync_init()
+{
+	// Document gets synced now, all subscribed users will be transmitted.
+	basic_document_info<selector_type>::m_users.clear();
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::
+	obby_sync_subscribe(const user& user)
+{
+	// Subscribe user to info
+	basic_document_info<selector_type>::user_subscribe(user);
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::
+	obby_local_init(const std::string& content)
+{
+	// Assign local document before subscribing
+	basic_document_info<selector_type>::assign_document();
+	// Subscribe local user
+	user_subscribe(get_buffer().get_self() );
+	// Add initial content
+	basic_document_info<selector_type>::m_document->insert(content, NULL);
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::user_subscribe(const user& user)
+{
+	// Call base function
+	basic_document_info<selector_type>::user_subscribe(user);
+	if(&get_buffer().get_self() == &user)
+	{
+		// Note that the document must be there at this point because
+		// the whole document synchronisation process should have been
+		// performed before we subscribed to a document.
+		if(basic_document_info<selector_type>::m_document.get() == NULL)
+		{
+			throw std::logic_error(
+				"obby::basic_client_document_info::"
+				"user_subscribe"
+			);
+		}
+
+		// Create jupiter algorithm to merge changes
+		m_jupiter.reset(
+			new jupiter_client(
+				basic_document_info<selector_type>::m_document
+			)
+		);
+
+		// Connect signal handlers
+		m_jupiter->local_event().connect(
+			sigc::mem_fun(
+				*this,
+				&basic_client_document_info::on_jupiter_local
+			)
+		);
+	}
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::
+	user_unsubscribe(const user& user)
+{
+	// Call base function
+	basic_document_info<selector_type>::user_unsubscribe(user);
+
+	if(&get_buffer().get_self() == &user)
+	{
+		// Release document if the local user unsubscribed
+		basic_document_info<selector_type>::release_document();
+		// Release jupiter algorithm
+		m_jupiter.reset(NULL);
+	}
+}
+
+template<typename selector_type>
+bool basic_client_document_info<selector_type>::
+	execute_packet(const document_packet& pack)
+{
+	// TODO: std::map<> with command to function
+	if(pack.get_command() == "rename")
+		{ on_net_rename(pack); return true; }
+
+	if(pack.get_command() == "record")
+		{ on_net_record(pack); return true; }
+
+	if(pack.get_command() == "sync_init")
+		{ on_net_sync_init(pack); return true; }
+
+	if(pack.get_command() == "sync_line")
+		{ on_net_sync_line(pack); return true; }
+
+	if(pack.get_command() == "subscribe")
+		{ on_net_subscribe(pack); return true; }
+
+	if(pack.get_command() == "unsubscribe")
+		{ on_net_unsubscribe(pack); return true; }
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::
+	on_net_rename(const document_packet& pack)
+{
+	// First parameter is the user who changed the title
+	const std::string& new_title =
+		pack.get_param(1).net6::basic_parameter::as<std::string>();
+
+	// Rename document
+	basic_document_info<selector_type>::document_rename(new_title);
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::
+	on_net_record(const document_packet& pack)
+{
+	// Not subscribed?
+	if(basic_document_info<selector_type>::m_document.get() == NULL)
+	{
+		format_string str(
+			"Got record without being subscribed to document "
+			"%0%/%1%"
+		);
+
+		str << basic_document_info<selector_type>::get_owner_id()
+		    << basic_document_info<selector_type>::get_id();
+
+		throw net6::basic_parameter::bad_value(str.str() );
+	}
+
+	// TODO: Extract record, apply remote operation
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::
+	on_net_sync_init(const document_packet& pack)
+{
+	// Subscribed?
+	if(basic_document_info<selector_type>::m_document.get() != NULL)
+	{
+		format_string str(
+			"Got sync_init for subscribed document %0%/%1%"
+		);
+
+		str << basic_document_info<selector_type>::get_owner_id()
+		    << basic_document_info<selector_type>::get_id();
+
+		throw net6::basic_parameter::bad_value(str.str() );
+	}
+
+	// Assign empty document
+	basic_document_info<selector_type>::assign_document();
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::
+	on_net_sync_line(const document_packet& pack)
+{
+	// No document assigned or subscribed?
+	if(basic_document_info<selector_type>::m_document.get() == NULL)
+	{
+		format_string str(
+			"Got sync_line without sync_init for document %0%/%1%"
+		);
+
+		str << basic_document_info<selector_type>::get_owner_id()
+		    << basic_document_info<selector_type>::get_id();
+
+		throw net6::basic_parameter::bad_value(str.str() );
+	}
+
+	// TODO: Clear all lines in document if this was the first line
+	// TODO: Create line from packet, add to document
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::
+	on_net_subscribe(const document_packet& pack)
+{
+	const user* new_user =
+		pack.get_param(0).net6::basic_parameter::as<user*>();
+
+	basic_document_info<selector_type>::user_subscribe(*new_user);
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::
+	on_net_unsubscribe(const document_packet& pack)
+{
+	const user* old_user =
+		pack.get_param(0).net6::basic_parameter::as<user*>();
+
+	basic_document_info<selector_type>::user_unsubscribe(*old_user);
+}
+
+template<typename selector_type>
+void basic_client_document_info<selector_type>::
+	on_jupiter_local(const record& rec)
+{
+	// TODO: Send record to server
+}
+
+template<typename selector_type>
+const basic_client_buffer<selector_type>&
+basic_client_document_info<selector_type>::get_buffer() const
+{
+	return dynamic_cast<const basic_client_buffer<selector_type>&>(
+		basic_document_info<selector_type>::m_buffer
+	);
+}
+
+template<typename selector_type>
+const net6::basic_client<selector_type>&
+basic_client_document_info<selector_type>::get_net6() const
+{
+	return dynamic_cast<const net6::basic_client<selector_type>&>(
+		basic_document_info<selector_type>::m_net
+	);
+}
+
+} // namespace obby
 
 #endif // _OBBY_CLIENT_DOCUMENT_INFO_HPP_

@@ -17,6 +17,8 @@
  */
 
 #include "document_info.hpp"
+
+#if 0
 #include "buffer.hpp"
 
 obby::document_info::document_info(const user* owner, unsigned int id,
@@ -127,4 +129,4 @@ void obby::document_info::rename_impl(const std::string& title)
 	// Emit corresponding signal
 	m_signal_rename.emit(title);
 }
-
+#endif

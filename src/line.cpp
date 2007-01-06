@@ -17,7 +17,6 @@
  */
 
 #include <cassert>
-#include "buffer.hpp"
 #include "line.hpp"
 
 const obby::line::size_type obby::line::npos = obby::line::string_type::npos;

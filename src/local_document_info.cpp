@@ -17,32 +17,12 @@
  */
 
 #include "local_document_info.hpp"
-#include "local_buffer.hpp"
 
-obby::local_document_info::local_document_info(const basic_local_buffer<net6::selector>& buf,
-                                               const user* owner,
+#if 0
+obby::local_document_info::local_document_info(const user* owner,
                                                unsigned int id,
                                                const std::string& title)
- : document_info(buf, owner, id, title)
+ : document_info(owner, id, title)
 {
 }
-
-obby::local_document_info::~local_document_info()
-{
-}
-
-const obby::basic_local_buffer<net6::selector>& obby::local_document_info::get_buffer() const
-{
-	return dynamic_cast<const obby::basic_local_buffer<net6::selector>&>(m_buffer);
-}
-
-obby::local_document* obby::local_document_info::get_document()
-{
-	return dynamic_cast<obby::local_document*>(m_document);
-}
-
-const obby::local_document* obby::local_document_info::get_document() const
-{
-	return dynamic_cast<const obby::local_document*>(m_document);
-}
-
+#endif

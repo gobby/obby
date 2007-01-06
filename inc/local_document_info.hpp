@@ -19,7 +19,7 @@
 #ifndef _OBBY_LOCAL_DOCUMENT_INFO_HPP_
 #define _OBBY_LOCAL_DOCUMENT_INFO_HPP_
 
-#include "local_document.hpp"
+#include <net6/local.hpp>
 #include "document_info.hpp"
 
 namespace obby
@@ -32,24 +32,17 @@ class basic_local_buffer;
  * a document.
  */
 
-class local_document_info : virtual public document_info
+template<typename selector_type>
+class basic_local_document_info
+ : virtual public basic_document_info<selector_type>
 {
 public:
-	local_document_info(const basic_local_buffer<net6::selector>& buf, const user* owner,
-	                    unsigned int id, const std::string& title);
-	~local_document_info();
-
-	/** Returns the buffer associated with the document.
-	 */
-	const basic_local_buffer<net6::selector>& get_buffer() const;
-
-	/** Returns the document for this info, if one is assigned.
-	 */
-	local_document* get_document();
-
-	/** Returns the document for this info, if one is assigned.
-	 */
-	const local_document* get_document() const;
+	basic_local_document_info(
+		const basic_local_buffer<selector_type>& buffer,
+		const net6::basic_local<selector_type>& net,
+		const user* owner, unsigned int id,
+		const std::string& title
+	);
 
 	/** Sends a subscribe request for the local user. If the subscribe
 	 * request succeeded, the subscribe_event will be emitted.
@@ -60,13 +53,46 @@ public:
 	 * will be emitted if the request has been accepted.
 	 */
 	virtual void unsubscribe() = 0;
-
 protected:
-	/** Assigns a document to the document info.
+	/** Returns the buffer this document belongs to.
 	 */
-	virtual void assign_document() = 0;
+	const basic_local_buffer<selector_type>& get_buffer() const;
+
+	/** Returns the underlaying net6 object.
+	 */
+	const net6::basic_local<selector_type>& get_net6() const;
 };
 
+typedef basic_local_document_info<net6::selector> local_document_info;
+
+template<typename selector_type>
+basic_local_document_info<selector_type>::basic_local_document_info(
+	const basic_local_buffer<selector_type>& buffer,
+	const net6::basic_local<selector_type>& net,
+	const user* owner, unsigned int id,
+	const std::string& title
+) : basic_document_info<selector_type>(buffer, net, owner, id, title)
+{
 }
+
+template<typename selector_type>
+const basic_local_buffer<selector_type>&
+basic_local_document_info<selector_type>::get_buffer() const
+{
+	return dynamic_cast<const basic_local_buffer<selector_type>&>(
+		basic_document_info<selector_type>::m_buffer
+	);
+}
+
+template<typename selector_type>
+const net6::basic_local<selector_type>&
+basic_local_document_info<selector_type>::get_net6() const
+{
+	return dynamic_cast<const net6::basic_local<selector_type>&>(
+		basic_document_info<selector_type>::m_net
+	);
+}
+
+} // namespace obby
 
 #endif // _OBBY_DOCUMENT_INFO_HPP_

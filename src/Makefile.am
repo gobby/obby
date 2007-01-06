@@ -40,10 +40,10 @@ libobby_la_SOURCES += jupiter_algorithm.cpp
 libobby_la_SOURCES += jupiter_client.cpp
 libobby_la_SOURCES += jupiter_server.cpp
 libobby_la_SOURCES += document_packet.cpp
-
 libobby_la_SOURCES += document_info.cpp
 libobby_la_SOURCES += local_document_info.cpp
 libobby_la_SOURCES += client_document_info.cpp
+
 libobby_la_SOURCES += server_document_info.cpp
 libobby_la_SOURCES += host_document_info.cpp
 libobby_la_SOURCES += buffer.cpp

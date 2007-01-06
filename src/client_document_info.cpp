@@ -16,10 +16,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <iostream>
 #include "client_document_info.hpp"
-#include "client_buffer.hpp"
 
+#if 0
 obby::client_document_info::client_document_info(const basic_client_buffer<net6::selector>& buf,
                                                  net6::client& client,
                                                  const user* owner,
@@ -311,3 +310,4 @@ void obby::client_document_info::assign_document()
 {
 	m_document = new client_document(*this, m_client);
 }
+#endif

@@ -291,14 +291,10 @@ document_info* basic_buffer<selector_type>::document_find(unsigned int owner_id,
 	{
 		// Check document ID
 		if(iter->get_id() != id) continue;
-		// Get document's owner
-		const user* owner = iter->get_owner();
-		// No owner requested?
-		if(owner == NULL && id == 0) return &(*iter);
-		// Document has no owner, but owner was requested
-		if(owner == NULL) continue;
-		// Compare owner ID
-		if(owner->get_id() == owner_id) return &(*iter);
+		// Check owner ID
+		if(iter->get_owner_id() != owner_id) continue;
+		// Found requested document
+		return &(*iter);
 	}
 
 	return NULL;

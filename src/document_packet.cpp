@@ -17,14 +17,6 @@
  */
 
 #include "document_packet.hpp"
-#include "document_info.hpp"
-
-obby::document_packet::document_packet(const document_info& info,
-                                       const std::string& command)
- : net6::packet("obby_document")
-{
-	*this << info << command;
-}
 
 obby::document_packet::document_packet(const net6::packet& base)
  : net6::packet(base)

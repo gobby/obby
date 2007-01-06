@@ -28,8 +28,6 @@
 namespace obby
 {
 
-class document_info;
-
 /** User in a obby session.
  */
 	
