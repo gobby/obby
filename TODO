@@ -8,16 +8,15 @@ Serious:
  * Test libobby under realtime conditions
 
 Important:
- * Implement automatic service announcement and discovery.
- * Implement chat 
 
 Normal:
+ * Implement automatic service announcement and discovery
  * Sync-On-Request
- * Document names
- * UTF-8 string handling 4 great unicode (waiting for Loriel::ustring :) ).
+ * UTF-8 string handling
 
 Minor:
  * Implement indent_record and unindent_record to (un)indent lines of text
 
 Wishlist:
+ * Implement paintchat
 
