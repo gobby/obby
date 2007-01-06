@@ -4,13 +4,13 @@
 
 using namespace std;
 using namespace obby;
+using namespace net6;
 // ^ - kranker Troll :(
 
-void on_discover(const string& name, const string& ip,
-	unsigned int port)
+void on_discover(const string& name, const ipv4_address& addr)
 {
-	cout << std::time(0) << " join: \"" << name << "\" (" << ip
-	       	<< ":" << port << ")" << endl;
+	cout << std::time(0) << " join: \"" << name << "\" ("
+		<< addr.get_name() << ":" << addr.get_port() << ")" << endl;
 }
 
 void on_leave(const string& name)

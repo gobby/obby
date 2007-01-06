@@ -23,6 +23,7 @@
 
 #include <sigc++/signal.h>
 #include <howl.h>
+#include <net6/address.hpp>
 
 namespace obby
 {
@@ -30,8 +31,8 @@ namespace obby
 class rendezvous
 {
 public:
-	typedef sigc::signal<void, const std::string&, const std::string&,
-		unsigned int> signal_discover_type;
+	typedef sigc::signal<void, const std::string&, 
+		const net6::ipv4_address&> signal_discover_type;
 	typedef sigc::signal<void, const std::string&> signal_leave_type;
 	
 	rendezvous();

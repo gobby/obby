@@ -150,10 +150,9 @@ sw_result obby::rendezvous::handle_resolve_reply(sw_discovery discovery,
 	sw_port port, sw_octets text_record, sw_ulong text_record_len,
 	sw_opaque extra)
 {
-	char ipv4_address[16];
-	sw_ipv4_address_name(address, ipv4_address, 16);
 	static_cast<obby::rendezvous*>(extra)->discover_event().emit(
-		name, ipv4_address, port);
+		name, net6::ipv4_address::create_from_address(
+		sw_ipv4_address_saddr(address), port));
 	return SW_OKAY;
 }
 
