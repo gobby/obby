@@ -56,6 +56,14 @@ public:
 	 */
 	virtual void create_document(const std::string& title);
 
+	/** Creates a new document with predefined content.
+	 * signal_insert_document will be emitted and may be used to access
+	 * the resulting obby::document. Additional signals will be emitted
+	 * for the synced content.
+	 */
+	virtual void create_document(const std::string& title,
+	                             const std::string& content);
+
 	/** Renames an existing document.
 	 */
 	virtual void rename_document(document& doc,

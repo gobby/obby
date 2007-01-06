@@ -57,9 +57,17 @@ public:
 	void login(const std::string& name, int red, int green, int blue);
 
 	/** Requests a new document at the server. signal_insert_document
-	 * will be emitted if the server authorized the creation process.
+	 * will be emitted if the server authorised the creation process.
 	 */
 	virtual void create_document(const std::string& title);
+
+	/** Requests a new document at the server and sync its initial
+	 * contents. signal_insert_document will be emitted if the server
+	 * authorised the creation process. Additionals signals will be
+	 * emitted for the synced content.
+	 */
+	virtual void create_document(const std::string& title,
+	                             const std::string& content);
 
 	/** Requests a new name for an existing document.
 	 */
