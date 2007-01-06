@@ -32,8 +32,3 @@ libobby FAQ
   reachable for the others is needed. This might require a port-forwarding
   on one side.
 
-4) Does Lobby use compression within the network protocol?
-
-  Yes. The compression method is negotiated on connect. First bzip2, then gzip
-  and at last no compression is tried.
-
