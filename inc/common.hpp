@@ -31,7 +31,8 @@ const char* obby_localedir();
 }
 
 /**
- * @brief Foo!
+ * @brief Main obby namespace that is used by almost every functionality that
+ * obby implements.
  */
 namespace obby
 {
