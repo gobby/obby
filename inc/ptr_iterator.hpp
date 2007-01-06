@@ -24,7 +24,6 @@ namespace obby
 
 /* An iterator type to iterate through a container containing pointers of the
  * given data type but retrieving references to them.
- * TODO: Provide ptr_iterator const and non-const.
  */
 template<typename type, typename container, typename base_iterator>
 class ptr_iterator : public base_iterator

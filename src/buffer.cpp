@@ -77,6 +77,16 @@ obby::buffer::document_iterator obby::buffer::document_end() const
 	return static_cast<document_iterator>(m_doclist.end() );
 }
 
+obby::buffer::user_iterator obby::buffer::user_begin() const
+{
+	return static_cast<user_iterator>(m_userlist.begin() );
+}
+
+obby::buffer::user_iterator obby::buffer::user_end() const
+{
+	return static_cast<user_iterator>(m_userlist.end() );
+}
+
 obby::buffer::signal_user_join_type obby::buffer::user_join_event() const
 {
 	return m_signal_user_join;

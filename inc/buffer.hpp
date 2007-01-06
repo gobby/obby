@@ -39,8 +39,21 @@ namespace obby
 class buffer : private net6::non_copyable
 {
 public:
-	typedef ptr_iterator<document, std::list<document*>, std::list<document*>::const_iterator> document_iterator;
+	// Document iterator typedef
+	typedef ptr_iterator<
+		document,
+		std::list<document*>,
+		std::list<document*>::const_iterator
+	> document_iterator;
 
+	// User iterator typedef 
+	typedef ptr_iterator<
+		user,
+		std::list<user*>,
+		std::list<user*>::const_iterator
+	> user_iterator;
+
+	// Signal types
 	typedef sigc::signal<void, user&> signal_user_join_type;
 	typedef sigc::signal<void, user&> signal_user_part_type;
 
@@ -106,6 +119,14 @@ public:
 	/** Returns the end of the document list.
 	 */
 	document_iterator document_end() const;
+
+	/** Returns the begin of the user list.
+	 */
+	user_iterator user_begin() const;
+
+	/** Returns the end of the user list.
+	 */
+	user_iterator user_end() const;
 
 	/** Sends a global chat message to all users.
 	 */
