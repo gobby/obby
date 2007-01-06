@@ -21,7 +21,6 @@ Trivial:
 Enhancement:
   * Session serialisation (#20)
   * Implement server-side commands for remote actions (#29)
-  * Document owners (#38)
 
 
 21: Provide some means of authentication
@@ -86,15 +85,4 @@ The possibility to send server-side commands would enable one to e.g. save
 the current document to a directory on the server or to perform other 
 actions. ''libobby'' should provide the framework for this and ''Gobby'' 
 some command interface to submit such commands to the server.
-
-38: Document owners
--------------------
-Documents should store their author. This would allow two possibilites:
-
- * The owner could give different people privilegies to access his 
-document, such as ''none'', ''read'', ''read/write''.
- * The document itself is no longer identified by its ID but by its ID 
-'''and''' the ID of the document owner. This allows that a document appears 
-immediately on the client side without waiting for server acknowledegment 
-because the identifications for a document cannot conflict.
 
