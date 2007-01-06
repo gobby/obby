@@ -112,12 +112,10 @@ void bufferd::on_part(obby::user& user)
 
 void bufferd::on_doc_insert(const obby::insert_record&, obby::document& doc)
 {
-	std::cout << "insert." << std::endl;
 }
 
 void bufferd::on_doc_remove(const obby::delete_record&, obby::document& doc)
 {
-	std::cout << "remove." << std::endl;
 }
 
 int main(int argc, char* argv[]) try
