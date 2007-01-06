@@ -7,13 +7,32 @@ msgid ""
 msgstr ""
 "Project-Id-Version: obby 0.2.0\n"
 "Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
-"POT-Creation-Date: 2005-11-14 11:02+0100\n"
+"POT-Creation-Date: 2005-11-24 23:40+0100\n"
 "PO-Revision-Date: 2005-07-27 19:36+0200\n"
 "Last-Translator: Peer Janssen <peer@baden-online.de>\n"
 "Language-Team: Peer Janssen <peer@baden-online.de>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: inc/server_buffer.hpp:274
+msgid "File is not an obby document"
+msgstr ""
+
+#: inc/server_buffer.hpp:281
+msgid "File is not a stored obby session"
+msgstr ""
+
+#: inc/server_buffer.hpp:322 src/user_table.cpp:75 src/chat.cpp:220
+#: src/line.cpp:94 src/document.cpp:57
+#, c-format
+msgid "Unexpected child node: '%0%'"
+msgstr ""
+
+#: inc/serialise/attribute.hpp:126
+#, c-format
+msgid "Attribute '%0%' has unexpected type: %1%"
+msgstr ""
 
 #: src/error.cpp:37
 msgid "Colour is already in use"
@@ -34,46 +53,51 @@ msgstr "Mauvaise version du protocole"
 #: src/user_table.cpp:58
 #, c-format
 msgid "User ID %0% is already in use"
-msgstr ""
-
-#: src/user_table.cpp:75 src/chat.cpp:220 src/line.cpp:94 src/document.cpp:57
-#, c-format
-msgid "Unexpected child node: '%0%'"
-msgstr ""
+msgstr "Cette couleur est déjà utilisée"
 
 #: src/chat.cpp:226
 msgid "Restored session"
 msgstr ""
 
-#: src/chat.cpp:279
+#: src/chat.cpp:293
 #, c-format
 msgid "%0% has joined"
 msgstr ""
 
-#: src/chat.cpp:286
+#: src/chat.cpp:300
 #, c-format
 msgid "%0% has left"
+msgstr ""
+
+#: src/chat.cpp:313
+#, c-format
+msgid "%0% has created a new document: %1%"
+msgstr ""
+
+#: src/chat.cpp:319
+#, c-format
+msgid "A new document was created: %0%"
 msgstr ""
 
 #: src/document.cpp:66
 msgid "Document needs at least one line"
 msgstr ""
 
-#: src/serialise/token.cpp:87
+#: src/serialise/token.cpp:94
 #, c-format
 msgid "Unexpected escape sequence: \\%0%"
 msgstr ""
 
-#: src/serialise/token.cpp:163
+#: src/serialise/token.cpp:170
 msgid "String not closed"
 msgstr ""
 
-#: src/serialise/token.cpp:268
+#: src/serialise/token.cpp:275
 #, c-format
 msgid "Unexpected token: '%0%'"
 msgstr ""
 
-#: src/serialise/token.cpp:388
+#: src/serialise/token.cpp:395
 msgid "Unexpected end of input"
 msgstr ""
 

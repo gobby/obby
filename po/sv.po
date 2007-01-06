@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: obby 0.3.0\n"
 "Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
-"POT-Creation-Date: 2005-11-14 11:02+0100\n"
+"POT-Creation-Date: 2005-11-24 23:40+0100\n"
 "PO-Revision-Date: 2005-11-06 10:50+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"
@@ -15,6 +15,25 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Rosetta-Version: 0.1\n"
+
+#: inc/server_buffer.hpp:274
+msgid "File is not an obby document"
+msgstr "Filen är inte ett obby-dokument"
+
+#: inc/server_buffer.hpp:281
+msgid "File is not a stored obby session"
+msgstr "Filen är inte en sparad obby-session"
+
+#: inc/server_buffer.hpp:322 src/user_table.cpp:75 src/chat.cpp:220
+#: src/line.cpp:94 src/document.cpp:57
+#, c-format
+msgid "Unexpected child node: '%0%'"
+msgstr "Oväntad barn-nod: '%0%'"
+
+#: inc/serialise/attribute.hpp:126
+#, c-format
+msgid "Attribute '%0%' has unexpected type: %1%"
+msgstr "Attribut'%0%' har en oväntad typ: %1%"
 
 #: src/error.cpp:37
 msgid "Colour is already in use"
@@ -35,111 +54,116 @@ msgstr "Protokollversionen stämmer inte"
 #: src/user_table.cpp:58
 #, c-format
 msgid "User ID %0% is already in use"
-msgstr ""
-
-#: src/user_table.cpp:75 src/chat.cpp:220 src/line.cpp:94 src/document.cpp:57
-#, c-format
-msgid "Unexpected child node: '%0%'"
-msgstr ""
+msgstr "Användarid %0% används redan"
 
 #: src/chat.cpp:226
 msgid "Restored session"
-msgstr ""
+msgstr "Återställd session"
 
-#: src/chat.cpp:279
+#: src/chat.cpp:293
 #, c-format
 msgid "%0% has joined"
-msgstr ""
+msgstr "%0% har anslutit"
 
-#: src/chat.cpp:286
+#: src/chat.cpp:300
 #, c-format
 msgid "%0% has left"
-msgstr ""
+msgstr "%0% har lämnat"
+
+#: src/chat.cpp:313
+#, c-format
+msgid "%0% has created a new document: %1%"
+msgstr "%0% har skapat ett nytt dokument: %1%"
+
+#: src/chat.cpp:319
+#, c-format
+msgid "A new document was created: %0%"
+msgstr "Ett nytt dokument har skapats: %0%"
 
 #: src/document.cpp:66
 msgid "Document needs at least one line"
-msgstr ""
+msgstr "Dokumentet behöver ha minst en rad"
 
-#: src/serialise/token.cpp:87
+#: src/serialise/token.cpp:94
 #, c-format
 msgid "Unexpected escape sequence: \\%0%"
-msgstr ""
+msgstr "Oväntad escape-sekvens: \\%0%"
 
-#: src/serialise/token.cpp:163
+#: src/serialise/token.cpp:170
 msgid "String not closed"
-msgstr ""
+msgstr "Sträng ej terminerad"
 
-#: src/serialise/token.cpp:268
+#: src/serialise/token.cpp:275
 #, c-format
 msgid "Unexpected token: '%0%'"
-msgstr ""
+msgstr "Oväntad token: '%0%'"
 
-#: src/serialise/token.cpp:388
+#: src/serialise/token.cpp:395
 msgid "Unexpected end of input"
-msgstr ""
+msgstr "Oväntat slut på indata"
 
 #: src/serialise/attribute.cpp:54
 #, c-format
 msgid "Expected '=' after %0%"
-msgstr ""
+msgstr "Väntade '=' efter %0%"
 
 #: src/serialise/attribute.cpp:65
 #, c-format
 msgid "Expected string literal as value for attribute '%0%'"
-msgstr ""
+msgstr "Väntade strängliteral som värde för attribut '%0%'"
 
 #: src/serialise/object.cpp:135
 msgid "Child object's indentation must be parent's plus one"
-msgstr ""
+msgstr "Barnobjektets indrag måste vara förälderns + 1"
 
 #: src/serialise/object.cpp:148
 msgid "Expected child object after indentation"
-msgstr ""
+msgstr "Väntade barnobjekt efter indrag"
 
 #: src/serialise/object.cpp:159
 #, c-format
 msgid "Expected child object instead of '%0%'"
-msgstr ""
+msgstr "Väntade barnobjekt itstället för '%0%'"
 
 #: src/serialise/object.cpp:220 src/serialise/object.cpp:234
 #, c-format
 msgid "Object '%0%' requires attribute '%1%'"
-msgstr ""
+msgstr "Objekt '%0%' kräver attribut '%1%'"
 
 #: src/serialise/parser.cpp:36
 #, c-format
 msgid "Could not open file '%0%' for reading"
-msgstr ""
+msgstr "Kunde inte öppna filen '%0%' för läsning"
 
 #: src/serialise/parser.cpp:79
 msgid "Expected initial exclamation mark"
-msgstr ""
+msgstr "Väntade inledande utropstecken"
 
 #: src/serialise/parser.cpp:89
 msgid "Expected document type after '!'"
-msgstr ""
+msgstr "Väntade dokumenttyp efter '!'"
 
 #: src/serialise/parser.cpp:100
 msgid "Expected newline after document type"
-msgstr ""
+msgstr "Väntade en ny rad efter dokumenttyp"
 
 #: src/serialise/parser.cpp:109
 msgid "Expected top-level object after document type"
-msgstr ""
+msgstr "Väntade topnivå-objekt efter dokumenttyp"
 
 #: src/serialise/parser.cpp:119
 msgid "Expected root object after document type"
-msgstr ""
+msgstr "Väntade rotobjekt efter dokumenttyp"
 
 #: src/serialise/parser.cpp:129
 #, c-format
 msgid "Expected end of input instead of '%0%'"
-msgstr ""
+msgstr "Väntade slut på indata istället för '%0%'"
 
 #: src/serialise/parser.cpp:141
 #, c-format
 msgid "Could not open file '%0%' for writing"
-msgstr ""
+msgstr "Kund inte öppna filen '%0%' för skrivning"
 
 #~ msgid "No server public key available, wait for the welcome packet"
 #~ msgstr "Ingen publik servernyckel tillgänglig, väntar på välkomstpaketet"
