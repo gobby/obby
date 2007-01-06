@@ -8,7 +8,6 @@ Serious:
  * Test libobby under realtime conditions
 
 Important:
- * Remove strict dependency on howl by introducing --with(out)-howl
 
 Normal:
  * Implement automatic service announcement and discovery
