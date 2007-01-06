@@ -362,8 +362,8 @@ void obby::client_buffer::on_net_welcome(const net6::packet& pack)
 	// The token creates some randomness within the hashed result
 	// we send over the line.
 	m_token = pack.get_param(0).as<std::string>();
-	m_public.set_n(mpz_class(pack.get_param(1).as<std::string>() ), 36);
-	m_public.set_k(mpz_class(pack.get_param(2).as<std::string>() ), 36);
+	m_public.set_n(mpz_class(pack.get_param(1).as<std::string>(), 36) );
+	m_public.set_k(mpz_class(pack.get_param(2).as<std::string>(), 36) );
 
 	m_signal_welcome.emit();
 }

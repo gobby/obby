@@ -94,10 +94,10 @@ protected:
 	 * classes from net6::server
 	 */
 	server_buffer();
+	server_buffer(const RSA::Key& public_key, const RSA::Key& private_key);
 
-	/** Internal function that registers the signal handlers for the
-	 * net6::server signals. It may be used by derived classes after
-	 * having created their server object.
+	/** Registers net6 signal handlers. May be used by derived classes
+	 * which override the server_buffer constructor.
 	 */
 	void register_signal_handlers();
 
@@ -176,6 +176,8 @@ protected:
 
 	signal_connect_type m_signal_connect;
 	signal_disconnect_type m_signal_disconnect;
+private:
+	void init_impl(unsigned int port);
 };
 
 }

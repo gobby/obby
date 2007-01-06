@@ -80,6 +80,7 @@ protected:
 	 * classes from net6::host
 	 */
 	host_buffer();
+	host_buffer(const RSA::Key& public_key, const RSA::Key& private_key);
 
         /** Adds a new document with the given title to the buffer.
 	 */
@@ -88,6 +89,9 @@ protected:
 	                                         const std::string& title);
 
 	user* m_self;
+private:
+	void init_impl(unsigned int port, const std::string& username,
+	               int red, int green, int blue);
 };
 
 }

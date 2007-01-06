@@ -30,15 +30,44 @@ namespace RSA
 	class Key
 	{
 	public:
+		Key();
 		Key(const mpz_class& n, const mpz_class& k);
 		Key(const Key& other);
 		~Key();
 
-		Key& operator=(const Key& other);
+		Key& operator =(const Key& other);
 
+		/** Checks if the key is empty.
+		 */
+		bool empty() const;
+
+		/** Checks if the key is valid, e.g. !empty().
+		 */
+		operator bool() const;
+
+		/** Alias for empty().
+		 */
+		bool operator !() const;
+
+		/** Compares two keys for equalness.
+		 */
+		bool operator ==(const Key& other);
+		bool operator !=(const Key& other);
+
+		/** Returns a unique ID (Fingerprint) for this key.
+		 */
 		const std::string& get_id() const;
+
+		/** Returns the modulus of the key.
+		 */
 		const mpz_class& get_n() const;
+
+		/** Returns the factor (e or d) of the key.
+		 */
 		const mpz_class& get_k() const;
+
+		void set_n(const mpz_class& n);
+		void set_k(const mpz_class& k);
 
 		/** Applies the key components using the RSA algorithm to a
 		 * number to generate a new encrypted one.
@@ -46,6 +75,10 @@ namespace RSA
 		mpz_class apply(const mpz_class& num) const;
 
 	private:
+		/** 2 ** 64.
+		 */
+		static const mpz_class _2e64;
+
 		mpz_class m_n, m_k;
 		std::string m_id;
 	};

@@ -26,9 +26,33 @@ obby::host_buffer::host_buffer()
 {
 }
 
+obby::host_buffer::host_buffer(const RSA::Key& public_key,
+                               const RSA::Key& private_key)
+ : buffer(), local_buffer(), server_buffer(public_key, private_key),
+   m_self(NULL)
+{
+}
+
 obby::host_buffer::host_buffer(unsigned int port, const std::string& username,
                                int red, int green, int blue)
  : buffer(), local_buffer(), server_buffer(), m_self(NULL)
+{
+	init_impl(port, username, red, green, blue);
+}
+
+obby::host_buffer::host_buffer(unsigned int port, const std::string& username,
+                               int red, int green, int blue,
+                               const RSA::Key& public_key,
+                               const RSA::Key& private_key)
+ : buffer(), local_buffer(), server_buffer(public_key, private_key),
+   m_self(NULL)
+{
+	init_impl(port, username, red, green, blue);
+}
+
+void obby::host_buffer::init_impl(unsigned int port,
+                                  const std::string& username, int red,
+                                  int green, int blue)
 {
 	net6::host* host = new net6::host(port, username, false);
 	m_server = host;

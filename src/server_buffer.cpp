@@ -28,14 +28,33 @@
 obby::server_buffer::server_buffer()
  : buffer(), m_server(NULL)
 {
+	// TODO: Key length as ctor parameter
+	std::pair<RSA::Key, RSA::Key> keys = RSA::generate(m_rclass, 256);
+	m_public = keys.second; m_private = keys.first;
+}
+
+obby::server_buffer::server_buffer(const RSA::Key& public_key,
+                                   const RSA::Key& private_key)
+ : buffer(), m_server(NULL), m_public(public_key), m_private(private_key)
+{
 }
 
 obby::server_buffer::server_buffer(unsigned int port)
  : buffer(), m_server(NULL)
 {
-	m_server = new net6::server(port, false);
+	init_impl(port);
 
-	register_signal_handlers();
+	// TODO: Key length as ctor parameter
+	std::pair<RSA::Key, RSA::Key> keys = RSA::generate(m_rclass, 256);
+	m_public = keys.second; m_private = keys.first;
+}
+
+obby::server_buffer::server_buffer(unsigned int port,
+                                   const RSA::Key& private_key,
+                                   const RSA::Key& public_key)
+ : buffer(), m_server(NULL), m_public(public_key), m_private(private_key)
+{
+	init_impl(port);
 }
 
 obby::server_buffer::~server_buffer()
@@ -45,6 +64,12 @@ obby::server_buffer::~server_buffer()
 		delete m_server;
 		m_server = NULL;
 	}
+}
+
+void obby::server_buffer::init_impl(unsigned int port)
+{
+	m_server = new net6::server(port);
+	register_signal_handlers();
 }
 
 void obby::server_buffer::select()
@@ -158,11 +183,17 @@ void obby::server_buffer::send_message_impl(const std::string& message,
 
 void obby::server_buffer::on_connect(net6::server::peer& peer)
 {
-	net6::packet pack("obby_welcome");
-	mpz_class t = /* [... TODO 48 bit zufallszahl] */ 0;
+	// Create random token for this connection
+	mpz_class t = m_rclass.get_z_bits(48);
 	std::string token = t.get_str(36);
-	pack << token << m_private.get_n() << m_public.get_k();
+
+	// Add the token for this peer into the token map
 	m_tokens[&peer] = token;
+
+	// Send token and the server's public key with the welcome packet
+	net6::packet pack("obby_welcome");
+	pack << token << m_private.get_n().get_str(36)
+	     << m_public.get_k().get_str(36);
 	m_signal_connect.emit(peer);
 }
 

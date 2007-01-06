@@ -20,6 +20,7 @@
 #define _OBBY_BUFFER_HPP_
 
 #include <list>
+#include <gmpxx.h>
 #include <net6/main.hpp>
 #include "document_info.hpp"
 #include "user_table.hpp"
@@ -155,6 +156,10 @@ protected:
 	/** net6 main object to keep net6 initialised during the obby session.
 	 */
 	net6::main m_netkit;
+
+	/** GMP random number generator.
+	 */
+	gmp_randclass m_rclass;
 
 	/** User table which stores all the users in the session.
 	 */

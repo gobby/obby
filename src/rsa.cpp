@@ -18,10 +18,14 @@
 
 #include "rsa.hpp"
 
-// TODO: mpz_class("ffffffffffffffff", 16) as const static member
+const mpz_class obby::RSA::Key::_2e64("ffffffffffffffff", 16);
+
+obby::RSA::Key::Key()
+{
+}
+
 obby::RSA::Key::Key(const mpz_class& n, const mpz_class& k)
- : m_n(n), m_k(k),
-   m_id(mpz_class(n & mpz_class("ffffffffffffffff", 16)).get_str(16))
+ : m_n(n), m_k(k), m_id(mpz_class(n & _2e64).get_str(16))
 {
 }
 
@@ -34,12 +38,38 @@ obby::RSA::Key::~Key()
 {
 }
 
-obby::RSA::Key& obby::RSA::Key::operator=(const Key& other)
+obby::RSA::Key& obby::RSA::Key::operator =(const Key& other)
 {
 	m_n = other.m_n;
 	m_k = other.m_k;
 	m_id = other.m_id;
+
 	return *this;
+}
+
+bool obby::RSA::Key::empty() const
+{
+	return (m_k == 0 && m_n == 0);
+}
+
+obby::RSA::Key::operator bool() const
+{
+	return !empty();
+}
+
+bool obby::RSA::Key::operator !() const
+{
+	return empty();
+}
+
+bool obby::RSA::Key::operator==(const Key& other)
+{
+	return (m_k == other.m_k) && (m_n == other.m_n);
+}
+
+bool obby::RSA::Key::operator!=(const Key& other)
+{
+	return (m_k != other.m_k) || (m_n != other.m_n);
 }
 
 const std::string& obby::RSA::Key::get_id() const
@@ -55,6 +85,17 @@ const mpz_class& obby::RSA::Key::get_n() const
 const mpz_class& obby::RSA::Key::get_k() const
 {
 	return m_k;
+}
+
+void obby::RSA::Key::set_n(const mpz_class& n)
+{
+	m_n = n;
+	m_id = mpz_class(n & _2e64).get_str(16);
+}
+
+void obby::RSA::Key::set_k(const mpz_class& k)
+{
+	m_k = k;
 }
 
 mpz_class obby::RSA::Key::apply(const mpz_class& num) const
@@ -73,6 +114,7 @@ namespace
 		mpz_class r = rclass.get_z_bits(bits);
 		if((r % 2) == 0)
 			r += 1;
+		// TODO: Ten is quire large. Smaller values should be faster.
 		while(!mpz_probab_prime_p(r.get_mpz_t(), 10) )
 			r += 2;
 		return r;
