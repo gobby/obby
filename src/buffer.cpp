@@ -135,6 +135,11 @@ obby::buffer::message_event() const
 {
 	return m_signal_message;
 }
+obby::buffer::signal_server_message_type
+obby::buffer::server_message_event() const
+{
+	return m_signal_server_message;
+}
 
 obby::user* obby::buffer::add_user(net6::peer& peer, int red, int green,
                                    int blue)
