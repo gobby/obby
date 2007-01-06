@@ -37,7 +37,7 @@ const char* obby_version()
 
 const char* obby_codename()
 {
-	return "firenze";
+	return "Faust";
 }
 
 const char* obby_package()
