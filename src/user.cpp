@@ -180,6 +180,7 @@ std::string
 serialise::context<obby::user*>::to_string(const obby::user* from) const
 {
 	std::stringstream stream;
+	on_stream_setup(stream);
 	stream << ( (from != NULL) ? (from->get_id()) : (0) );
 	return stream.str();
 }
@@ -194,6 +195,7 @@ serialise::context<obby::user*>::from_string(const std::string& string) const
 	// Extract user ID from stream
 	unsigned int user_id;
 	std::stringstream stream(string);
+	on_stream_setup(stream);
 	stream >> user_id;
 
 	// Not a valid ID?
@@ -215,4 +217,26 @@ serialise::context<obby::user*>::from_string(const std::string& string) const
 
 	// Deserialisation successful
 	return user;
+}
+
+void serialise::context<obby::user*>::
+	on_stream_setup(std::stringstream& stream) const
+{
+}
+
+void serialise::context<const obby::user*>::
+	on_stream_setup(std::stringstream& stream) const
+{
+}
+
+void serialise::hex_context<obby::user*>::
+	on_stream_setup(std::stringstream& stream) const
+{
+	stream >> std::hex;
+}
+
+void serialise::hex_context<const obby::user*>::
+	on_stream_setup(std::stringstream& stream) const
+{
+	stream >> std::hex;
 }

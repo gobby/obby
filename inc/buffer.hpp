@@ -216,7 +216,7 @@ protected:
 typedef basic_buffer<net6::selector> buffer;
 
 template<typename selector_type>
-const unsigned long basic_buffer<selector_type>::PROTOCOL_VERSION = 4;
+const unsigned long basic_buffer<selector_type>::PROTOCOL_VERSION = 5;
 
 template<typename selector_type>
 basic_buffer<selector_type>::basic_buffer()

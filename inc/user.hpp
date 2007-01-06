@@ -224,6 +224,8 @@ public:
 	virtual const obby::user* from_string(const std::string& string) const;
 
 protected:
+	virtual void on_stream_setup(std::stringstream& stream) const;
+
 	const obby::user_table* m_user_table;
 };
 
@@ -235,6 +237,32 @@ public:
 		context<obby::user*>() {}
 	context(const obby::user_table& user_table):
 		context<obby::user*>(user_table) {}
+protected:
+	virtual void on_stream_setup(std::stringstream& stream) const;
+};
+
+template<>
+class hex_context<obby::user*>: public context<obby::user*>
+{
+public:
+	hex_context():
+		context<obby::user*>() {}
+	hex_context(const obby::user_table& user_table):
+		context<obby::user*>(user_table) {}
+protected:
+	virtual void on_stream_setup(std::stringstream& stream) const;
+};
+
+template<>
+class hex_context<const obby::user*>: public context<const obby::user*>
+{
+public:
+	hex_context():
+		context<const obby::user*>() {}
+	hex_context(const obby::user_table& user_table):
+		context<const obby::user*>(user_table) {}
+protected:
+	virtual void on_stream_setup(std::stringstream& stream) const;
 };
 
 } // namespace serialise
