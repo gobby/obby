@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sigc++/bind.h>
+#include <stdexcept>
 
 #include "record.hpp"
 #include "insert_record.hpp"
@@ -101,11 +102,16 @@ void bufferd::on_doc_remove(const obby::delete_record&, obby::document& doc)
 	std::cout << "remove." << std::endl;
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char* argv[]) try
 {
 	bufferd buffer(argc, argv);
 	buffer.run();
 
 	return 0;
+}
+catch(std::runtime_error& e)
+{
+	std::cerr << e.what() << std::endl;
+	return 1;
 }
 
