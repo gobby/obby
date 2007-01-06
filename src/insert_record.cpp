@@ -62,7 +62,7 @@ void obby::insert_record::on_delete(const position& from, const position& to)
 	{
 		m_text = "";
 	}
-	else(m_pos >= to)
+	else if(m_pos >= to)
 	{
 		// TODO: Put this into a method of position?
 		if(to.get_line() == m_pos.get_line() )
