@@ -51,8 +51,11 @@ namespace RSA
 	};
 
 	/** Generates a public/private key pair with a given bit count.
+	 * <em>rclass</em> is a GMP randomness context. The function
+	 * returns the public key as the first, the private key as the
+	 * second element in the pair.
 	 */
-	std::pair<Key, Key> generate(unsigned int bits);
+	std::pair<Key, Key> generate(gmp_randclass& rclass, unsigned int bits);
 
 	/** Encrypts a string with a given key to another, binary-safe
 	 * string representation.

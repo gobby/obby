@@ -67,6 +67,17 @@ mpz_class obby::RSA::Key::apply(const mpz_class& num) const
 
 namespace
 {
+	inline mpz_class generate_large_prime_number(gmp_randclass& rclass,
+	                                             unsigned int bits)
+	{
+		mpz_class r = rclass.get_z_bits(bits);
+		if((r % 2) == 0)
+			r += 1;
+		while(!mpz_probab_prime_p(r.get_mpz_t(), 10) )
+			r += 2;
+		return r;
+	}
+
 	inline void encrypt_num_to_str(const obby::RSA::Key& key,
 	                               const mpz_class& num, std::string& res)
 	{
@@ -87,10 +98,28 @@ namespace
 	}
 }
 
-std::pair<obby::RSA::Key, obby::RSA::Key> obby::RSA::generate(unsigned int bits)
+std::pair<obby::RSA::Key, obby::RSA::Key> obby::RSA::generate(
+	gmp_randclass& rclass, unsigned int bits)
 {
-	/* TODO... IMPLEMENT THIS */
 	/* There is still room for optimisations... */
+	mpz_class p = generate_large_prime_number(rclass, bits);
+	mpz_class q = generate_large_prime_number(rclass, bits);
+	mpz_class n = p * q;
+	mpz_class f = (p - 1) * (q - 1);
+	mpz_class e;
+	for(e = rclass.get_z_bits(bits / 32); e < (f - 1); ++e)
+	{
+		mpz_class gcd;
+		mpz_gcd(gcd.get_mpz_t(), f.get_mpz_t(), e.get_mpz_t() );
+		if(gcd == 1)
+			break;
+	}
+	mpz_class k;
+	for(k = f; (k + 1) % e != 0; k += f);
+	mpz_class d = (k + 1) / e;
+	return std::pair<RSA::Key, RSA::Key>(
+		RSA::Key(n, e), /* Public key */
+		RSA::Key(n, d)  /* Private key */ );
 }
 
 std::string obby::RSA::encrypt(const Key& key, const std::string& msg)
