@@ -3,6 +3,7 @@ pkginclude_HEADERS += format_string.hpp
 pkginclude_HEADERS += error.hpp
 pkginclude_HEADERS += position.hpp
 pkginclude_HEADERS += duplex_signal.hpp
+pkginclude_HEADERS += ring.hpp
 pkginclude_HEADERS += ptr_iterator.hpp
 nobase_pkginclude_HEADERS =  serialise/error.hpp
 nobase_pkginclude_HEADERS += serialise/token.hpp

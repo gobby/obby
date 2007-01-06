@@ -24,6 +24,7 @@ libobby_la_SOURCES += format_string.cpp
 libobby_la_SOURCES += error.cpp
 libobby_la_SOURCES += position.cpp
 libobby_la_SOURCES += duplex_signal.cpp
+libobby_la_SOURCES += ring.cpp
 libobby_la_SOURCES += ptr_iterator.cpp
 libobby_la_SOURCES += vector_time.cpp
 libobby_la_SOURCES += rsa.cpp
