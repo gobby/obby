@@ -54,6 +54,12 @@ void obby::rendezvous::discover()
 {
 }
 
+obby::rendezvous::signal_discover_type
+obby::rendezvous::discover_event() const
+{
+	return m_signal_discover;
+}
+
 sw_result obby::rendezvous::handle_publish_reply(sw_discovery discovery,
 	sw_discovery_oid oid, sw_discovery_publish_status status,
 	sw_opaque extra)
@@ -64,6 +70,14 @@ sw_result obby::rendezvous::handle_browse_reply(sw_discovery discovery,
 	sw_discovery_oid oid, sw_discovery_browse_status status,
 	sw_uint32 interface_index, sw_const_string name, sw_const_string type,
 	sw_const_string domain, sw_opaque extra)
+{
+}
+
+sw_result obby::rendezvous::handle_resolve_reply(sw_discovery discovery,
+	sw_discovery_oid oid, sw_uint32 interface_index, sw_const_string name,
+	sw_const_string type, sw_const_string domain, sw_ipv4_address address,
+	sw_port port, sw_octets text_record, sw_ulong text_record_len,
+	sw_opaque extra)
 {
 }
 

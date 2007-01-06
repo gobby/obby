@@ -21,6 +21,7 @@
 
 #include <string>
 
+#include <sigc++/signal.h>
 #include <howl.h>
 
 namespace obby
@@ -29,6 +30,9 @@ namespace obby
 class rendezvous
 {
 public:
+	typedef sigc::signal<const std::string&, const std::string&,
+		unsigned int> signal_discover_type;
+
 	rendezvous();
 	~rendezvous();
 
@@ -44,9 +48,13 @@ public:
 	 * is found, handing over the name, the ip and the port of the
 	 * participant. */
 	void discover();
-	
+
+	signal_discover_type discover_event() const;
+
 protected:
 	sw_discovery m_session;
+
+	signal_discover_type m_signal_discover;
 
 private:
 	static sw_result handle_publish_reply(sw_discovery discovery,
@@ -60,6 +68,17 @@ private:
 			sw_const_string name,
 			sw_const_string type,
 			sw_const_string domain,
+			sw_opaque extra);
+	static sw_result handle_resolve_reply(sw_discovery discovery,
+			sw_discovery_oid oid,
+			sw_uint32 interface_index,
+			sw_const_string name,
+			sw_const_string type,
+			sw_const_string domain,
+			sw_ipv4_address address,
+			sw_port port,
+			sw_octets text_record,
+			sw_ulong text_record_len,
 			sw_opaque extra);
 };
 
