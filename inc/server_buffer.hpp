@@ -35,10 +35,8 @@ namespace obby
 class server_buffer : public buffer, public sigc::trackable
 {
 public: 
-	// TODO: Make a differnce for part and disconnect and join and connect
-	typedef sigc::signal<void, net6::server::peer&> signal_join_type;
-	typedef sigc::signal<void, user&> signal_login_type;
-	typedef sigc::signal<void, net6::server::peer&> signal_part_type;
+	typedef sigc::signal<void, net6::server::peer&> signal_connect_type;
+	typedef sigc::signal<void, net6::server::peer&> signal_disconnect_type;
 
 	/** Creates a new server buffer listening on port <em>port</em>.
 	 */
@@ -63,15 +61,12 @@ public:
 	
 	/** Signal which will be emitted if a new client has connected.
 	 */
-	signal_join_type join_event() const;
+	signal_connect_type connect_event() const;
 
-	/** Signal which will be emitted if a new client has logged in.
+	/** Signal which will be emitted if a connected client has quit without
+	 * having been logged in.
 	 */
-	signal_login_type login_event() const;
-
-	/** Signal which will be emitted if a client has quit.
-	 */
-	signal_part_type part_event() const;
+	signal_disconnect_type disconnect_event() const;
 
 protected:
 	/** Private constuctor used by derived objects. It does not create
@@ -107,9 +102,8 @@ protected:
 	unsigned int m_doc_counter;
 	net6::server* m_server;
 
-	signal_join_type m_signal_join;
-	signal_login_type m_signal_login;
-	signal_part_type m_signal_part;
+	signal_connect_type m_signal_connect;
+	signal_disconnect_type m_signal_disconnect;
 };
 
 }

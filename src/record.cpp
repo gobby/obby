@@ -109,8 +109,8 @@ obby::record* obby::record::from_packet(const net6::packet& pack)
 		if(pack.get_param(6).get_type() != net6::packet::param::STRING)
 			return NULL;
 
-		unsigned int pos = pack.get_param(4).as_int();
-		const std::string& text = pack.get_param(5).as_string();
+		unsigned int pos = pack.get_param(5).as_int();
+		const std::string& text = pack.get_param(6).as_string();
 		
 		return new insert_record(pos, text, document, 
 		                         revision, from, id);
@@ -123,8 +123,8 @@ obby::record* obby::record::from_packet(const net6::packet& pack)
 		if(pack.get_param(6).get_type() != net6::packet::param::STRING)
 			return NULL;
 
-		unsigned int pos = pack.get_param(4).as_int();
-		const std::string& text = pack.get_param(5).as_string();
+		unsigned int pos = pack.get_param(5).as_int();
+		const std::string& text = pack.get_param(6).as_string();
 
 		return new delete_record(pos, text, document,
 		                         revision, from, id);

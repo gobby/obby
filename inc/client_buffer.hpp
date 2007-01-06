@@ -38,9 +38,7 @@ namespace obby
 class client_buffer : public buffer, public sigc::trackable
 {
 public:
-	typedef sigc::signal<void, user&>              signal_join_type;
 	typedef sigc::signal<void>                     signal_sync_type;
-	typedef sigc::signal<void, user&>              signal_part_type;
 	typedef sigc::signal<void>                     signal_close_type;
 	typedef sigc::signal<void, const std::string&> signal_login_failed_type;
 	
@@ -84,19 +82,10 @@ public:
 	 */
 	void select(unsigned int timeout);
 
-	// TODO: Move join_event and part_event to buffer?
-	/** Signal which will be emitted if a new client joined the session.
-	 */
-	signal_join_type join_event() const;
-
 	/** Signal which will be emitted if the initial synchronization of
 	 * the documents has been completed.
 	 */
 	signal_sync_type sync_event() const;
-
-	/** Signal which will be emitted if another client has quit.
-	 */
-	signal_part_type part_event() const;
 
 	/** Signal which will be emitted if the connection to the server
 	 * has been lost.
@@ -144,9 +133,7 @@ protected:
 	net6::client* m_client;
 	user* m_self;
 
-	signal_join_type m_signal_join;
 	signal_sync_type m_signal_sync;
-	signal_part_type m_signal_part;
 	signal_close_type m_signal_close;
 	signal_login_failed_type m_signal_login_failed;
 };

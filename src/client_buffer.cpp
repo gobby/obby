@@ -86,19 +86,9 @@ void obby::client_buffer::select(unsigned int timeout)
 	m_client->select(timeout);
 }
 
-obby::client_buffer::signal_join_type obby::client_buffer::join_event() const
-{
-	return m_signal_join;
-}
-
 obby::client_buffer::signal_sync_type obby::client_buffer::sync_event() const
 {
 	return m_signal_sync;
-}
-
-obby::client_buffer::signal_part_type obby::client_buffer::part_event() const
-{
-	return m_signal_part;
 }
 
 obby::client_buffer::signal_close_type obby::client_buffer::close_event() const
@@ -126,7 +116,7 @@ void obby::client_buffer::on_join(net6::client::peer& peer,
 
 	user* new_user = add_user(peer, red, green, blue);
 	if(!m_self) m_self = new_user;
-	m_signal_join.emit(*new_user);
+	m_signal_user_join.emit(*new_user);
 }
 
 void obby::client_buffer::on_part(net6::client::peer& peer)
@@ -139,7 +129,7 @@ void obby::client_buffer::on_part(net6::client::peer& peer)
 
 	// Emit part singal
 	assert(iter != m_userlist.end() );
-	m_signal_part.emit(**iter);
+	m_signal_user_part.emit(**iter);
 
 	// Remove user from list
 	delete *iter;
@@ -164,11 +154,11 @@ void obby::client_buffer::on_data(const net6::packet& pack)
 
 	if(pack.get_command() == "obby_sync_init")
 		on_net_sync_init(pack);
-	if(pack.get_command() == "obby_sync_doc_init");
+	if(pack.get_command() == "obby_sync_doc_init")
 		on_net_sync_doc_init(pack);
 	if(pack.get_command() == "obby_sync_doc_line")
 		on_net_sync_doc_line(pack);
-	if(pack.get_command() == "obby_sync_doc_final");
+	if(pack.get_command() == "obby_sync_doc_final")
 		on_net_sync_doc_final(pack);
 	if(pack.get_command() == "obby_sync_final")
 		on_net_sync_final(pack);

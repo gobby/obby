@@ -73,24 +73,21 @@ void obby::server_buffer::remove_document(document* doc)
 	
 }
 
-obby::server_buffer::signal_join_type obby::server_buffer::join_event() const
+obby::server_buffer::signal_connect_type
+obby::server_buffer::connect_event() const
 {
-	return m_signal_join;
+	return m_signal_connect;
 }
 
-obby::server_buffer::signal_login_type obby::server_buffer::login_event() const
+obby::server_buffer::signal_disconnect_type
+obby::server_buffer::disconnect_event() const
 {
-	return m_signal_login;
-}
-
-obby::server_buffer::signal_part_type obby::server_buffer::part_event() const
-{
-	return m_signal_part;
+	return m_signal_disconnect;
 }
 
 void obby::server_buffer::on_join(net6::server::peer& peer)
 {
-	m_signal_join.emit(peer);
+	m_signal_connect.emit(peer);
 }
 
 void obby::server_buffer::on_login(net6::server::peer& peer,
@@ -115,11 +112,17 @@ void obby::server_buffer::on_login(net6::server::peer& peer,
 	net6::packet final_sync("obby_sync_final");
 	m_server->send(final_sync, peer);
 
-	m_signal_login.emit(*new_user);
+	m_signal_user_join.emit(*new_user);
 }
 
 void obby::server_buffer::on_part(net6::server::peer& peer)
 {
+	if(!peer.is_logined() )
+	{
+		m_signal_disconnect.emit(peer);
+		return;
+	}
+
 	// Delete user from user list
 	std::list<user*>::iterator iter;
 	for(iter = m_userlist.begin(); iter != m_userlist.end(); ++ iter)
@@ -132,7 +135,7 @@ void obby::server_buffer::on_part(net6::server::peer& peer)
 		}
 	}
 
-	m_signal_part.emit(peer);
+	m_signal_user_part.emit(**iter);
 }
 
 void obby::server_buffer::on_data(const net6::packet& pack,

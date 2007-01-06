@@ -36,6 +36,24 @@ namespace obby
 class buffer : private net6::non_copyable
 {
 public:
+	/** Iterator to iterate through the list of documents.
+	 */
+	class document_iterator : public std::list<document*>::const_iterator
+	{
+	public:
+		typedef std::list<document*>::const_iterator base_iterator;
+
+		document_iterator();
+		document_iterator(const base_iterator& iter);
+
+		document_iterator& operator=(const base_iterator& iter);
+
+		document& operator*();
+		const document& operator*() const;
+	};
+
+	typedef sigc::signal<void, user&> signal_user_join_type;
+	typedef sigc::signal<void, user&> signal_user_part_type;
 	typedef sigc::signal<void, document&> signal_insert_document_type;
 	typedef sigc::signal<void, document&> signal_remove_document_type;
 
@@ -54,6 +72,23 @@ public:
 	 */
 	user* find_user(const std::string& name) const;
 
+	/** Returns the begin of the document list.
+	 */
+	document_iterator document_begin() const;
+
+	/** Returns the end of the document list.
+	 */
+	document_iterator document_end() const;
+	
+	/** Signal which will be emitted if a new user has joined the obby
+	 * session.
+	 */
+	signal_user_join_type user_join_event() const;
+
+	/** Signal which will be emitted if a user has quit.
+	 */
+	signal_user_part_type user_part_event() const;
+	
 	/** Signal which will be emitted when another participiant in the
 	 * obby session has created a new document.
 	 */
@@ -75,6 +110,9 @@ protected:
 
 	std::list<document*> m_doclist;
 	std::list<user*> m_userlist;
+
+	signal_user_join_type m_signal_user_join;
+	signal_user_part_type m_signal_user_part;
 
 	signal_insert_document_type m_signal_insert_document;
 	signal_remove_document_type m_signal_remove_document;

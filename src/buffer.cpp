@@ -19,6 +19,32 @@
 #include <cassert>
 #include "buffer.hpp"
 
+obby::buffer::document_iterator::document_iterator()
+ : base_iterator()
+{
+}
+
+obby::buffer::document_iterator::document_iterator(const base_iterator& iter)
+ : base_iterator(iter)
+{
+}
+
+obby::buffer::document_iterator&
+obby::buffer::document_iterator::operator=(const base_iterator& iter)
+{
+	return static_cast<document_iterator&>(base_iterator::operator=(iter) );
+}
+
+obby::document& obby::buffer::document_iterator::operator*()
+{
+	return *base_iterator::operator*();
+}
+
+const obby::document& obby::buffer::document_iterator::operator*() const
+{
+	return *base_iterator::operator*();
+}
+
 obby::buffer::buffer()
 {
 }
@@ -59,6 +85,26 @@ obby::user* obby::buffer::find_user(const std::string& name) const
 		if( (*iter)->get_name() == name)
 			return *iter;
 	return NULL;
+}
+
+obby::buffer::document_iterator obby::buffer::document_begin() const
+{
+	return static_cast<document_iterator>(m_doclist.begin() );
+}
+
+obby::buffer::document_iterator obby::buffer::document_end() const
+{
+	return static_cast<document_iterator>(m_doclist.end() );
+}
+
+obby::buffer::signal_user_join_type obby::buffer::user_join_event() const
+{
+	return m_signal_user_join;
+}
+
+obby::buffer::signal_user_part_type obby::buffer::user_part_event() const
+{
+	return m_signal_user_part;
 }
 
 obby::buffer::signal_insert_document_type

@@ -23,7 +23,7 @@ const int CURSES_ERR = ERR;
 class screen
 {
 public:
-	screen(const obby::buffer& buffer);
+	screen(const obby::document& document);
 	~screen();
 
 	unsigned int get_cursor() const;
@@ -40,13 +40,13 @@ public:
 	void scroll_to_cursor();
 
 protected:
-	const obby::buffer& m_buffer;
+	const obby::document& m_document;
 	unsigned int m_scroll_x, m_scroll_y;
 	unsigned int m_cursor;
 };
 
-screen::screen(const obby::buffer& buffer)
- : m_buffer(buffer), m_scroll_x(0), m_scroll_y(0), m_cursor(0)
+screen::screen(const obby::document& document)
+ : m_document(document), m_scroll_x(0), m_scroll_y(0), m_cursor(0)
 {
 	initscr();
 	cbreak();
@@ -54,6 +54,7 @@ screen::screen(const obby::buffer& buffer)
 	nonl();
 	intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
+	halfdelay(2);
 }
 
 screen::~screen()
@@ -69,34 +70,34 @@ unsigned int screen::get_cursor() const
 unsigned int screen::get_cursor_x() const
 {
 	unsigned int cursor_x, cursor_y;
-	m_buffer.position_to_coord(m_cursor, cursor_x, cursor_y);
+	m_document.position_to_coord(m_cursor, cursor_x, cursor_y);
 	return cursor_x;
 }
 
 unsigned int screen::get_cursor_y() const
 {
 	unsigned int cursor_x, cursor_y;
-	m_buffer.position_to_coord(m_cursor, cursor_x, cursor_y);
+	m_document.position_to_coord(m_cursor, cursor_x, cursor_y);
 	return cursor_y;
 }
 
 void screen::set_cursor(unsigned int x, unsigned int y)
 {
 	unsigned int cursor_x, cursor_y;
-	m_buffer.position_to_coord(m_cursor, cursor_x, cursor_y);
+	m_document.position_to_coord(m_cursor, cursor_x, cursor_y);
 	move_cursor(x - cursor_x, y - cursor_y, false);
 }
 
 void screen::move_cursor(int by_x, int by_y, bool priority_x)
 {
 	unsigned int cx, cy;
-	m_buffer.position_to_coord(m_cursor, cx, cy);
+	m_document.position_to_coord(m_cursor, cx, cy);
 	int cursor_x = static_cast<int>(cx) + by_x;
 	int cursor_y = static_cast<int>(cy) + by_y;
 
 	if(cursor_y < 0) cursor_y = 0;
-	if(cursor_y > m_buffer.get_line_count() - 1)
-		cursor_y = m_buffer.get_line_count() - 1;
+	if(cursor_y > m_document.get_line_count() - 1)
+		cursor_y = m_document.get_line_count() - 1;
 
 	if(cursor_x < 0)
 	{
@@ -105,7 +106,7 @@ void screen::move_cursor(int by_x, int by_y, bool priority_x)
 			if(cursor_y > 0)
 			{
 				cursor_y --;
-				cursor_x = m_buffer.get_line(cursor_y).length();
+				cursor_x = m_document.get_line(cursor_y).length();
 			}
 			else
 			{
@@ -118,27 +119,27 @@ void screen::move_cursor(int by_x, int by_y, bool priority_x)
 		}
 	}
 
-	if(cursor_x > m_buffer.get_line(cursor_y).length() )
+	if(cursor_x > m_document.get_line(cursor_y).length() )
 	{
 		if(priority_x)
 		{
-			if(cursor_y != m_buffer.get_line_count() - 1)
+			if(cursor_y != m_document.get_line_count() - 1)
 			{
 				cursor_y ++;
 				cursor_x = 0;
 			}
 			else
 			{
-				cursor_x = m_buffer.get_line(cursor_y).length();
+				cursor_x = m_document.get_line(cursor_y).length();
 			}
 		}
 		else
 		{
-			cursor_x = m_buffer.get_line(cursor_y).length();
+			cursor_x = m_document.get_line(cursor_y).length();
 		}
 	}
 
-	m_cursor = m_buffer.coord_to_position(cursor_x, cursor_y);
+	m_cursor = m_document.coord_to_position(cursor_x, cursor_y);
 	scroll_to_cursor();
 	redraw();
 }
@@ -165,7 +166,7 @@ void screen::redraw()
 {
 	unsigned int from_y = m_scroll_y;
 	unsigned int to_y = m_scroll_y + LINES;
-	if(to_y > m_buffer.get_line_count() ) to_y = m_buffer.get_line_count();
+	if(to_y > m_document.get_line_count() ) to_y = m_document.get_line_count();
 
 	for(unsigned int y = from_y; y < to_y; ++ y)
 	{
@@ -173,7 +174,7 @@ void screen::redraw()
 		clrtoeol();
 		move(y - from_y, 0);
 
-		std::string new_text = m_buffer.get_line(y);
+		std::string new_text = m_document.get_line(y);
 		if(new_text.length() <= m_scroll_x) continue;
 
 		
@@ -185,7 +186,7 @@ void screen::redraw()
 	}
 
 	unsigned int cursor_x, cursor_y;
-	m_buffer.position_to_coord(m_cursor, cursor_x, cursor_y);
+	m_document.position_to_coord(m_cursor, cursor_x, cursor_y);
 	int cx = cursor_x, cy = cursor_y;
 	cx -= m_scroll_x, cy -= m_scroll_y;
 
@@ -196,17 +197,15 @@ void screen::redraw()
 void screen::scroll_to_cursor()
 {
 	unsigned int cursor_x, cursor_y;
-	m_buffer.position_to_coord(m_cursor, cursor_x, cursor_y);
+	m_document.position_to_coord(m_cursor, cursor_x, cursor_y);
 
 	if(m_scroll_x + COLS <= cursor_x)
 		m_scroll_x = cursor_x - COLS + 1;
 	if(cursor_x < m_scroll_x)
 		m_scroll_x = cursor_x;
 
-v v v v v v v
 	if(m_scroll_y + LINES <= cursor_y)
 		m_scroll_y = cursor_y - LINES + 1;
-^ ^ ^ ^ ^ ^ ^
 	if(cursor_y < m_scroll_y)
 		m_scroll_y = cursor_y;
 }
@@ -228,61 +227,68 @@ protected:
 	void on_close();
 	void on_sync();
 	void on_login_failed(const std::string& reason);
-	void on_insert(const obby::insert_record& record);
-	void on_delete(const obby::delete_record& record);
+
+	void on_document_insert(obby::document& doc);
+	void on_document_remove(obby::document& doc);
+
+	void on_insert(const obby::insert_record& record, obby::document& doc);
+	void on_delete(const obby::delete_record& record, obby::document& doc);
 
 	int m_port;
 	bool m_quit;
 	std::string m_reason;
 	bool m_synced;
 	obby::client_buffer m_buffer;
-	screen m_screen;
+	screen* m_screen;
+	obby::document* m_document;
 };
 
 curses_editor::curses_editor(int argc, char* argv[])
-v v v v v v v
  : m_port(argc > 3 ? strtol(argv[3], NULL, 10) : 6522), m_quit(true),
-^ ^ ^ ^ ^ ^ ^
-   m_synced(false), m_buffer(argv[2], m_port), m_screen(m_buffer)
+   m_synced(false), m_buffer(argv[2], m_port), m_screen(NULL)
 {
 	srand( time(NULL) );
-	unsigned int red = rand() % 255;
-	unsigned int green = rand() % 255;
-	unsigned int blue = rand() % 255;
+	unsigned int red = rand() % 256;
+	unsigned int green = rand() % 256;
+	unsigned int blue = rand() % 256;
 	
 	m_buffer.login_failed_event().connect(
 		sigc::mem_fun(*this, &curses_editor::on_login_failed) );
 	m_buffer.login(argv[1], red, green, blue);
 
-	m_buffer.join_event().connect(
+	m_buffer.user_join_event().connect(
 		sigc::mem_fun(*this, &curses_editor::on_join) );
-	m_buffer.part_event().connect(
+	m_buffer.user_part_event().connect(
 		sigc::mem_fun(*this, &curses_editor::on_part) );
 	m_buffer.close_event().connect(
 		sigc::mem_fun(*this, &curses_editor::on_close) );
 	m_buffer.sync_event().connect(
 		sigc::mem_fun(*this, &curses_editor::on_sync) );
-	m_buffer.insert_event().connect(
-		sigc::mem_fun(*this, &curses_editor::on_insert) );
-	m_buffer.delete_event().connect(
-		sigc::mem_fun(*this, &curses_editor::on_delete) );
+
+	m_buffer.insert_document_event().connect(
+		sigc::mem_fun(*this, &curses_editor::on_document_insert) );
+	m_buffer.remove_document_event().connect(
+		sigc::mem_fun(*this, &curses_editor::on_document_remove) );
 }
 
 curses_editor::~curses_editor()
 {
+	if(m_screen)
+		delete m_screen;
 	if(!m_quit)
 		quit();
 }
 
 bool curses_editor::run()
 {
-	halfdelay(2);
 	m_quit = false;
 	
 	while(!m_quit)
 	{
-		int c = getch();
-		if(c != ERR && m_synced)
+		int c = ERR;
+		if(m_screen) c = getch();
+
+		if(c != ERR && m_synced && m_screen)
 		{
 			// Get cursor position
 //			unsigned int x = m_screen.get_cursor_x();
@@ -292,28 +298,28 @@ bool curses_editor::run()
 			if(isprint(c) && c <= 0xff)
 			{
 				char string[2] = { c, '\0' };
-				m_buffer.insert(m_screen.get_cursor(), string);
-				m_screen.on_insert(m_screen.get_cursor(), string);
+				m_document->insert(m_screen->get_cursor(), string);
+				m_screen->on_insert(m_screen->get_cursor(), string);
 			}
 
 			if(c == '\r')
 			{
-				m_buffer.insert(m_screen.get_cursor(), "\n");
-				m_screen.on_insert(m_screen.get_cursor(), "\n");
+				m_document->insert(m_screen->get_cursor(), "\n");
+				m_screen->on_insert(m_screen->get_cursor(), "\n");
 			}
 
 			if(c == KEY_LEFT)
-				m_screen.move_cursor(-1, 0, true);
+				m_screen->move_cursor(-1, 0, true);
 			if(c == KEY_RIGHT)
-				m_screen.move_cursor(1, 0, true);
+				m_screen->move_cursor(1, 0, true);
 			if(c == KEY_UP)
-				m_screen.move_cursor(0, -1, false);
+				m_screen->move_cursor(0, -1, false);
 			if(c == KEY_DOWN)
-				m_screen.move_cursor(0, 1, false);
+				m_screen->move_cursor(0, 1, false);
 			if(c == KEY_BACKSPACE)
 			{
-				m_buffer.erase(m_screen.get_cursor() - 1, m_screen.get_cursor() );
-				m_screen.on_erase(m_screen.get_cursor() - 1, m_screen.get_cursor() );
+				m_document->erase(m_screen->get_cursor() - 1, m_screen->get_cursor() );
+				m_screen->on_erase(m_screen->get_cursor() - 1, m_screen->get_cursor() );
 			}
 
 			if(c == 'q')
@@ -351,7 +357,16 @@ void curses_editor::on_close()
 
 void curses_editor::on_sync()
 {
-	m_screen.on_insert(0, m_buffer.get_whole_buffer() );
+	obby::buffer::document_iterator iter;
+	for(iter = m_buffer.document_begin();
+	    iter != m_buffer.document_end();
+	    ++ iter)
+	{
+		m_screen = new screen(*iter);
+		m_document = &(*iter);
+	}
+		
+	// TODO: Sync document content
 	m_synced = true;
 }
 
@@ -361,14 +376,36 @@ void curses_editor::on_login_failed(const std::string& reason)
 	quit();
 }
 
-void curses_editor::on_insert(const obby::insert_record& record)
+void curses_editor::on_document_insert(obby::document& document)
 {
-	m_screen.on_insert(record.get_position(), record.get_text() );
+	document.insert_event().connect(sigc::bind(
+		sigc::mem_fun(*this, &curses_editor::on_insert),
+		sigc::ref(document)
+	));
+
+	document.delete_event().connect(sigc::bind(
+		sigc::mem_fun(*this, &curses_editor::on_delete),
+		sigc::ref(document)
+	));
+
+	m_screen = new screen(document);
+	m_document = &document;
 }
 
-void curses_editor::on_delete(const obby::delete_record& record)
+void curses_editor::on_document_remove(obby::document& document)
 {
-	m_screen.on_erase(record.get_begin(), record.get_end() );
+}
+
+void curses_editor::on_insert(const obby::insert_record& record,
+                              obby::document& document)
+{
+	m_screen->on_insert(record.get_position(), record.get_text() );
+}
+
+void curses_editor::on_delete(const obby::delete_record& record,
+                              obby::document& document)
+{
+	m_screen->on_erase(record.get_begin(), record.get_end() );
 }
 
 int main(int argc, char* argv[]) try
