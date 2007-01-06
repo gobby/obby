@@ -6,10 +6,14 @@ libobby
   later version. A copy of the license is included in the
   distribution.
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  This program is distributed under the terms and conditions of
+  the GNU General Public License, with the clarification that it
+  is allowed to link it with the howl library, or any derivative
+  of it that is distributed under its current or a GPL compatible
+  license (as of version 1.0.0) and in the hope that it will be
+  useful, but WITHOUT ANY WARRANTY; without even the implied
+  warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  Please see the GNU General Public License for more details.
 
   Copyright (C) 2005 0x539 dev group <crew@0x539.de>
 

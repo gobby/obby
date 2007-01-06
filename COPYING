@@ -1,3 +1,14 @@
+  This library is licensed under the terms and conditions
+of the GNU General Public License version 2 or any later
+version, with the clarification that it is allowed to link
+it with the howl library, or any derivative of it that is
+distributed under its current license (as of version 1.0.0).
+The dependency on code licensed under the Apple Public Source
+License is known and not considered harmful. For those
+considering this a problem the code depending on howl is
+kept modular and could be deactivated with a configuration
+option.
+
 		    GNU GENERAL PUBLIC LICENSE
 		       Version 2, June 1991
 
