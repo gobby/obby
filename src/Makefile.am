@@ -11,7 +11,7 @@ libobby_la_LDFLAGS = -version-info 0:0:0 -release 0.3
 libobby_la_LIBADD = serialise/libserialise.la $(libobby_LIBS) @extra_libraries@
 
 if WIN32
-libobby_la_LDFLAGS += -no-undefined
+libobby_la_LDFLAGS += -no-undefined -Wl,--enable-runtime-pseudo-reloc
 endif
 
 libobby_la_CPPFLAGS = $(libobby_CFLAGS) -I../inc @extra_includes@
