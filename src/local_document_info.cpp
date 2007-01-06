@@ -17,12 +17,3 @@
  */
 
 #include "local_document_info.hpp"
-
-#if 0
-obby::local_document_info::local_document_info(const user* owner,
-                                               unsigned int id,
-                                               const std::string& title)
- : document_info(owner, id, title)
-{
-}
-#endif
