@@ -732,9 +732,9 @@ echo '<?xml version="1.0" encoding="UTF-8" ?>';
 
     echo '<div class="menu">';
     if(NULL != $GLOBALS['refresh'])
-      echo '[ <a href="' . make_link(array('file' => $file, 'document' => $document, 'refresh' => NULL)) . '">Do not refresh</a> ]';
+      echo '[ <a href="' . make_link(array('file' => $filename, 'document' => $document, 'refresh' => NULL)) . '">Do not refresh</a> ]';
     else
-      echo '[ <a href="' . make_link(array('file' => $file, 'document' => $document, 'refresh' => $GLOBALS['defrefresh'])) . '">Refresh every ' . $GLOBALS['defrefresh'] . ' seconds</a> ]';
+      echo '[ <a href="' . make_link(array('file' => $filename, 'document' => $document, 'refresh' => $GLOBALS['defrefresh'])) . '">Refresh every ' . $GLOBALS['defrefresh'] . ' seconds</a> ]';
     echo '</div>';
 
     $user_table->print_list();
