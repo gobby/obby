@@ -43,12 +43,20 @@ public:
 		std::istream& stream
 	);
 
+	void deserialise_memory(
+		const std::string& mem
+	);
+
 	void serialise(
 		const std::string& file
 	) const;
 
 	void serialise(
 		std::ostream& stream
+	) const;
+
+	void serialise_memory(
+		std::string& mem
 	) const;
 
 	const std::string& get_type() const;

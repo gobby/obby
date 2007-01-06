@@ -14,8 +14,11 @@ LDADD       += $(libhowl_LIBS)
 AM_CPPFLAGS += $(libhowl_CFLAGS)
 endif
 
-noinst_PROGRAMS = rsa
-#noinst_PROGRAMS += bufferd
+noinst_PROGRAMS = \
+	rsa \
+	serialise
+
+#noinst_PROGRAMS += buffer
 #noinst_PROGRAMS += curses
 
 #bufferd_SOURCES = bufferd.cpp
@@ -24,6 +27,7 @@ noinst_PROGRAMS = rsa
 #curses_LDADD = $(LDADD) -lncurses
 
 rsa_SOURCES = rsa.cpp
+serialise_SOURCES = serialise.cpp
 
 if WITH_HOWL
 noinst_PROGRAMS += discover

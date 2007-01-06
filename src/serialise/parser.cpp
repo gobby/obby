@@ -67,8 +67,15 @@ void obby::serialise::parser::deserialise(
 		result.append(readbuf, stream.gcount() );
 	}
 
+	deserialise_memory(result);
+}
+
+void obby::serialise::parser::deserialise_memory(
+	const std::string& mem
+)
+{
 	token_list list;
-	list.deserialise(result);
+	list.deserialise(mem);
 	token_list::iterator iter = list.begin();
 
 	// Get initial '!'
@@ -153,6 +160,19 @@ void obby::serialise::parser::serialise(
 	std::ostream& stream
 ) const
 {
+	// Get string
+	std::string result;
+	serialise_memory(result);
+
+	// Write it into the file
+	stream << result;
+	stream.flush();
+}
+
+void obby::serialise::parser::serialise_memory(
+	std::string& mem
+) const
+{
 	// Empty list
 	token_list list;
 
@@ -165,14 +185,7 @@ void obby::serialise::parser::serialise(
 
 	// Serialise root object with its children
 	m_object.serialise(list);
-
-	// Get string
-	std::string result;
-	list.serialise(result);
-
-	// Write it into the file
-	stream << result;
-	stream.flush();
+	list.serialise(mem);
 }
 
 const std::string& obby::serialise::parser::get_type() const
