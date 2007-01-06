@@ -45,14 +45,14 @@ void obby::jupiter_undo::client_remove(const user& client)
 
 void obby::jupiter_undo::local_op(const operation& op, const user* from)
 {
-	m_opring.push_back(op.reverse(m_doc) );
-	transform_undo_ring(op);
+/*	transform_undo_ring(op);
+	m_opring.push_back(op.reverse(m_doc) );*/
 }
 
 void obby::jupiter_undo::remote_op(const operation& op, const user* from)
 {
 	// No need to check, transform in all cases
-	transform_undo_ring(op);
+	//transform_undo_ring(op);
 }
 
 bool obby::jupiter_undo::can_undo()
