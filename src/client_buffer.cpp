@@ -510,6 +510,7 @@ void obby::client_buffer::on_net_sync_doclist_document(const net6::packet& pack)
 		dynamic_cast<client_document_info&>(info);
 
 	// Add users who subscribed to this document
+	client_info.obby_sync_init();
 	for(unsigned int i = 3; i < pack.get_param_count(); ++ i)
 	{
 		// Read user from parameter
@@ -558,6 +559,7 @@ obby::client_buffer::add_document_info(const user* owner,
 	document_info* doc = new client_document_info(
 		*this, *m_client, owner, id, title
 	);
+
 	// Push to list
 	m_doclist.push_back(doc);
 	return *doc;

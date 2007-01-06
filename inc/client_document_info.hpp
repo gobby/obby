@@ -74,6 +74,11 @@ public:
 	 */
 	virtual void obby_data(const net6::packet& pack);
 
+	/** Called by the client buffer when user synchronisation begings.
+	 * This clears all the correcntly subscribed users.
+	 */
+	virtual void obby_sync_init();
+
 	/** Adds a user to the list of subscribed users. This function is
 	 * called by the buffer while synchronising the document list.
 	 */

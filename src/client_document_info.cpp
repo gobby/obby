@@ -102,6 +102,13 @@ void obby::client_document_info::obby_data(const net6::packet& pack)
 	}
 }
 
+void obby::client_document_info::obby_sync_init()
+{
+	// The subscription list gets synchronised now, so m_userlist has
+	// to be cleared to hold exactly the synchonised users and no others.
+	m_userlist.clear();
+}
+
 void obby::client_document_info::obby_sync_subscribe(const user& user)
 {
 	// The signal does not have to be emitted because this function is
