@@ -276,6 +276,11 @@ void basic_server_buffer<Document, Selector>::open(unsigned int port)
 	register_signal_handlers();
 
 	net6_server().reopen(port);
+
+	// Clear previous documents and users
+	basic_buffer<Document, Selector>::document_clear();
+	basic_buffer<Document, Selector>::m_user_table.clear();
+
 	basic_buffer<Document, Selector>::m_signal_sync_init.emit(0);
 	basic_buffer<Document, Selector>::m_signal_sync_final.emit();
 }
@@ -298,11 +303,15 @@ void basic_server_buffer<Document, Selector>::open(const std::string& session,
 
 	net6_server().reopen(port);
 
-	basic_buffer<Document, Selector>::m_signal_sync_init.emit(0);
-
 	// Deserialise file
 	serialise::parser parser;
 	parser.deserialise(session);
+
+	// Clear previous documents and users
+	basic_buffer<Document, Selector>::document_clear();
+	basic_buffer<Document, Selector>::m_user_table.clear();
+
+	basic_buffer<Document, Selector>::m_signal_sync_init.emit(0);
 
 	if(parser.get_type() != "obby")
 		throw serialise::error(_("File is not an obby document"), 1);
@@ -375,10 +384,17 @@ void basic_server_buffer<Document, Selector>::close()
 		);
 	}
 
+	user_table& table = basic_buffer<Document, Selector>::m_user_table;
+	for(user_table::iterator iter =
+		table.begin(user::flags::CONNECTED, user::flags::NONE);
+	    iter != table.end(user::flags::CONNECTED, user::flags::NONE);
+	    ++ iter)
+	{
+		table.remove_user(*iter);
+	}
+
 	// Reset documents, users and network object
 	// TODO: Keep documents and users until reconnection
-	basic_buffer<Document, Selector>::document_clear();
-	basic_buffer<Document, Selector>::m_user_table.clear();
 	basic_buffer<Document, Selector>::m_net.reset(NULL);
 }
 
@@ -414,21 +430,38 @@ template<typename Document, typename Selector>
 void basic_server_buffer<Document, Selector>::
 	document_remove(base_document_info_type& info)
 {
-	// Emit unsubscribe signal for all users that were
-	// subscribed to this document
-	// TODO: Do this in document_delete
-	for(typename document_info_type::user_iterator user_iter =
-		info.user_begin();
-	    user_iter != info.user_end();
-	    ++ user_iter)
+	if(is_open() )
 	{
-		info.unsubscribe_event().emit(*user_iter);
-	}
+		// Emit unsubscribe signal for all users that were
+		// subscribed to this document
+		// TODO: Do this in document_delete
+		for(typename document_info_type::user_iterator user_iter =
+			info.user_begin();
+		    user_iter != info.user_end();
+		    ++ user_iter)
+		{
+			info.unsubscribe_event().emit(*user_iter);
+		}
 
-	// Tell other clients about removal
-	net6::packet remove_pack("obby_document_remove");
-	remove_pack << &info;
-	net6_server().send(remove_pack);
+		// Tell other clients about removal
+		net6::packet remove_pack("obby_document_remove");
+		remove_pack << &info;
+		net6_server().send(remove_pack);
+	}
+	else
+	{
+		// No users must be subscribed to this document when the
+		// session is not open, they should have been unsubscribed
+		// on session close.
+		if(info.user_count() > 0)
+		{
+			throw std::logic_error(
+				"obby::basic_server_buffer::document_remove:\n"
+				"Users are still subscribed to the document "
+				"although the session has been closed"
+			);
+		}
+	}
 
 	// Delete document
 	basic_buffer<Document, Selector>::document_delete(info);
@@ -475,6 +508,14 @@ void basic_server_buffer<Document, Selector>::
 	                     const std::string& encoding,
                              const std::string& content)
 {
+	if(!is_open() )
+	{
+		throw std::logic_error(
+			"obby::basic_server_buffer::document_create_impl:\n"
+			"Document creation while server is closed"
+		);
+	}
+
 	// Create new document
 	base_document_info_type* info =
 		new_document_info(owner, id, title, encoding, content);
@@ -504,9 +545,12 @@ template<typename Document, typename Selector>
 void basic_server_buffer<Document, Selector>::
 	send_message_impl(const std::string& message, const user* writer)
 {
-	net6::packet message_pack("obby_message");
-	message_pack << writer << message;
-	net6_server().send(message_pack);
+	if(is_open() )
+	{
+		net6::packet message_pack("obby_message");
+		message_pack << writer << message;
+		net6_server().send(message_pack);
+	}
 
 	if(writer == NULL)
 	{
@@ -534,9 +578,12 @@ void basic_server_buffer<Document, Selector>::
 	// TODO: user::set_colour should emit this signal
 	basic_buffer<Document, Selector>::m_signal_user_colour.emit(user);
 
-	net6::packet colour_pack("obby_user_colour");
-	colour_pack << &user << colour;
-	net6_server().send(colour_pack);
+	if(is_open() )
+	{
+		net6::packet colour_pack("obby_user_colour");
+		colour_pack << &user << colour;
+		net6_server().send(colour_pack);
+	}
 }
 
 template<typename Document, typename Selector>
