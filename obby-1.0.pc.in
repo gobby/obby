@@ -7,6 +7,6 @@ Name: lobby
 Description: Network text editing library
 Requires: sigc++-2.0 net6-1.0 @extra_requires@
 Version: @PACKAGE_VERSION@
-Libs: -L${libdir} -lobby
+Libs: @LIBS@ -L${libdir} -lobby
 Cflags: -I${includedir}
 

@@ -11,6 +11,7 @@ AC_CONFIG_HEADER([inc/config.hpp])
 AC_CANONICAL_HOST
 
 # Checks for programs.
+AC_LANG(C++)
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
@@ -21,6 +22,57 @@ AC_PROG_RANLIB
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AC_CACHE_SAVE
+
+# Check for the required GMP presence.
+ac_gmp_lib_dirs="/usr/lib /usr/local/lib"
+## An explicit library search path for GMP is not yet supported. I'll keep
+## this here anyway as a template when a solution is found for checking
+## the presence of library and headers in their corresponding subdirectories
+## of DIR. [TODO]
+#AC_ARG_WITH(gmp,
+#	AC_HELP_STRING([--with-gmp=DIR], [look for the GNU MP library in DIR]),
+#	ac_gmp_lib_dirs="$withval $ac_gmp_lib_dirs")
+ac_gmp_lib_found=no
+#ac_obby_libs="$LDFLAGS"
+#for dir in $ac_gmp_lib_dirs
+#do
+	if test "x$ac_gmp_lib_found" != "xyes" ; then
+		AC_CHECK_LIB(gmpxx, __gmpz_get_str, ac_gmp_lib_found=yes,
+			ac_gmp_lib_found=no)
+		AC_CHECK_HEADER([gmpxx.h], ac_gmp_lib_found=yes,
+			ac_gmp_lib_found=no)
+	fi
+	if test "x$ac_gmp_lib_found" = "xyes" ; then
+#		LIBS="-L$dir -lgmpxx $LIBS"
+		LIBS="-lgmpxx $LIBS"
+#		break		
+	fi
+#done
+if test "x$ac_gmp_lib_found" != "xyes" ; then
+	AC_MSG_ERROR([
+
+][  ###
+][  ###  GNU multiple precision arithmetic library not found or
+][  ###  not compiled with C++ support!
+][  ###
+][  ###  If your GNU multiple precision (MP) libraries are in an unusual
+][  ###  location, specify the directory where they are located with:
+][  ###
+][  ###       --with-gmp=DIR
+][  ###
+][  ###  If you don't have the GNU MP development files on your system,
+][  ###  download and install them from the following URL:
+][  ###
+][  ###       http://gnu.org/software/gmp
+][  ###
+][  ###  C++ support needs to be enabled in GMP by passing `--enable-cxx'
+][  ###  to its configuration script.
+][  ###
+][  ###  (Error detail might be available in `config.log'.)
+][  ###
+])
+fi
+AC_SUBST(LIBS)
 
 # Let the user choose if he wants libhowl support or not (default to no).
 extra_requires=""
