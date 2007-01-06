@@ -4,7 +4,7 @@ lib_LTLIBRARIES = libobby.la
 #     ^     :     ^    :       ^
 #     |     :   minor  :       |
 # interface :  changes : compatibility
-libobby_la_LDFLAGS = -version-info 0:0:0 -release 0
+libobby_la_LDFLAGS = -version-info 0:0:0 -release 1.0
 
 libobby_la_LIBADD = $(libobby_LIBS)
 
