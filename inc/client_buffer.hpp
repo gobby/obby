@@ -1051,8 +1051,11 @@ void basic_client_buffer<Document, Selector>::
 
 	// Initialise document counter to the document's ID to produce
 	// unique IDs even when rejoining a session.
-	if(owner_id == m_self->get_id() )
+	if(owner_id == m_self->get_id() &&
+	   id >= basic_buffer<Document, Selector>::m_doc_counter)
+	{
 		basic_buffer<Document, Selector>::m_doc_counter = id + 1;
+	}
 
 	// Check for duplicates, should not happen
 	if(document_find(owner_id, id) != NULL)
