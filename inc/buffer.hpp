@@ -265,7 +265,7 @@ protected:
 typedef basic_buffer<obby::document, net6::selector> buffer;
 
 template<typename Document, typename Selector>
-const unsigned long basic_buffer<Document, Selector>::PROTOCOL_VERSION = 6ul;
+const unsigned long basic_buffer<Document, Selector>::PROTOCOL_VERSION = 7ul;
 
 template<typename Document, typename Selector>
 basic_buffer<Document, Selector>::basic_buffer():

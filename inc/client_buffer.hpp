@@ -66,8 +66,8 @@ public:
 		signal_login_failed_type;
 	typedef sigc::signal<void>
 		signal_close_type;
-	typedef sigc::signal<void>
-		signal_encrypted_type;
+//	typedef sigc::signal<void>
+//		signal_encrypted_type;
 
 	typedef typename sigc::signal<bool, connection_settings&>
 		::template accumulated<login_accumulator>
@@ -195,7 +195,7 @@ public:
 	/** Signal which will be emitted as soon as the connection is
 	 * guaranteed to be encrypted.
 	 */
-	signal_encrypted_type encrypted_event() const;
+	//signal_encrypted_type encrypted_event() const;
 
 	/** Signal which will be emitted if a login request did not succeed.
 	 */
@@ -257,7 +257,7 @@ protected:
 	void on_join(const net6::user& user6, const net6::packet& pack);
 	void on_part(const net6::user& user6, const net6::packet& pack);
 	void on_close();
-	void on_encrypted();
+	//void on_encrypted();
 	void on_data(const net6::packet& pack);
 	void on_login_failed(net6::login::error error);
 	void on_login_extend(net6::packet& pack);
@@ -313,7 +313,7 @@ protected:
 
 	signal_welcome_type m_signal_welcome;
 	signal_close_type m_signal_close;
-	signal_encrypted_type m_signal_encrypted;
+	//signal_encrypted_type m_signal_encrypted;
 	signal_login_failed_type m_signal_login_failed;
 
 	signal_prompt_name_type m_signal_prompt_name;
@@ -638,21 +638,21 @@ basic_client_buffer<Document, Selector>::close_event() const
 	return m_signal_close;
 }
 
-template<typename Document, typename Selector>
+/*template<typename Document, typename Selector>
 typename basic_client_buffer<Document, Selector>::signal_encrypted_type
 basic_client_buffer<Document, Selector>::encrypted_event() const
 {
 	return m_signal_encrypted;
-}
+}*/
 
 template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::on_join(const net6::user& user6,
                                                       const net6::packet& pack)
 {
 	unsigned int id =
-		pack.get_param(2).net6::parameter::as<unsigned int>();
+		pack.get_param(3).net6::parameter::as<unsigned int>();
 	colour colour =
-		pack.get_param(3).net6::parameter::as<obby::colour>();
+		pack.get_param(4).net6::parameter::as<obby::colour>();
 
 	// Add user
 	const user* new_user = basic_buffer<Document, Selector>::
@@ -696,11 +696,11 @@ void basic_client_buffer<Document, Selector>::on_close()
 	m_signal_close.emit();
 }
 
-template<typename Document, typename Selector>
+/*template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::on_encrypted()
 {
 	m_signal_encrypted.emit();
-}
+}*/
 
 template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::on_data(const net6::packet& pack)
@@ -1081,8 +1081,8 @@ void basic_client_buffer<Document, Selector>::register_signal_handlers()
 		sigc::mem_fun(*this, &basic_client_buffer::on_part) );
 	net6_client().close_event().connect(
 		sigc::mem_fun(*this, &basic_client_buffer::on_close) );
-	net6_client().encrypted_event().connect(
-		sigc::mem_fun(*this, &basic_client_buffer::on_encrypted) );
+	//net6_client().encrypted_event().connect(
+	//	sigc::mem_fun(*this, &basic_client_buffer::on_encrypted) );
 	net6_client().data_event().connect(
 		sigc::mem_fun(*this, &basic_client_buffer::on_data) );
 	net6_client().login_failed_event().connect(

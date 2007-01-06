@@ -268,6 +268,3 @@ protected:
 } // namespace serialise
 
 #endif // _OBBY_USER_HPP_
-
-
-
