@@ -948,7 +948,12 @@ bool basic_server_buffer<Document, Selector>::
 	}
 	catch(std::logic_error& e)
 	{
-		// Packet caused a logic error. Not good.
+		// Print a meaningful error message to stderr why
+		// the offending user was dropped.
+		std::cerr << "obby logic error caught in connection to "
+		          << from.get_name() << ": " << e.what() << std::endl;
+
+		// Packet caused a logic error. Not good. Drop the client.
 		throw net6::bad_packet(e.what());
 	}
 }
