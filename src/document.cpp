@@ -20,7 +20,7 @@
 #include "document.hpp"
 
 obby::document::document(unsigned int id, const user_table& usertable)
- : m_id(id), m_history(), m_revision(0), m_usertable(usertable),
+ : m_id(id), m_title(), m_history(), m_revision(0), m_usertable(usertable),
    m_lines(1, line())
 {
 }
@@ -35,6 +35,16 @@ obby::document::~document()
 unsigned int obby::document::get_id() const
 {
 	return m_id;
+}
+
+std::string obby::document::get_title() const
+{
+	return m_title;
+}
+
+void obby::document::set_title(const std::string& title)
+{
+	m_title = title;
 }
 
 std::string obby::document::get_whole_buffer() const

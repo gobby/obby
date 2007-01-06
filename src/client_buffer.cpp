@@ -150,6 +150,8 @@ void obby::client_buffer::on_data(const net6::packet& pack)
 
 	if(pack.get_command() == "obby_document_create")
 		on_net_document_create(pack);
+	if(pack.get_command() == "obby_document_rename")
+		on_net_document_rename(pack);
 	if(pack.get_command() == "obby_document_remove")
 		on_net_document_remove(pack);
 
@@ -207,6 +209,21 @@ void obby::client_buffer::on_net_document_create(const net6::packet& pack)
 
 	document& new_doc = add_document(id);
 	m_signal_insert_document.emit(new_doc);
+}
+
+void obby::client_buffer::on_net_document_rename(const net6::packet& pack)
+{
+	if(pack.get_param_count() < 2) return;
+	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
+	if(pack.get_param(1).get_type() != net6::packet::param::STRING) return;
+	
+	unsigned int id = pack.get_param(0).as_int();
+	const std::string& name = pack.get_param(1).as_string();
+       
+	document* doc = find_document(id);
+	assert(doc != NULL);
+	doc->set_title(name);
+	m_signal_rename_document.emit(*doc, name);
 }
 
 void obby::client_buffer::on_net_document_remove(const net6::packet& pack)

@@ -50,6 +50,14 @@ public:
 	 */
 	unsigned int get_id() const;
 
+	/** Returns the title set for this document.
+	 */
+	std::string get_title() const;
+
+	/** Sets a new title for this document.
+	 */
+	void set_title(const std::string& title);
+
 	/** Returns the whole content of the document.
 	 */
 	std::string get_whole_buffer() const;
@@ -125,6 +133,7 @@ public:
 	virtual void on_net_record(record& rec) = 0;
 protected:
 	unsigned int m_id;
+	std::string m_title;
 
 	std::list<record*> m_history;
 	unsigned int m_revision;

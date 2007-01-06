@@ -121,6 +121,7 @@ protected:
 	void on_net_record(const net6::packet& pack);
 
 	void on_net_document_create(const net6::packet& pack);
+	void on_net_document_rename(const net6::packet& pack);
 	void on_net_document_remove(const net6::packet& pack);
 
 	void on_net_sync_init(const net6::packet& pack);

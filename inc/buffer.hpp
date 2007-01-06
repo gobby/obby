@@ -59,6 +59,8 @@ public:
 	typedef sigc::signal<void, user&> signal_user_join_type;
 	typedef sigc::signal<void, user&> signal_user_part_type;
 	typedef sigc::signal<void, document&> signal_insert_document_type;
+	typedef sigc::signal<void, document&, const std::string&>
+		signal_rename_document_type;
 	typedef sigc::signal<void, document&> signal_remove_document_type;
 
 	buffer();
@@ -106,7 +108,12 @@ public:
 	 */
 	signal_insert_document_type insert_document_event() const;
 
-	/** Signal which will be emitted when another participiant in the
+	/** Signal which will be emitted when another participant in the
+	 * obby session renames one document.
+	 */
+	signal_rename_document_type rename_document_event() const;
+
+	/** Signal which will be emitted when another participant in the
 	 * obby session has removed an existing document.
 	 */
 	signal_remove_document_type remove_document_event() const;
@@ -140,6 +147,7 @@ protected:
 	signal_user_part_type m_signal_user_part;
 
 	signal_insert_document_type m_signal_insert_document;
+	signal_rename_document_type m_signal_rename_document;
 	signal_remove_document_type m_signal_remove_document;
 };
 

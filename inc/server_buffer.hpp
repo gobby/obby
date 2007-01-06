@@ -96,8 +96,10 @@ protected:
 	void on_extend(net6::server::peer& peer, net6::packet& pack);
 
 	void on_net_record(const net6::packet& pack, user& from);
+	void on_net_title(const net6::packet& pack, user& from);
 
 	void on_net_document_create(const net6::packet& pack, user& from);
+	void on_net_document_rename(const net6::packet& pack, user& from);
 	void on_net_document_remove(const net6::packet& pack, user& from);
 
 	unsigned int m_doc_counter;
