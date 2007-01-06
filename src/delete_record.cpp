@@ -47,7 +47,7 @@ obby::record* obby::delete_record::clone() const
 void obby::delete_record::apply(document& doc) const
 {
 	assert(doc.get_sub_buffer(m_pos, m_pos + m_text.length()) == m_text);
-	doc.erase_nosync(m_pos, m_pos + m_text.length(), m_from);
+	doc.erase_nosync(*this);
 }
 
 void obby::delete_record::apply(record& rec) const
@@ -138,10 +138,5 @@ obby::position obby::delete_record::get_end() const
 const std::string& obby::delete_record::get_text() const
 {
 	return m_text;
-}
-
-void obby::delete_record::emit_document_signal(const document& doc) const
-{
-	doc.delete_event().emit(*this);
 }
 

@@ -92,12 +92,11 @@ std::string obby::document::get_sub_buffer(position from, position to) const
 	return buffer;
 }
 
-void obby::document::insert_nosync(position pos, const std::string& text,
-                                   unsigned int author_id)
+void obby::document::insert_nosync(const insert_record& record)
 {
 	// Convert position to row and column
 	unsigned int pos_row, pos_col;
-	position_to_coord(pos, pos_row, pos_col);
+	position_to_coord(record.get_position(), pos_row, pos_col);
 
 	// Verify them
 	assert(pos_row < m_lines.size() );
@@ -105,7 +104,8 @@ void obby::document::insert_nosync(position pos, const std::string& text,
 
 	// Find author in user table
 	const user_table::user* author;
-	author = get_buffer().get_user_table().find_from_user_id(author_id);
+	author = get_buffer().get_user_table().find_from_user_id(
+		record.get_from() );
 	assert(author != NULL);
 
 	// Move line iterator to the line where to insert text
@@ -118,8 +118,12 @@ void obby::document::insert_nosync(position pos, const std::string& text,
 	line first_line_carry;
 	unsigned int ins_col = pos_col;
 
+	// Notify signal handlers before making any changes
+	m_signal_insert.before().emit(record);
+	
 	// Insert line by line
 	std::string::size_type nl_pos = 0, nl_prev = 0;
+	const std::string& text = record.get_text();
 	while( (nl_pos = text.find('\n', nl_pos)) != std::string::npos)
 	{
 		// First line?
@@ -146,30 +150,37 @@ void obby::document::insert_nosync(position pos, const std::string& text,
 	// Insert first_line_carry (if any) and the text in the last line
 	iter->insert(ins_col, first_line_carry);
 	iter->insert(ins_col, text.substr(nl_prev), *author);
+
+	// Notify signal handlers after changes have been performed
+	m_signal_insert.after().emit(record);
 }
 
-void obby::document::erase_nosync(position from, position to,
-                                  unsigned int author_id)
+void obby::document::erase_nosync(const delete_record& record)
 {
 	// Convert positions to rows and columns
 	unsigned int from_row, from_col, to_row, to_col;
-	position_to_coord(from, from_row, from_col);
-	position_to_coord(to, to_row, to_col);
+	position_to_coord(record.get_begin(), from_row, from_col);
+	position_to_coord(record.get_end(), to_row, to_col);
 	
 	// Verify them
-	assert(to >= from);
+	// TODO: record ensures already that end >= begin, doesn't it?
+	assert(record.get_end() >= record.get_begin() );
 	assert(to_row < m_lines.size() );
 	assert(to_col <= m_lines[to_row].length() );
 
 	// Find author in user_table
 	const user_table::user* author;
-	author = get_buffer().get_user_table().find_from_user_id(author_id);
+	author = get_buffer().get_user_table().find_from_user_id(
+		record.get_from() );
 	assert(author != NULL);
 
 	// Find the iterator for the given row
 	std::vector<line>::iterator iter = m_lines.begin();
 	for(unsigned int i = 0; i < from_row; ++ i)
 		++ iter;
+
+	// Notify signal handlers before making any changes
+	m_signal_delete.before().emit(record);
 
 	// Do not remove any lines?
 	if(from_row == to_row)
@@ -191,6 +202,9 @@ void obby::document::erase_nosync(position from, position to,
 			++ end_iter;
 		m_lines.erase(iter, end_iter);
 	}
+
+	// Notify signal handlers after changes have been performed
+	m_signal_delete.after().emit(record);
 }
 
 obby::document::signal_insert_type obby::document::insert_event() const

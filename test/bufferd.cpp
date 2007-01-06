@@ -97,9 +97,9 @@ void bufferd::on_insert_document(obby::document& doc)
 	std::cout << "New document created: ID = " << doc.get_id() << ", ";
 	std::cout << "TITLE = \"" << doc.get_title() << "\"" << std::endl;
 	
-	doc.insert_event().connect(sigc::bind(
+	doc.insert_event().before().connect(sigc::bind(
 		sigc::mem_fun(*this, &bufferd::on_doc_insert), sigc::ref(doc)));
-	doc.delete_event().connect(sigc::bind(
+	doc.delete_event().before().connect(sigc::bind(
 		sigc::mem_fun(*this, &bufferd::on_doc_remove), sigc::ref(doc)));
 }
 

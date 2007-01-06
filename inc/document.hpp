@@ -24,6 +24,7 @@
 #include <sigc++/signal.h>
 #include <net6/non_copyable.hpp>
 #include "position.hpp"
+#include "duplex_signal.hpp"
 #include "record.hpp"
 #include "insert_record.hpp"
 #include "delete_record.hpp"
@@ -38,12 +39,14 @@ class buffer;
 /** Abstract base class for obby documents. A document contains an amount of
  * text that is synchronised to all other participants in the obby session.
  */
-	
+
 class document : private net6::non_copyable
 {
 public:
-	typedef sigc::signal<void, const insert_record&> signal_insert_type;
-	typedef sigc::signal<void, const delete_record&> signal_delete_type;
+	typedef duplex_signal<sigc::signal<void, const insert_record&> >
+		signal_insert_type;
+	typedef duplex_signal<sigc::signal<void, const delete_record&> >
+		signal_delete_type;
 
 	document(unsigned int id, const buffer& buf);
 	virtual ~document();
@@ -82,33 +85,25 @@ public:
 	 */
 	virtual void erase(position from, position to) = 0;
 
-	/** Inserts text without syncing it to other users. This is an low-level
+	/** Inserts text without syncing it to other users. This is a low-level
 	 * function libobby uses within itself, so USE WITH CARE! You may
 	 * destroy the complete obby session by performing unsynced operations.
-	 * @param pos Position where to insert text
-	 * @param text text to insert
-	 * @param author_id ID of the user who performed this operation.
 	 */
-	void insert_nosync(position pos, const std::string& text,
-	                   unsigned int author_id);
+	void insert_nosync(const insert_record& record);
 
-	/** Removes text without syncing it to other users. This is an low-level
+	/** Removes text without syncing it to other users. This is a low-level
 	 * function libobby uses within itself, so USE WITH CARE! You may
 	 * destroy the complete obby session by performing unsynced operations.
-	 * @param from Beginning of the position where to remove text
-	 * @param to End of the area where to remove text
-	 * @param author_id ID of the user who performed this operation.
 	 */
-	void erase_nosync(position from, position to, unsigned int author_id);
+	void erase_nosync(const delete_record& record);
 
 	/** Signal which will be emitted if text has been inserted into the
-	 * document. A call to insert or insert_nosync will not emit this
-	 * signal.
+	 * document.
 	 */
 	signal_insert_type insert_event() const;
 
 	/** Signal which will be emitted if text has been deleted from the
-	 * document. erase and erase_nosync will not emit this signal.
+	 * document.
 	 */
 	signal_delete_type delete_event() const;
 

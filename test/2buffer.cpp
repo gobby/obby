@@ -22,9 +22,9 @@ void sync_1(obby::client_buffer& client1)
 {
 	obby::document& doc = *client1.document_begin();
 	
-	doc.insert_event().connect(sigc::bind(
+	doc.insert_event().before().connect(sigc::bind(
 		sigc::ptr_fun(&insert_n), sigc::ref(doc), 1) );
-	doc.delete_event().connect(sigc::bind(
+	doc.delete_event().before().connect(sigc::bind(
 		sigc::ptr_fun(&erase_n), sigc::ref(doc), 1) );
 	
 	doc.insert(4, "H");
@@ -34,9 +34,9 @@ void sync_2(obby::client_buffer& client2)
 {
 	obby::document& doc = *client2.document_begin();
 	
-	doc.insert_event().connect(sigc::bind(
+	doc.insert_event().before().connect(sigc::bind(
 		sigc::ptr_fun(&insert_n), sigc::ref(doc), 2) );
-	doc.delete_event().connect(sigc::bind(
+	doc.delete_event().before().connect(sigc::bind(
 		sigc::ptr_fun(&erase_n), sigc::ref(doc), 2) );
 	
 	doc.erase(3, 4);

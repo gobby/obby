@@ -57,8 +57,6 @@ public:
 	virtual void on_insert(position pos, const std::string& text) = 0;
 	virtual void on_delete(position from, position to) = 0;
 
-	virtual void emit_document_signal(const document& doc) const = 0;
-
 	static record* from_packet(const net6::packet& pack);
 
 #ifndef NDEBUG

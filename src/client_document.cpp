@@ -40,8 +40,6 @@ const obby::client_buffer& obby::client_document::get_buffer() const
 
 void obby::client_document::insert(position pos, const std::string& text)
 {
-	// Insert into buffer
-//	insert_nosync(pos, text, m_client.get_self()->get_id() );
 	// Add to unsynced changes
 	record* rec = new insert_record(pos, text, m_id, m_revision,
 	                                m_client.get_self()->get_id() );
@@ -55,8 +53,6 @@ void obby::client_document::insert(position pos, const std::string& text)
 void obby::client_document::erase(position from, position to)
 {
 	std::string text = get_sub_buffer(from, to);
-	// Delete from buffer
-//	erase_nosync(from, to);
 	// Add to unsynced changes
 	record* rec = new delete_record(from, text, m_id, m_revision,
 	                                m_client.get_self()->get_id() );
@@ -73,22 +69,17 @@ void obby::client_document::on_net_record(record& rec)
 	m_history.push_front(rec.clone() );
 
 	// Look for a unsynced change we are syncing
-//	record* sync_record = NULL;
 	std::list<record*>::iterator iter;
 
 	for(iter = m_unsynced.end(); iter-- != m_unsynced.begin(); )
 	{
 		record* rev = (*iter)->reverse();
-
 		rev->apply(*this);
-		rev->emit_document_signal(*this);
-
 		delete rev;
 	}
 
 	// Insert rec.
 	rec.apply(*this);
-	rec.emit_document_signal(*this);
 
 	for(iter = m_unsynced.begin(); iter != m_unsynced.end(); )
 	{
@@ -111,8 +102,6 @@ void obby::client_document::on_net_record(record& rec)
 			else
 			{
 				(*iter)->apply(*this);
-				(*iter)->emit_document_signal(*this);
-				
 				++ iter;
 			}
 		}

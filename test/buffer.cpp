@@ -101,12 +101,12 @@ void buffer::on_insert_document(obby::document& doc)
 	std::cout << doc.get_whole_buffer() << std::endl;
 	std::cout << "----------------------" << std::endl;
 
-	doc.insert_event().connect(sigc::bind(
+	doc.insert_event().before().connect(sigc::bind(
 		sigc::mem_fun(*this, &buffer::on_doc_insert),
 		sigc::ref(doc)
 	));
 
-	doc.delete_event().connect(sigc::bind(
+	doc.delete_event().before().connect(sigc::bind(
 		sigc::mem_fun(*this, &buffer::on_doc_remove),
 		sigc::ref(doc)
 	));

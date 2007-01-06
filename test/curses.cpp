@@ -403,12 +403,12 @@ void curses_editor::on_login_failed(const std::string& reason)
 
 void curses_editor::on_document_insert(obby::document& document)
 {
-	document.insert_event().connect(sigc::bind(
+	document.insert_event().after().connect(sigc::bind(
 		sigc::mem_fun(*this, &curses_editor::on_insert),
 		sigc::ref(document)
 	));
 
-	document.delete_event().connect(sigc::bind(
+	document.delete_event().after().connect(sigc::bind(
 		sigc::mem_fun(*this, &curses_editor::on_delete),
 		sigc::ref(document)
 	));

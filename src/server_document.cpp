@@ -96,9 +96,6 @@ void obby::server_document::on_net_record(record& rec)
 
 	// Tell clients
 	m_server.send(rec.to_packet() );
-
-	// Emit changed signal
-	rec.emit_document_signal(*this);
 }
 
 void obby::server_document::synchronise(net6::server::peer& peer)

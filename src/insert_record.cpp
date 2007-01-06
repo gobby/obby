@@ -47,7 +47,7 @@ obby::record* obby::insert_record::clone() const
 
 void obby::insert_record::apply(document& doc) const
 {
-	doc.insert_nosync(m_pos, m_text, m_from);
+	doc.insert_nosync(*this);
 }
 
 void obby::insert_record::apply(record& rec) const
@@ -95,11 +95,6 @@ obby::position obby::insert_record::get_position() const
 const std::string& obby::insert_record::get_text() const
 {
 	return m_text;
-}
-
-void obby::insert_record::emit_document_signal(const document& doc) const
-{
-	doc.insert_event().emit(*this);
 }
 
 #ifndef NDEBUG

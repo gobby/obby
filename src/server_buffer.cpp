@@ -157,7 +157,7 @@ void obby::server_buffer::create_document(const std::string& title,
 	m_server->send(pack);
 
 	// Insert the document's content, syncing is done by the create packet.
-	doc.insert_nosync(0, content, author_id);
+	doc.insert_nosync(insert_record(0, content, id, 0, author_id, 0) );
 
 	// Emit the signal
 	m_signal_insert_document.emit(doc);

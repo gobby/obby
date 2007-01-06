@@ -49,8 +49,6 @@ public:
 	virtual void on_insert(position pos, const std::string& text);
 	virtual void on_delete(position from, position to);
 
-	virtual void emit_document_signal(const document& doc) const;
-
 	position get_position() const;
 	const std::string& get_text() const;
 
