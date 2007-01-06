@@ -6,13 +6,13 @@ lib_LTLIBRARIES = libobby.la
 # interface :  changes : compatibility
 libobby_la_LDFLAGS = -version-info 0:0:0 -release 0.2
 
-libobby_la_LIBADD = $(libobby_LIBS)
+libobby_la_LIBADD = $(libobby_LIBS) @extra_libraries@
 
 if WIN32
 libobby_la_LDFLAGS += -no-undefined
 endif
 
-libobby_la_CPPFLAGS = $(libobby_CFLAGS) -I../inc
+libobby_la_CPPFLAGS = $(libobby_CFLAGS) -I../inc @extra_includes@
 
 # gettext
 libobby_la_CPPFLAGS += -DLOCALEDIR=\""$(datadir)/locale"\"

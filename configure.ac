@@ -24,41 +24,19 @@ AC_PROG_LIBTOOL
 AC_CACHE_SAVE
 
 # Check for the required GMP presence.
-ac_gmp_lib_dirs="/usr/lib /usr/local/lib"
-## An explicit library search path for GMP is not yet supported. I'll keep
-## this here anyway as a template when a solution is found for checking
-## the presence of library and headers in their corresponding subdirectories
-## of DIR. [TODO]
-#AC_ARG_WITH(gmp,
-#	AC_HELP_STRING([--with-gmp=DIR], [look for the GNU MP library in DIR]),
-#	ac_gmp_lib_dirs="$withval $ac_gmp_lib_dirs")
-ac_gmp_lib_found=no
-#ac_obby_libs="$LDFLAGS"
-#for dir in $ac_gmp_lib_dirs
-#do
-	if test "x$ac_gmp_lib_found" != "xyes" ; then
-		AC_CHECK_LIB(gmpxx, __gmpz_get_str, ac_gmp_lib_found=yes,
-			ac_gmp_lib_found=no)
-		AC_CHECK_HEADER([gmpxx.h], ac_gmp_lib_found=yes,
-			ac_gmp_lib_found=no)
-	fi
-	if test "x$ac_gmp_lib_found" = "xyes" ; then
-#		LIBS="-L$dir -lgmpxx $LIBS"
-		LIBS="-lgmpxx $LIBS"
-#		break		
-	fi
-#done
-if test "x$ac_gmp_lib_found" != "xyes" ; then
-#][  ###  If your GNU multiple precision (MP) libraries are in an unusual
-#][  ###  location, specify the directory where they are located with:
-#][  ###
-#][  ###       --with-gmp=DIR
-#][  ###
+AC_CHECK_GMP
+
+if test "x$have_gmp" = "xno" || test "x$have_gmpxx" = "xno"; then
 	AC_MSG_ERROR([
 
 ][  ###
-][  ###  GNU multiple precision arithmetic library not found or
-][  ###  not compiled with C++ support!
+][  ###  GNU multiple precision arithmetic library version 4.1.3 or higher
+][  ###  not found or compiled without enabling the C++ interface.
+][  ###
+][  ###  If your GNU multiple precision (MP) libraries are in an unusual
+][  ###  location, specify the directory where they are located with:
+][  ###
+][  ###       --with-libgmp-prefix=DIR
 ][  ###
 ][  ###  If you don't have the GNU MP development files on your system,
 ][  ###  download and install them from the following URL:
@@ -72,7 +50,10 @@ if test "x$ac_gmp_lib_found" != "xyes" ; then
 ][  ###
 ])
 fi
-AC_SUBST(LIBS)
+extra_includes="${extra_includes} ${gmp_includes_option}"
+extra_libraries="${extra_libraries} ${gmp_library_option}"
+AC_SUBST(extra_includes)
+AC_SUBST(extra_libraries)
 
 # Let the user choose if he wants libhowl support or not (default to no).
 extra_requires=""
@@ -118,6 +99,7 @@ fi
 AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION
 
-AC_CONFIG_FILES([po/Makefile.in Makefile])
-AC_OUTPUT([inc/Makefile src/Makefile test/Makefile obby-0.2.pc])
+AC_CONFIG_FILES([Makefile m4/Makefile po/Makefile.in inc/Makefile src/Makefile
+                 test/Makefile obby-0.2.pc])
+AC_OUTPUT
 

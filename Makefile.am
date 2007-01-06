@@ -3,6 +3,9 @@ if BUILD_TESTS
 SUBDIRS += test
 endif
 
+# Tell aclocal where to find `.m4' files.
+ACLOCAL_AMFLAGS = -I m4
+
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = obby-0.2.pc
 
