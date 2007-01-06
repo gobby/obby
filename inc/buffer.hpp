@@ -43,6 +43,7 @@ class basic_buffer: private net6::non_copyable, public sigc::trackable
 public:
 	typedef Document document_type;
 	typedef Selector selector_type;
+	typedef typename document_type::template_type document_template_type;
 
 	// base_document_info_type is needed to support GCC-3.3 which does
 	// not support covariant returns
@@ -150,6 +151,15 @@ public:
 	bool check_colour(const colour& colour,
 	                  const user* ignore = NULL) const;
 
+	/** @brief Returns the current document template that is used
+	 * to instanciate a document.
+	 */
+	const document_template_type& get_document_template() const;
+
+	/** Sets a new template that is used to instanciate a document.
+	 */
+	void set_document_template(const document_template_type& tmpl);
+
 	/** Signal which will be emitted when the initial syncrhonisation
 	 * begins, thus if the client has logged in successfully.
 	 */
@@ -215,38 +225,19 @@ protected:
 	signal_document_rename_type m_signal_document_rename;
 	signal_document_remove_type m_signal_document_remove;
 
-	/** net6 main object to keep net6 initialised during the obby session.
-	 */
 	net6::main m_netkit;
-
-	/** Net object.
-	 */
 	std::auto_ptr<net_type> m_net;
 
-	/** GMP random number generator.
-	 */
 	gmp_randclass m_rclass;
 
-	/** User table which stores all the users in the session.
-	 */
 	user_table m_user_table;
-
-	/** Chat buffer and history.
-	 */
 	chat m_chat;
 
-	/** List of documents.
-	 */
 	document_list m_docs;
-
-	/** gettext catalog for obby.
-	 * TODO: Move to some obby::main object and/or refcount this?
-	 */
-	net6::gettext_package m_package;
-
-	/** Counter for document IDs.
-	 */
+	document_template_type m_document_template;
 	unsigned int m_doc_counter;
+
+	net6::gettext_package m_package;
 };
 
 typedef basic_buffer<obby::document, net6::selector> buffer;
@@ -257,7 +248,7 @@ const unsigned long basic_buffer<Document, Selector>::PROTOCOL_VERSION = 6ul;
 template<typename Document, typename Selector>
 basic_buffer<Document, Selector>::basic_buffer():
 	m_rclass(GMP_RAND_ALG_LC, 16), m_chat(*this, 0xff),
-	m_package(obby_package(), obby_localedir()), m_doc_counter(0)
+	m_doc_counter(0), m_package(obby_package(), obby_localedir())
 {
 	// Initialize gettext
 	init_gettext(m_package);
@@ -409,6 +400,20 @@ typename basic_buffer<Document, Selector>::document_size_type
 basic_buffer<Document, Selector>::document_count() const
 {
 	return m_docs.size();
+}
+
+template<typename Document, typename Selector>
+const typename basic_buffer<Document, Selector>::document_template_type&
+basic_buffer<Document, Selector>::get_document_template() const
+{
+	return m_document_template;
+}
+
+template<typename Document, typename Selector>
+void basic_buffer<Document, Selector>::
+	set_document_template(const document_template_type& tmpl)
+{
+	m_document_template = tmpl;
 }
 
 template<typename Document, typename Selector>

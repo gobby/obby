@@ -610,7 +610,17 @@ void basic_document_info<Document, Selector>::
 	obj.add_attribute("id").set_value(m_id);
 	obj.add_attribute("title").set_value(m_title);
 
-	m_document->serialise(obj);
+	for(typename document_type::chunk_iterator chunk_it =
+		m_document->chunk_begin();
+	    chunk_it != m_document->chunk_end();
+	    ++ chunk_it)
+	{
+		serialise::object& chunk = obj.add_child();
+		chunk.set_name("chunk");
+
+		chunk.add_attribute("content").set_value(chunk_it.get_text() );
+		chunk.add_attribute("author").set_value(chunk_it.get_author() );
+	}
 }
 
 template<typename Document, typename Selector>
@@ -774,7 +784,8 @@ template<typename Document, typename Selector>
 void basic_document_info<Document, Selector>::assign_document()
 {
 	// TODO: Document template given to buffer that may be copied here.
-	m_document.reset(new Document);
+	// TODO: Give only user table to document
+	m_document.reset(new Document(get_buffer().get_document_template() ));
 }
 
 template<typename Document, typename Selector>

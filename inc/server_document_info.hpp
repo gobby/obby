@@ -220,9 +220,27 @@ basic_server_document_info<Document, Selector>::
 	// TODO: Avoid code duplication somehow
 	// Assign document content
 	basic_document_info<Document, Selector>::assign_document();
+
 	// Deserialise document
-	basic_document_info<Document, Selector>::
-		m_document->deserialise(obj, buffer.get_user_table() );
+	for(serialise::object::child_iterator child_it = obj.children_begin();
+	    child_it != obj.children_end();
+	    ++ child_it)
+	{
+		if(child_it->get_name() != "chunk")
+			continue; // TODO: Throw unexpected child error
+
+		const serialise::attribute& content_attr =
+			child_it->get_required_attribute("content");
+		const serialise::attribute& author_attr =
+			child_it->get_required_attribute("author");
+
+		basic_document_info<Document, Selector>::m_document->append(
+			content_attr.as<std::string>(),
+			author_attr.as<const obby::user*>(
+				buffer.get_user_table()
+			)
+		);
+	}
 
 	// Create jupiter server implementation
 	m_jupiter.reset(new jupiter_type(
@@ -267,22 +285,23 @@ void basic_server_document_info<Document, Selector>::
 	// Subscribe given user
 	user_subscribe(user);
 
-	const net6::user& user6 = user.get_net6();
-	unsigned int line_count = basic_document_info<Document, Selector>::
-		m_document->get_line_count();
-
 	// Synchronise initial document to user
+	document_type& doc =
+		*basic_document_info<Document, Selector>::m_document;
+
 	document_packet init_pack(*this, "sync_init");
-	init_pack << line_count;
+	init_pack << doc.size();
 	get_net6().send(init_pack, user.get_net6() );
 
 	// Send content
-	for(unsigned int i = 0; i < line_count; ++ i)
+	for(typename document_type::chunk_iterator iter = doc.chunk_begin();
+	    iter != doc.chunk_end();
+	    ++ iter)
 	{
-		document_packet line_pack(*this, "sync_line");
-		basic_document_info<Document, Selector>::
-			m_document->get_line(i).append_packet(line_pack);
-		get_net6().send(line_pack, user.get_net6() );
+		// TODO: Do not send all at once.
+		document_packet chunk_pack(*this, "sync_chunk");
+		chunk_pack << iter.get_text() << iter.get_author();
+		get_net6().send(chunk_pack, user.get_net6() );
 	}
 
 	// Tell clients

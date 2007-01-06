@@ -155,7 +155,7 @@ protected:
 
 	/** Synchronisation of a line of the document.
 	 */
-	virtual void on_net_sync_line(const document_packet& pack);
+	virtual void on_net_sync_chunk(const document_packet& pack);
 
 	/** User subscription command.
 	 */
@@ -541,8 +541,8 @@ bool basic_client_document_info<Document, Selector>::
 	if(pack.get_command() == "sync_init")
 		{ on_net_sync_init(pack); return true; }
 
-	if(pack.get_command() == "sync_line")
-		{ on_net_sync_line(pack); return true; }
+	if(pack.get_command() == "sync_chunk")
+		{ on_net_sync_chunk(pack); return true; }
 
 	if(pack.get_command() == "subscribe")
 		{ on_net_subscribe(pack); return true; }
@@ -623,20 +623,17 @@ void basic_client_document_info<Document, Selector>::
 
 	// Assign empty document
 	basic_document_info<Document, Selector>::assign_document();
-	// Clear all lines, the document will be synced line-wise
-	// TODO: Get at least rid of this function call
-	basic_document_info<Document, Selector>::m_document->clear_lines();
 }
 
 template<typename Document, typename Selector>
 void basic_client_document_info<Document, Selector>::
-	on_net_sync_line(const document_packet& pack)
+	on_net_sync_chunk(const document_packet& pack)
 {
 	// No document assigned or subscribed?
 	if(basic_document_info<Document, Selector>::m_document.get() == NULL)
 	{
 		format_string str(
-			"Got sync_line without sync_init for document %0%/%1%"
+			"Got sync_chunk without sync_init for document %0%/%1%"
 		);
 
 		str << basic_document_info<Document, Selector>::get_owner_id()
@@ -645,10 +642,18 @@ void basic_client_document_info<Document, Selector>::
 		throw net6::bad_value(str.str() );
 	}
 
-	// Add line to document
+	// Add chunk to document
 	unsigned int index = 2;
-	basic_document_info<Document, Selector>::m_document->add_line(
-		line(pack, index, get_buffer().get_user_table())
+	basic_document_info<Document, Selector>::m_document->append(
+		pack.get_param(0).net6::parameter::as<std::string>(),
+		pack.get_param(1).net6::parameter::as<const user*>(
+			::serialise::hex_context<
+				const user*
+			>(basic_document_info<
+				Document,
+				Selector
+			>::get_buffer().get_user_table() )
+		)
 	);
 }
 

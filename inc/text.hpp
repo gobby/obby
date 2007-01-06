@@ -89,11 +89,11 @@ protected:
 		/** @brief Serialises the chunk to the given serialisation
 		 * object.
 		 */
-		void serialise(serialise::object& obj);
+		void serialise(serialise::object& obj) const;
 
 		/** @brief Reads the chunk from a net6::packet.
 		 */
-		void append_packet(net6::packet& pack);
+		void append_packet(net6::packet& pack) const;
 
 		/** @brief Prepends text to the chunk.
 		 */
@@ -165,11 +165,11 @@ public:
 
 	/** @brief Writes the text to a serialisation object.
 	 */
-	void serialise(serialise::object& obj);
+	void serialise(serialise::object& obj) const;
 
 	/** @brief Appends the text to a net6 packet.
 	 */
-	void append_packet(net6::packet& pack);
+	void append_packet(net6::packet& pack) const;
 
 	/** @brief Removes any chunks in the text.
 	 */
@@ -178,7 +178,7 @@ public:
 	/** @brief Extracts a subtext from this text.
 	 */
 	text substr(size_type pos,
-	            size_type len = npos);
+	            size_type len = npos) const;
 
 	/** @brief Inserts a string into the text.
 	 */
@@ -315,6 +315,14 @@ private:
 	 * chunk.
 	 */
 	list_type::iterator find_chunk(size_type& pos);
+
+	/** @brief Internal function to find the chunk at the given position
+	 * in the chunk list.
+	 *
+	 * pos is changed to point to the required position in the returned
+	 * chunk.
+	 */
+	list_type::const_iterator find_chunk(size_type& pos) const;
 
 	/** @brief Inserts a chunk at the given position in the given chunk.
 	 *

@@ -102,7 +102,8 @@ operation<Document>::from_packet(const net6::packet& pack,
                                  unsigned int& index,
                                  const user_table& user_table)
 {
-	const std::string& type = pack.get_param(index ++).net6::parameter::as<std::string>();
+	const std::string& type =
+		pack.get_param(index ++).net6::parameter::as<std::string>();
 	std::auto_ptr<operation<Document> > op;
 
 	if(type == "ins")

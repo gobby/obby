@@ -21,160 +21,81 @@
 
 #include "position.hpp"
 #include "duplex_signal.hpp"
-#include "user.hpp"
-#include "user_table.hpp"
 #include "text.hpp"
 
 namespace obby
 {
 
-class document: private net6::non_copyable
-{
-public:
-	typedef text::chunk_iterator chunk_iterator;
-
-	void clear();
-
-	position size() const;
-
-	std::string get_text() const;
-
-	void insert(position pos,
-	            const text& str);
-
-	void erase(position pos,
-	           position len);
-
-	chunk_iterator chunk_begin() const;
-	chunk_iterator chunk_end() const;
-
-protected:
-	text m_text; // Max chunk size of 1024 or so
-};
-
-#if 0
-/** Contains the content of a document. Note that all positions pointing into
- * the document refer to byte offsets.
+/** @brief Default document that uses obby::text to store its content.
  */
-class document : private net6::non_copyable
+class document: private net6::non_copyable
 {
 public:
 	typedef duplex_signal<
 		sigc::signal<void, position, const std::string&, const user*>
 	> signal_insert_type;
+
 	typedef duplex_signal<
 		sigc::signal<void, position, position, const user*>
-	> signal_delete_type;
+	> signal_erase_type;
 
-	class chunk_iterator
-	{
-	public:
-		chunk_iterator(const document& doc);
+	typedef text::chunk_iterator chunk_iterator;
 
-		const std::string& text() const;
-		const user* author() const;
-	protected:
-		std::vector<line>::iterator m_iter;
-	};
-
+	/** @brief Default constructor, creates an empty document.
+	 */
 	document();
 
-	/** Serialises the document into a serialisation object.
+	/** @brief Clears the document content.
 	 */
-//	void serialise(serialise::object& obj) const;
+	void clear();
 
-	/** Deserialises the document.
-	 * TODO: Should be ctor?
+	/** @brief Returns the size (in bytes) of the document.
 	 */
-/*	void deserialise(const serialise::object& obj,
-	                 const user_table& user_table);*/
+	position size() const;
 
-	/** Returns the whole content of the document.
+	/** @brief Returns the whole document as a string.
 	 */
 	std::string get_text() const;
 
-	/** Returns a part of the document's content.
+	/** @brief Extracts a part from the document.
 	 */
-	//std::string get_slice(position from, position len) const;
+	text get_slice(position pos,
+	               position len) const;
 
-	/** Returns a part of the document's content and user assignment.
+	/** @brief Inserts text into the document.
 	 */
-	line get_slice(position from, position len) const;
+	void insert(position pos,
+	            const text& str);
 
-	/** Inserts text into the document.
-	 * @param pos Position where to insert <em>text</em>.
-	 * @param text Text to insert.
-	 * @param author User that has written <em>text</em>.
+	/** @brief Erases text from the document.
 	 */
-	//void insert(position pos, const std::string& text, const user* author);
+	void erase(position pos,
+	           position len);
 
-	/** Inserts a given chunk into the document.
-	 * @param pos Position where to insert <em>text</em>
-	 * @param text Chunk to insert.
+	/** @brief Returns the beginning of the chunk list.
 	 */
-	void insert(position pos, const line& text);
+	chunk_iterator chunk_begin() const;
 
-	/** Removes text from the document.
-	 * @param pos Beginning of the range where to delete text.
-	 * @param len Amount of bytes to delete.
-	 * @param author User who deleted the text.
+	/** @brief Returns the end of the chunk list.
 	 */
-	void erase(position pos, position len, const user* author);
+	chunk_iterator chunk_end() const;
 
-	/** Signal which will be emitted if text has been inserted into the
-	 * document.
+	/** @brief Signal that is emitted when text has been inserted into
+	 * the document.
 	 */
-	//signal_insert_type insert_event() const;
+	signal_insert_type insert_event() const;
 
-	/** Signal which will be emitted if text has been deleted from the
-	 * document.
+	/** @brief Signal that is emitted when text has been erased from
+	 * the document.
 	 */
-	//signal_delete_type delete_event() const;
-
-	/** Clears all the lines in the document. Note that a document with no
-	 * lines is invalid and cannot be operated with insert() or erase().
-	 * Insert at least one line with add_line() after the call to this
-	 * function. Note that a call to this function does not emit
-	 * insert or erase signals.
-	 */
-	//void clear_lines();
-
-	/** Adds a line to the document. Note that a call to this function does
-	 * not emit insert or erase signals.
-	 */
-	//void add_line(const line& line);
-
-	/** Returns the given line of text.
-	 */
-	//const line& get_line(unsigned int index) const;
-
-	/** Returns the amount of lines in the buffer.
-	 */
-	//unsigned int get_line_count() const;
-
-	/** Converts a row/column pair to a obby::position.
-	 */
-	position coord_to_position(unsigned int row, unsigned int col) const;
-
-	/** Convert an obby::position to a row/column pair.
-	 */
-	void position_to_coord(position pos,
-	                       unsigned int& row,
-	                       unsigned int& col) const;
-
-	/** Returns an obby::position pointing at the end of the buffer.
-	 */
-	//position position_eob() const;
+	signal_erase_type erase_event() const;
 
 protected:
-	// TODO: Add history
-	// TODO: Use std::vector<line*>?
-	std::vector<line> m_lines;
+	text m_text;
 
 	signal_insert_type m_signal_insert;
-	signal_delete_type m_signal_delete;
+	signal_erase_type m_signal_erase;
 };
-#endif
 
 }
 

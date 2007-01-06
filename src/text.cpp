@@ -27,6 +27,27 @@ namespace
 	{
 		return size == obby::text::npos ? CHUNK_INIT : size;
 	}
+
+	// find_chunk implementation to avoid code duplication for
+	// iterator and const_iterator versions
+	template<typename List, typename Iter>
+	Iter find_chunk(List list, obby::text::size_type& pos)
+	{
+		for(Iter it = list.begin(); it != list.end(); ++ it)
+		{
+			if( (*it)->get_length() > pos)
+				return it;
+			else
+				pos -= (*it)->get_length();
+		}
+
+		if(pos == 0) return list.end();
+
+		throw std::logic_error(
+			"obby::text::find_chunk:\n"
+			"Requested position exceeds text's size"
+		);
+	}
 }
 
 obby::text::chunk::chunk(const chunk& other):
@@ -65,13 +86,13 @@ obby::text::chunk::chunk(const serialise::object& obj,
 {
 }
 
-void obby::text::chunk::serialise(serialise::object& obj)
+void obby::text::chunk::serialise(serialise::object& obj) const
 {
 	obj.add_attribute("content").set_value(m_text);
 	obj.add_attribute("author").set_value(m_author);
 }
 
-void obby::text::chunk::append_packet(net6::packet& pack)
+void obby::text::chunk::append_packet(net6::packet& pack) const
 {
 	pack << m_text << m_author;
 }
@@ -193,9 +214,9 @@ obby::text& obby::text::operator=(const text& other)
 	return *this;
 }
 
-void obby::text::serialise(serialise::object& obj)
+void obby::text::serialise(serialise::object& obj) const
 {
-	for(list_type::iterator it = m_chunks.begin();
+	for(list_type::const_iterator it = m_chunks.begin();
 	    it != m_chunks.end();
 	    ++ it)
 	{
@@ -205,10 +226,10 @@ void obby::text::serialise(serialise::object& obj)
 	}
 }
 
-void obby::text::append_packet(net6::packet& pack)
+void obby::text::append_packet(net6::packet& pack) const
 {
 	pack << m_chunks.size();
-	for(list_type::iterator it = m_chunks.begin();
+	for(list_type::const_iterator it = m_chunks.begin();
 	    it != m_chunks.end();
 	    ++ it)
 	{
@@ -228,10 +249,10 @@ void obby::text::clear()
 	m_chunks.clear();
 }
 
-obby::text obby::text::substr(size_type pos, size_type len)
+obby::text obby::text::substr(size_type pos, size_type len) const
 {
 	text new_text;
-	list_type::iterator iter = find_chunk(pos);
+	list_type::const_iterator iter = find_chunk(pos);
 
 	chunk* prev_chunk = NULL;
 	while( (len == npos || len > 0) && (iter != m_chunks.end()) )
@@ -263,9 +284,6 @@ obby::text obby::text::substr(size_type pos, size_type len)
 
 			new_text.m_chunks.push_back(prev_chunk);
 		}
-
-//		if(len != npos)
-//			len -= count;
 
 		++ iter; pos = 0;
 	}
@@ -605,23 +623,21 @@ obby::text::operator string_type() const
 	return str;
 }
 
-obby::text::list_type::iterator obby::text::find_chunk(size_type& pos)
+obby::text::list_type::iterator
+obby::text::find_chunk(size_type& pos)
 {
-	for(list_type::iterator it = m_chunks.begin();
-	    it != m_chunks.end();
-	    ++ it)
-	{
-		if( (*it)->get_length() > pos)
-			return it;
-		else
-			pos -= (*it)->get_length();
-	}
+	return ::find_chunk<list_type&, list_type::iterator>(
+		m_chunks,
+		pos
+	);
+}
 
-	if(pos == 0) return m_chunks.end();
-
-	throw std::logic_error(
-		"obby::text::find_chunk:\n"
-		"Requested position exceeds text's size"
+obby::text::list_type::const_iterator
+obby::text::find_chunk(size_type& pos) const
+{
+	return ::find_chunk<const list_type&, list_type::const_iterator>(
+		m_chunks,
+		pos
 	);
 }
 

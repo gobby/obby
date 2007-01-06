@@ -112,7 +112,7 @@ template<typename Document>
 void delete_operation<Document>::apply(document_type& doc,
                                        const user* author) const
 {
-	doc.erase(m_pos, m_len, author);
+	doc.erase(m_pos, m_len);
 }
 
 template<typename Document>
