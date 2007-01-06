@@ -18,6 +18,8 @@ Normal:
    - Load/save complete obby session
    - Use XML to serialise a tree of objects
  * Implement server-side commands to let the server act on the remote side
+ * document_iterator in the client_buffer results in client_documents, and so on
+ * history_iterator, unsynced_iterator (client_document)
 
 Minor:
  * Implement indent_record and unindent_record to (un)indent lines of text

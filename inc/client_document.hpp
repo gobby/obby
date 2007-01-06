@@ -67,6 +67,9 @@ public:
 	virtual void on_net_sync_line(const net6::packet& pack);
 	virtual void on_net_sync_final(const net6::packet& pack);
 
+	/** Returns the amount of unsynced changes.
+	 */
+	unsigned int get_unsynced_changes_count() const;
 protected:
 	std::list<record*> m_unsynced;
 	net6::client& m_client;
