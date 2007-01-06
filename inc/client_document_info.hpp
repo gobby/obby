@@ -525,6 +525,11 @@ template<typename Document, typename Selector>
 void basic_client_document_info<Document, Selector>::
 	user_unsubscribe(const user& user)
 {
+	// Base function emits signal, unsubscribed should already
+	// be set then.
+	if(&get_buffer().get_self() == &user)
+		m_subscription_state = base_local_type::UNSUBSCRIBED;
+
 	// Call base function
 	base_type::user_unsubscribe(user);
 
@@ -539,8 +544,6 @@ void basic_client_document_info<Document, Selector>::
 		base_type::release_document();
 		// Release jupiter algorithm
 		m_jupiter.reset(NULL);
-
-		m_subscription_state = base_local_type::UNSUBSCRIBED;
 	}
 }
 
