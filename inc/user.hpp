@@ -20,6 +20,7 @@
 #define _OBBY_USER_HPP_
 
 #include <string>
+#include <net6/non_copyable.hpp>
 #include <net6/address.hpp>
 #include <net6/peer.hpp>
 #include <net6/packet.hpp>
@@ -33,7 +34,7 @@ class document_info;
 /** User in a obby session.
  */
 	
-class user
+class user : private net6::non_copyable
 {
 public:
 	enum flags {
