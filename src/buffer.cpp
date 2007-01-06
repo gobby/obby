@@ -92,16 +92,19 @@ obby::document_info* obby::buffer::find_document(unsigned int owner_id,
 	return NULL;
 }
 
-bool obby::buffer::check_colour(int red, int green, int blue) const
+bool obby::buffer::check_colour(int red, int green, int blue,
+                                const user* ignore) const
 {
 	// Check for existing colours
 	// TODO: Check for colours that non-connected users occupy?
-	std::list<user*>::iterator iter;
 	for(user_table::user_iterator<user::CONNECTED> iter =
 		m_usertable.user_begin<user::CONNECTED>();
 	    iter != m_usertable.user_end<user::CONNECTED>();
 	    ++ iter)
 	{
+		if(&(*iter) == ignore)
+			continue;
+
 		if((abs(red   - iter->get_red()) +
 		    abs(green - iter->get_green()) +
 		    abs(blue  - iter->get_blue())) < 32)

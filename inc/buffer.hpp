@@ -108,7 +108,8 @@ public:
 	/** Checks if given colour components match an other
 	 * already present one too closely.
 	 */
-	bool check_colour(int red, int green, int blue) const;
+	bool check_colour(int red, int green, int blue,
+	                  const user* ignore = NULL) const;
 
 	/** Signal which will be emitted if a new user has joined the obby
 	 * session.
