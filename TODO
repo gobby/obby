@@ -12,6 +12,7 @@ Normal:
   * Hide equivalent insert / change calls (#28)
   * Implement server-side commands for remote actions (#29)
   * Implement records to (un)indent lines of text (#30)
+  * Undo/Redo (#39)
 
 Minor:
 
@@ -59,6 +60,12 @@ Implement indent_record and unindent_record to (un)indent lines of text
 
 ''This is a stub and generated out of the old TODO located in the 
 repository.''
+
+39: Undo/Redo
+-------------
+The current undo/redo implementation is taken directly from GtkSourceView. 
+This is not good because text that other people have written may be undone. 
+We need a proper undo/redo handling in libobby.
 
 8: Flags for obby::user
 -----------------------
