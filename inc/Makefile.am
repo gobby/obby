@@ -11,7 +11,6 @@ nobase_pkginclude_HEADERS += serialise/attribute.hpp
 nobase_pkginclude_HEADERS += serialise/object.hpp
 nobase_pkginclude_HEADERS += serialise/parser.hpp
 pkginclude_HEADERS += vector_time.hpp
-pkginclude_HEADERS += rsa.hpp
 pkginclude_HEADERS += sha1.hpp
 pkginclude_HEADERS += colour.hpp
 pkginclude_HEADERS += user.hpp

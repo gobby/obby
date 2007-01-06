@@ -24,7 +24,6 @@
 #include "common.hpp"
 #include "error.hpp"
 #include "sha1.hpp"
-#include "rsa.hpp"
 #include "command.hpp"
 #include "buffer.hpp"
 #include "server_document_info.hpp"
@@ -57,14 +56,9 @@ public:
 	typedef sigc::signal<void, const net6::user&> signal_connect_type;
 	typedef sigc::signal<void, const net6::user&> signal_disconnect_type;
 
-	/** Default constructor that automatically generates a RSA key pair.
+	/** Default constructor.
 	 */
 	basic_server_buffer();
-
-	/** Constructor taking a given RSA key pair.
-	 */
-	basic_server_buffer(const RSA::Key& public_key,
-	                    const RSA::Key& private_key);
 
 	/** Opens the server on the given port.
 	 */
@@ -236,11 +230,6 @@ protected:
 	 */
 	std::map<const net6::user*, std::string> m_tokens;
 
-	/** RSA keys to enable secure authentication.
-	 */
-	RSA::Key m_public;
-	RSA::Key m_private;
-
 	/** Global session password. Only people who know this password are
 	 * allowed to join the session.
 	 */
@@ -269,31 +258,10 @@ basic_server_buffer<Document, Selector>::
 		basic_server_buffer():
 	basic_buffer<Document, Selector>()
 {
-	// TODO: Key length as ctor parameter
-	std::pair<RSA::Key, RSA::Key> keys = RSA::generate(
-		basic_buffer<Document, Selector>::m_rclass, 256
-	);
-
-	m_public = keys.first; m_private = keys.second;
-
 	// Note that the command description is translated on server side.
 	// We cannot just send a number or something that the client converts
 	// to localised text since the client does not know the available
 	// commands (and neither their descriptions).
-	m_command_map.add_command(
-		"me",
-		_("Sends an action to the chat."),
-		sigc::mem_fun(*this, &basic_server_buffer::on_command_emote)
-	);
-}
-
-template<typename Document, typename Selector>
-basic_server_buffer<Document, Selector>::
-	basic_server_buffer(const RSA::Key& public_key,
-	                    const RSA::Key& private_key):
-	basic_buffer<Document, Selector>(),
-	m_public(public_key), m_private(private_key)
-{
 	m_command_map.add_command(
 		"me",
 		_("Sends an action to the chat."),
@@ -622,9 +590,7 @@ void basic_server_buffer<Document, Selector>::
 	// Send token and the server's public key with the welcome packet
 	net6::packet welcome_pack("obby_welcome");
 	welcome_pack << basic_buffer<Document, Selector>::PROTOCOL_VERSION
-	             << token
-	             << m_public.get_n().get_str(36)
-	             << m_public.get_k().get_str(36);
+	             << token;
 
 	net6_server().send(welcome_pack, user6);
 
@@ -1030,10 +996,7 @@ void basic_server_buffer<Document, Selector>::
 	// Set password for this user
 	basic_buffer<Document, Selector>::m_user_table.set_user_password(
 		from,
-		RSA::decrypt(
-			m_private,
-			pack.get_param(0).net6::parameter::as<std::string>()
-		)
+		pack.get_param(0).net6::parameter::as<std::string>()
 	);
 }
 

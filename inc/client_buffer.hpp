@@ -23,7 +23,6 @@
 #include <net6/client.hpp>
 #include "error.hpp"
 #include "sha1.hpp"
-#include "rsa.hpp"
 #include "command.hpp"
 #include "local_buffer.hpp"
 #include "client_document_info.hpp"
@@ -87,9 +86,9 @@ public:
 
 	/** Connects to the given host where a obby server is assumed to be
 	 * running. After the connection has been established, signal_welcome
-	 * will be emitted after the server sent us some initial data (like its
-	 * public RSA key). At this point the login function may be used to
-	 * login as a user with a given colour.
+	 * will be emitted after the server sent us some initial data
+	 * At this point the login function may be used to login as a user
+	 * with a given colour.
 	 * TODO: Ask username and colour parameters already here and login
 	 * implicitly after having called connect().
 	 *
@@ -162,10 +161,6 @@ public:
 	 * not already completed.
 	 */
 	virtual const std::string& get_name() const;
-
-	/** Returns the public key of the remote server.
-	 */
-	const RSA::Key& get_public_key() const;
 
 	/** Sends a global message to all users.
 	 */
@@ -314,7 +309,6 @@ protected:
 	const user* m_self;
 
 	std::string m_token;
-	RSA::Key m_public;
 
 	connection_settings m_settings;
 
@@ -416,16 +410,6 @@ template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::login(const std::string& name,
                                                     const colour& colour)
 {
-	// Need public key (which comes with welcome packet) before login
-	if(!m_public)
-	{
-		throw std::logic_error(
-			"obby::basic_client_buffer::login:\n"
-			"No public key available - wait for welcome packet "
-			"before calling login"
-		);
-	}
-
 	m_settings.name = name;
 	m_settings.colour = colour;
 
@@ -581,7 +565,7 @@ void basic_client_buffer<Document, Selector>::
 	if(is_logged_in() )
 	{
 		net6::packet password_pack("obby_user_password");
-		password_pack << RSA::encrypt(m_public, password);
+		password_pack << password;
 		net6_client().send(password_pack);
 	}
 	else
@@ -843,18 +827,6 @@ void basic_client_buffer<Document, Selector>::
 	// the line. Because every client has its individual token, it is
 	// not possible to take one's password hash and send it to the server.
 	m_token = pack.get_param(1).net6::parameter::as<std::string>();
-
-	// The server's public key, used to encrypt the password if we want
-	// to change it.
-	m_public.set_n(mpz_class(
-		pack.get_param(2).net6::parameter::as<std::string>(),
-		36
-	) );
-
-	m_public.set_k(mpz_class(
-		pack.get_param(3).net6::parameter::as<std::string>(),
-		36
-	) );
 
 	// Emit welcome signal to indicate that the user may now perform a
 	// login() call.

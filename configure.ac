@@ -23,35 +23,8 @@ AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AC_CACHE_SAVE
 
-# Check for the required GMP presence.
-AC_CHECK_GMP
-
-if test "x$have_gmp" = "xno" || test "x$have_gmpxx" = "xno"; then
-	AC_MSG_ERROR([
-
-][  ###
-][  ###  GNU multiple precision arithmetic library version 4.1.3 or higher
-][  ###  not found or compiled without enabling the C++ interface.
-][  ###
-][  ###  If your GNU multiple precision (MP) libraries are in an unusual
-][  ###  location, specify the directory where they are located with:
-][  ###
-][  ###       --with-libgmp-prefix=DIR
-][  ###
-][  ###  If you don't have the GNU MP development files on your system,
-][  ###  download and install them from the following URL:
-][  ###
-][  ###       http://gnu.org/software/gmp
-][  ###
-][  ###  C++ support needs to be enabled in GMP by passing `--enable-cxx'
-][  ###  to its configuration script.
-][  ###
-][  ###  (Error detail might be available in `config.log'.)
-][  ###
-])
-fi
-extra_includes="${extra_includes} ${gmp_includes_option}"
-extra_libraries="${extra_libraries} ${gmp_library_option}"
+extra_includes=""
+extra_libraries=""
 AC_SUBST(extra_includes)
 AC_SUBST(extra_libraries)
 

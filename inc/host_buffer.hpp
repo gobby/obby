@@ -58,18 +58,6 @@ public:
 	basic_host_buffer(const std::string& username,
 	                  const colour& colour);
 
-	/** Creates a new host_buffer.
-	 * @param username User name for the local user.
-	 * @param colour Local user colour.
-	 * @param public_key Public RSA key of the server's key pair.
-	 * @param private_key Corresponding private key. Must match
-	 * the public one.
-	 */
-	basic_host_buffer(const std::string& username,
-	                  const colour& colour,
-	                  const RSA::Key& public_key,
-	                  const RSA::Key& private_key);
-
 	/** Opens the server on the given port.
 	 */
 	virtual void open(unsigned int port);
@@ -176,20 +164,6 @@ basic_host_buffer<Document, Selector>::
 	basic_buffer<Document, Selector>(),
 	basic_local_buffer<Document, Selector>(),
 	basic_server_buffer<Document, Selector>(),
-	m_username(username), m_colour(colour), m_self(NULL)
-{
-	init_impl();
-}
-
-template<typename Document, typename Selector>
-basic_host_buffer<Document, Selector>::
-	basic_host_buffer(const std::string& username,
-	                  const colour& colour,
-	                  const RSA::Key& public_key,
-	                  const RSA::Key& private_key):
-	basic_buffer<Document, Selector>(),
-	basic_local_buffer<Document, Selector>(),
-	basic_server_buffer<Document, Selector>(public_key, private_key),
 	m_username(username), m_colour(colour), m_self(NULL)
 {
 	init_impl();
