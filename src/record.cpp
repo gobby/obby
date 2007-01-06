@@ -56,6 +56,16 @@ unsigned int obby::record::get_revision() const
 	return m_revision;
 }
 
+void obby::record::set_from(unsigned int from)
+{
+	m_from = from;
+}
+
+void obby::record::set_revision(unsigned int revision)
+{
+	m_revision = revision;
+}
+
 void obby::record::invalidate()
 {
 	m_valid = false;

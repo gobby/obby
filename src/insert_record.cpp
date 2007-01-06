@@ -38,9 +38,14 @@ obby::insert_record::~insert_record()
 {
 }
 
-void obby::insert_record::apply(buffer& buf)
+void obby::insert_record::apply(buffer& buf) const
 {
 	buf.insert_nosync(m_pos, m_text);
+}
+
+void obby::insert_record::apply(record& rec) const
+{
+	rec.on_insert(m_pos, m_text);
 }
 
 net6::packet obby::insert_record::to_packet()

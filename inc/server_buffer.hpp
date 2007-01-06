@@ -55,7 +55,6 @@ protected:
 	void on_part(net6::server::peer& peer);
 	void on_data(const net6::packet& pack, net6::server::peer& from);
 
-	unsigned int m_counter;
 	net6::server m_server;
 
 	signal_insert_type m_signal_insert;

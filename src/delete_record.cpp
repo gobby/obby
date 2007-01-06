@@ -40,9 +40,14 @@ obby::delete_record::~delete_record()
 {
 }
 
-void obby::delete_record::apply(buffer& buf)
+void obby::delete_record::apply(buffer& buf) const
 {
 	buf.erase_nosync(m_from, m_to);
+}
+
+void obby::delete_record::apply(record& rec) const
+{
+	rec.on_delete(m_from, m_to);
 }
 
 net6::packet obby::delete_record::to_packet()

@@ -19,7 +19,7 @@
 #include "server_buffer.hpp"
 
 obby::server_buffer::server_buffer(unsigned int port)
- : buffer(), m_counter(0), m_server(port)
+ : buffer(), m_server(port)
 {
 	m_server.join_event().connect(
 		sigc::mem_fun(*this, &server_buffer::on_join) );
@@ -74,18 +74,80 @@ obby::server_buffer::signal_part_type obby::server_buffer::part_event() const
 
 void obby::server_buffer::on_join(net6::server::peer& peer)
 {
+	m_signal_join.emit(peer);
 }
 
 void obby::server_buffer::on_login(net6::server::peer& peer)
 {
+	m_signal_login.emit(peer);
 }
 
 void obby::server_buffer::on_part(net6::server::peer& peer)
 {
+	m_signal_part.emit(peer);
 }
 
 void obby::server_buffer::on_data(const net6::packet& pack,
                                   net6::server::peer& peer)
 {
+	if(pack.get_command() == "obby_record")
+	{
+		record* rec = record::from_packet(pack);
+		// TODO: Ensure that rec exists
+
+		// Undo all changes until the revision of rec has been reached
+		// TODO: Ensure that the wished revision exists.
+		std::list<record*>::iterator iter;
+		for(iter = m_history.begin(); iter != m_history.end(); ++ iter)
+		{
+			// Break if wished revision has been reached
+			if((*iter)->get_revision() == rec->get_revision() )
+				break;
+	
+			record* rev_iter = (*iter)->reverse(*this);
+			rev_iter->apply(*this);
+			delete rev_iter;
+
+			// Apply rec on the current record in history to put
+			// it to the right direction
+			rec->apply(**iter);
+		}
+
+		// Apply record.
+		rec->apply(*this);
+
+		// Redo the changes to reach the current revision
+		-- iter;
+		do
+		{
+			// Apply the current change to the new record
+			(*iter)->apply(*rec);
+
+			// Re-apply this revision to the buffer
+			(*iter)->apply(*this);
+			-- iter;
+		} while(iter != m_history.begin() );
+
+		// Increment revision
+		rec->set_revision(++ m_revision);
+
+		// Set correct sender
+		rec->set_from(peer.get_id() );
+
+		// Add change to history
+		m_history.push_front(rec);
+
+		// Tell clients
+		m_server.send(rec->to_packet() );
+
+		// Emit changed signal
+		// HACKHACKHACK :D
+		if(pack.get_param(0).as_string() == "insert")
+			m_signal_insert.emit(
+				*static_cast<insert_record*>(rec) );
+		if(pack.get_param(0).as_string() == "delete")
+			m_signal_delete.emit(
+				*static_cast<delete_record*>(rec) );
+	}
 }
 

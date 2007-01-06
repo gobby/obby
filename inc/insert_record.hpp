@@ -36,7 +36,8 @@ public:
 	              unsigned int id);
 	~insert_record();
 
-	virtual void apply(buffer& buf);
+	virtual void apply(buffer& buf) const;
+	virtual void apply(record& rec) const;
 	virtual net6::packet to_packet();
 	virtual record* reverse(const buffer& buf);
 
