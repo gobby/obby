@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -36,21 +36,30 @@ namespace obby
 /** Abstract base class for obby buffers. A buffer contains multiple documents
  * that are synchronised through many users and a user list.
  */
-template<typename selector_type>
+template<typename Document, typename Selector>
 class basic_buffer: private net6::non_copyable, public sigc::trackable
 {
 public:
-	typedef basic_document_info<selector_type> base_document_info;
-	typedef basic_document_info<selector_type> document_info;
+	typedef Document document_type;
+	typedef Selector selector_type;
 
-	// Document iterator typedef
-	typedef typename std::list<document_info*>::size_type
-		document_size_type;
+	// base_document_info_type is needed to support GCC-3.3 which does
+	// not support covariant returns
+	typedef basic_document_info<document_type, selector_type>
+		base_document_info_type;
+
+	typedef basic_document_info<document_type, selector_type>
+		document_info_type;
+
+	// Document list
+	// TODO: Outsource this to document_list<document_info_type> class
+	typedef std::list<document_info_type*> document_list;
+	typedef typename document_list::size_type document_size_type;
 
 	typedef ptr_iterator<
-		document_info,
-		std::list<document_info*>,
-		typename std::list<document_info*>::const_iterator
+		document_info_type,
+		document_list,
+		typename document_list::const_iterator
 	> document_iterator;
 
 	// Signal types
@@ -64,11 +73,11 @@ public:
 		signal_user_part_type;
 	typedef sigc::signal<void, const user&>
 		signal_user_colour_type;
-	typedef sigc::signal<void, document_info&>
+	typedef sigc::signal<void, document_info_type&>
 		signal_document_insert_type;
-	typedef sigc::signal<void, document_info&>
+	typedef sigc::signal<void, document_info_type&>
 		signal_document_rename_type;
-	typedef sigc::signal<void, document_info&>
+	typedef sigc::signal<void, document_info_type&>
 		signal_document_remove_type;
 
 	basic_buffer();
@@ -103,15 +112,15 @@ public:
 	/** Removes an existing document. signal_document_remove will be
 	 * emitted if the document has been removed.
 	 */
-	virtual void document_remove(base_document_info& doc) = 0;
+	virtual void document_remove(base_document_info_type& doc) = 0;
 	
 	/** Looks for a document with the given ID which belongs to the user
 	 * with the given owner ID. Note that we do not take a real user object
 	 * here because the ID is enough and one might not have a user object
 	 * to the corresponding ID. So a time-consuming lookup is obsolete.
 	 */
-	document_info* document_find(unsigned int owner_id,
-	                             unsigned int id) const;
+	document_info_type* document_find(unsigned int owner_id,
+	                                  unsigned int id) const;
 
 	/** Returns the begin of the document list.
 	 */
@@ -180,11 +189,11 @@ public:
 protected:
         /** Internal function to add a document to the buffer.
 	 */
-	void document_add(document_info& document);
+	void document_add(document_info_type& document);
 
 	/** Internal function to delete a document from the buffer.
 	 */
-	void document_delete(document_info& document);
+	void document_delete(document_info_type& document);
 
 	/** Internal function to clear the whole document list.
 	 */
@@ -223,7 +232,7 @@ protected:
 
 	/** List of documents.
 	 */
-	std::list<document_info*> m_docs;
+	document_list m_docs;
 
 	/** gettext catalog for obby.
 	 * TODO: Move to some obby::main object and/or refcount this?
@@ -235,13 +244,13 @@ protected:
 	unsigned int m_doc_counter;
 };
 
-typedef basic_buffer<net6::selector> buffer;
+typedef basic_buffer<obby::document, net6::selector> buffer;
 
-template<typename selector_type>
-const unsigned long basic_buffer<selector_type>::PROTOCOL_VERSION = 5;
+template<typename Document, typename Selector>
+const unsigned long basic_buffer<Document, Selector>::PROTOCOL_VERSION = 5ul;
 
-template<typename selector_type>
-basic_buffer<selector_type>::basic_buffer():
+template<typename Document, typename Selector>
+basic_buffer<Document, Selector>::basic_buffer():
 	m_rclass(GMP_RAND_ALG_LC, 16), m_chat(*this, 0xff),
 	m_package(obby_package(), obby_localedir()), m_doc_counter(0)
 {
@@ -252,44 +261,57 @@ basic_buffer<selector_type>::basic_buffer():
 	m_rclass.seed(std::time(NULL) );
 }
 
-template<typename selector_type>
-basic_buffer<selector_type>::~basic_buffer()
+template<typename Document, typename Selector>
+basic_buffer<Document, Selector>::~basic_buffer()
 {
 	document_clear();
 }
 
-template<typename selector_type>
-const user_table& basic_buffer<selector_type>::get_user_table() const
+template<typename Document, typename Selector>
+const user_table& basic_buffer<Document, Selector>::get_user_table() const
 {
 	return m_user_table;
 }
 
-template<typename selector_type>
-const chat& basic_buffer<selector_type>::get_chat() const
+template<typename Document, typename Selector>
+const chat& basic_buffer<Document, Selector>::get_chat() const
 {
 	return m_chat;
 }
 
-template<typename selector_type>
-selector_type& basic_buffer<selector_type>::get_selector()
+template<typename Document, typename Selector>
+typename basic_buffer<Document, Selector>::selector_type&
+	basic_buffer<Document, Selector>::get_selector()
 {
-	if(m_net.get() != NULL)
-		throw std::logic_error("obby::basic_buffer::get_selector");
+	if(m_net.get() == NULL)
+	{
+		throw std::logic_error(
+			"obby::basic_buffer::get_selector:\n"
+			"Net object not yet initialized"
+		);
+	}
 
 	return m_net->get_selector();
 }
 
-template<typename selector_type>
-const selector_type& basic_buffer<selector_type>::get_selector() const
+template<typename Document, typename Selector>
+const typename basic_buffer<Document, Selector>::selector_type&
+	basic_buffer<Document, Selector>::get_selector() const
 {
-	if(m_net.get())
-		throw std::logic_error("obby::basic_buffer::get_selector");
+	if(m_net.get() == NULL)
+	{
+		throw std::logic_error(
+			"obby::basic_buffer::get_selector:\n"
+			"Net object not yet initialized"
+		);
+	}
 
 	return m_net->get_selector();
 }
 
-template<typename selector_type>
-void basic_buffer<selector_type>::serialise(const std::string& session) const
+template<typename Document, typename Selector>
+void basic_buffer<Document, Selector>::
+	serialise(const std::string& session) const
 {
 	serialise::parser parser;
 	parser.set_type("obby");
@@ -321,10 +343,10 @@ void basic_buffer<selector_type>::serialise(const std::string& session) const
 	parser.serialise(session);
 }
 
-template<typename selector_type>
-typename basic_buffer<selector_type>::document_info*
-basic_buffer<selector_type>::document_find(unsigned int owner_id,
-                                           unsigned int id) const
+template<typename Document, typename Selector>
+typename basic_buffer<Document, Selector>::document_info_type*
+basic_buffer<Document, Selector>::document_find(unsigned int owner_id,
+                                                unsigned int id) const
 {
 	document_iterator iter;
 	for(iter = m_docs.begin(); iter != m_docs.end(); ++ iter)
@@ -340,9 +362,9 @@ basic_buffer<selector_type>::document_find(unsigned int owner_id,
 	return NULL;
 }
 
-template<typename selector_type>
-bool basic_buffer<selector_type>::check_colour(const colour& colour,
-                                               const user* ignore) const
+template<typename Document, typename Selector>
+bool basic_buffer<Document, Selector>::check_colour(const colour& colour,
+                                                    const user* ignore) const
 {
 	for(user_table::iterator iter =
 		m_user_table.begin(user::flags::CONNECTED, user::flags::NONE);
@@ -363,105 +385,108 @@ bool basic_buffer<selector_type>::check_colour(const colour& colour,
 	return true;
 }
 
-template<typename selector_type>
-typename basic_buffer<selector_type>::document_iterator
-basic_buffer<selector_type>::document_begin() const
+template<typename Document, typename Selector>
+typename basic_buffer<Document, Selector>::document_iterator
+basic_buffer<Document, Selector>::document_begin() const
 {
 	return static_cast<document_iterator>(m_docs.begin() );
 }
 
-template<typename selector_type>
-typename basic_buffer<selector_type>::document_iterator
-basic_buffer<selector_type>::document_end() const
+template<typename Document, typename Selector>
+typename basic_buffer<Document, Selector>::document_iterator
+basic_buffer<Document, Selector>::document_end() const
 {
 	return static_cast<document_iterator>(m_docs.end() );
 }
 
-template<typename selector_type>
-typename basic_buffer<selector_type>::document_size_type
-basic_buffer<selector_type>::document_count() const
+template<typename Document, typename Selector>
+typename basic_buffer<Document, Selector>::document_size_type
+basic_buffer<Document, Selector>::document_count() const
 {
 	return m_docs.size();
 }
 
-template<typename selector_type>
-typename basic_buffer<selector_type>::signal_sync_init_type
-basic_buffer<selector_type>::sync_init_event() const
+template<typename Document, typename Selector>
+typename basic_buffer<Document, Selector>::signal_sync_init_type
+basic_buffer<Document, Selector>::sync_init_event() const
 {
-	        return m_signal_sync_init;
+	return m_signal_sync_init;
 }
 
-template<typename selector_type>
-typename basic_buffer<selector_type>::signal_sync_final_type
-basic_buffer<selector_type>::sync_final_event() const
+template<typename Document, typename Selector>
+typename basic_buffer<Document, Selector>::signal_sync_final_type
+basic_buffer<Document, Selector>::sync_final_event() const
 {
-	        return m_signal_sync_final;
+	return m_signal_sync_final;
 }
 
-template<typename selector_type>
-typename basic_buffer<selector_type>::signal_user_join_type
-basic_buffer<selector_type>::user_join_event() const
+template<typename Document, typename Selector>
+typename basic_buffer<Document, Selector>::signal_user_join_type
+basic_buffer<Document, Selector>::user_join_event() const
 {
 	return m_signal_user_join;
 }
 
-template<typename selector_type>
-typename basic_buffer<selector_type>::signal_user_part_type
-basic_buffer<selector_type>::user_part_event() const
+template<typename Document, typename Selector>
+typename basic_buffer<Document, Selector>::signal_user_part_type
+basic_buffer<Document, Selector>::user_part_event() const
 {
 	return m_signal_user_part;
 }
 
-template<typename selector_type>
-typename basic_buffer<selector_type>::signal_user_colour_type
-basic_buffer<selector_type>::user_colour_event() const
+template<typename Document, typename Selector>
+typename basic_buffer<Document, Selector>::signal_user_colour_type
+basic_buffer<Document, Selector>::user_colour_event() const
 {
 	return m_signal_user_colour;
 }
 
-template<typename selector_type>
-typename basic_buffer<selector_type>::signal_document_insert_type
-basic_buffer<selector_type>::document_insert_event() const
+template<typename Document, typename Selector>
+typename basic_buffer<Document, Selector>::signal_document_insert_type
+basic_buffer<Document, Selector>::document_insert_event() const
 {
 	return m_signal_document_insert;
 }
 
-template<typename selector_type>
-typename basic_buffer<selector_type>::signal_document_rename_type
-basic_buffer<selector_type>::document_rename_event() const
+template<typename Document, typename Selector>
+typename basic_buffer<Document, Selector>::signal_document_rename_type
+basic_buffer<Document, Selector>::document_rename_event() const
 {
 	return m_signal_document_rename;
 }
 
-template<typename selector_type>
-typename basic_buffer<selector_type>::signal_document_remove_type
-basic_buffer<selector_type>::document_remove_event() const
+template<typename Document, typename Selector>
+typename basic_buffer<Document, Selector>::signal_document_remove_type
+basic_buffer<Document, Selector>::document_remove_event() const
 {
 	return m_signal_document_remove;
 }
 
-template<typename selector_type>
-void basic_buffer<selector_type>::document_add(document_info& document)
+template<typename Document, typename Selector>
+void basic_buffer<Document, Selector>::
+	document_add(document_info_type& info)
 {
 	// Add new document into list
-	m_docs.push_back(&document);
+	m_docs.push_back(&info);
 	// Emit document_insert signal
-	m_signal_document_insert.emit(document);
+	m_signal_document_insert.emit(info);
 	// Emit user_subscribe signal for each user that is initially
 	// subscribed to the document.
-	for(typename document_info::user_iterator iter = document.user_begin();
-	    iter != document.user_end();
+	for(typename document_info_type::user_iterator iter =
+		info.user_begin();
+	    iter != info.user_end();
 	    ++ iter)
-		document.subscribe_event().emit(*iter);
+		info.subscribe_event().emit(*iter);
 }
 
-template<typename selector_type>
-void basic_buffer<selector_type>::document_delete(document_info& info)
+template<typename Document, typename Selector>
+void basic_buffer<Document, Selector>::
+	document_delete(document_info_type& info)
 {
 	// TODO: Emit user_unsubscribe signal for each user that was subscribed?
 	// Emit document_remove signal
 	m_signal_document_remove.emit(info);
-	// Delete from list
+	// Delete from list (TODO: Use std::set?)
 	m_docs.erase(
 		std::remove(m_docs.begin(), m_docs.end(), &info),
 		m_docs.end()
@@ -471,11 +496,11 @@ void basic_buffer<selector_type>::document_delete(document_info& info)
 	delete &info;
 }
 
-template<typename selector_type>
-void basic_buffer<selector_type>::document_clear()
+template<typename Document, typename Selector>
+void basic_buffer<Document, Selector>::document_clear()
 {
 	// TODO: Emit document_remove signal for each document?
-	typename std::list<document_info*>::iterator iter;
+	typename document_list::iterator iter;
 	for(iter = m_docs.begin(); iter != m_docs.end(); ++ iter)
 		delete *iter;
 

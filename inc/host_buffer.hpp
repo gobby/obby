@@ -141,7 +141,7 @@ typedef basic_host_buffer<net6::selector> host_buffer;
 
 /*template<typename selector_type>
 basic_host_buffer<selector_type>::basic_host_buffer()
- : basic_buffer<selector_type>(),
+ : basic_buffer<obby::document, selector_type>(),
    basic_local_buffer<selector_type>(),
    basic_server_buffer<selector_type>(),
    m_self(NULL)
@@ -153,7 +153,7 @@ template<typename selector_type>
 basic_host_buffer<selector_type>::
 	basic_host_buffer(const RSA::Key& public_key,
 	                  const RSA::Key& private_key)
- : basic_buffer<selector_type>(),
+ : basic_buffer<obby::document, selector_type>(),
    basic_local_buffer<selector_type>(),
    basic_server_buffer<selector_type>(public_key, private_key),
    m_self(NULL)
@@ -164,7 +164,7 @@ template<typename selector_type>
 basic_host_buffer<selector_type>::
 	basic_host_buffer(const std::string& username,
 	                  const colour& colour)
- : basic_buffer<selector_type>(),
+ : basic_buffer<obby::document, selector_type>(),
    basic_local_buffer<selector_type>(),
    basic_server_buffer<selector_type>(),
    m_username(username), m_colour(colour), m_self(NULL)
@@ -177,7 +177,7 @@ basic_host_buffer<selector_type>::
 	                  const colour& colour,
 	                  const RSA::Key& public_key,
 	                  const RSA::Key& private_key)
- : basic_buffer<selector_type>(),
+ : basic_buffer<obby::document, selector_type>(),
    basic_local_buffer<selector_type>(),
    basic_server_buffer<selector_type>(public_key, private_key),
    m_username(username), m_colour(colour), m_self(NULL)
@@ -190,12 +190,12 @@ void basic_host_buffer<selector_type>::open(unsigned int port)
 	basic_server_buffer<selector_type>::open(port);
 
 	// Create local user
-	m_self = basic_buffer<selector_type>::m_user_table.add_user(
-		basic_buffer<selector_type>::m_user_table.find_free_id(),
+	m_self = basic_buffer<obby::document, selector_type>::m_user_table.add_user(
+		basic_buffer<obby::document, selector_type>::m_user_table.find_free_id(),
 		net6_host().get_self(), m_colour
 	);
 
-	basic_buffer<selector_type>::m_signal_user_join.emit(*m_self);
+	basic_buffer<obby::document, selector_type>::m_signal_user_join.emit(*m_self);
 }
 
 template<typename selector_type>
@@ -205,12 +205,12 @@ void basic_host_buffer<selector_type>::open(const std::string& content,
 	basic_server_buffer<selector_type>::open(content, port);
 
 	// Create local user
-	m_self = basic_buffer<selector_type>::m_user_table.add_user(
-		basic_buffer<selector_type>::m_user_table.find_free_id(),
+	m_self = basic_buffer<obby::document, selector_type>::m_user_table.add_user(
+		basic_buffer<obby::document, selector_type>::m_user_table.find_free_id(),
 		net6_host().get_self(), m_colour
 	);
 
-	basic_buffer<selector_type>::m_signal_user_join.emit(*m_self);
+	basic_buffer<obby::document, selector_type>::m_signal_user_join.emit(*m_self);
 }
 
 template<typename selector_type>
@@ -226,7 +226,7 @@ basic_host_buffer<selector_type>::
 	document_find(unsigned int owner_id, unsigned int id) const
 {
 	return dynamic_cast<document_info*>(
-		basic_buffer<selector_type>::document_find(owner_id, id)
+		basic_buffer<obby::document, selector_type>::document_find(owner_id, id)
 	);
 }
 
@@ -256,7 +256,7 @@ void basic_host_buffer<selector_type>::
 	if(m_self == NULL)
 		throw std::logic_error("obby::host_buffer::document_create");
 
-	unsigned int id = ++ basic_buffer<selector_type>::m_doc_counter;
+	unsigned int id = ++ basic_buffer<obby::document, selector_type>::m_doc_counter;
 
 	// Create document with local user as owner instead of NULL indicating
 	// that it is the server's document.
@@ -273,7 +273,7 @@ void basic_host_buffer<selector_type>::set_colour(const colour& colour)
 
 	// Check for colour conflicts
 	// TODO: user_colour_impl should check this
-	if(!basic_buffer<selector_type>::check_colour(colour, m_self))
+	if(!basic_buffer<obby::document, selector_type>::check_colour(colour, m_self))
 	{
 		basic_local_buffer<selector_type>::
 			m_signal_user_colour_failed.emit();
@@ -318,7 +318,7 @@ typename basic_host_buffer<selector_type>::net_type&
 basic_host_buffer<selector_type>::net6_host()
 {
 	return dynamic_cast<net_type&>(
-		*basic_buffer<selector_type>::m_net
+		*basic_buffer<obby::document, selector_type>::m_net
 	);
 }
 
@@ -327,7 +327,7 @@ const typename basic_host_buffer<selector_type>::net_type&
 basic_host_buffer<selector_type>::net6_host() const
 {
 	return dynamic_cast<const net_type&>(
-		*basic_buffer<selector_type>::m_net
+		*basic_buffer<obby::document, selector_type>::m_net
 	);
 }
 

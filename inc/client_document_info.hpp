@@ -185,7 +185,7 @@ basic_client_document_info<selector_type>::basic_client_document_info(
 	net6::basic_client<selector_type>& net,
 	const user* owner, unsigned int id,
 	const std::string& title
-) : basic_document_info<selector_type>(buffer, net, owner, id, title),
+) : basic_document_info<obby::document, selector_type>(buffer, net, owner, id, title),
     basic_local_document_info<selector_type>(buffer, net, owner, id, title)
 {
 	// If we created this document, the constructor with initial content
@@ -209,7 +209,7 @@ basic_client_document_info<selector_type>::basic_client_document_info(
 	net6::basic_client<selector_type>& net,
 	const user* owner, unsigned int id,
 	const std::string& title, const std::string& content
-) : basic_document_info<selector_type>(buffer, net, owner, id, title),
+) : basic_document_info<obby::document, selector_type>(buffer, net, owner, id, title),
     basic_local_document_info<selector_type>(buffer, net, owner, id, title)
 {
 	// content is provided, so we should have created this document
@@ -222,8 +222,8 @@ basic_client_document_info<selector_type>::basic_client_document_info(
 	}
 
 	// Assign document, initialise content
-	basic_document_info<selector_type>::assign_document();
-	basic_document_info<selector_type>::
+	basic_document_info<obby::document, selector_type>::assign_document();
+	basic_document_info<obby::document, selector_type>::
 		m_document->insert(0, content, NULL);
 
 	// Subscribe owner
@@ -235,7 +235,7 @@ basic_client_document_info<selector_type>::basic_client_document_info(
 	const basic_client_buffer<selector_type>& buffer,
 	net6::basic_client<selector_type>& net,
 	const net6::packet& init_pack
-) : basic_document_info<selector_type>(
+) : basic_document_info<obby::document, selector_type>(
 	buffer, net,
 	init_pack.get_param(0).net6::parameter::as<const user*>(
 		::serialise::hex_context<const user*>(buffer.get_user_table())
@@ -364,7 +364,7 @@ template<typename selector_type>
 void basic_client_document_info<selector_type>::obby_sync_init()
 {
 	// Document gets synced now, all subscribed users will be transmitted.
-	basic_document_info<selector_type>::m_users.clear();
+	basic_document_info<obby::document, selector_type>::m_users.clear();
 }
 
 template<typename selector_type>
@@ -374,7 +374,7 @@ void basic_client_document_info<selector_type>::
 	// Subscribe user to info
 	// TODO: Why did we call the base method here?
 	// - armin, 10-31-2005
-	//basic_document_info<selector_type>::user_subscribe(user);
+	//basic_document_info<obby::document, selector_type>::user_subscribe(user);
 
 	user_subscribe(user);
 }
@@ -384,11 +384,11 @@ void basic_client_document_info<selector_type>::
 	obby_local_init(const std::string& content)
 {
 	// Assign local document before subscribing
-	basic_document_info<selector_type>::assign_document();
+	basic_document_info<obby::document, selector_type>::assign_document();
 	// Subscribe local user
 	user_subscribe(get_buffer().get_self() );
 	// Add initial content
-	basic_document_info<selector_type>::
+	basic_document_info<obby::document, selector_type>::
 		m_document->insert(0, content, NULL);
 }
 
@@ -396,7 +396,7 @@ template<typename selector_type>
 void basic_client_document_info<selector_type>::user_subscribe(const user& user)
 {
 	// Call base function
-	basic_document_info<selector_type>::user_subscribe(user);
+	basic_document_info<obby::document, selector_type>::user_subscribe(user);
 
 	// Add client to jupiter algo if we are subscribed
 	if(m_jupiter.get() != NULL)
@@ -407,7 +407,7 @@ void basic_client_document_info<selector_type>::user_subscribe(const user& user)
 		// Note that the document must be there at this point because
 		// the whole document synchronisation process should have been
 		// performed before we subscribed to a document.
-		if(basic_document_info<selector_type>::m_document.get() == NULL)
+		if(basic_document_info<obby::document, selector_type>::m_document.get() == NULL)
 		{
 			throw std::logic_error(
 				"obby::basic_client_document_info::"
@@ -417,13 +417,13 @@ void basic_client_document_info<selector_type>::user_subscribe(const user& user)
 
 		// Create jupiter algorithm to merge changes
 		m_jupiter.reset(new jupiter_client(
-			*basic_document_info<selector_type>::m_document
+			*basic_document_info<obby::document, selector_type>::m_document
 		) );
 
 		// Add existing clients
-		for(typename basic_document_info<selector_type>::user_iterator
-			iter = basic_document_info<selector_type>::user_begin();
-		    iter != basic_document_info<selector_type>::user_end();
+		for(typename basic_document_info<obby::document, selector_type>::user_iterator
+			iter = basic_document_info<obby::document, selector_type>::user_begin();
+		    iter != basic_document_info<obby::document, selector_type>::user_end();
 		    ++ iter)
 		{
 			m_jupiter->client_add(*iter);
@@ -447,12 +447,12 @@ void basic_client_document_info<selector_type>::
 		m_jupiter->client_remove(user);
 
 	// Call base function
-	basic_document_info<selector_type>::user_unsubscribe(user);
+	basic_document_info<obby::document, selector_type>::user_unsubscribe(user);
 
 	if(&get_buffer().get_self() == &user)
 	{
 		// Release document if the local user unsubscribed
-		basic_document_info<selector_type>::release_document();
+		basic_document_info<obby::document, selector_type>::release_document();
 		// Release jupiter algorithm
 		m_jupiter.reset(NULL);
 	}
@@ -493,7 +493,7 @@ void basic_client_document_info<selector_type>::
 		pack.get_param(1).net6::parameter::as<std::string>();
 
 	// Rename document
-	basic_document_info<selector_type>::document_rename(new_title);
+	basic_document_info<obby::document, selector_type>::document_rename(new_title);
 }
 
 template<typename selector_type>
@@ -508,8 +508,8 @@ void basic_client_document_info<selector_type>::
 			"%0%/%1%"
 		);
 
-		str << basic_document_info<selector_type>::get_owner_id()
-		    << basic_document_info<selector_type>::get_id();
+		str << basic_document_info<obby::document, selector_type>::get_owner_id()
+		    << basic_document_info<obby::document, selector_type>::get_id();
 
 		throw net6::bad_value(str.str() );
 	}
@@ -527,7 +527,7 @@ void basic_client_document_info<selector_type>::
 	record rec(
 		pack,
 		index,
-		basic_document_info<selector_type>::m_buffer.get_user_table()
+		basic_document_info<obby::document, selector_type>::m_buffer.get_user_table()
 	);
 
 	// Apply remote operation
@@ -539,23 +539,23 @@ void basic_client_document_info<selector_type>::
 	on_net_sync_init(const document_packet& pack)
 {
 	// Subscribed?
-	if(basic_document_info<selector_type>::m_document.get() != NULL)
+	if(basic_document_info<obby::document, selector_type>::m_document.get() != NULL)
 	{
 		format_string str(
 			"Got sync_init for subscribed document %0%/%1%"
 		);
 
-		str << basic_document_info<selector_type>::get_owner_id()
-		    << basic_document_info<selector_type>::get_id();
+		str << basic_document_info<obby::document, selector_type>::get_owner_id()
+		    << basic_document_info<obby::document, selector_type>::get_id();
 
 		throw net6::bad_value(str.str() );
 	}
 
 	// Assign empty document
-	basic_document_info<selector_type>::assign_document();
+	basic_document_info<obby::document, selector_type>::assign_document();
 	// Clear all lines, the document will be synced line-wise
 	// TODO: Get at least rid of this function call
-	basic_document_info<selector_type>::m_document->clear_lines();
+	basic_document_info<obby::document, selector_type>::m_document->clear_lines();
 }
 
 template<typename selector_type>
@@ -563,21 +563,21 @@ void basic_client_document_info<selector_type>::
 	on_net_sync_line(const document_packet& pack)
 {
 	// No document assigned or subscribed?
-	if(basic_document_info<selector_type>::m_document.get() == NULL)
+	if(basic_document_info<obby::document, selector_type>::m_document.get() == NULL)
 	{
 		format_string str(
 			"Got sync_line without sync_init for document %0%/%1%"
 		);
 
-		str << basic_document_info<selector_type>::get_owner_id()
-		    << basic_document_info<selector_type>::get_id();
+		str << basic_document_info<obby::document, selector_type>::get_owner_id()
+		    << basic_document_info<obby::document, selector_type>::get_id();
 
 		throw net6::bad_value(str.str() );
 	}
 
 	// Add line to document
 	unsigned int index = 2;
-	basic_document_info<selector_type>::m_document->add_line(
+	basic_document_info<obby::document, selector_type>::m_document->add_line(
 		line(pack, index, get_buffer().get_user_table())
 	);
 }
@@ -626,7 +626,7 @@ const basic_client_buffer<selector_type>&
 basic_client_document_info<selector_type>::get_buffer() const
 {
 	return dynamic_cast<const basic_client_buffer<selector_type>&>(
-		basic_document_info<selector_type>::m_buffer
+		basic_document_info<obby::document, selector_type>::m_buffer
 	);
 }
 
@@ -635,7 +635,7 @@ net6::basic_client<selector_type>&
 basic_client_document_info<selector_type>::get_net6()
 {
 	return dynamic_cast<net6::basic_client<selector_type>&>(
-		basic_document_info<selector_type>::m_net
+		basic_document_info<obby::document, selector_type>::m_net
 	);
 }
 
@@ -644,7 +644,7 @@ const net6::basic_client<selector_type>&
 basic_client_document_info<selector_type>::get_net6() const
 {
 	return dynamic_cast<const net6::basic_client<selector_type>&>(
-		basic_document_info<selector_type>::m_net
+		basic_document_info<obby::document, selector_type>::m_net
 	);
 }
 

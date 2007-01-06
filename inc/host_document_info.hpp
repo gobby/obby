@@ -106,7 +106,7 @@ basic_host_document_info<selector_type>::basic_host_document_info(
 	const user* owner, unsigned int id,
 	const std::string& title, const std::string& content
 ):
-	basic_document_info<selector_type>(buffer, net, owner, id, title),
+	basic_document_info<obby::document, selector_type>(buffer, net, owner, id, title),
 	basic_local_document_info<selector_type>(buffer, net, owner, id, title),
  	basic_server_document_info<selector_type>(
 		buffer, net, owner, id, title, content
@@ -129,7 +129,7 @@ basic_host_document_info<selector_type>::basic_host_document_info(
 	net6::basic_host<selector_type>& net,
 	const serialise::object& obj
 ):
-	basic_document_info<selector_type>(buffer, net, obj),
+	basic_document_info<obby::document, selector_type>(buffer, net, obj),
 	basic_local_document_info<selector_type>(buffer, net, obj),
 	basic_server_document_info<selector_type>(buffer, net, obj)
 {
@@ -190,7 +190,7 @@ void basic_host_document_info<selector_type>::
 
 	// Do not call server function because it will add the client to
 	// jupiter in any case.
-	basic_document_info<selector_type>::user_subscribe(user);
+	basic_document_info<obby::document, selector_type>::user_subscribe(user);
 
 	// Add client to jupiter if it is not the local client
 	if(&user != &get_buffer().get_self() )
@@ -212,7 +212,7 @@ void basic_host_document_info<selector_type>::
 	}
 
 	// Call base function
-	basic_document_info<selector_type>::user_unsubscribe(user);
+	basic_document_info<obby::document, selector_type>::user_unsubscribe(user);
 }
 
 template<typename selector_type>
@@ -220,7 +220,7 @@ const basic_host_buffer<selector_type>&
 basic_host_document_info<selector_type>::get_buffer() const
 {
 	return dynamic_cast<const basic_host_buffer<selector_type>&>(
-		basic_document_info<selector_type>::m_buffer
+		basic_document_info<obby::document, selector_type>::m_buffer
 	);
 }
 
@@ -229,7 +229,7 @@ net6::basic_host<selector_type>&
 basic_host_document_info<selector_type>::get_net6()
 {
 	return dynamic_cast<net6::basic_host<selector_type>&>(
-		basic_document_info<selector_type>::m_net
+		basic_document_info<obby::document, selector_type>::m_net
 	);
 }
 
@@ -238,7 +238,7 @@ const net6::basic_host<selector_type>&
 basic_host_document_info<selector_type>::get_net6() const
 {
 	return dynamic_cast<const net6::basic_host<selector_type>&>(
-		basic_document_info<selector_type>::m_net
+		basic_document_info<obby::document, selector_type>::m_net
 	);
 }
 

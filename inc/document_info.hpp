@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -31,14 +31,14 @@
 namespace obby
 {
 
-template<typename selector_type>
+template<typename Document, typename Selector>
 class basic_buffer;
 
 /** Information about a document that is provided without being subscribed to
  * a document.
  */
-template<typename selector_type>
-class basic_document_info : private net6::non_copyable, public sigc::trackable
+template<typename Document, typename Selector>
+class basic_document_info: private net6::non_copyable, public sigc::trackable
 {
 public:
 	class privileges
@@ -52,18 +52,53 @@ public:
 		static const privileges ADMIN;
 		static const privileges ALL;
 
-        	privileges operator|(privileges other) const { return privileges(m_value | other.m_value); }
-	        privileges operator&(privileges other) const { return privileges(m_value & other.m_value); }
-        	privileges operator^(privileges other) const { return privileges(m_value ^ other.m_value); }
-	        privileges& operator|=(privileges other) { m_value |= other.m_value; return *this; }
-        	privileges& operator&=(privileges other) { m_value &= other.m_value; return *this; }
-	        privileges& operator^=(privileges other) { m_value ^= other.m_value; return *this; }
-        	privileges operator~() const { return privileges(~m_value); }
+        	privileges operator|(privileges other) const
+		{
+			return privileges(m_value | other.m_value);
+		}
+
+	        privileges operator&(privileges other) const
+		{
+			return privileges(m_value & other.m_value);
+		}
+
+        	privileges operator^(privileges other) const
+		{
+			return privileges(m_value ^ other.m_value);
+		}
+
+	        privileges& operator|=(privileges other)
+		{
+			m_value |= other.m_value; return *this;
+		}
+
+        	privileges& operator&=(privileges other)
+		{
+			m_value &= other.m_value; return *this;
+		}
+
+	        privileges& operator^=(privileges other)
+		{
+			m_value ^= other.m_value; return *this;
+		}
+
+        	privileges operator~() const
+		{
+			return privileges(~m_value);
+		}
 
 		operator bool() const { return m_value != NONE.m_value; }
 		bool operator!() const { return m_value == NONE.m_value; }
-	        bool operator==(privileges other) const { return m_value == other.m_value; }
-        	bool operator!=(privileges other) const { return m_value != other.m_value; }
+
+	        bool operator==(privileges other) const
+		{
+			return m_value == other.m_value;
+		}
+
+        	bool operator!=(privileges other) const
+		{
+			return m_value != other.m_value;
+		}
 
 	        unsigned int get_value() const { return m_value; }
 
@@ -73,12 +108,16 @@ public:
 	        unsigned int m_value;
 	};
 
+	typedef Document document_type;
+	typedef Selector selector_type;
+
 	class privileges_table;
 
 	typedef sigc::signal<void, const std::string&> signal_rename_type;
 	typedef sigc::signal<void, const user&> signal_subscribe_type;
 	typedef sigc::signal<void, const user&> signal_unsubscribe_type;
 
+	// TODO: Outsource subscribed users into an own class
 	typedef std::list<user*>::size_type user_size_type;
 	typedef ptr_iterator<
 		const user,
@@ -86,13 +125,16 @@ public:
 		std::list<const user*>::const_iterator
 	> user_iterator;
 
-	basic_document_info(const basic_buffer<selector_type>& buffer,
-	                    net6::basic_object<selector_type>& net,
+	typedef basic_buffer<document_type, selector_type> buffer_type;
+	typedef net6::basic_object<selector_type> net_type;
+
+	basic_document_info(const buffer_type& buffer,
+	                    net_type& net,
 	                    const user* owner, unsigned int id,
 	                    const std::string& title);
 
-	basic_document_info(const basic_buffer<selector_type>& buffer,
-	                    net6::basic_object<selector_type>& net,
+	basic_document_info(const buffer_type& buffer,
+	                    net_type& net,
 	                    const serialise::object& obj);
 
 	/** Serialises the document into the given serialisation object.
@@ -119,7 +161,7 @@ public:
 
 	/** Returns the content of the document, if available.
 	 */
-	const document& get_content() const;
+	const Document& get_content() const;
 
 	/** Returns the privileges table for this document.
 	 */
@@ -197,8 +239,8 @@ protected:
 	 */
 	void release_document();
 
-	const basic_buffer<selector_type>& m_buffer;
-	net6::basic_object<selector_type>& m_net;
+	const buffer_type& m_buffer;
+	net_type& m_net;
 
 	const user* m_owner;
 	unsigned int m_id;
@@ -215,39 +257,59 @@ protected:
 public:
 	/** Returns the buffer to which this document_info belongs.
 	 */
-	const basic_buffer<selector_type>& get_buffer() const;
+	const buffer_type& get_buffer() const;
 
 private:
 	/** Returns the underlaying net6 object through which requests are
 	 * transmitted.
 	 */
-	net6::basic_object<selector_type>& get_net6();
+	net_type& get_net6();
 
 	/** Returns the underlaying net6 object through which requests are
 	 * transmitted.
 	 */
-	const net6::basic_object<selector_type>& get_net6() const;
+	const net_type& get_net6() const;
 };
 
-template<typename selector_type>
-const typename basic_document_info<selector_type>::privileges basic_document_info<selector_type>::privileges::NONE = typename basic_document_info<selector_type>::privileges(0x00000000);
-template<typename selector_type>
-const typename basic_document_info<selector_type>::privileges basic_document_info<selector_type>::privileges::SUBSCRIBE = typename basic_document_info<selector_type>::privileges(0x00000001);
-template<typename selector_type>
-const typename basic_document_info<selector_type>::privileges basic_document_info<selector_type>::privileges::MODIFY = typename basic_document_info<selector_type>::privileges(0x00000002);
-template<typename selector_type>
-const typename basic_document_info<selector_type>::privileges basic_document_info<selector_type>::privileges::CLOSE = typename basic_document_info<selector_type>::privileges(0x00000004);
-template<typename selector_type>
-const typename basic_document_info<selector_type>::privileges basic_document_info<selector_type>::privileges::RENAME = typename basic_document_info<selector_type>::privileges(0x00000008);
-template<typename selector_type>
-const typename basic_document_info<selector_type>::privileges basic_document_info<selector_type>::privileges::ADMIN = typename basic_document_info<selector_type>::privileges(0x00000010);
-template<typename selector_type>
-const typename basic_document_info<selector_type>::privileges basic_document_info<selector_type>::privileges::ALL = typename basic_document_info<selector_type>::privileges(~basic_document_info<selector_type>::privileges::NONE);
+template<typename Document, typename Selector>
+const typename basic_document_info<Document, Selector>::privileges
+basic_document_info<Document, Selector>::privileges::NONE =
+typename basic_document_info<Document, Selector>::privileges(0x00000000);
+
+template<typename Document, typename Selector>
+const typename basic_document_info<Document, Selector>::privileges
+basic_document_info<Document, Selector>::privileges::SUBSCRIBE =
+typename basic_document_info<Document, Selector>::privileges(0x00000001);
+
+template<typename Document, typename Selector>
+const typename basic_document_info<Document, Selector>::privileges
+basic_document_info<Document, Selector>::privileges::MODIFY =
+typename basic_document_info<Document, Selector>::privileges(0x00000002);
+
+template<typename Document, typename Selector>
+const typename basic_document_info<Document, Selector>::privileges
+basic_document_info<Document, Selector>::privileges::CLOSE =
+typename basic_document_info<Document, Selector>::privileges(0x00000004);
+
+template<typename Document, typename Selector>
+const typename basic_document_info<Document, Selector>::privileges
+basic_document_info<Document, Selector>::privileges::RENAME =
+typename basic_document_info<Document, Selector>::privileges(0x00000008);
+
+template<typename Document, typename Selector>
+const typename basic_document_info<Document, Selector>::privileges
+basic_document_info<Document, Selector>::privileges::ADMIN =
+typename basic_document_info<Document, Selector>::privileges(0x00000010);
+
+template<typename Document, typename Selector>
+const typename basic_document_info<Document, Selector>::privileges
+basic_document_info<Document, Selector>::privileges::ALL =
+typename basic_document_info<Document, Selector>::privileges(0xffffffff);
 
 /** Table that stores the privileges for multiple users.
  */
-template<typename selector_type>
-class basic_document_info<selector_type>::privileges_table
+template<typename Document, typename Selector>
+class basic_document_info<Document, Selector>::privileges_table
 {
 public:
 	typedef sigc::signal<void, const user&, privileges>
@@ -290,114 +352,132 @@ protected:
 namespace serialise
 {
 
-template<typename selector_type, typename document_type>
-class basic_context
+template<typename DocumentInfo>
+class document_info_context
 {
 public:
-	typedef obby::basic_buffer<selector_type> buffer;
+	typedef DocumentInfo document_info_type;
+	typedef typename document_info_type::buffer_type buffer_type;
 
-	basic_context();
-	basic_context(const buffer& buffer);
+	document_info_context();
+	document_info_context(const buffer_type& buffer);
 
-	virtual std::string to_string(document_type from) const;
-	virtual document_type from_string(const std::string& string) const;
+	virtual std::string to_string(document_info_type* from) const;
+
+	virtual document_info_type*
+	from_string(const std::string& string) const;
 protected:
 	virtual void on_stream_setup(std::stringstream& stream) const = 0;
 
-	const buffer* m_buffer;
+	const buffer_type* m_buffer;
 };
 
-template<typename selector_type>
-class context<obby::basic_document_info<selector_type>*>:
-	public basic_context<
-		selector_type,
-		obby::basic_document_info<selector_type>*
+template<typename Document, typename Selector>
+class context<obby::basic_document_info<Document, Selector>*>:
+	public document_info_context<
+		obby::basic_document_info<Document, Selector>
 	>
 {
 public:
-	typedef obby::basic_document_info<selector_type>*
-		document_type;
-	typedef typename basic_context<selector_type, document_type>::buffer
-		buffer;
+	typedef typename document_info_context<
+		obby::basic_document_info<Document, Selector>
+	>::document_info_type document_info_type;
+
+	typedef typename document_info_context<
+		obby::basic_document_info<Document, Selector>
+	>::buffer_type buffer_type;
 
 	context():
-		basic_context<selector_type, document_type>() {}
-	context(const buffer& buffer):
-		basic_context<selector_type, document_type>(buffer) {}
+		document_info_context<document_info_type>() {}
+	context(const buffer_type& buffer):
+		document_info_context<document_info_type>(buffer) {}
 
 protected:
 	virtual void on_stream_setup(std::stringstream& stream) const;
 };
 
-template<typename selector_type>
-class context<const obby::basic_document_info<selector_type>*>:
-	public basic_context<
-		selector_type,
-		const obby::basic_document_info<selector_type>*
+template<typename Document, typename Selector>
+class context<const obby::basic_document_info<Document, Selector>*>:
+	public document_info_context<
+		const obby::basic_document_info<Document, Selector>
 	>
 {
 public:
-	typedef const obby::basic_document_info<selector_type>*
-		document_type;
-	typedef typename basic_context<selector_type, document_type>::buffer
-		buffer;
+	typedef typename document_info_context<
+		const obby::basic_document_info<Document, Selector>
+	>::document_info_type document_info_type;
+
+	typedef typename document_info_context<
+		const obby::basic_document_info<Document, Selector>
+	>::buffer_type buffer_type;
 
 	context():
-		basic_context<selector_type, document_type>() {}
-	context(const buffer& buffer):
-		basic_context<selector_type, document_type>(buffer) {}
+		document_info_context<document_info_type>() {}
+	context(const buffer_type& buffer):
+		document_info_context<document_info_type>(buffer) {}
 
 protected:
 	virtual void on_stream_setup(std::stringstream& stream) const;
 };
 
-template<typename selector_type>
-class hex_context<obby::basic_document_info<selector_type>*>:
-	public context<obby::basic_document_info<selector_type>*>
+template<typename Document, typename Selector>
+class hex_context<obby::basic_document_info<Document, Selector>*>:
+	public context<obby::basic_document_info<Document, Selector>*>
 {
 public:
-	typedef obby::basic_document_info<selector_type> document_type;
-	typedef typename context<document_type*>::buffer buffer;
+	typedef typename context<
+		obby::basic_document_info<Document, Selector>*
+	>::document_info_type document_info_type;
+
+	typedef typename context<
+		obby::basic_document_info<Document, Selector>*
+	>::buffer_type buffer_type;
 
 	hex_context():
-		context<document_type*>() {}
-	hex_context(const buffer& buffer):
-		context<document_type*>(buffer) {}
+		context<document_info_type*>() {}
+	hex_context(const buffer_type& buffer):
+		context<document_info_type*>(buffer) {}
 protected:
 	virtual void on_stream_setup(std::stringstream& stream) const;
 };
 
-template<typename selector_type>
-class hex_context<const obby::basic_document_info<selector_type>*>:
-	public context<const obby::basic_document_info<selector_type>*>
+template<typename Document, typename Selector>
+class hex_context<const obby::basic_document_info<Document, Selector>*>:
+	public context<const obby::basic_document_info<Document, Selector>*>
 {
 public:
-	typedef obby::basic_document_info<selector_type> document_type;
-	typedef typename context<const document_type*>::buffer buffer;
+	typedef typename context<
+		const obby::basic_document_info<Document, Selector>*
+	>::document_info_type document_info_type;
+
+	typedef typename context<
+		const obby::basic_document_info<Document, Selector>*
+	>::buffer_type buffer_type;
 
 	hex_context():
-		context<const document_type*>() {}
-	hex_context(const buffer& buffer):
-		context<const document_type*>(buffer) {}
+		context<const document_info_type*>() {}
+	hex_context(const buffer_type& buffer):
+		context<const document_info_type*>(buffer) {}
 protected:
 	virtual void on_stream_setup(std::stringstream& stream) const;
 };
 
-template<typename selector_type, typename document_type>
-basic_context<selector_type, document_type>::basic_context():
+template<typename DocumentInfo>
+document_info_context<DocumentInfo>::document_info_context():
 	m_buffer(NULL)
 {
 }
 
-template<typename selector_type, typename document_type>
-basic_context<selector_type, document_type>::basic_context(const buffer& buffer):
+template<typename DocumentInfo>
+document_info_context<DocumentInfo>::
+	document_info_context(const buffer_type& buffer):
 	m_buffer(&buffer)
 {
 }
 
-template<typename selector_type, typename document_type>
-std::string basic_context<selector_type, document_type>::
-	to_string(document_type from) const
+template<typename DocumentInfo>
+std::string document_info_context<DocumentInfo>::
+	to_string(document_info_type* from) const
 {
 	std::stringstream stream;
 	on_stream_setup(stream);
@@ -405,8 +485,9 @@ std::string basic_context<selector_type, document_type>::
 	return stream.str();
 }
 
-template<typename selector_type, typename document_type>
-document_type basic_context<selector_type, document_type>::
+template<typename DocumentInfo>
+typename document_info_context<DocumentInfo>::document_info_type*
+document_info_context<DocumentInfo>::
 	from_string(const std::string& string) const
 {
 	// We need a buffer to lookup the document
@@ -424,7 +505,8 @@ document_type basic_context<selector_type, document_type>::
 		throw conversion_error("Document ID ought to be two integers");
 
 	// Lookup document
-	document_type info = m_buffer->document_find(owner_id, document_id);
+	document_info_type* info =
+		m_buffer->document_find(owner_id, document_id);
 
 	if(info == NULL)
 	{
@@ -438,27 +520,27 @@ document_type basic_context<selector_type, document_type>::
 	return info;
 }
 
-template<typename selector_type>
-void context<obby::basic_document_info<selector_type>*>::
+template<typename Document, typename Selector>
+void context<obby::basic_document_info<Document, Selector>*>::
 	on_stream_setup(std::stringstream& stream) const
 {
 }
 
-template<typename selector_type>
-void context<const obby::basic_document_info<selector_type>*>::
+template<typename Document, typename Selector>
+void context<const obby::basic_document_info<Document, Selector>*>::
 	on_stream_setup(std::stringstream& stream) const
 {
 }
 
-template<typename selector_type>
-void hex_context<obby::basic_document_info<selector_type>*>::
+template<typename Document, typename Selector>
+void hex_context<obby::basic_document_info<Document, Selector>*>::
 	on_stream_setup(std::stringstream& stream) const
 {
 	stream >> std::hex;
 }
 
-template<typename selector_type>
-void hex_context<const obby::basic_document_info<selector_type>*>::
+template<typename Document, typename Selector>
+void hex_context<const obby::basic_document_info<Document, Selector>*>::
 	on_stream_setup(std::stringstream& stream) const
 {
 	stream >> std::hex;
@@ -469,12 +551,11 @@ void hex_context<const obby::basic_document_info<selector_type>*>::
 namespace obby
 {
 
-typedef basic_document_info<net6::selector> document_info;
 
-template<typename selector_type>
-basic_document_info<selector_type>::
-	basic_document_info(const basic_buffer<selector_type>& buffer,
-	                    net6::basic_object<selector_type>& net,
+template<typename Document, typename Selector>
+basic_document_info<Document, Selector>::
+	basic_document_info(const buffer_type& buffer,
+	                    net_type& net,
 	                    const user* owner, unsigned int id,
 	                    const std::string& title):
 	m_buffer(buffer), m_net(net), m_owner(owner), m_id(id), m_title(title),
@@ -484,10 +565,10 @@ basic_document_info<selector_type>::
 {
 }
 
-template<typename selector_type>
-basic_document_info<selector_type>::
-	basic_document_info(const basic_buffer<selector_type>& buffer,
-	                    net6::basic_object<selector_type>& net,
+template<typename Document, typename Selector>
+basic_document_info<Document, Selector>::
+	basic_document_info(const buffer_type& buffer,
+	                    net_type& net,
 	                    const serialise::object& obj):
 	m_buffer(buffer), m_net(net),
 	m_owner(
@@ -512,12 +593,18 @@ basic_document_info<selector_type>::
 {
 }
 
-template<typename selector_type>
-void basic_document_info<selector_type>::serialise(serialise::object& obj) const
+template<typename Document, typename Selector>
+void basic_document_info<Document, Selector>::
+	serialise(serialise::object& obj) const
 {
 	/* Cannot serialise an object whose content we do not have */
 	if(m_document.get() == NULL)
-		throw std::logic_error("obby::basic_document_info::serialise");
+	{
+		throw std::logic_error(
+			"obby::basic_document_info::serialise:\n"
+			"No content available, probably not subscribed"
+		);
+	}
 
 	obj.add_attribute("owner").set_value(m_owner);
 	obj.add_attribute("id").set_value(m_id);
@@ -526,14 +613,14 @@ void basic_document_info<selector_type>::serialise(serialise::object& obj) const
 	m_document->serialise(obj);
 }
 
-template<typename selector_type>
-const user* basic_document_info<selector_type>::get_owner() const
+template<typename Document, typename Selector>
+const user* basic_document_info<Document, Selector>::get_owner() const
 {
 	return m_owner;
 }
 
-template<typename selector_type>
-unsigned int basic_document_info<selector_type>::get_owner_id() const
+template<typename Document, typename Selector>
+unsigned int basic_document_info<Document, Selector>::get_owner_id() const
 {
 	if(m_owner == NULL)
 		return 0;
@@ -541,41 +628,44 @@ unsigned int basic_document_info<selector_type>::get_owner_id() const
 	return m_owner->get_id();
 }
 
-template<typename selector_type>
-unsigned int basic_document_info<selector_type>::get_id() const
+template<typename Document, typename Selector>
+unsigned int basic_document_info<Document, Selector>::get_id() const
 {
 	return m_id;
 }
 
-template<typename selector_type>
-const std::string& basic_document_info<selector_type>::get_title() const
+template<typename Document, typename Selector>
+const std::string& basic_document_info<Document, Selector>::get_title() const
 {
 	return m_title;
 }
 
-template<typename selector_type>
-const document& basic_document_info<selector_type>::get_content() const
+template<typename Document, typename Selector>
+const Document& basic_document_info<Document, Selector>::get_content() const
 {
 	if(m_document.get() == NULL)
 	{
 		throw std::logic_error(
-			"obby::basic_document_info::get_content"
+			"obby::basic_document_info::get_content:\n"
+			"No content available, probably not subscribed"
 		);
 	}
 
 	return *m_document;
 }
 
-template<typename selector_type>
-const typename basic_document_info<selector_type>::privileges_table&
-basic_document_info<selector_type>::get_privileges_table() const
+template<typename Document, typename Selector>
+const typename basic_document_info<Document, Selector>::privileges_table&
+basic_document_info<Document, Selector>::get_privileges_table() const
 {
 	return *m_priv_table;
 }
 
-template<typename selector_type>
-bool basic_document_info<selector_type>::is_subscribed(const user& user) const
+template<typename Document, typename Selector>
+bool basic_document_info<Document, Selector>::
+	is_subscribed(const user& user) const
 {
+	// TODO: Use std::set
 	return std::find(
 		m_users.begin(),
 		m_users.end(),
@@ -583,68 +673,69 @@ bool basic_document_info<selector_type>::is_subscribed(const user& user) const
 	) != m_users.end();
 }
 
-template<typename selector_type>
-typename basic_document_info<selector_type>::user_iterator
-basic_document_info<selector_type>::user_begin() const
+template<typename Document, typename Selector>
+typename basic_document_info<Document, Selector>::user_iterator
+basic_document_info<Document, Selector>::user_begin() const
 {
 	return m_users.begin();
 }
 
-template<typename selector_type>
-typename basic_document_info<selector_type>::user_iterator
-basic_document_info<selector_type>::user_end() const
+template<typename Document, typename Selector>
+typename basic_document_info<Document, Selector>::user_iterator
+basic_document_info<Document, Selector>::user_end() const
 {
 	return m_users.end();
 }
 
-template<typename selector_type>
-typename basic_document_info<selector_type>::user_size_type
-basic_document_info<selector_type>::user_count() const
+template<typename Document, typename Selector>
+typename basic_document_info<Document, Selector>::user_size_type
+basic_document_info<Document, Selector>::user_count() const
 {
 	return m_users.size();
 }
 
-template<typename selector_type>
-typename basic_document_info<selector_type>::signal_rename_type
-basic_document_info<selector_type>::rename_event() const
+template<typename Document, typename Selector>
+typename basic_document_info<Document, Selector>::signal_rename_type
+basic_document_info<Document, Selector>::rename_event() const
 {
 	return m_signal_rename;
 }
 
-template<typename selector_type>
-typename basic_document_info<selector_type>::signal_subscribe_type
-basic_document_info<selector_type>::subscribe_event() const
+template<typename Document, typename Selector>
+typename basic_document_info<Document, Selector>::signal_subscribe_type
+basic_document_info<Document, Selector>::subscribe_event() const
 {
 	return m_signal_subscribe;
 }
 
-template<typename selector_type>
-typename basic_document_info<selector_type>::signal_unsubscribe_type
-basic_document_info<selector_type>::unsubscribe_event() const
+template<typename Document, typename Selector>
+typename basic_document_info<Document, Selector>::signal_unsubscribe_type
+basic_document_info<Document, Selector>::unsubscribe_event() const
 {
 	return m_signal_unsubscribe;
 }
 
-template<typename selector_type>
-void basic_document_info<selector_type>::obby_user_join(const user& user)
+template<typename Document, typename Selector>
+void basic_document_info<Document, Selector>::obby_user_join(const user& user)
 {
 }
 
-template<typename selector_type>
-void basic_document_info<selector_type>::obby_user_part(const user& user)
+template<typename Document, typename Selector>
+void basic_document_info<Document, Selector>::obby_user_part(const user& user)
 {
 	// User left the session: Unsubscribe from document
 	if(is_subscribed(user) )
 		user_unsubscribe(user);
 }
 
-template<typename selector_type>
-void basic_document_info<selector_type>::user_subscribe(const user& user)
+template<typename Document, typename Selector>
+void basic_document_info<Document, Selector>::user_subscribe(const user& user)
 {
 	if(is_subscribed(user) )
 	{
 		throw std::logic_error(
-			"obby::basic_document_info::user_subscribe"
+			"obby::basic_document_info::user_subscribe:\n"
+			"User is already subscribed"
 		);
 	}
 
@@ -652,13 +743,14 @@ void basic_document_info<selector_type>::user_subscribe(const user& user)
 	m_signal_subscribe.emit(user);
 }
 
-template<typename selector_type>
-void basic_document_info<selector_type>::user_unsubscribe(const user& user)
+template<typename Document, typename Selector>
+void basic_document_info<Document, Selector>::user_unsubscribe(const user& user)
 {
 	if(!is_subscribed(user) )
 	{
 		throw std::logic_error(
-			"obby::basic_document_info::user_unsubscribe"
+			"obby::basic_document_info::user_unsubscribe:\n"
+			"User is not subscribed"
 		);
 	}
 
@@ -670,66 +762,67 @@ void basic_document_info<selector_type>::user_unsubscribe(const user& user)
 	m_signal_unsubscribe.emit(user);
 }
 
-template<typename selector_type>
-void basic_document_info<selector_type>::
+template<typename Document, typename Selector>
+void basic_document_info<Document, Selector>::
 	document_rename(const std::string& title)
 {
 	m_title = title;
 	m_signal_rename.emit(title);
 }
 
-template<typename selector_type>
-void basic_document_info<selector_type>::assign_document()
+template<typename Document, typename Selector>
+void basic_document_info<Document, Selector>::assign_document()
 {
-	m_document.reset(new document);
+	// TODO: Document template given to buffer that may be copied here.
+	m_document.reset(new Document);
 }
 
-template<typename selector_type>
-void basic_document_info<selector_type>::release_document()
+template<typename Document, typename Selector>
+void basic_document_info<Document, Selector>::release_document()
 {
 	m_document.reset(NULL);
 }
 
-template<typename selector_type>
-const basic_buffer<selector_type>&
-basic_document_info<selector_type>::get_buffer() const
+template<typename Document, typename Selector>
+const typename basic_document_info<Document, Selector>::buffer_type&
+basic_document_info<Document, Selector>::get_buffer() const
 {
 	return m_buffer;
 }
 
-template<typename selector_type>
-net6::basic_object<selector_type>&
-basic_document_info<selector_type>::get_net6()
+template<typename Document, typename Selector>
+typename basic_document_info<Document, Selector>::net_type&
+basic_document_info<Document, Selector>::get_net6()
 {
 	return m_net;
 }
 
-template<typename selector_type>
-const net6::basic_object<selector_type>&
-basic_document_info<selector_type>::get_net6() const
+template<typename Document, typename Selector>
+const typename basic_document_info<Document, Selector>::net_type&
+basic_document_info<Document, Selector>::get_net6() const
 {
 	return m_net;
 }
 
 // privileges_table
-template<typename selector_type>
-basic_document_info<selector_type>::privileges_table::
-	privileges_table(privileges default_privileges)
- : m_default_privs(default_privileges)
+template<typename Document, typename Selector>
+basic_document_info<Document, Selector>::privileges_table::
+	privileges_table(privileges default_privileges):
+	m_default_privs(default_privileges)
 {
 }
 
-template<typename selector_type>
-typename basic_document_info<selector_type>::privileges
-basic_document_info<selector_type>::privileges_table::
+template<typename Document, typename Selector>
+typename basic_document_info<Document, Selector>::privileges
+basic_document_info<Document, Selector>::privileges_table::
 	get_default_privileges() const
 {
 	return m_default_privs;
 }
 
-template<typename selector_type>
-typename basic_document_info<selector_type>::privileges
-basic_document_info<selector_type>::privileges_table::
+template<typename Document, typename Selector>
+typename basic_document_info<Document, Selector>::privileges
+basic_document_info<Document, Selector>::privileges_table::
 	privileges_query(const user& user, privileges privs) const
 {
 	typename priv_map::const_iterator iter = m_privs.find(&user);
@@ -737,18 +830,18 @@ basic_document_info<selector_type>::privileges_table::
 	return iter->second & privs;
 }
 
-template<typename selector_type>
-void basic_document_info<selector_type>::privileges_table::
+template<typename Document, typename Selector>
+void basic_document_info<Document, Selector>::privileges_table::
 	privileges_change(const user& user, privileges privs)
 {
 	m_privs[&user] = privs;
 	m_signal_privileges_changed.emit(user, privs);
 }
 
-template<typename selector_type>
-typename basic_document_info<selector_type>::privileges_table::
+template<typename Document, typename Selector>
+typename basic_document_info<Document, Selector>::privileges_table::
 	signal_privileges_changed_type
-basic_document_info<selector_type>::privileges_table::
+basic_document_info<Document, Selector>::privileges_table::
 	privileges_changed_event() const
 {
 	return m_signal_privileges_changed;
@@ -757,5 +850,3 @@ basic_document_info<selector_type>::privileges_table::
 } // namespace obby
 
 #endif // _OBBY_DOCUMENT_INFO_HPP_
-
-

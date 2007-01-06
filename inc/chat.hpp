@@ -25,7 +25,7 @@
 #include <sigc++/connection.h>
 #include "user.hpp"
 #include "user_table.hpp"
-#include "document_info.hpp"
+//#include "document_info.hpp"
 
 namespace obby
 {
@@ -119,21 +119,8 @@ public:
 	 * @param max_messages How many messages to store before deleting
 	 * old ones.
 	 */
-	template<typename buffer_type>
-	chat(const buffer_type& buffer, unsigned int max_messages):
-		m_max_messages(max_messages)
-	{
-		buffer.sync_init_event().connect(
-			sigc::mem_fun(*this, &chat::on_sync_init) );
-		buffer.sync_final_event().connect(
-			sigc::mem_fun(*this, &chat::on_sync_final) );
-		m_user_join_conn = buffer.user_join_event().connect(
-			sigc::mem_fun(*this, &chat::on_user_join) );
-		m_user_part_conn = buffer.user_part_event().connect(
-			sigc::mem_fun(*this, &chat::on_user_part) );
-		m_document_insert_conn = buffer.document_insert_event().connect(
-			sigc::mem_fun(*this, &chat::on_document_insert) );
-	}
+	template<typename Buffer>
+	chat(const Buffer& buffer, unsigned int max_messages);
 
 	~chat();
 
@@ -181,7 +168,9 @@ protected:
 
 	void on_user_join(const user& user);
 	void on_user_part(const user& user);
-	void on_document_insert(document_info& document);
+
+	template<typename DocumentInfo>
+	void on_document_insert(DocumentInfo& document);
 
 	unsigned int m_max_messages;
 	std::list<message*> m_messages;
@@ -192,6 +181,53 @@ protected:
 	sigc::connection m_user_part_conn;
 	sigc::connection m_document_insert_conn;
 };
+
+template<typename Buffer>
+chat::chat(const Buffer& buffer, unsigned int max_messages):
+	m_max_messages(max_messages)
+{
+	typedef typename Buffer::document_info_type document_info_type;
+
+	buffer.sync_init_event().connect(
+		sigc::mem_fun(*this, &chat::on_sync_init) );
+	buffer.sync_final_event().connect(
+		sigc::mem_fun(*this, &chat::on_sync_final) );
+	m_user_join_conn = buffer.user_join_event().connect(
+		sigc::mem_fun(*this, &chat::on_user_join) );
+	m_user_part_conn = buffer.user_part_event().connect(
+		sigc::mem_fun(*this, &chat::on_user_part) );
+
+	m_document_insert_conn = buffer.document_insert_event().connect(
+		sigc::mem_fun(
+			*this,
+			&chat::on_document_insert<document_info_type>
+		)
+	);
+}
+
+template<typename DocumentInfo>
+void chat::on_document_insert(DocumentInfo& document)
+{
+	const user* user = document.get_owner();
+	std::string localised_str;
+
+	// The document has no owner, it was created by the server.
+	if(user != NULL)
+	{
+		obby::format_string str(
+			_("%0% has created a new document: %1%") );
+		str << (*user).get_name() << document.get_title();
+		localised_str = str.str();
+	}
+	else
+	{
+		obby::format_string str(_("A new document was created: %0%") );
+		str << document.get_title();
+		localised_str = str.str();
+	}
+
+	add_message(new system_message(localised_str, std::time(NULL)) );
+}
 
 } // namespace obby
 

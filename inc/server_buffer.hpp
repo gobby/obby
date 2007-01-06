@@ -35,12 +35,12 @@ namespace obby
  * connections from client_buffers and synchronises their changes.
  */
 template<typename selector_type>
-class basic_server_buffer : virtual public basic_buffer<selector_type>
+class basic_server_buffer : virtual public basic_buffer<obby::document, selector_type>
 {
 public: 
 	typedef net6::basic_server<selector_type> net_type;
 
-	typedef typename basic_buffer<selector_type>::base_document_info
+	typedef typename basic_buffer<obby::document, selector_type>::base_document_info_type
 		base_document_info;
 	typedef basic_server_document_info<selector_type>
 		document_info;
@@ -224,11 +224,11 @@ typedef basic_server_buffer<net6::selector> server_buffer;
 
 template<typename selector_type>
 basic_server_buffer<selector_type>::basic_server_buffer()
- : basic_buffer<selector_type>()
+ : basic_buffer<obby::document, selector_type>()
 {
 	// TODO: Key length as ctor parameter
 	std::pair<RSA::Key, RSA::Key> keys = RSA::generate(
-		basic_buffer<selector_type>::m_rclass, 256
+		basic_buffer<obby::document, selector_type>::m_rclass, 256
 	);
 
 	m_public = keys.first; m_private = keys.second;
@@ -238,7 +238,7 @@ template<typename selector_type>
 basic_server_buffer<selector_type>::
 	basic_server_buffer(const RSA::Key& public_key,
 	                    const RSA::Key& private_key)
- : basic_buffer<selector_type>(), m_public(public_key), m_private(private_key)
+ : basic_buffer<obby::document, selector_type>(), m_public(public_key), m_private(private_key)
 {
 }
 
@@ -248,10 +248,10 @@ void basic_server_buffer<selector_type>::open(unsigned int port)
 	if(is_open() )
 		throw std::logic_error("obby::basic_server_buffer::open");
 
-	basic_buffer<selector_type>::m_net.reset(new_net(port) );
+	basic_buffer<obby::document, selector_type>::m_net.reset(new_net(port) );
 	register_signal_handlers();
-	basic_buffer<selector_type>::m_signal_sync_init.emit(0);
-	basic_buffer<selector_type>::m_signal_sync_final.emit();
+	basic_buffer<obby::document, selector_type>::m_signal_sync_init.emit(0);
+	basic_buffer<obby::document, selector_type>::m_signal_sync_final.emit();
 }
 
 template<typename selector_type>
@@ -262,9 +262,9 @@ void basic_server_buffer<selector_type>::open(const std::string& session,
 		throw std::logic_error("obby::basic_server_buffer::open");
 
 	// Open server
-	basic_buffer<selector_type>::m_net.reset(new_net(port) );
+	basic_buffer<obby::document, selector_type>::m_net.reset(new_net(port) );
 	register_signal_handlers();
-	basic_buffer<selector_type>::m_signal_sync_init.emit(0);
+	basic_buffer<obby::document, selector_type>::m_signal_sync_init.emit(0);
 
 	// Deserialise file
 	serialise::parser parser;
@@ -296,16 +296,16 @@ void basic_server_buffer<selector_type>::open(const std::string& session,
 		if(iter->get_name() == "user_table")
 		{
 			// Stored user table
-			basic_buffer<selector_type>::m_user_table.deserialise(
+			basic_buffer<obby::document, selector_type>::m_user_table.deserialise(
 				*iter
 			);
 		}
 		else if(iter->get_name() == "chat")
 		{
 			// Stored chat history
-			basic_buffer<selector_type>::m_chat.deserialise(
+			basic_buffer<obby::document, selector_type>::m_chat.deserialise(
 				*iter,
-				basic_buffer<selector_type>::m_user_table
+				basic_buffer<obby::document, selector_type>::m_user_table
 			);
 		}
 		else if(iter->get_name() == "document")
@@ -313,7 +313,7 @@ void basic_server_buffer<selector_type>::open(const std::string& session,
 			// Stored document, load it
 			document_info* info = new_document_info(*iter);
 			// Add to list
-			basic_buffer<selector_type>::document_add(*info);
+			basic_buffer<obby::document, selector_type>::document_add(*info);
 		}
 		else
 		{
@@ -325,7 +325,7 @@ void basic_server_buffer<selector_type>::open(const std::string& session,
 		}
 	}
 
-	basic_buffer<selector_type>::m_signal_sync_final.emit();
+	basic_buffer<obby::document, selector_type>::m_signal_sync_final.emit();
 }
 
 template<typename selector_type>
@@ -336,15 +336,15 @@ void basic_server_buffer<selector_type>::close()
 
 	// Reset documents, users and network object
 	// TODO: Keep documents and users until reconnection
-	basic_buffer<selector_type>::document_clear();
-	basic_buffer<selector_type>::m_user_table.clear();
-	basic_buffer<selector_type>::m_net.reset(NULL);
+	basic_buffer<obby::document, selector_type>::document_clear();
+	basic_buffer<obby::document, selector_type>::m_user_table.clear();
+	basic_buffer<obby::document, selector_type>::m_net.reset(NULL);
 }
 
 template<typename selector_type>
 bool basic_server_buffer<selector_type>::is_open() const
 {
-	return basic_buffer<selector_type>::m_net.get() != NULL;
+	return basic_buffer<obby::document, selector_type>::m_net.get() != NULL;
 }
 
 template<typename selector_type>
@@ -360,7 +360,7 @@ void basic_server_buffer<selector_type>::
 {
 	// TODO: m_doc_counter should not be declared in basic_buffer
 	// but client_buffer / server_buffer separately
-	unsigned int id = ++ basic_buffer<selector_type>::m_doc_counter;
+	unsigned int id = ++ basic_buffer<obby::document, selector_type>::m_doc_counter;
 
 	// Create the document with the special owner NULL which means that
 	// this document was created by the server.
@@ -385,7 +385,7 @@ void basic_server_buffer<selector_type>::
 	net6_server().send(remove_pack);
 
 	// Delete document
-	basic_buffer<selector_type>::document_delete(info);
+	basic_buffer<obby::document, selector_type>::document_delete(info);
 }
 
 template<typename selector_type>
@@ -394,7 +394,7 @@ basic_server_buffer<selector_type>::
 	document_find(unsigned int owner_id, unsigned int id) const
 {
 	return dynamic_cast<document_info*>(
-		basic_buffer<selector_type>::document_find(owner_id, id)
+		basic_buffer<obby::document, selector_type>::document_find(owner_id, id)
 	);
 }
 
@@ -429,7 +429,7 @@ void basic_server_buffer<selector_type>::
 	// Create new document
 	document_info* info = new_document_info(owner, id, title, content);
 	// Add to buffer
-	basic_buffer<selector_type>::document_add(*info);
+	basic_buffer<obby::document, selector_type>::document_add(*info);
 	// Publish the new document to the users. Note that we do not have
 	// to send the document's initial content because no user is currently
 	// subscribed, and the content is synced with the subscription.
@@ -438,9 +438,9 @@ void basic_server_buffer<selector_type>::
 
 	// TODO: send_to_all_except function or something
 	// or, better: user_table.send() with given flags.
-	for(user_table::iterator iter = basic_buffer<selector_type>::
+	for(user_table::iterator iter = basic_buffer<obby::document, selector_type>::
 		m_user_table.begin(user::flags::CONNECTED, user::flags::NONE);
-	    iter != basic_buffer<selector_type>::
+	    iter != basic_buffer<obby::document, selector_type>::
 		m_user_table.end(user::flags::CONNECTED, user::flags::NONE);
 	    ++ iter)
 	{
@@ -460,13 +460,13 @@ void basic_server_buffer<selector_type>::
 
 	if(writer == NULL)
 	{
-		basic_buffer<selector_type>::m_chat.add_server_message(
+		basic_buffer<obby::document, selector_type>::m_chat.add_server_message(
 			message
 		);
 	}
 	else
 	{
-		basic_buffer<selector_type>::m_chat.add_user_message(
+		basic_buffer<obby::document, selector_type>::m_chat.add_user_message(
 			message,
 			*writer
 		);
@@ -479,9 +479,9 @@ void basic_server_buffer<selector_type>::
 	                 const colour& colour)
 {
 	// TODO: user_colour_impl should check for color conflicts - should it?
-	basic_buffer<selector_type>::m_user_table.set_user_colour(user, colour);
+	basic_buffer<obby::document, selector_type>::m_user_table.set_user_colour(user, colour);
 	// TODO: user::set_colour should emit this signal
-	basic_buffer<selector_type>::m_signal_user_colour.emit(user);
+	basic_buffer<obby::document, selector_type>::m_signal_user_colour.emit(user);
 
 	net6::packet colour_pack("obby_user_colour");
 	colour_pack << &user << colour;
@@ -493,7 +493,7 @@ void basic_server_buffer<selector_type>::
 	on_connect(const net6::user& user6)
 {
 	// Create random token for this connection
-	mpz_class toknum = basic_buffer<selector_type>::m_rclass.get_z_bits(48);
+	mpz_class toknum = basic_buffer<obby::document, selector_type>::m_rclass.get_z_bits(48);
 	std::string token = toknum.get_str(36);
 
 	// Add the token for this user into the token map until a obby::user
@@ -503,7 +503,7 @@ void basic_server_buffer<selector_type>::
 
 	// Send token and the server's public key with the welcome packet
 	net6::packet welcome_pack("obby_welcome");
-	welcome_pack << basic_buffer<selector_type>::PROTOCOL_VERSION
+	welcome_pack << basic_buffer<obby::document, selector_type>::PROTOCOL_VERSION
 	             << token
 	             << m_public.get_n().get_str(36)
 	             << m_public.get_k().get_str(36);
@@ -523,7 +523,7 @@ template<typename selector_type>
 void basic_server_buffer<selector_type>::on_join(const net6::user& user6)
 {
 	// Find user in list
-	const user* new_user = basic_buffer<selector_type>::
+	const user* new_user = basic_buffer<obby::document, selector_type>::
 		m_user_table.find(
 			user6,
 			user::flags::CONNECTED,
@@ -539,9 +539,9 @@ void basic_server_buffer<selector_type>::on_join(const net6::user& user6)
 	}
 
 	// Synchronise non-connected users.
-	for(user_table::iterator iter = basic_buffer<selector_type>::
+	for(user_table::iterator iter = basic_buffer<obby::document, selector_type>::
 		m_user_table.begin(user::flags::NONE, user::flags::CONNECTED);
-	    iter != basic_buffer<selector_type>::
+	    iter != basic_buffer<obby::document, selector_type>::
 		m_user_table.end(user::flags::NONE, user::flags::CONNECTED);
 	    ++ iter)
 	{
@@ -552,9 +552,9 @@ void basic_server_buffer<selector_type>::on_join(const net6::user& user6)
 	}
 
 	// Synchronise the document list
-	for(typename basic_buffer<selector_type>::document_iterator iter =
-		basic_buffer<selector_type>::document_begin();
-	   iter != basic_buffer<selector_type>::document_end();
+	for(typename basic_buffer<obby::document, selector_type>::document_iterator iter =
+		basic_buffer<obby::document, selector_type>::document_begin();
+	   iter != basic_buffer<obby::document, selector_type>::document_end();
 	   ++ iter)
 	{
 		// Setup document packet
@@ -578,22 +578,22 @@ void basic_server_buffer<selector_type>::on_join(const net6::user& user6)
 
 	// Forward join message to documents
 	// TODO: Let the documents connect to signal_user_join
-	for(typename basic_buffer<selector_type>::document_iterator iter =
-		basic_buffer<selector_type>::document_begin();
-	   iter != basic_buffer<selector_type>::document_end();
+	for(typename basic_buffer<obby::document, selector_type>::document_iterator iter =
+		basic_buffer<obby::document, selector_type>::document_begin();
+	   iter != basic_buffer<obby::document, selector_type>::document_end();
 	   ++ iter)
 		iter->obby_user_join(*new_user);
 
 	// User joined successfully; emit user_join signal
 	// TODO: Move to user_table::add_user
-	basic_buffer<selector_type>::m_signal_user_join.emit(*new_user);
+	basic_buffer<obby::document, selector_type>::m_signal_user_join.emit(*new_user);
 }
 
 template<typename selector_type>
 void basic_server_buffer<selector_type>::on_part(const net6::user& user6)
 {
 	// Find obby::user object for given net6::user
-	const user* cur_user = basic_buffer<selector_type>::
+	const user* cur_user = basic_buffer<obby::document, selector_type>::
 		m_user_table.find(
 			user6,
 			user::flags::CONNECTED,
@@ -610,16 +610,16 @@ void basic_server_buffer<selector_type>::on_part(const net6::user& user6)
 
 	// Forward part message to documents
 	// TODO: Let the documents connect to signal_user_part
-	for(typename basic_buffer<selector_type>::document_iterator iter =
-		basic_buffer<selector_type>::document_begin();
-	   iter != basic_buffer<selector_type>::document_end();
+	for(typename basic_buffer<obby::document, selector_type>::document_iterator iter =
+		basic_buffer<obby::document, selector_type>::document_begin();
+	   iter != basic_buffer<obby::document, selector_type>::document_end();
 	   ++ iter)
 		iter->obby_user_part(*cur_user);
 
 	// Emit part signal, remove user from list
 	// TODO: Move part signal emission to remove_user
-	basic_buffer<selector_type>::m_signal_user_part.emit(*cur_user);
-	basic_buffer<selector_type>::m_user_table.remove_user(*cur_user);
+	basic_buffer<obby::document, selector_type>::m_signal_user_part.emit(*cur_user);
+	basic_buffer<obby::document, selector_type>::m_user_table.remove_user(*cur_user);
 }
 
 template<typename selector_type>
@@ -644,7 +644,7 @@ bool basic_server_buffer<selector_type>::
 			pack.get_param(3).net6::parameter::as<std::string>();
 
 	// Check colour
-	if(!basic_buffer<selector_type>::check_colour(colour) )
+	if(!basic_buffer<obby::document, selector_type>::check_colour(colour) )
 	{
 		error = login::ERROR_COLOUR_IN_USE;
 		return false;
@@ -676,7 +676,7 @@ bool basic_server_buffer<selector_type>::
 	}
 
 	// Search user in user table
-	const obby::user* user = basic_buffer<selector_type>::m_user_table.find(
+	const obby::user* user = basic_buffer<obby::document, selector_type>::m_user_table.find(
 		name,
 		user::flags::NONE,
 		user::flags::CONNECTED
@@ -707,11 +707,11 @@ void basic_server_buffer<selector_type>::
 	// Choose free user ID (note that this is another ID as the net6
 	// user ID because this ID must remain valid over multiple sessions).
 	unsigned int user_id =
-		basic_buffer<selector_type>::m_user_table.find_free_id();
+		basic_buffer<obby::document, selector_type>::m_user_table.find_free_id();
 
 	// Insert into user list
 	const user* new_user =
-		basic_buffer<selector_type>::m_user_table.add_user(
+		basic_buffer<obby::document, selector_type>::m_user_table.add_user(
 			user_id, user6, colour
 		);
 
@@ -729,7 +729,7 @@ void basic_server_buffer<selector_type>::
 	}
 
 	// Store token in user, remove from list
-	basic_buffer<selector_type>::m_user_table.set_user_token(
+	basic_buffer<obby::document, selector_type>::m_user_table.set_user_token(
 		*new_user,
 		token_iter->second
 	);
@@ -741,9 +741,9 @@ void basic_server_buffer<selector_type>::
 
 	// Calculate number of required sync packets (one for each
 	// non-connected user, one for each document in the list).
-	unsigned int sync_n = basic_buffer<selector_type>::
+	unsigned int sync_n = basic_buffer<obby::document, selector_type>::
 		m_user_table.count(user::flags::NONE, user::flags::NONE);
-	sync_n += basic_buffer<selector_type>::document_count();
+	sync_n += basic_buffer<obby::document, selector_type>::document_count();
 
 	// Send initial sync packet with this number, the client may then show
 	// a progressbar or something.
@@ -757,7 +757,7 @@ void basic_server_buffer<selector_type>::
 	on_extend(const net6::user& user6, net6::packet& pack)
 {
 	// Find corresponding user in list
-	const user* cur_user = basic_buffer<selector_type>::
+	const user* cur_user = basic_buffer<obby::document, selector_type>::
 		m_user_table.find(
 			user6,
 			user::flags::CONNECTED,
@@ -781,7 +781,7 @@ void basic_server_buffer<selector_type>::
 	on_data(const net6::user& user6, const net6::packet& pack)
 {
 	// Get obby::user from net6::user
-	const user* from_user = basic_buffer<selector_type>::
+	const user* from_user = basic_buffer<obby::document, selector_type>::
 		m_user_table.find(
 			user6,
 			user::flags::CONNECTED,
@@ -851,8 +851,8 @@ void basic_server_buffer<selector_type>::
 {
 	// Get document to remove
 	document_info& doc = dynamic_cast<document_info&>(
-		*pack.get_param(0).net6::parameter::as<obby::document_info*>(
-			::serialise::hex_context<obby::document_info*>(*this)
+		*pack.get_param(0).net6::parameter::as<base_document_info*>(
+			::serialise::hex_context<base_document_info*>(*this)
 		)
 	);
 
@@ -877,7 +877,7 @@ void basic_server_buffer<selector_type>::
 	on_net_user_password(const net6::packet& pack, const user& from)
 {
 	// Set password for this user
-	basic_buffer<selector_type>::m_user_table.set_user_password(
+	basic_buffer<obby::document, selector_type>::m_user_table.set_user_password(
 		from,
 		RSA::decrypt(
 			m_private,
@@ -894,7 +894,7 @@ void basic_server_buffer<selector_type>::
 		pack.get_param(0).net6::parameter::as<obby::colour>();
 
 	// Check new user colour for conflicts
-	if(!basic_buffer<selector_type>::check_colour(colour, &from) )
+	if(!basic_buffer<obby::document, selector_type>::check_colour(colour, &from) )
 	{
 		net6::packet reply_pack("obby_user_colour_failed");
 		net6_server().send(reply_pack, from.get_net6() );
@@ -910,8 +910,8 @@ void basic_server_buffer<selector_type>::
 	on_net_document(const net6::packet& pack, const user& from)
 {
 	document_info& info = dynamic_cast<document_info&>(
-		*pack.get_param(0).net6::parameter::as<obby::document_info*>(
-			::serialise::hex_context<obby::document_info*>(*this)
+		*pack.get_param(0).net6::parameter::as<base_document_info*>(
+			::serialise::hex_context<base_document_info*>(*this)
 		)
 	);
 
@@ -974,7 +974,7 @@ typename basic_server_buffer<selector_type>::net_type&
 basic_server_buffer<selector_type>::net6_server()
 {
 	return dynamic_cast<net_type&>(
-		*basic_buffer<selector_type>::m_net
+		*basic_buffer<obby::document, selector_type>::m_net
 	);
 }
 
@@ -983,7 +983,7 @@ const typename basic_server_buffer<selector_type>::net_type&
 basic_server_buffer<selector_type>::net6_server() const
 {
 	return dynamic_cast<const net_type&>(
-		*basic_buffer<selector_type>::m_net
+		*basic_buffer<obby::document, selector_type>::m_net
 	);
 }
 

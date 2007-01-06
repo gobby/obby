@@ -28,7 +28,7 @@ namespace obby
 /** A local_buffer is a buffer object with a local user.
  */
 template<typename selector_type>
-class basic_local_buffer : virtual public basic_buffer<selector_type>
+class basic_local_buffer : virtual public basic_buffer<obby::document, selector_type>
 {
 public: 
 	typedef basic_local_document_info<selector_type> document_info;
@@ -80,7 +80,7 @@ typedef basic_local_buffer<net6::selector> local_buffer;
 
 template<typename selector_type>
 basic_local_buffer<selector_type>::basic_local_buffer()
- : basic_buffer<selector_type>()
+ : basic_buffer<obby::document, selector_type>()
 {
 }
 
@@ -96,7 +96,7 @@ basic_local_buffer<selector_type>::document_find(unsigned int owner_id,
                                                  unsigned int id) const
 {
 	return dynamic_cast<document_info*>(
-		basic_buffer<selector_type>::find_document(owner_id, id)
+		basic_buffer<obby::document, selector_type>::find_document(owner_id, id)
 	);
 }
 

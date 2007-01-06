@@ -24,18 +24,18 @@
 namespace obby
 {
 
-template<typename selector_type>
+template<typename Document, typename Selector>
 class basic_document_info;
 
 /** Packet which belongs to a specified document.
  */
-class document_packet : public net6::packet
+class document_packet: public net6::packet
 {
 public:
-	template<typename selector_type>
-	document_packet(const basic_document_info<selector_type>& info,
-	                const std::string& command)
-	 : net6::packet("obby_document")
+	template<typename Document, typename Selector>
+	document_packet(const basic_document_info<Document, Selector>& info,
+	                const std::string& command):
+		net6::packet("obby_document")
 	{
 		// Real command is obby_document, so the command who is
 		// interesting for the document is stored as second parameter.

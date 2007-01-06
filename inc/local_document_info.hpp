@@ -35,7 +35,7 @@ class basic_local_buffer;
 
 template<typename selector_type>
 class basic_local_document_info
- : virtual public basic_document_info<selector_type>
+ : virtual public basic_document_info<obby::document, selector_type>
 {
 public:
 	basic_local_document_info(
@@ -94,7 +94,7 @@ basic_local_document_info<selector_type>::basic_local_document_info(
 	const user* owner, unsigned int id,
 	const std::string& title
 ):
-	basic_document_info<selector_type>(buffer, net, owner, id, title)
+	basic_document_info<obby::document, selector_type>(buffer, net, owner, id, title)
 {
 }
 
@@ -104,7 +104,7 @@ basic_local_document_info<selector_type>::basic_local_document_info(
 	net6::basic_local<selector_type>& net,
 	const serialise::object& obj
 ):
-	basic_document_info<selector_type>(buffer, net, obj)
+	basic_document_info<obby::document, selector_type>(buffer, net, obj)
 {
 }
 
@@ -118,7 +118,7 @@ template<typename selector_type>
 bool basic_local_document_info<selector_type>::
 	is_subscribed(const user& user) const
 {
-	return basic_document_info<selector_type>::is_subscribed(user);
+	return basic_document_info<obby::document, selector_type>::is_subscribed(user);
 }
 
 template<typename selector_type>
@@ -126,7 +126,7 @@ const basic_local_buffer<selector_type>&
 basic_local_document_info<selector_type>::get_buffer() const
 {
 	return dynamic_cast<const basic_local_buffer<selector_type>&>(
-		basic_document_info<selector_type>::m_buffer
+		basic_document_info<obby::document, selector_type>::m_buffer
 	);
 }
 
@@ -135,7 +135,7 @@ net6::basic_local<selector_type>&
 basic_local_document_info<selector_type>::get_net6()
 {
 	return dynamic_cast<net6::basic_local<selector_type>&>(
-		basic_document_info<selector_type>::m_net
+		basic_document_info<obby::document, selector_type>::m_net
 	);
 }
 
@@ -144,7 +144,7 @@ const net6::basic_local<selector_type>&
 basic_local_document_info<selector_type>::get_net6() const
 {
 	return dynamic_cast<const net6::basic_local<selector_type>&>(
-		basic_document_info<selector_type>::m_net
+		basic_document_info<obby::document, selector_type>::m_net
 	);
 }
 

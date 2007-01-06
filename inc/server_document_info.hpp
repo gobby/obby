@@ -40,7 +40,7 @@ class basic_server_buffer;
  */
 template<typename selector_type>
 class basic_server_document_info
- : virtual public basic_document_info<selector_type>
+ : virtual public basic_document_info<obby::document, selector_type>
 {
 public:
 	basic_server_document_info(
@@ -172,17 +172,17 @@ basic_server_document_info<selector_type>::basic_server_document_info(
 	net6::basic_server<selector_type>& net,
 	const user* owner, unsigned int id,
 	const std::string& title, const std::string& content
-) : basic_document_info<selector_type>(buffer, net, owner, id, title)
+) : basic_document_info<obby::document, selector_type>(buffer, net, owner, id, title)
 {
 	// Assign document content
-	basic_document_info<selector_type>::assign_document();
+	basic_document_info<obby::document, selector_type>::assign_document();
 	// Create initial content
-	basic_document_info<selector_type>::
+	basic_document_info<obby::document, selector_type>::
 		m_document->insert(0, content, NULL);
 
 	// Create jupiter server implementation
 	m_jupiter.reset(new jupiter_server(
-		*basic_document_info<selector_type>::m_document
+		*basic_document_info<obby::document, selector_type>::m_document
 	) );
 
 	// Owner is subscribed implicitely
@@ -204,18 +204,18 @@ basic_server_document_info<selector_type>::basic_server_document_info(
 	net6::basic_server<selector_type>& net,
 	const serialise::object& obj
 ):
-	basic_document_info<selector_type>(buffer, net, obj)
+	basic_document_info<obby::document, selector_type>(buffer, net, obj)
 {
 	// TODO: Avoid code duplication somehow
 	// Assign document content
-	basic_document_info<selector_type>::assign_document();
+	basic_document_info<obby::document, selector_type>::assign_document();
 	// Deserialise document
-	basic_document_info<selector_type>::
+	basic_document_info<obby::document, selector_type>::
 		m_document->deserialise(obj, buffer.get_user_table() );
 
 	// Create jupiter server implementation
 	m_jupiter.reset(new jupiter_server(
-		*basic_document_info<selector_type>::m_document
+		*basic_document_info<obby::document, selector_type>::m_document
 	) );
 	// Connect to signals
 	m_jupiter->record_event().connect(
@@ -255,7 +255,7 @@ void basic_server_document_info<selector_type>::
 	user_subscribe(user);
 
 	const net6::user& user6 = user.get_net6();
-	unsigned int line_count = basic_document_info<selector_type>::
+	unsigned int line_count = basic_document_info<obby::document, selector_type>::
 		m_document->get_line_count();
 
 	// Synchronise initial document to user
@@ -267,7 +267,7 @@ void basic_server_document_info<selector_type>::
 	for(unsigned int i = 0; i < line_count; ++ i)
 	{
 		document_packet line_pack(*this, "sync_line");
-		basic_document_info<selector_type>::
+		basic_document_info<obby::document, selector_type>::
 			m_document->get_line(i).append_packet(line_pack);
 		get_net6().send(line_pack, user.get_net6() );
 	}
@@ -306,13 +306,13 @@ void basic_server_document_info<selector_type>::
 template<typename selector_type>
 void basic_server_document_info<selector_type>::obby_user_join(const user& user)
 {
-	basic_document_info<selector_type>::obby_user_join(user);
+	basic_document_info<obby::document, selector_type>::obby_user_join(user);
 }
 
 template<typename selector_type>
 void basic_server_document_info<selector_type>::obby_user_part(const user& user)
 {
-	basic_document_info<selector_type>::obby_user_part(user);
+	basic_document_info<obby::document, selector_type>::obby_user_part(user);
 }
 
 template<typename selector_type>
@@ -320,7 +320,7 @@ void basic_server_document_info<selector_type>::
 	user_subscribe(const user& user)
 {
 	// Call base function
-	basic_document_info<selector_type>::user_subscribe(user);
+	basic_document_info<obby::document, selector_type>::user_subscribe(user);
 	// Add client to jupiter
 	m_jupiter->client_add(user);
 }
@@ -332,7 +332,7 @@ void basic_server_document_info<selector_type>::
 	// Remove client from jupiter
 	m_jupiter->client_remove(user);
 	// Call base function
-	basic_document_info<selector_type>::user_unsubscribe(user);
+	basic_document_info<obby::document, selector_type>::user_unsubscribe(user);
 }
 
 template<typename selector_type>
@@ -356,7 +356,7 @@ void basic_server_document_info<selector_type>::
 	rename_impl(const std::string& new_title, const user* from)
 {
 	// Rename document
-	basic_document_info<selector_type>::document_rename(new_title);
+	basic_document_info<obby::document, selector_type>::document_rename(new_title);
 	// Forward to clients
 	document_packet pack(*this, "rename");
 	pack << from << new_title;
@@ -404,7 +404,7 @@ void basic_server_document_info<selector_type>::
 	record rec(
 		pack,
 		index,
-		basic_document_info<selector_type>::m_buffer.get_user_table()
+		basic_document_info<obby::document, selector_type>::m_buffer.get_user_table()
 	);
 
 	m_jupiter->remote_op(rec, &from);
@@ -441,7 +441,7 @@ const basic_server_buffer<selector_type>&
 basic_server_document_info<selector_type>::get_buffer() const
 {
 	return dynamic_cast<const basic_server_buffer<selector_type>&>(
-		basic_document_info<selector_type>::m_buffer
+		basic_document_info<obby::document, selector_type>::m_buffer
 	);
 }
 
@@ -450,7 +450,7 @@ net6::basic_server<selector_type>&
 basic_server_document_info<selector_type>::get_net6()
 {
 	return dynamic_cast<net6::basic_server<selector_type>&>(
-		basic_document_info<selector_type>::m_net
+		basic_document_info<obby::document, selector_type>::m_net
 	);
 }
 
@@ -459,7 +459,7 @@ const net6::basic_server<selector_type>&
 basic_server_document_info<selector_type>::get_net6() const
 {
 	return dynamic_cast<const net6::basic_server<selector_type>&>(
-		basic_document_info<selector_type>::m_net
+		basic_document_info<obby::document, selector_type>::m_net
 	);
 }
 
