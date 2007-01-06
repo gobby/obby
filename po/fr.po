@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: obby 0.2.0\n"
 "Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
-"POT-Creation-Date: 2005-11-24 23:40+0100\n"
+"POT-Creation-Date: 2005-11-19 12:55+0100\n"
 "PO-Revision-Date: 2005-07-27 19:36+0200\n"
 "Last-Translator: Peer Janssen <peer@baden-online.de>\n"
 "Language-Team: Peer Janssen <peer@baden-online.de>\n"
@@ -15,15 +15,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: inc/server_buffer.hpp:274
+#: inc/server_buffer.hpp:271
 msgid "File is not an obby document"
-msgstr ""
+msgstr "Le fichier n'est pas un fichier Obby"
 
-#: inc/server_buffer.hpp:281
+#: inc/server_buffer.hpp:278
 msgid "File is not a stored obby session"
-msgstr ""
+msgstr "Le fichier ne correspand à aucune séance Obby"
 
-#: inc/server_buffer.hpp:322 src/user_table.cpp:75 src/chat.cpp:220
+#: inc/server_buffer.hpp:319 src/user_table.cpp:75 src/chat.cpp:220
 #: src/line.cpp:94 src/document.cpp:57
 #, c-format
 msgid "Unexpected child node: '%0%'"
@@ -53,35 +53,35 @@ msgstr "Mauvaise version du protocole"
 #: src/user_table.cpp:58
 #, c-format
 msgid "User ID %0% is already in use"
-msgstr "Cette couleur est déjà utilisée"
+msgstr "ID d'utilisateur %0% est déjà utilisée"
 
 #: src/chat.cpp:226
 msgid "Restored session"
-msgstr ""
+msgstr "Reprise de séance"
 
-#: src/chat.cpp:293
+#: src/chat.cpp:279
 #, c-format
 msgid "%0% has joined"
-msgstr ""
+msgstr "%0% est parmis nous!"
 
-#: src/chat.cpp:300
+#: src/chat.cpp:286
 #, c-format
 msgid "%0% has left"
-msgstr ""
+msgstr "%0% nous a quitté :("
 
-#: src/chat.cpp:313
+#: src/chat.cpp:298
 #, c-format
 msgid "%0% has created a new document: %1%"
-msgstr ""
+msgstr "%0% a créé le document : %1%"
 
-#: src/chat.cpp:319
+#: src/chat.cpp:302
 #, c-format
 msgid "A new document was created: %0%"
-msgstr ""
+msgstr "Un nouveau document a été créé"
 
 #: src/document.cpp:66
 msgid "Document needs at least one line"
-msgstr ""
+msgstr "Le document doit contenir au moins un ligne"
 
 #: src/serialise/token.cpp:94
 #, c-format

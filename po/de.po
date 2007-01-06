@@ -5,9 +5,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: obby 0.3.0\n"
+"Project-Id-Version: obby 0.2.0\n"
 "Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
-"POT-Creation-Date: 2005-11-24 23:40+0100\n"
+"POT-Creation-Date: 2005-11-19 12:55+0100\n"
 "PO-Revision-Date: 2005-07-24 16:44+0200\n"
 "Last-Translator: Philipp Kern <phil@0x539.de>\n"
 "Language-Team: German Translation Team <crew@0x539.de>\n"
@@ -15,15 +15,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: inc/server_buffer.hpp:274
+#: inc/server_buffer.hpp:271
 msgid "File is not an obby document"
 msgstr "Datei ist kein obby-Dokument"
 
-#: inc/server_buffer.hpp:281
+#: inc/server_buffer.hpp:278
 msgid "File is not a stored obby session"
 msgstr "Datei ist keine gespeicherte obby-Sitzung"
 
-#: inc/server_buffer.hpp:322 src/user_table.cpp:75 src/chat.cpp:220
+#: inc/server_buffer.hpp:319 src/user_table.cpp:75 src/chat.cpp:220
 #: src/line.cpp:94 src/document.cpp:57
 #, c-format
 msgid "Unexpected child node: '%0%'"
@@ -59,22 +59,22 @@ msgstr "Benutzer-ID %0% wird bereits benutzt"
 msgid "Restored session"
 msgstr "Sitzung wiederhergestellt"
 
-#: src/chat.cpp:293
+#: src/chat.cpp:279
 #, c-format
 msgid "%0% has joined"
 msgstr "%0% hat die Sitzung betreten"
 
-#: src/chat.cpp:300
+#: src/chat.cpp:286
 #, c-format
 msgid "%0% has left"
 msgstr "%0% hat die Sitzung verlassen"
 
-#: src/chat.cpp:313
+#: src/chat.cpp:298
 #, c-format
 msgid "%0% has created a new document: %1%"
 msgstr "%0% hat ein neues Dokument erstellt: %1%"
 
-#: src/chat.cpp:319
+#: src/chat.cpp:302
 #, c-format
 msgid "A new document was created: %0%"
 msgstr "Ein neues Dokument wurde erstellt: %0%"
@@ -167,5 +167,4 @@ msgstr "Konnte die Datei '%0%' nicht zum Schreiben öffnen"
 
 #~ msgid "No server public key available, wait for the welcome packet"
 #~ msgstr ""
-#~ "Kein öffentlicher Schlüssel des Servers verfügbar, warte auf das erste "
-#~ "Paket"
+#~ "Kein öffentlicher Schlüssel des Servers verfügbar, warte auf das erste Paket"

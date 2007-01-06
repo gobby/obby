@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: obby\n"
 "Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
-"POT-Creation-Date: 2005-11-24 23:40+0100\n"
+"POT-Creation-Date: 2005-11-19 12:55+0100\n"
 "PO-Revision-Date: 2005-10-21 20:32+0200\n"
 "Last-Translator: Jordi Mallach <jordi@sindominio.net>\n"
 "Language-Team: Catalan  <ca@dodds.net>\n"
@@ -16,15 +16,15 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: inc/server_buffer.hpp:274
+#: inc/server_buffer.hpp:271
 msgid "File is not an obby document"
 msgstr ""
 
-#: inc/server_buffer.hpp:281
+#: inc/server_buffer.hpp:278
 msgid "File is not a stored obby session"
 msgstr ""
 
-#: inc/server_buffer.hpp:322 src/user_table.cpp:75 src/chat.cpp:220
+#: inc/server_buffer.hpp:319 src/user_table.cpp:75 src/chat.cpp:220
 #: src/line.cpp:94 src/document.cpp:57
 #, c-format
 msgid "Unexpected child node: '%0%'"
@@ -60,22 +60,22 @@ msgstr "El color ja està en ús"
 msgid "Restored session"
 msgstr "S'ha restaurat la sessió"
 
-#: src/chat.cpp:293
+#: src/chat.cpp:279
 #, c-format
 msgid "%0% has joined"
 msgstr "%0% s'ha unit"
 
-#: src/chat.cpp:300
+#: src/chat.cpp:286
 #, c-format
 msgid "%0% has left"
 msgstr ""
 
-#: src/chat.cpp:313
+#: src/chat.cpp:298
 #, c-format
 msgid "%0% has created a new document: %1%"
 msgstr ""
 
-#: src/chat.cpp:319
+#: src/chat.cpp:302
 #, c-format
 msgid "A new document was created: %0%"
 msgstr ""
