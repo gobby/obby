@@ -120,12 +120,16 @@ void bufferd::on_part(obby::user& user)
 	std::cout << user.get_name() << " has quit." << std::endl;
 }
 
-void bufferd::on_doc_insert(const obby::insert_record&, obby::document& doc)
+void bufferd::on_doc_insert(const obby::insert_record& record,
+                            obby::document& doc)
 {
+	std::cout << "Insert " << record.get_text() << " at " << record.get_position() << std::endl;
 }
 
-void bufferd::on_doc_remove(const obby::delete_record&, obby::document& doc)
+void bufferd::on_doc_remove(const obby::delete_record& record,
+                            obby::document& doc)
 {
+	std::cout << "Delete " << record.get_text() << " from " << record.get_begin() << " to " << record.get_end() << std::endl;
 }
 
 int main(int argc, char* argv[]) try
