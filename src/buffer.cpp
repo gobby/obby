@@ -31,6 +31,14 @@ obby::buffer::~buffer()
 		delete *iter;
 }
 
+std::string obby::buffer::get_whole_buffer() const
+{
+	unsigned int last_line = m_lines.size() - 1;
+	unsigned int last_col = m_lines[last_line].length();
+
+	return get_sub_buffer(position(0, 0), position(last_line, last_col) );
+}
+
 std::string obby::buffer::get_sub_buffer(const position& from,
                                          const position& to) const
 {

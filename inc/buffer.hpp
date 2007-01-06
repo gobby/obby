@@ -34,6 +34,7 @@ public:
 	buffer();
 	~buffer();
 
+	std::string get_whole_buffer() const;
 	std::string get_sub_buffer(const position& from,
 	                           const position& to) const;
 
