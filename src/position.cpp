@@ -60,7 +60,7 @@ void obby::position::move_to(unsigned int line, unsigned int col)
 	m_col = col;
 }
 
-void obby::position::move_by(int lines, int cols);
+void obby::position::move_by(int lines, int cols)
 {
 	// Avoid underflow
 	if(static_cast<int>(m_line) - lines < 0)
@@ -74,3 +74,41 @@ void obby::position::move_by(int lines, int cols);
 		m_col += cols;
 }
 
+int obby::position::compare(const position& other) const
+{
+	if(m_line != other.m_line)
+		return m_line > other.m_line ? 1 : -1;
+	if(m_col != other.m_col)
+		return m_col > other.m_col ? 1 : -1;
+	return 0;
+}
+
+bool obby::position::operator==(const position& other) const
+{
+	return compare(other) == 0;
+}
+
+bool obby::position::operator!=(const position& other) const
+{
+	return compare(other) != 0;
+}
+
+bool obby::position::operator<(const position& other) const
+{
+	return compare(other) == -1;
+}
+
+bool obby::position::operator<=(const position& other) const
+{
+	return compare(other) != 1;
+}
+
+bool obby::position::operator>(const position& other) const
+{
+	return compare(other) == 1;
+}
+
+bool obby::position::operator>=(const position& other) const
+{
+	return compare(other) != -1;
+}

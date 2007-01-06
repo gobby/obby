@@ -37,6 +37,14 @@ public:
 
 	void move_to(unsigned int line, unsigned int col);
 	void move_by(int lines, int cols);
+
+	int compare(const position& other) const;
+	bool operator==(const position& other) const;
+	bool operator!=(const position& other) const;
+	bool operator<(const position& other) const;
+	bool operator<=(const position& other) const;
+	bool operator>(const position& other) const;
+	bool operator>=(const position& other) const;
 private:
 	unsigned int m_line;
 	unsigned int m_col;

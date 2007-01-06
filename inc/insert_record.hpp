@@ -42,8 +42,8 @@ public:
 	virtual void on_insert(const position& pos, const std::string& text);
 	virtual void on_delete(const position& from, const position& to);
 protected:
-	position pos;
-	std::string text;
+	position m_pos;
+	std::string m_text;
 };
 
 }

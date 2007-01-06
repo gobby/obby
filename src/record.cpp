@@ -21,7 +21,7 @@
 unsigned int obby::record::m_counter = 0;
 
 obby::record::record(unsigned int revision, unsigned int from)
- : m_id(++ m_counter), m_revision(revision) m_from(from)
+ : m_id(++ m_counter), m_revision(revision), m_from(from)
 {
 }
 
