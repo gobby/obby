@@ -195,14 +195,14 @@ basic_insert_operation<Document, String>::
 		}
 		else
 		{
-			return construct(m_pos + m_text.length(), m_text);
+			return construct(m_pos + text.length(), m_text);
 		}
 	}
 	else
 	{
 		// Case 2
 		return construct(
-			m_pos + m_text.length(),
+			m_pos + text.length(),
 			m_text
 		);
 	}
