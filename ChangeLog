@@ -1,3 +1,30 @@
+Sat Aug 26 15:28:37 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Update to the Catalan translation, thanks to Jordi Mallach
+
+Sat Aug 26 13:05:26 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Bump version to 0.4.1
+
+Sat Aug 26 13:04:35 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Add new translations to NEWS
+
+Sat Aug 26 13:04:09 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Credit Jordi Mallach, Rolando Espinoza and Daniel Nylander as translators
+
+Mon Aug 21 02:52:27 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Drop Fortran checks for a massive speed-up
+
+Sun Aug 20 22:54:22 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Remove the test build conditional
+
+Sun Aug 20 22:45:26 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * Check whether file could be opened
+
+Thu Aug 17 14:23:25 CEST 2006  Philipp Kern <phil@0x539.de>
+  tagged obby-0.4.0rc4
+
+Thu Aug 17 14:23:18 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Updated ChangeLog for release
+
 Thu Aug 17 14:22:55 CEST 2006  Philipp Kern <phil@0x539.de>
   * Translation roundup
 
