@@ -25,6 +25,7 @@ namespace obby
 class position
 {
 public:
+	position();
 	position(unsigned int line, unsigned int col);
 	position(const position& other);
 	~position();
@@ -33,6 +34,9 @@ public:
 
 	unsigned int get_line() const;
 	unsigned int get_col() const;
+
+	void move_to(unsigned int line, unsigned int col);
+	void move_by(int lines, int cols);
 private:
 	unsigned int m_line;
 	unsigned int m_col;
