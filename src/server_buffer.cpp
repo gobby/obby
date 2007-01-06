@@ -99,6 +99,7 @@ void obby::server_buffer::remove_document(document* doc)
 
 void obby::server_buffer::send_message(const std::string& message)
 {
+	m_signal_server_message.emit(message);
 	relay_message(0, message);
 }
 

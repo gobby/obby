@@ -65,6 +65,8 @@ public:
 	typedef sigc::signal<void, document&> signal_remove_document_type;
 	typedef sigc::signal<void, obby::user&, const std::string&>
 		signal_message_type;
+	typedef sigc::signal<void, const std::string&>
+		signal_server_message_type;
 
 	buffer();
 	virtual ~buffer();
@@ -100,7 +102,7 @@ public:
 	/** Sends a global chat message to all users.
 	 */
 	virtual void send_message(const std::string& message) = 0;
-	
+
 	/** Signal which will be emitted if a new user has joined the obby
 	 * session.
 	 */
@@ -163,6 +165,7 @@ protected:
 	signal_remove_document_type m_signal_remove_document;
 
 	signal_message_type m_signal_message;
+	signal_server_message_type m_signal_server_message;
 };
 
 }

@@ -72,6 +72,7 @@ const obby::user& obby::host_buffer::get_self() const
 
 void obby::host_buffer::send_message(const std::string& message)
 {
+	m_signal_message.emit(*m_self, message);
 	relay_message(m_self->get_id(), message);
 }
 
