@@ -129,19 +129,19 @@ protected:
 	/** Unsubscribe request.
 	 */
 	virtual void on_net_unsubscribe(const document_packet& pack,
-	                                const user& from);
+	                                const obby::user& from);
 
 	/** Callback from jupiter implementation with a record of a local
 	 * operation that may be sent to the given user.
 	 */
 	virtual void on_jupiter_local(const record& rec, const user& user,
-	                              const user* from);
+	                              const obby::user* from);
 
 	/** Callback from jupiter implementation with a record of a remote
 	 * operation (got by a user) that may be sent to others.
 	 */
 	virtual void on_jupiter_remote(const record& rec, const user& user,
-	                               const user* from);
+	                               const obby::user* from);
 
 	std::auto_ptr<jupiter_server> m_jupiter;
 
@@ -397,7 +397,7 @@ void basic_server_document_info<selector_type>::
 
 template<typename selector_type>
 void basic_server_document_info<selector_type>::
-	on_jupiter_local(const record& rec, const user& user, const user* from)
+	on_jupiter_local(const record& rec, const user& user, const obby::user* from)
 {
 	document_packet pack(*this, "record");
 	pack << from;
@@ -407,7 +407,7 @@ void basic_server_document_info<selector_type>::
 
 template<typename selector_type>
 void basic_server_document_info<selector_type>::
-	on_jupiter_remote(const record& rec, const user& user, const user* from)
+	on_jupiter_remote(const record& rec, const user& user, const obby::user* from)
 {
 	// TODO: Make only one signal in jupiter_server
 	on_jupiter_local(rec, user, from);
