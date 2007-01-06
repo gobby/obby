@@ -158,7 +158,8 @@ void obby::client_buffer::set_password(const std::string& password)
 	m_client->send(pack);
 }
 
-obby::client_buffer::signal_welcome_type obby::client_buffer::welcome_event() const
+obby::client_buffer::signal_welcome_type
+obby::client_buffer::welcome_event() const
 {
 	return m_signal_welcome;
 }

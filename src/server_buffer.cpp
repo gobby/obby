@@ -194,6 +194,8 @@ void obby::server_buffer::on_connect(net6::server::peer& peer)
 	net6::packet pack("obby_welcome");
 	pack << token << m_private.get_n().get_str(36)
 	     << m_public.get_k().get_str(36);
+	m_server->send(pack, peer);
+
 	m_signal_connect.emit(peer);
 }
 
