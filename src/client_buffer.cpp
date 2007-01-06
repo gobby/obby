@@ -16,6 +16,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <cassert>
 #include "client_buffer.hpp"
 
 obby::client_buffer::client_buffer(const std::string& hostname,
