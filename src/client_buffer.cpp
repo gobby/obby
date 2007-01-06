@@ -25,10 +25,6 @@
 obby::client_buffer::client_buffer()
  : buffer(), m_client(NULL), m_self(NULL)
 {
-#ifdef ENABLE_NLS
-	bindtextdomain(PACKAGE, LOCALEDIR);
-	bind_textdomain_codeset(PACKAGE, "UTF-8");
-#endif
 }
 
 obby::client_buffer::client_buffer(const std::string& hostname,

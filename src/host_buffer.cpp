@@ -25,10 +25,6 @@
 obby::host_buffer::host_buffer()
  : buffer(), local_buffer(), server_buffer(), m_self(NULL)
 {
-#ifdef ENABLE_NLS
-	bindtextdomain(PACKAGE, LOCALEDIR);
-	bind_textdomain_codeset(PACKAGE, "UTF-8");
-#endif
 }
 
 obby::host_buffer::host_buffer(const RSA::Key& public_key,

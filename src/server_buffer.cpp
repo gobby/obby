@@ -32,11 +32,6 @@ obby::server_buffer::server_buffer()
 	// TODO: Key length as ctor parameter
 	std::pair<RSA::Key, RSA::Key> keys = RSA::generate(m_rclass, 256);
 	m_public = keys.first; m_private = keys.second;
-
-#ifdef ENABLE_NLS
-	bindtextdomain(PACKAGE, LOCALEDIR);
-	bind_textdomain_codeset(PACKAGE, "UTF-8");
-#endif
 }
 
 obby::server_buffer::server_buffer(const RSA::Key& public_key,

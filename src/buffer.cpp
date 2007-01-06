@@ -26,6 +26,12 @@ const unsigned long obby::buffer::PROTOCOL_VERSION = 1;
 obby::buffer::buffer()
  : m_netkit(), m_rclass(GMP_RAND_ALG_LC, 16), m_doc_counter(0)
 {
+#ifdef ENABLE_NLS
+	// Gettext initialisation
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	bind_textdomain_codeset(PACKAGE, "UTF-8");
+#endif
+
 	// Register user type
 	net6::packet::register_type(
 		net6::parameter<user*>::TYPE_ID,
