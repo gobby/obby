@@ -40,7 +40,8 @@ obby::delete_record::~delete_record()
 
 obby::record* obby::delete_record::clone() const
 {
-	return new delete_record(m_pos, m_text, m_revision, m_from, m_id);
+	return new delete_record(m_pos, m_text, m_document,
+	                         m_revision, m_from, m_id);
 }
 
 void obby::delete_record::apply(document& doc) const

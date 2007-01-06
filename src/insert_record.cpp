@@ -41,7 +41,8 @@ obby::insert_record::~insert_record()
 
 obby::record* obby::insert_record::clone() const
 {
-	return new insert_record(m_pos, m_text, m_revision, m_from, m_id);
+	return new insert_record(m_pos, m_text, m_document,
+	                         m_revision, m_from, m_id);
 }
 
 void obby::insert_record::apply(document& doc) const
