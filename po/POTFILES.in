@@ -2,4 +2,8 @@
 
 src/error.cpp
 src/client_buffer.cpp
+src/serialise/token.cpp
+src/serialise/attribute.cpp
+src/serialise/object.cpp
+src/serialise/parser.cpp
 
