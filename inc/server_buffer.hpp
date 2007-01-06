@@ -538,18 +538,6 @@ void basic_server_buffer<selector_type>::on_join(const net6::user& user6)
 		throw net6::bad_value(str.str() );
 	}
 
-	// Calculate number of required sync packets (one for each
-	// non-connected user, one for each document in the list).
-	unsigned int sync_n = basic_buffer<selector_type>::
-		m_user_table.count(user::flags::NONE, user::flags::CONNECTED);
-	sync_n += basic_buffer<selector_type>::document_count();
-
-	// Send initial sync packet with this number, the client may then show
-	// a progressbar or something.
-	net6::packet init_pack("obby_sync_init");
-	init_pack << sync_n;
-	net6_server().send(init_pack, user6);
-
 	// Synchronise non-connected users.
 	for(user_table::iterator iter = basic_buffer<selector_type>::
 		m_user_table.begin(user::flags::NONE, user::flags::CONNECTED);
@@ -747,6 +735,21 @@ void basic_server_buffer<selector_type>::
 	);
 
 	m_tokens.erase(token_iter);
+
+	// Send initial sync packet; this is here in on_login() for it to
+	// happen before net6 syncs its users.
+
+	// Calculate number of required sync packets (one for each
+	// non-connected user, one for each document in the list).
+	unsigned int sync_n = basic_buffer<selector_type>::
+		m_user_table.count(user::flags::NONE, user::flags::NONE);
+	sync_n += basic_buffer<selector_type>::document_count();
+
+	// Send initial sync packet with this number, the client may then show
+	// a progressbar or something.
+	net6::packet init_pack("obby_sync_init");
+	init_pack << sync_n;
+	net6_server().send(init_pack, user6);
 }
 
 template<typename selector_type>
