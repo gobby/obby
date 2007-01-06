@@ -104,7 +104,87 @@ void obby::client_buffer::on_data(const net6::packet& pack)
 {
 	if(pack.get_command() == "obby_record")
 	{
-		// TODO: Implement me!
+		record* rec = record::from_packet(pack);
+		// TODO: Ensure that rec exists
+		// Undo all non-synced changes
+	
+		std::list<record*>::iterator iter;
+		for(iter = m_unsynced.begin(); iter != m_unsynced.end(); ++iter)
+		{
+			record* rev_iter = (*iter)->reverse(*this);
+			rev_iter->apply(*this);
+			delete rev_iter;
+
+			rec->apply(**iter);
+		}
+
+		// Apply new record
+		rec->apply(*this);
+
+		// Record in unsynced changes that is synced with this packet
+		record* sync_record = NULL;
+
+		// Redo all unsynced changes except the one that just came in
+		do
+		{
+			-- iter;
+
+			// Check if this record is the one we are syncing
+			if( (*iter)->get_from() == rec->get_from() )
+			{
+				if( (*iter)->get_id() == rec->get_id() )
+				{
+					// Delete unsynced record
+					sync_record = (*iter)->reverse(*this);
+					delete *iter;
+
+					// Record is synced - remove from list
+					iter = m_unsynced.erase(iter);
+
+					continue;
+				}
+			}
+
+			// Apply the current change to the new record
+			(*iter)->apply(*rec);
+
+			// Apply the current change to the syncing record
+			if(sync_record) (*iter)->apply(*sync_record);
+
+			// Reapply revision to the buffer
+			(*iter)->apply(*this);
+		} while(iter != m_unsynced.begin() );
+
+		// Put the synced record into history
+		m_history.push_front(rec);
+
+		// Update revision
+		m_revision = rec->get_revision();
+
+		// TODO: Check if sync_record record changes the document
+		// or if sync_record and rec result in the same document.
+		// Don't emit any signals in this case.
+
+		// Emit changed signal
+		// again, HACKHACKHACK :D
+		if(pack.get_param(0).as_string() == "insert")
+		{
+			m_signal_delete.emit(
+				*static_cast<delete_record*>(sync_record) );
+			m_signal_insert.emit(
+				*static_cast<insert_record*>(rec) );
+		}
+		
+		if(pack.get_param(0).as_string() == "delete")
+		{
+			m_signal_insert.emit(
+				*static_cast<insert_record*>(sync_record) );
+			m_signal_delete.emit(
+				*static_cast<delete_record*>(rec) );
+		}
+
+		// sync_record is not needed any longer.
+		delete sync_record;
 	}
 }
 
