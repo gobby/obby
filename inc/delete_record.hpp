@@ -29,9 +29,9 @@ namespace obby
 class delete_record : public record
 {
 public:
-	delete_record(const position& from, const position& to,
+	delete_record(const position& begin, const position& end,
 	              unsigned int revision, unsigned int from);
-	delete_record(const position& from, const position& to,
+	delete_record(const position& begin, const position& end,
 	              unsigned int revision, unsigned int from,
 	              unsigned int id);
 	~delete_record();
