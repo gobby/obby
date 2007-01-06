@@ -207,7 +207,9 @@ const obby::user* obby::user_table::find(const net6::user& user,
 		if( &i->second->get_net6() != &user) continue;
 
 		user::flags flags = i->second->get_flags();
-		if(!iterator::check_flags(flags, inc_flags, exc_flags) ) break;
+		if(!iterator::check_flags(flags, inc_flags, exc_flags) )
+			continue;
+
 		return i->second;
 	}
 
@@ -223,7 +225,8 @@ const obby::user* obby::user_table::find(const std::string& name,
 		if(i->second->get_name() != name) continue;
 
 		user::flags flags = i->second->get_flags();
-		if(!iterator::check_flags(flags, inc_flags, exc_flags) ) break;
+		if(!iterator::check_flags(flags, inc_flags, exc_flags) )
+			continue;
 		return i->second;
 	}
 
