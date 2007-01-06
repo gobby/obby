@@ -144,9 +144,9 @@ protected:
 	                       const obby::user* writer);
 
 	/** Changes the colour of the given user to the new provided
-	 * colors and relays the fact to the other users.
+	 * colour and relays the fact to the other users.
 	 */
-	void user_colour_impl(obby::user& user,
+	void user_colour_impl(const obby::user& user,
 	                      const colour& colour);
 
 	/** net6 signal handlers.
@@ -471,10 +471,11 @@ void basic_server_buffer<selector_type>::
 
 template<typename selector_type>
 void basic_server_buffer<selector_type>::
-	user_colour_impl(obby::user& user, const colour& colour)
+	user_colour_impl(const obby::user& user,
+	                 const colour& colour)
 {
-	// TODO: user_colour_impl should check for color conflicts
-	user.set_colour(colour);
+	// TODO: user_colour_impl should check for color conflicts - should it?
+	basic_buffer<selector_type>::m_user_table.set_user_colour(user, colour);
 	// TODO: user::set_colour should emit this signal
 	basic_buffer<selector_type>::m_signal_user_colour.emit(user);
 
@@ -715,9 +716,10 @@ void basic_server_buffer<selector_type>::
 		basic_buffer<selector_type>::m_user_table.find_free_id();
 
 	// Insert into user list
-	user* new_user = basic_buffer<selector_type>::m_user_table.add_user(
-		user_id, user6, colour
-	);
+	const user* new_user =
+		basic_buffer<selector_type>::m_user_table.add_user(
+			user_id, user6, colour
+		);
 
 	// Remove token from temporary token list because token can now be
 	// stored in the user object.
@@ -733,9 +735,11 @@ void basic_server_buffer<selector_type>::
 	}
 
 	// Store token in user, remove from list
-	// TODO: Perform this by a call to user table, use only
-	// const user.
-	new_user->set_token(token_iter->second);
+	basic_buffer<selector_type>::m_user_table.set_user_token(
+		*new_user,
+		token_iter->second
+	);
+
 	m_tokens.erase(token_iter);
 }
 
@@ -861,8 +865,8 @@ void basic_server_buffer<selector_type>::
 	on_net_user_password(const net6::packet& pack, const user& from)
 {
 	// Set password for this user
-	// TODO: Do this by a call to user_table
-	const_cast<user&>(from).set_password(
+	basic_buffer<selector_type>::m_user_table.set_user_password(
+		from,
 		RSA::decrypt(
 			m_private,
 			pack.get_param(0).net6::parameter::as<std::string>()
@@ -885,9 +889,7 @@ void basic_server_buffer<selector_type>::
 	}
 	else
 	{
-		// TODO: user_colour_impl should take const user&, user_table
-		// performs the necessary operation
-		user_colour_impl(const_cast<user&>(from), colour);
+		user_colour_impl(from, colour);
 	}
 }
 

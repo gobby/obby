@@ -178,23 +178,35 @@ public:
 	 * assigned to this user, the colour is updated. If a user with this ID
 	 * is already connected, std::logic_error is thrown.
 	 */
-	obby::user* add_user(unsigned int id,
-	                     const net6::user& user,
-			     const colour& colour);
+	const obby::user* add_user(unsigned int id,
+	                           const net6::user& user,
+	                           const colour& colour);
 
 	/** Adds a new user to the user list. No net6::user exists, so the
 	 * connected flag will not be set. If a user with this ID exists
 	 * already, std::logic_error will be thrown.
 	 */
-	obby::user* add_user(unsigned int id,
-	                     const std::string& name,
-			     const colour& colour);
+	const obby::user* add_user(unsigned int id,
+	                           const std::string& name,
+	                           const colour& colour);
 
 	/** Removes a user from the user list. This means that this user gets
 	 * marked as non-connected and the reference to the underlaying
 	 * net6::user object is dropped.
 	 */
 	void remove_user(const user& user_to_remove);
+
+	/** Assigns a token to this user that is used for password hashing.
+	 */
+	void set_user_token(const user& user, const std::string& token);
+
+	/** Assigns a password to this user.
+	 */
+	void set_user_password(const user& user, const std::string& password);
+
+	/** Changes this user's colour.
+	 */
+	void set_user_colour(const user& user, const colour& colour);
 
 	/** Looks for a new user ID that is currently not in use by another
 	 * user.
@@ -235,6 +247,11 @@ public:
 	size_type count(user::flags inc_flags,
 	                user::flags exc_flags) const;
 protected:
+	/** Internal function to find a user with the given ID that has to be
+	 * in the user table.
+	 */
+	user& lookup(unsigned int id);
+
 	/** Internal function to find a non-const user with the given name.
 	 */
 	user* find_int(const std::string& name);

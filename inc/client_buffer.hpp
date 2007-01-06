@@ -160,7 +160,7 @@ public:
 
 	/** Set user password.
 	 */
-	void set_password(const std::string& password);
+	virtual void set_password(const std::string& password);
 
 	/** Set user colour.
 	 */
@@ -234,7 +234,7 @@ protected:
 	/** Creates the underlaying net6 network object corresponding to the
 	 * buffer's type.
 	 * TODO: Make server_buffer's and host_buffer's new_net parameterless
-	 * and callopen() approproately
+	 * and call open() appropriately
 	 */
 	virtual net_type* new_net();
 
@@ -280,7 +280,7 @@ protected:
 	 */
 	virtual void on_net_document(const net6::packet& pack);
 
-	user* m_self;
+	const user* m_self;
 
 	std::string m_token;
 	RSA::Key m_public;
@@ -544,7 +544,7 @@ void basic_client_buffer<selector_type>::
 		pack.get_param(3).net6::parameter::as<obby::colour>();
 
 	// Add user
-	user* new_user = basic_buffer<selector_type>::m_user_table.add_user(
+	const user* new_user = basic_buffer<selector_type>::m_user_table.add_user(
 		id, user6, colour
 	);
 
@@ -652,7 +652,8 @@ void basic_client_buffer<selector_type>::on_login_extend(net6::packet& pack)
 {
 	// Add user colour and, if given, (hashed) passwords.
 	pack << m_settings.colour;
-	if(!m_settings.global_password.empty() )
+	if(!m_settings.global_password.empty() ||
+	   !m_settings.user_password.empty() )
 	{
 		pack << SHA1::hash(m_token + m_settings.global_password);
 		if(!m_settings.user_password.empty() )
@@ -827,8 +828,8 @@ void basic_client_buffer<selector_type>::
 	const user* from = pack.get_param(0).net6::parameter::
 		as<const user*>(basic_buffer<selector_type>::get_user_table() );
 
-	// TODO: Should be done by a call to the user_table
-	const_cast<user*>(from)->set_colour(
+	basic_buffer<selector_type>::m_user_table.set_user_colour(
+		*from,
 		pack.get_param(1).net6::parameter::as<obby::colour>()
 	);
 

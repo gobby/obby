@@ -87,9 +87,9 @@ void obby::user_table::clear()
 	m_user_map.clear();
 }
 
-obby::user* obby::user_table::add_user(unsigned int id,
-                                       const net6::user& user6,
-                                       const colour& colour)
+const obby::user* obby::user_table::add_user(unsigned int id,
+                                             const net6::user& user6,
+                                             const colour& colour)
 {
 	// Find already exiting user with the given name
 	user* existing_user = find_int(user6.get_name() );
@@ -120,9 +120,9 @@ obby::user* obby::user_table::add_user(unsigned int id,
 	}
 }
 
-obby::user* obby::user_table::add_user(unsigned int id,
-                                       const std::string& name,
-                                       const colour& colour)
+const obby::user* obby::user_table::add_user(unsigned int id,
+                                             const std::string& name,
+                                             const colour& colour)
 {
 	// Look for an existing user with this name.
 	user* existing_user = find_int(name);
@@ -147,6 +147,24 @@ void obby::user_table::remove_user(const user& user_to_remove)
 	// Release underlaying net6::user object, this disables the connected
 	// flag, too. Keep the user in the list to recognize him if he rejoins.
 	const_cast<user&>(user_to_remove).release_net6();
+}
+
+void obby::user_table::set_user_token(const user& user,
+                                      const std::string& token)
+{
+	lookup(user.get_id()).set_token(token);
+}
+
+void obby::user_table::set_user_password(const user& user,
+                                         const std::string& password)
+{
+	lookup(user.get_id()).set_password(password);
+}
+
+void obby::user_table::set_user_colour(const user& user,
+                                       const colour& colour)
+{
+	lookup(user.get_id()).set_colour(colour);
 }
 
 unsigned int obby::user_table::find_free_id() const
@@ -232,6 +250,15 @@ obby::user_table::size_type obby::user_table::count(user::flags inc_flags,
 	}
 
 	return c;
+}
+
+obby::user& obby::user_table::lookup(unsigned int id)
+{
+	base_iterator iter = m_user_map.find(id);
+	if(iter == m_user_map.end() )
+		throw std::logic_error("obby::user_table::lookup");
+
+	return *iter->second;
 }
 
 obby::user* obby::user_table::find_int(const std::string& name)

@@ -119,7 +119,7 @@ protected:
 	std::string m_username;
 	colour m_colour;
 
-	user* m_self;
+	const user* m_self;
 private:
 	/** This function provides access to the underlaying net6::basic_host
 	 * object.
@@ -241,7 +241,6 @@ void basic_host_buffer<selector_type>::send_message(const std::string& message)
 		throw std::logic_error("obby::host_buffer::send_message");
 
 	// Send message from local user instead of server
-	// TODO: Move signal emission to send_message_impl
 	basic_server_buffer<selector_type>::send_message_impl(message, m_self);
 }
 
@@ -255,7 +254,7 @@ void basic_host_buffer<selector_type>::
 	unsigned int id = ++ basic_buffer<selector_type>::m_doc_counter;
 
 	// Create document with local user as owner instead of NULL indicating
-	// that it is the server's docuent.
+	// that it is the server's document.
 	basic_server_buffer<selector_type>::document_create_impl(
 		m_self, id, title, content
 	);
@@ -276,10 +275,9 @@ void basic_host_buffer<selector_type>::set_colour(const colour& colour)
 	}
 	else
 	{
-		// TODO: user_colour_impl should take const user&, user_table
-		// performs the necessary operation
 		basic_server_buffer<selector_type>::user_colour_impl(
-			const_cast<user&>(*m_self), colour
+			*m_self,
+			colour
 		);
 	}
 }
