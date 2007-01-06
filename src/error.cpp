@@ -40,7 +40,7 @@ std::string obby::login::errstring(error err)
 	if(err == ERROR_WRONG_USER_PASSWORD)
 		return _("Wrong user password");
 	if(err == ERROR_PROTOCOL_VERSION_MISMATCH)
-		return _("Protcol version mismatch");
+		return _("Protocol version mismatch");
 	else
 		return net6::login::errstring(err);
 }
