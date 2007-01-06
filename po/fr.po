@@ -34,5 +34,5 @@ msgstr "Mauvaise version du protocole"
 #: src/client_buffer.cpp:63
 msgid "No server public key available, wait for the welcome packet"
 msgstr ""
-"La clé publique du serveur n'est pas disponible, attendez le paquet de "
-"« bonjour »"
+"La clé publique du serveur n'est pas disponible, attendez le paquet de « "
+"bonjour »"

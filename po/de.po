@@ -33,5 +33,5 @@ msgstr "Falsche Protokollversion"
 
 #: src/client_buffer.cpp:67
 msgid "No server public key available, wait for the welcome packet"
-msgstr "Kein öffentlicher Schlüssel des Servers verfügbar, warte auf das "
-"erste Paket"
+msgstr ""
+"Kein öffentlicher Schlüssel des Servers verfügbar, warte auf das erste Paket"
