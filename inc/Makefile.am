@@ -44,4 +44,13 @@ pkginclude_HEADERS += host_buffer.hpp
 if WITH_ZEROCONF
 pkginclude_HEADERS += zeroconf.hpp
 endif
+if WITH_BONJOUR
+noinst_HEADERS      = zeroconf_bonjour.hpp
+endif
+if WITH_HOWL
+noinst_HEADERS      = zeroconf_howl.hpp
+endif
+if WITH_AVAHI
+noinst_HEADERS      = zeroconf_avahi.hpp
+endif
 

@@ -58,6 +58,16 @@ libobby_la_SOURCES += server_buffer.cpp
 libobby_la_SOURCES += host_buffer.cpp
 
 if WITH_ZEROCONF
-libobby_la_SOURCES  += zeroconf.cpp
+libobby_la_SOURCES += zeroconf.cpp
+endif
+
+if WITH_BONJOUR
+libobby_la_SOURCES += zeroconf_bonjour.cpp
+endif
+if WITH_HOWL
+libobby_la_SOURCES += zeroconf_howl.cpp
+endif
+if WITH_AVAHI
+libobby_la_SOURCES += zeroconf_avahi.cpp
 endif
 

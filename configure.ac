@@ -31,43 +31,54 @@ AC_SUBST(extra_includes)
 AC_SUBST(extra_libraries)
 AC_SUBST(extra_requires)
 
+# Initialise pkg-config.
+PKG_CHECK_MODULES([libraries], [$extra_requires])
+
 # Zeroconf support
-zeroconf=no
+AC_ARG_WITH([zeroconf],
+            AS_HELP_STRING([--with-zeroconf],
+                           [compile with Zeroconf support]),
+            [zeroconf=$withval], [zeroconf=no])
+AC_CACHE_CHECK([whether to compile with Zeroconf support],
+               [zeroconf], [zeroconf=no])
 
-## Let the user choose if he wants libhowl support or not (default to no).
-AC_ARG_WITH([howl],
-	    AS_HELP_STRING([--with-howl],
-			   [support Zeroconf through libhowl [[default=no]]]),
-	    [ac_cv_use_howl=$withval], [ac_cv_use_howl=no])
-AC_CACHE_CHECK([whether to use howl], [ac_cv_use_howl], [ac_cv_use_howl=no])
-if test "x$ac_cv_use_howl" != "xno" ; then
-	extra_requires="$extra_requires howl"
-	zeroconf=yes
-	AC_DEFINE([WITH_HOWL], 1, [Define whether to use howl.])
-fi
-
-## Let the user choose if he wants to support Zeroconf through Avahi
-## (default to no).
-AC_ARG_WITH([avahi],
-            AS_HELP_STRING([--with-avahi],
-                           [support Zeroconf through Avahi [[default=no]]]),
-            [ac_cv_use_avahi=$withval], [ac_cv_use_howl=np])
-AC_CACHE_CHECK([whether to use Avahi], [ac_cv_use_avahi], [ac_cv_use_avahi=no])
-if test "x$ac_cv_use_avahi" != "xno" ; then
+using_zeroconf=no
+if test "x$zeroconf" = "xyes" ; then
+  # Check for Apple's Bonjour first
+  AC_CHECK_HEADER(dns_sd.h, [AC_CHECK_LIB(dns_sd, DNSServiceRegister,
+                  [AC_DEFINE(WITH_BONJOUR, 1,
+                             [Use Bonjour Zeroconf implementation.])])])
+  if test "x$ac_cv_lib_dns_sd_DNSServiceRegister" = "xyes" ; then
+    using_zeroconf=bonjour
+    extra_libraries="$extra_libraries -ldns_sd"
+    AC_MSG_NOTICE([Using Bonjour/DNS-SD Zeroconf implementation.])
+  else
+    PKG_CHECK_MODULES([libhowl], [howl], [howl_found=yes], [howl_found=no])
+    if test "x$howl_found" = "xyes" ; then
+      using_zeroconf=howl
+      extra_requires="$extra_requires howl"
+      AC_DEFINE(WITH_HOWL, 1, [Use Howl Zeroconf implementation.])
+      AC_MSG_NOTICE([Using Howl Zeroconf implementation.])
+    else
+      PKG_CHECK_MODULES([libavahi], [avahi-client >= 0.6], [avahi_found=yes],
+                        [avahi_found=no])
+      if test "x$avahi_found" = "xyes" ; then
+        using_zeroconf=avahi
         extra_requires="$extra_requires avahi-client"
-	zeroconf=yes
-	AC_DEFINE([WITH_AVAHI], 1, [Define whether to use Avahi.])
-fi
-
-if test "x$ac_cv_use_howl" != "xno" ; then
-  if test "x$ac_cv_use_avahi" != "xno" ; then
-    AC_MSG_ERROR([[
-*** You cannot use both libhowl and Avahi. Try to use only one of them.
-]])
+        AC_DEFINE(WITH_AVAHI, 1, [Use Avahi Zeroconf implementation.])
+        AC_MSG_NOTICE([Using Avahi Zeroconf implementation.])
+      else
+        AC_MSG_ERROR([No supported Zeroconf implementation found.])
+        exit
+      fi
+    fi
   fi
 fi
-
-AM_CONDITIONAL(WITH_ZEROCONF, test x$zeroconf = xyes)
+AM_CONDITIONAL(WITH_ZEROCONF, test x$using_zeroconf != xno)
+AM_CONDITIONAL(WITH_BONJOUR, test x$using_zeroconf = xbonjour)
+AM_CONDITIONAL(WITH_HOWL, test x$using_zeroconf = xhowl)
+AM_CONDITIONAL(WITH_AVAHI, test x$using_zeroconf = xavahi)
+AC_CACHE_SAVE
 
 # WIN32 build checks
 AC_MSG_CHECKING([whether to enable WIN32 specific flags])
@@ -91,9 +102,6 @@ AM_CONDITIONAL(BUILD_TESTS, test x$ac_cv_build_tests != xno)
 
 # Checks for libraries.
 PKG_CHECK_MODULES([libobby], [$extra_requires])
-if test "x$ac_cv_use_howl" != "xno" ; then
-	PKG_CHECK_MODULES([libhowl], [howl])
-fi
 
 # gettext / i18n
 AM_GNU_GETTEXT([external])
