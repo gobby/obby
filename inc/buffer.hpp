@@ -53,6 +53,7 @@ public:
 
 	std::string get_line(unsigned int index) const;
 	unsigned int get_line_count() const;
+	unsigned int get_line_position(unsigned int line) const { return m_lines[line]; }
 
 	position coord_to_position(unsigned int x, unsigned int y) const;
 	void position_to_coord(position pos, unsigned int& x,

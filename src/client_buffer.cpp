@@ -279,7 +279,11 @@ void obby::client_buffer::on_net_sync_line(const net6::packet& pack)
 	if(pack.get_param(0).get_type() != net6::packet::param::STRING) return;
 
 	if(!m_buffer.empty() )
+	{
+		m_lines.push_back(m_buffer.length() );
 		m_buffer += "\n";
+	}
+
 	m_buffer += pack.get_param(0).as_string();
 }
 

@@ -78,10 +78,13 @@ void obby::buffer::erase_nosync(position from, position to)
 	{
 		if(*iter >= from && *iter < to)
 			iter = m_lines.erase(iter);
-		else if(*iter >= to)
-			{ *iter -= (to - from); ++ iter; }
 		else
+		{
+			if(*iter >= to)
+				*iter -= (to - from);
+
 			++ iter;
+		}
 	}
 }
 

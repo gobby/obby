@@ -89,10 +89,10 @@ void obby::server_buffer::on_login(net6::server::peer& peer)
 	m_server.send(init_sync, peer);
 
 	std::string::size_type pos = 0, prev = 0;
-	while( (pos = m_buffer.find('\n')) != std::string::npos)
+	while( (pos = m_buffer.find('\n', pos)) != std::string::npos)
 	{
 		net6::packet line_sync("obby_sync_line");
-		line_sync << m_buffer.substr(pos, prev - pos);
+		line_sync << m_buffer.substr(prev, pos - prev);
 		m_server.send(line_sync, peer);
 		prev = ++ pos;
 	}
