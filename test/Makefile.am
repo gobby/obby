@@ -15,6 +15,7 @@ AM_CPPFLAGS += $(libhowl_CFLAGS)
 endif
 
 noinst_PROGRAMS = \
+	ring \
 	rsa \
 	serialise
 
@@ -26,6 +27,7 @@ noinst_PROGRAMS = \
 #curses_SOURCES = curses.cpp
 #curses_LDADD = $(LDADD) -lncurses
 
+ring_SOURCES = ring.cpp
 rsa_SOURCES = rsa.cpp
 serialise_SOURCES = serialise.cpp
 
