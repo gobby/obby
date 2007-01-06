@@ -18,6 +18,7 @@
 
 #include <cassert>
 #include "delete_record.hpp"
+#include "insert_record.hpp"
 #include "buffer.hpp"
 
 obby::delete_record::delete_record(const position& begin, const position& end,
@@ -42,6 +43,25 @@ obby::delete_record::~delete_record()
 void obby::delete_record::apply(buffer& buf)
 {
 	buf.erase_nosync(m_from, m_to);
+}
+
+net6::packet obby::delete_record::to_packet()
+{
+	net6::packet pack("obby_record");
+	pack << "delete" << static_cast<int>(m_id)
+	     << static_cast<int>(m_revision) << static_cast<int>(record::m_from)
+	     << static_cast<int>(m_from.get_line() )
+	     << static_cast<int>(m_from.get_col() )
+	     << static_cast<int>(m_to.get_line() )
+	     << static_cast<int>(m_to.get_col() );
+	return pack;
+}
+
+obby::record* obby::delete_record::reverse(const buffer& buf)
+{
+	std::string sub_buf = buf.get_sub_buffer(m_from, m_to);
+	return new insert_record(m_from, sub_buf,
+	                         m_revision, record::m_from, m_id);
 }
 
 void obby::delete_record::on_insert(const position& pos,

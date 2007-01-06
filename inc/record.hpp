@@ -20,6 +20,7 @@
 #define _OBBY_RECORD_HPP_
 
 #include <string>
+#include <net6/packet.hpp>
 #include "position.hpp"
 
 namespace obby
@@ -35,7 +36,10 @@ public:
 	~record();
 
 	virtual void apply(buffer& buf) = 0;
-	virtual bool is_valid() const;
+	virtual net6::packet to_packet() = 0;
+	virtual record* reverse(const buffer& buf) = 0;
+
+	bool is_valid() const;
 
 	unsigned int get_id() const;
 	unsigned int get_from() const;
@@ -52,6 +56,8 @@ protected:
 	unsigned int m_from;
 	bool m_valid;
 	static unsigned int m_counter; // id counter to create unique ids
+	
+	static record* from_packet(const net6::packet& pack);
 };
 
 }

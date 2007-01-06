@@ -34,7 +34,8 @@ public:
 	buffer();
 	~buffer();
 
-	std::string get_sub_buffer(const position& from, const position& to);
+	std::string get_sub_buffer(const position& from,
+	                           const position& to) const;
 
 	virtual void insert(const position& pos, const std::string& text) = 0;
 	virtual void erase(const position& from, const position& to) = 0;

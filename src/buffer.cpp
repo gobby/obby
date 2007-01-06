@@ -32,7 +32,7 @@ obby::buffer::~buffer()
 }
 
 std::string obby::buffer::get_sub_buffer(const position& from,
-                                         const position& to)
+                                         const position& to) const
 {
 	assert(to >= from);
 	assert(to.get_line() < m_lines.size() );

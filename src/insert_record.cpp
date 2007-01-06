@@ -18,6 +18,7 @@
 
 #include <cassert>
 #include "insert_record.hpp"
+#include "delete_record.hpp"
 #include "buffer.hpp"
 
 obby::insert_record::insert_record(const position& pos, const std::string& text,
@@ -40,6 +41,24 @@ obby::insert_record::~insert_record()
 void obby::insert_record::apply(buffer& buf)
 {
 	buf.insert_nosync(m_pos, m_text);
+}
+
+net6::packet obby::insert_record::to_packet()
+{
+	net6::packet pack("obby_record");
+	pack << "insert" << static_cast<int>(m_id)
+	     << static_cast<int>(m_revision) << static_cast<int>(m_from)
+	     << static_cast<int>(m_pos.get_line() )
+	     << static_cast<int>(m_pos.get_col() )
+	     << m_text;
+	return pack;
+}
+
+obby::record* obby::insert_record::reverse(const buffer& buf)
+{
+	position text_size(m_text);
+	return new delete_record(m_pos, m_pos + text_size, m_revision, 
+	                         m_from, m_id);
 }
 
 void obby::insert_record::on_insert(const position& pos,
