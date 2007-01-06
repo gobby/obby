@@ -12,7 +12,6 @@ Normal:
   * Hide equivalent insert / change calls (#28)
   * Implement server-side commands for remote actions (#29)
   * Implement records to (un)indent lines of text (#30)
-  * Format strings for texts to translate (#37)
   * Undo/Redo (#39)
   * libobby: Localisation (#40)
   * Exchange version information (#42)
@@ -62,12 +61,6 @@ Implement indent_record and unindent_record to (un)indent lines of text
 
 ''This is a stub and generated out of the old TODO located in the 
 repository.''
-
-37: Format strings for texts to translate
------------------------------------------
-We should use format strings instead of just catting strings togeather to 
-permit translators to change word order. Maybe a wrapper around 
-''g_sprintf_strdup''.
 
 39: Undo/Redo
 -------------
