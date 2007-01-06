@@ -925,7 +925,7 @@ template<typename selector_type>
 typename basic_server_buffer<selector_type>::net_type*
 basic_server_buffer<selector_type>::new_net(unsigned int port)
 {
-	return new net_type(port);
+	return new net_type(port, false);
 }
 
 template<typename selector_type>
