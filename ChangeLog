@@ -1,3 +1,48 @@
+Thu May 18 19:44:17 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Compile fix for GCC 4.0
+
+Thu May 18 19:36:54 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Bumped version to 0.4.0rc2
+
+Thu May 18 19:34:23 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Deactivate all Zeroconf implementations except Howl
+
+Sun May 14 13:47:46 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * GCC 3.3 build fix
+
+Sun May  7 15:24:44 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Added `make check' testrunner
+
+Sun May  7 14:57:42 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * Make tests return EXIT_SUCCESS or EXIT_FAILURE
+
+Sun May  7 12:52:07 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * Removed jupiter dir, added jupiter test to test/
+
+Sun May  7 12:50:23 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * Fixed a bug in text::compare that produced incorrect results
+
+Sat May  6 11:55:15 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Check for substrings in Win32 detection
+
+Sat Apr 29 22:55:29 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * Removed rsa test
+
+Tue Apr 18 15:47:31 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Compatibility fix for Avahi's Howl layer
+
+Mon Apr 17 14:58:03 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Split Zeroconf API into three files and implement auto API selection
+
+Sat Apr 15 18:10:44 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Refactored Zeroconf support, added Avahi stub (dysfunctional)
+
+Mon Apr 10 14:24:30 CEST 2006  Philipp Kern <phil@0x539.de>
+  tagged obby-0.4.0rc1
+
+Mon Apr 10 14:24:22 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Updated ChangeLog for release
+
 Mon Apr 10 14:23:37 CEST 2006  Philipp Kern <phil@0x539.de>
   * Log logic errors to stderr
 
@@ -52,11 +97,11 @@ Sat Mar 25 13:50:59 CET 2006  Philipp Kern <phil@0x539.de>
 Sat Mar 25 11:22:58 CET 2006  Philipp Kern <phil@0x539.de>
   * Preliminary NEWS for 0.4.0
 
-Fri Mar 24 17:21:06 CET 2006  Armin Burgmeier <armin@0x539.de>
-  * Removed token storage in user, we do not need the token anymore
-
 Fri Mar 24 21:51:48 CET 2006  Philipp Kern <phil@0x539.de>
   * Bump version and API version
+
+Fri Mar 24 17:21:06 CET 2006  Armin Burgmeier <armin@0x539.de>
+  * Removed token storage in user, we do not need the token anymore
 
 Fri Mar 24 16:57:52 CET 2006  Philipp Kern <phil@0x539.de>
   * Removed SHA1, tokens and all references to GMP
