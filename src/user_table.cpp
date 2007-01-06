@@ -214,8 +214,12 @@ unsigned int obby::user_table::count(user::flags flags, bool inverse) const
 		return m_user_map.size();
 
 	unsigned int c = 0;
-	for(iterator iter = begin(); iter != end(); ++ iter)
+	for(iterator iter = begin(flags, inverse);
+	    iter != end(flags, inverse);
+	    ++ iter)
+	{
 		++ c;
+	}
 
 	return c;
 }
