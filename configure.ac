@@ -31,7 +31,10 @@ AC_SUBST(extra_includes)
 AC_SUBST(extra_libraries)
 AC_SUBST(extra_requires)
 
-# Let the user choose if he wants libhowl support or not (default to no).
+# Zeroconf support
+zeroconf=no
+
+## Let the user choose if he wants libhowl support or not (default to no).
 AC_ARG_WITH([howl],
 	    AS_HELP_STRING([--with-howl],
 			   [support Zeroconf through libhowl [[default=no]]]),
@@ -39,9 +42,32 @@ AC_ARG_WITH([howl],
 AC_CACHE_CHECK([whether to use howl], [ac_cv_use_howl], [ac_cv_use_howl=no])
 if test "x$ac_cv_use_howl" != "xno" ; then
 	extra_requires="$extra_requires howl"
+	zeroconf=yes
 	AC_DEFINE([WITH_HOWL], 1, [Define whether to use howl.])
 fi
-AM_CONDITIONAL(WITH_HOWL, test x$ac_cv_use_howl != xno)
+
+## Let the user choose if he wants to support Zeroconf through Avahi
+## (default to no).
+AC_ARG_WITH([avahi],
+            AS_HELP_STRING([--with-avahi],
+                           [support Zeroconf through Avahi [[default=no]]]),
+            [ac_cv_use_avahi=$withval], [ac_cv_use_howl=np])
+AC_CACHE_CHECK([whether to use Avahi], [ac_cv_use_avahi], [ac_cv_use_avahi=no])
+if test "x$ac_cv_use_avahi" != "xno" ; then
+        extra_requires="$extra_requires avahi-client"
+	zeroconf=yes
+	AC_DEFINE([WITH_AVAHI], 1, [Define whether to use Avahi.])
+fi
+
+if test "x$ac_cv_use_howl" != "xno" ; then
+  if test "x$ac_cv_use_avahi" != "xno" ; then
+    AC_MSG_ERROR([[
+*** You cannot use both libhowl and Avahi. Try to use only one of them.
+]])
+  fi
+fi
+
+AM_CONDITIONAL(WITH_ZEROCONF, test x$zeroconf = xyes)
 
 # WIN32 build checks
 AC_MSG_CHECKING([whether to enable WIN32 specific flags])

@@ -41,7 +41,7 @@ pkginclude_HEADERS += client_buffer.hpp
 pkginclude_HEADERS += server_buffer.hpp
 pkginclude_HEADERS += host_buffer.hpp
 
-if WITH_HOWL
+if WITH_ZEROCONF
 pkginclude_HEADERS += zeroconf.hpp
 endif
 

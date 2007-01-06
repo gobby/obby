@@ -50,9 +50,9 @@ const char* obby_localedir()
 	return LOCALEDIR;
 }
 
-#ifdef WITH_HOWL
+#if defined(WITH_HOWL) || defined(WITH_AVAHI)
 /* This is an entry point for which external scripts could check. */
-void obby_has_howl()
+void obby_has_zeroconf()
 {
 	return;
 }

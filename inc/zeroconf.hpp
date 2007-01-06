@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005-2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -23,20 +23,40 @@
 #include <map>
 
 #include <sigc++/signal.h>
-#include <howl.h>
 #include <net6/non_copyable.hpp>
 #include <net6/address.hpp>
 
 namespace obby
 {
 
-class zeroconf : private net6::non_copyable
+class zeroconf_base : private net6::non_copyable
 {
 public:
 	typedef sigc::signal<void, const std::string&, 
 		const net6::ipv4_address&> signal_discover_type;
 	typedef sigc::signal<void, const std::string&> signal_leave_type;
-	
+
+	virtual void publish(const std::string& name, unsigned int port) = 0;
+	virtual void unpublish(const std::string& name) = 0;
+	virtual void unpublish_all() = 0;
+	virtual void discover() = 0;
+	virtual void select() = 0;
+	virtual void select(unsigned int msecs) = 0;
+
+	virtual signal_discover_type discover_event() const;
+	virtual signal_leave_type leave_event() const;
+
+protected:
+	zeroconf_base();
+
+private:
+	signal_discover_type m_signal_discover;
+	signal_leave_type m_signal_leave;
+};
+
+class zeroconf : public zeroconf_base
+{
+public:
 	zeroconf();
 	~zeroconf();
 
@@ -44,68 +64,42 @@ public:
 	 * default domain (.local). It uses the service identifier
 	 * _lobby._tcp. <em>name</em> is the value which should be displayed
 	 * when other users are discovering this record. */
-	void publish(const std::string& name, unsigned int port);
+	virtual void publish(const std::string& name, unsigned int port);
 
 	/** Unpublishes a record.
 	 */
-	void unpublish(const std::string& name);
+	virtual void unpublish(const std::string& name);
 
 	/** Unpublishes all records.
 	 */
-	void unpublish_all();
+	virtual void unpublish_all();
 
 	/** Discovers other users in the local network within the default
 	 * domain (.local). It searches for participants with the service
 	 * identifier set to _lobby._tcp. It emits a signal when a new user
 	 * is found, handing over the name, the ip and the port of the
 	 * participant. */
-	void discover();
+	virtual void discover();
 
 	/** Process all zeroconf events. This procedure does not return,
 	 * so it should be used in an own thread. */
-	void select();
+	virtual void select();
 
 	/** Process all available Zeroconf events in a timeframe of
 	 * <em>msecs</em> milliseconds. A value of 0 will prevent the command
 	 * from blocking the caller. */
-	void select(unsigned int msecs);
-	
-	signal_discover_type discover_event() const;
-	signal_leave_type leave_event() const;
-	
+	virtual void select(unsigned int msecs);
+
+	/** Signal which will be emitted when a new server is found on the
+	 * network. */
+	virtual signal_discover_type discover_event() const;
+
+	/** Signal which will be emitted when a formerly present server left
+	 * the network. */
+	virtual signal_leave_type leave_event() const;
+
 protected:
-	std::map<std::string, sw_discovery_oid> m_published;
-
-	sw_discovery m_session;
-	sw_salt m_salt;
-	
-	signal_discover_type m_signal_discover;
-	signal_leave_type m_signal_leave;
-
-private:
-	static sw_result HOWL_API handle_publish_reply(sw_discovery discovery,
-			sw_discovery_oid oid,
-			sw_discovery_publish_status status,
-			sw_opaque extra);
-	static sw_result HOWL_API handle_browse_reply(sw_discovery discovery,
-			sw_discovery_oid id,
-			sw_discovery_browse_status status,
-			sw_uint32 interface_index,
-			sw_const_string name,
-			sw_const_string type,
-			sw_const_string domain,
-			sw_opaque extra);
-	static sw_result HOWL_API handle_resolve_reply(sw_discovery discovery,
-			sw_discovery_oid oid,
-			sw_uint32 interface_index,
-			sw_const_string name,
-			sw_const_string type,
-			sw_const_string domain,
-			sw_ipv4_address address,
-			sw_port port,
-			sw_octets text_record,
-			sw_ulong text_record_len,
-			sw_opaque extra);
+	std::auto_ptr<zeroconf_base> m_delegate;
 };
 
 }

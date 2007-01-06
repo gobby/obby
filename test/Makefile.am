@@ -9,10 +9,10 @@
 LDADD = -L../src/.libs -lobby $(libobby_LIBS)
 AM_CPPFLAGS = -I../inc/ $(libobby_CFLAGS)
 
-if WITH_HOWL
-LDADD       += $(libhowl_LIBS)
-AM_CPPFLAGS += $(libhowl_CFLAGS)
-endif
+#if WITH_HOWL
+#LDADD       += $(libhowl_LIBS)
+#AM_CPPFLAGS += $(libhowl_CFLAGS)
+#endif
 
 noinst_PROGRAMS = \
 	ring \
@@ -33,8 +33,8 @@ rsa_SOURCES = rsa.cpp
 serialise_SOURCES = serialise.cpp
 text_SOURCES = text.cpp
 
-if WITH_HOWL
-noinst_PROGRAMS += discover
-discover_SOURCES = discover.cpp
-endif
+#if WITH_HOWL
+#noinst_PROGRAMS += discover
+#discover_SOURCES = discover.cpp
+#endif
 

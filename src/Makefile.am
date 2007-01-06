@@ -57,9 +57,7 @@ libobby_la_SOURCES += client_buffer.cpp
 libobby_la_SOURCES += server_buffer.cpp
 libobby_la_SOURCES += host_buffer.cpp
 
-if WITH_HOWL
-libobby_la_CPPFLAGS += $(libhowl_CFLAGS)
-libobby_la_LIBADD   += $(libhowl_LIBS)
+if WITH_ZEROCONF
 libobby_la_SOURCES  += zeroconf.cpp
 endif
 
