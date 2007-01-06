@@ -134,5 +134,22 @@ obby::user* obby::buffer::add_user(net6::peer& peer, int red, int green,
 {
 	user* new_user = new user(peer, red, green, blue);
 	m_userlist.push_back(new_user);
+	m_usertable->insert_user(*new_user);
 	return new_user;
 }
+
+void obby::buffer::remove_user(user* user_to_remove)
+{
+	m_usertable->delete_user(*user_to_remove);
+	m_userlist.erase(
+		std::remove(
+			m_userlist.begin(),
+			m_userlist.end(),
+			user_to_remove
+		),
+		m_userlist.end()
+	);
+
+	delete user_to_remove;
+}
+

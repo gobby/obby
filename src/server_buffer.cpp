@@ -17,6 +17,7 @@
  */
 
 #include <cassert>
+#include "server_user_table.hpp"
 #include "server_document.hpp"
 #include "server_buffer.hpp"
 
@@ -26,8 +27,11 @@ obby::server_buffer::server_buffer()
 }
 
 obby::server_buffer::server_buffer(unsigned int port)
- : buffer(), m_doc_counter(0), m_server(new net6::server(port, false) )
+ : buffer(), m_doc_counter(0), m_server(NULL)
 {
+	m_server = new net6::server(port, false);
+	m_usertable = new server_user_table(*m_server, *this);
+
 	register_signal_handlers();
 }
 
@@ -37,6 +41,12 @@ obby::server_buffer::~server_buffer()
 	{
 		delete m_server;
 		m_server = NULL;
+	}
+
+	if(m_usertable)
+	{
+		delete m_usertable;
+		m_usertable = NULL;
 	}
 }
 
@@ -72,8 +82,6 @@ void obby::server_buffer::remove_document(document* doc)
 	m_server->send(pack);
 
 	delete doc;
-
-	
 }
 
 obby::server_buffer::signal_connect_type
@@ -108,10 +116,15 @@ void obby::server_buffer::on_login(net6::server::peer& peer,
 	init_sync << static_cast<unsigned int>(m_doclist.size() );
 	m_server->send(init_sync, peer);
 
+	// Synchronize user table first
+	static_cast<server_user_table*>(m_usertable)->synchronize(peer);
+
+	// Synchronize the documents
 	std::list<document*>::iterator iter;
 	for(iter = m_doclist.begin(); iter != m_doclist.end(); ++ iter)
 		static_cast<server_document*>(*iter)->synchronize(peer);
 
+	// Done with synchronizing
 	net6::packet final_sync("obby_sync_final");
 	m_server->send(final_sync, peer);
 
@@ -126,18 +139,11 @@ void obby::server_buffer::on_part(net6::server::peer& peer)
 		return;
 	}
 
-	// Find user in list
-	std::list<user*>::iterator iter;
-	for(iter = m_userlist.begin(); iter != m_userlist.end(); ++ iter)
-		if( (*iter)->get_id() == peer.get_id() )
-			break;
+	user* cur_user = find_user(peer.get_id() );
+	assert(cur_user != NULL);
 
-	// User was logged in: It must be in the user list
-	assert(iter != m_userlist.end() );
-
-	m_signal_user_part.emit(**iter);
-	m_userlist.erase(iter);
-	delete *iter;
+	m_signal_user_part.emit(*cur_user);
+	remove_user(cur_user);
 }
 
 void obby::server_buffer::on_data(const net6::packet& pack,

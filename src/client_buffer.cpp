@@ -17,6 +17,7 @@
  */
 
 #include <cassert>
+#include "client_user_table.hpp"
 #include "client_document.hpp"
 #include "client_buffer.hpp"
 
@@ -34,6 +35,8 @@ obby::client_buffer::client_buffer(const std::string& hostname,
 	);
 
 	m_client = new net6::client(addr);
+	m_usertable = new client_user_table(*m_client, *this);
+
 	register_signal_handlers();
 }
 
@@ -43,6 +46,12 @@ obby::client_buffer::~client_buffer()
 	{
 		delete m_client;
 		m_client = NULL;
+	}
+
+	if(m_usertable)
+	{
+		delete m_usertable;
+		m_usertable = NULL;
 	}
 }
 
@@ -121,19 +130,11 @@ void obby::client_buffer::on_join(net6::client::peer& peer,
 
 void obby::client_buffer::on_part(net6::client::peer& peer)
 {
-	// Find user in user list and store iterator to it
-	std::list<user*>::iterator iter;
-	for(iter = m_userlist.begin(); iter != m_userlist.end(); ++ iter)
-		if( (*iter)->get_id() == peer.get_id() )
-			break;
+	user* cur_user = find_user(peer.get_id() );
+	assert(cur_user != NULL);
 
-	// Emit part singal
-	assert(iter != m_userlist.end() );
-	m_signal_user_part.emit(**iter);
-
-	// Remove user from list
-	delete *iter;
-	m_userlist.erase(iter);
+	m_signal_user_part.emit(*cur_user);
+	remove_user(cur_user);
 }
 
 void obby::client_buffer::on_close()
@@ -154,6 +155,12 @@ void obby::client_buffer::on_data(const net6::packet& pack)
 
 	if(pack.get_command() == "obby_sync_init")
 		on_net_sync_init(pack);
+	if(pack.get_command() == "obby_sync_usertable_init")
+		on_net_sync_usertable_init(pack);
+	if(pack.get_command() == "obby_sync_usertable_record")
+		on_net_sync_usertable_record(pack);
+	if(pack.get_command() == "obby_sync_usertable_final")
+		on_net_sync_usertable_final(pack);
 	if(pack.get_command() == "obby_sync_doc_init")
 		on_net_sync_doc_init(pack);
 	if(pack.get_command() == "obby_sync_doc_line")
@@ -175,7 +182,7 @@ void obby::client_buffer::on_net_record(const net6::packet& pack)
 	record* rec = record::from_packet(pack);
 	if(!rec) return;
 
-	// TODO: Find suitable document
+	// Find suitable document
 	document* doc = find_document(rec->get_document() );
 	if(!doc) { delete rec; return; }
 
@@ -226,6 +233,21 @@ void obby::client_buffer::on_net_document_remove(const net6::packet& pack)
 void obby::client_buffer::on_net_sync_init(const net6::packet& pack)
 {
 	// t0l.
+}
+
+void obby::client_buffer::on_net_sync_usertable_init(const net6::packet& pack)
+{
+	static_cast<client_user_table*>(m_usertable)->on_net_sync_init(pack);
+}
+
+void obby::client_buffer::on_net_sync_usertable_record(const net6::packet& pack)
+{
+	static_cast<client_user_table*>(m_usertable)->on_net_sync_record(pack);
+}
+
+void obby::client_buffer::on_net_sync_usertable_final(const net6::packet& pack)
+{
+	static_cast<client_user_table*>(m_usertable)->on_net_sync_final(pack);
 }
 
 void obby::client_buffer::on_net_sync_doc_init(const net6::packet& pack)

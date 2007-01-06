@@ -25,6 +25,7 @@
 #include <net6/non_copyable.hpp>
 #include "user.hpp"
 #include "document.hpp"
+#include "user_table.hpp"
 
 namespace obby
 {
@@ -106,12 +107,25 @@ protected:
 	 */
 	virtual user* add_user(net6::peer& peer, int red, int green, int blue);
 
+	/** Internal function to remove an existing user from the user list.
+	 */
+	virtual void remove_user(user* user_to_remove);
+
 	/** Adds a new document with the given ID to the buffer. The internal
 	 * ID counter is set to the new given document ID.
 	 */
 	virtual document& add_document(unsigned int id) = 0;
 
+	/** User table to identify users through multiple obby sessions.
+	 */
+	user_table* m_usertable;
+
+	/** List of documents.
+	 */
 	std::list<document*> m_doclist;
+
+	/** User list.
+	 */
 	std::list<user*> m_userlist;
 
 	signal_user_join_type m_signal_user_join;

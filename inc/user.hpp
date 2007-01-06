@@ -26,7 +26,7 @@
 namespace obby
 {
 
-/** User in a obby session
+/** User in a obby session.
  */
 	
 class user

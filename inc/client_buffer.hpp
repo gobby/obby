@@ -124,6 +124,9 @@ protected:
 	void on_net_document_remove(const net6::packet& pack);
 
 	void on_net_sync_init(const net6::packet& pack);
+	void on_net_sync_usertable_init(const net6::packet& pack);
+	void on_net_sync_usertable_record(const net6::packet& pack);
+	void on_net_sync_usertable_final(const net6::packet& pack);
 	void on_net_sync_doc_init(const net6::packet& pack);
 	void on_net_sync_doc_line(const net6::packet& pack);
 	void on_net_sync_doc_final(const net6::packet& pack);

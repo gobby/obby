@@ -15,9 +15,10 @@ Important:
    EOF
 
 Normal:
- * Implement indent_record and unindent_record to (un)indent lines of text
+ * Priority constants
 
 Minor:
+ * Implement indent_record and unindent_record to (un)indent lines of text
 
 Wishlist:
 
