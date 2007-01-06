@@ -162,8 +162,8 @@ public:
 	 * assigned to this user, the colour is updated. If a user with this ID
 	 * is already connected, std::logic_error is thrown.
 	 */
-	obby::user* add_user(const net6::user& user, int red, int green,
-	                     int blue);
+	obby::user* add_user(unsigned int id, const net6::user& user, int red,
+	                     int green, int blue);
 
 	/** Adds a new user to the user list. No net6::user exists, so the
 	 * connected flag will not be set. If a user with this ID exists
@@ -177,7 +177,12 @@ public:
 	 * net6::user object is dropped.
 	 */
 	void remove_user(const user& user_to_remove);
-	
+
+	/** Looks for a new user ID that is currently not in use by another
+	 * user.
+	 */
+	unsigned int find_free_id() const;
+
 	/** Returns the beginning of the user list.
 	 */
 	iterator begin(user::flags flags = user::flags::NONE,

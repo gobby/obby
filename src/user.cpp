@@ -26,10 +26,11 @@ const obby::user::flags obby::user::flags::CONNECTED = obby::user::flags(0x00000
 const obby::user::privileges obby::user::privileges::NONE = obby::user::privileges(0x00000000);
 const obby::user::privileges obby::user::privileges::CREATE_DOCUMENT = obby::user::privileges(0x00000001);
 
-obby::user::user(const net6::user& user6, int red, int green, int blue)
- : m_user6(&user6), m_id(user6.get_id() ), m_name(user6.get_name() ),
-   m_red(red), m_green(green), m_blue(blue), m_flags(flags::CONNECTED),
-   m_privs(privileges::NONE)
+obby::user::user(unsigned int id, const net6::user& user6,
+                 int red, int green, int blue):
+	m_user6(&user6), m_id(id), m_name(user6.get_name() ),
+	m_red(red), m_green(green), m_blue(blue), m_flags(flags::CONNECTED),
+	m_privs(privileges::NONE)
 {
 }
 

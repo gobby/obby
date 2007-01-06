@@ -192,6 +192,7 @@ void basic_host_buffer<selector_type>::open(unsigned int port)
 
 	// Create local user
 	m_self = basic_buffer<selector_type>::m_user_table.add_user(
+		basic_buffer<selector_type>::m_user_table.find_free_id(),
 		net6_host().get_self(), m_red, m_green, m_blue
 	);
 }
@@ -204,6 +205,7 @@ void basic_host_buffer<selector_type>::open(const std::string& content,
 
 	// Create local user
 	m_self = basic_buffer<selector_type>::m_user_table.add_user(
+		basic_buffer<selector_type>::m_user_table.find_free_id(),
 		net6_host().get_self(), m_red, m_green, m_blue
 	);
 }

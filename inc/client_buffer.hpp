@@ -503,16 +503,18 @@ template<typename selector_type>
 void basic_client_buffer<selector_type>::
 	on_join(const net6::user& user6, const net6::packet& pack)
 {
-	unsigned int red =
+	unsigned int id =
 		pack.get_param(2).net6::parameter::as<unsigned int>();
-	unsigned int green =
+	unsigned int red =
 		pack.get_param(3).net6::parameter::as<unsigned int>();
-	unsigned int blue =
+	unsigned int green =
 		pack.get_param(4).net6::parameter::as<unsigned int>();
+	unsigned int blue =
+		pack.get_param(5).net6::parameter::as<unsigned int>();
 
 	// Add user
 	user* new_user = basic_buffer<selector_type>::m_user_table.add_user(
-		user6, red, green, blue
+		id, user6, red, green, blue
 	);
 
 	// The first joining user is the local one

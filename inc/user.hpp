@@ -96,16 +96,18 @@ public:
 	};
 
 	/** Creates a new user from an existing net6::user.
+	 * @param id Unique obby ID for this user.
 	 * @param user6 Underlaying net6::user object.
 	 * @param red Red colour component of the user colour (0-255)
 	 * @param green Green colour component of the user colour (0-255)
 	 * @param blue Blue colour component of the user colour (0-255)
 	 */
-	user(const net6::user& user6, int red, int green, int blue);
+	user(unsigned int id, const net6::user& user6,
+	     int red, int green, int blue);
 
 	/** Creates a new user that represents a client that has already left
 	 * the obby session.
-	 * @param id ID of the underlaying user.
+	 * @param id Unique obby ID for this user.
 	 * @param name Name of the user.
 	 * @param red Red colour component of the user colour (0-255)
 	 * @param green Green colour component of the user colour (0-255)

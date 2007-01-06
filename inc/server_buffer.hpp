@@ -156,8 +156,8 @@ protected:
 	void on_part(const net6::user& user6);
 	bool on_auth(const net6::user& user6, const net6::packet& pack,
 	             net6::login::error& error);
-	unsigned int on_login(const net6::user& user6,
-	                      const net6::packet& pack);
+	void on_login(const net6::user& user6,
+	              const net6::packet& pack);
 	void on_extend(const net6::user& user6, net6::packet& pack);
 	void on_data(const net6::user& from, const net6::packet& pack);
 
@@ -668,7 +668,7 @@ bool basic_server_buffer<selector_type>::
 }
 
 template<typename selector_type>
-unsigned int basic_server_buffer<selector_type>::
+void basic_server_buffer<selector_type>::
 	on_login(const net6::user& user6, const net6::packet& pack)
 {
 	// Get color
@@ -679,9 +679,14 @@ unsigned int basic_server_buffer<selector_type>::
 	unsigned int blue =
 		pack.get_param(3).net6::parameter::as<unsigned int>();
 
+	// Choose free user ID (note that this is another ID as the net6
+	// user ID because this ID must remain valid over multiple sessions).
+	unsigned int user_id =
+		basic_buffer<selector_type>::m_user_table.find_free_id();
+
 	// Insert into user list
 	user* new_user = basic_buffer<selector_type>::m_user_table.add_user(
-		user6, red, green, blue
+		user_id, user6, red, green, blue
 	);
 
 	// Remove token from temporary token list because token can now be
@@ -702,9 +707,6 @@ unsigned int basic_server_buffer<selector_type>::
 	// const user.
 	new_user->set_token(token_iter->second);
 	m_tokens.erase(token_iter);
-
-	// Tell net6 to use already existing ID, if any
-	return new_user->get_id();
 }
 
 template<typename selector_type>
@@ -723,9 +725,9 @@ void basic_server_buffer<selector_type>::
 		throw net6::bad_value(str.str() );
 	}
 
-	// Extend user-join packet with colour
-	pack << cur_user->get_red() << cur_user->get_green()
-	     << cur_user->get_blue();
+	// Extend user-join packet with colour and obby-ID
+	pack << cur_user->get_id() << cur_user->get_red()
+	     << cur_user->get_green() << cur_user->get_blue();
 }
 
 template<typename selector_type>

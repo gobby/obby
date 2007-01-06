@@ -58,23 +58,10 @@ void obby::user_table::deserialise(const serialise::object& obj)
 
 			// Insert into user map
 			m_user_map[new_user->get_id()] = new_user;
-			
-			/*const serialise::attribute* id_attr =
-				iter->get_attribute("id");
-			const serialise::attribute* name_attr =
-				iter->get_attribute("name");
-			// TODO: Replace this by a obby::colour class
-			const serialise::attribute* red_attr =
-				iter->get_attribute("red");
-			const serialise::attribute* blue_attr =
-				iter->get_attribute("green");
-			const serialise::attribute* green_attr =
-				iter->get_attribute("blue");
-
-			if(!id_attr || !name_attr || !red_attr || !blue_attr || !green_attr)*/
 		}
 		else
 		{
+			// TODO: unexpected_child_error
 			format_string str("Unexpected child node: '%0%'");
 			str << iter->get_name();
 			throw serialise::error(str.str(), iter->get_line() );
@@ -90,8 +77,8 @@ void obby::user_table::clear()
 	m_user_map.clear();
 }
 
-obby::user* obby::user_table::add_user(const net6::user& user6, int red,
-                                       int green, int blue)
+obby::user* obby::user_table::add_user(unsigned int id, const net6::user& user6,
+                                       int red, int green, int blue)
 {
 	// Find already exiting user with the given name
 	user* existing_user = find_int(user6.get_name() );
@@ -108,11 +95,15 @@ obby::user* obby::user_table::add_user(const net6::user& user6, int red,
 	}
 	else
 	{
+		// Make sure the ID is not already in use.
+		if(id == 0 || m_user_map.find(id) != m_user_map.end() )
+			throw std::logic_error("obby::user_table::add_user");
+
 		// User seems to be here for his first time: Create a new user.
-		user* new_user = new user(user6, red, green, blue);
+		user* new_user = new user(id, user6, red, green, blue);
 
 		// Insert user into user list
-		m_user_map[new_user->get_id()] = new_user;
+		m_user_map[id] = new_user;
 
 		return new_user;
 	}
@@ -129,8 +120,12 @@ obby::user* obby::user_table::add_user(unsigned int id, const std::string& name,
 	if(existing_user != NULL)
 		throw std::logic_error("obby::user_table::add_user");
 
+	// Make sure the ID is not already in use.
+	if(id == 0 || m_user_map.find(id) != m_user_map.end() )
+		throw std::logic_error("obby::user_table::add_user");
+
 	user* new_user = new user(id, name, red, green, blue);
-	m_user_map[new_user->get_id()] = new_user;
+	m_user_map[id] = new_user;
 
 	return new_user;
 }
@@ -140,6 +135,16 @@ void obby::user_table::remove_user(const user& user_to_remove)
 	// Release underlaying net6::user object, this disables the connected
 	// flag, too. Keep the user in the list to recognize him if he rejoins.
 	const_cast<user&>(user_to_remove).release_net6();
+}
+
+unsigned int obby::user_table::find_free_id() const
+{
+	unsigned int free_id = 1;
+	for(iterator iter = begin(); iter != end(); ++ iter)
+		if(iter->get_id() >= free_id)
+			free_id = iter->get_id() + 1;
+
+	return free_id;
 }
 
 obby::user_table::iterator obby::user_table::begin(user::flags flags,
