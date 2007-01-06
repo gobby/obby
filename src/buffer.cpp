@@ -20,7 +20,6 @@
 #include "buffer.hpp"
 
 obby::buffer::buffer()
- : m_doc_counter(0)
 {
 }
 
@@ -33,11 +32,6 @@ obby::buffer::~buffer()
 	std::list<user*>::iterator user_i;
 	for(user_i = m_userlist.begin(); user_i != m_userlist.end(); ++ user_i)
 		delete *user_i;
-}
-
-obby::document& obby::buffer::add_document()
-{
-	return add_document(m_doc_counter + 1);
 }
 
 obby::document* obby::buffer::find_document(unsigned int id) const
@@ -67,14 +61,16 @@ obby::user* obby::buffer::find_user(const std::string& name) const
 	return NULL;
 }
 
-obby::buffer::signal_insert_doc_type obby::buffer::insert_doc_event() const
+obby::buffer::signal_insert_document_type
+obby::buffer::insert_document_event() const
 {
-	return signal_insert_doc;
+	return m_signal_insert_document;
 }
 
-obby::buffer::signal_remove_doc_type obby::buffer::remove_doc_event() const
+obby::buffer::signal_remove_document_type
+obby::buffer::remove_document_event() const
 {
-	return signal_remove_doc;
+	return m_signal_remove_document;
 }
 
 obby::user* obby::buffer::add_user(net6::peer& peer, int red, int green,
@@ -84,4 +80,3 @@ obby::user* obby::buffer::add_user(net6::peer& peer, int red, int green,
 	m_userlist.push_back(new_user);
 	return new_user;
 }
-

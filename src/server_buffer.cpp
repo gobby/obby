@@ -20,12 +20,12 @@
 #include "server_buffer.hpp"
 
 obby::server_buffer::server_buffer()
- : buffer(), m_server(NULL)
+ : buffer(), m_doc_counter(0), m_server(NULL)
 {
 }
 
 obby::server_buffer::server_buffer(unsigned int port)
- : buffer(), m_server(new net6::server(port, false) )
+ : buffer(), m_doc_counter(0), m_server(new net6::server(port, false) )
 {
 	register_signal_handlers();
 }
@@ -49,12 +49,28 @@ void obby::server_buffer::select(unsigned int timeout)
 	m_server->select(timeout);
 }
 
-obby::document& obby::server_buffer::add_document(unsigned int id)
+obby::document& obby::server_buffer::create_document()
 {
-	document* doc = new server_document(id, *m_server);
-	m_doc_counter = id;
-	m_doclist.push_back(doc);
-	return *doc;
+	unsigned int id = ++ m_doc_counter;
+	document& doc = add_document(id);
+	
+	net6::packet pack("obby_document_create");
+	pack << id;
+	m_server->send(pack);
+}
+
+void obby::server_buffer::remove_document(document* doc)
+{
+	m_doclist.erase(std::remove(m_doclist.begin(), m_doclist.end(), doc),
+	                m_doclist.end() );
+	
+	net6::packet pack("obby_document_remove");
+	pack << doc->get_id();
+	m_server->send(pack);
+
+	delete doc;
+
+	
 }
 
 obby::server_buffer::signal_join_type obby::server_buffer::join_event() const
@@ -85,29 +101,19 @@ void obby::server_buffer::on_login(net6::server::peer& peer,
 	int blue = pack.get_param(3).as_int();
 	user* new_user = add_user(peer, red, green, blue);
 
-	// TODO: Sync every document!
 	// Client logged in. Synchronise the complete buffer, but
 	// seperate it into multiple packets to not block other high-priority
 	// network packets like chat packets.
-/*	net6::packet init_sync("obby_sync_init");
-	init_sync << m_revision;
+	net6::packet init_sync("obby_sync_init");
+	init_sync << static_cast<unsigned int>(m_doclist.size() );
 	m_server->send(init_sync, peer);
 
-	std::string::size_type pos = 0, prev = 0;
-	while( (pos = m_buffer.find('\n', pos)) != std::string::npos)
-	{
-		net6::packet line_sync("obby_sync_line");
-		line_sync << m_buffer.substr(prev, pos - prev);
-		m_server->send(line_sync, peer);
-		prev = ++ pos;
-	}
-
-	net6::packet line_sync("obby_sync_line");
-	line_sync << m_buffer.substr(prev);
-	m_server->send(line_sync, peer);
+	std::list<document*>::iterator iter;
+	for(iter = m_doclist.begin(); iter != m_doclist.end(); ++ iter)
+		static_cast<server_document*>(*iter)->synchronize(peer);
 
 	net6::packet final_sync("obby_sync_final");
-	m_server->send(final_sync, peer);*/
+	m_server->send(final_sync, peer);
 
 	m_signal_login.emit(*new_user);
 }
@@ -132,28 +138,11 @@ void obby::server_buffer::on_part(net6::server::peer& peer)
 void obby::server_buffer::on_data(const net6::packet& pack,
                                   net6::server::peer& peer)
 {
+	user* from_user = find_user(peer.get_id() );
+	assert(from_user != NULL);
+
 	if(pack.get_command() == "obby_record")
-	{
-		// Create record from packet
-		record* rec = record::from_packet(pack);
-		if(!rec) return;
-
-		// Set correct sender
-		rec->set_from(peer.get_id() );
-
-		// TODO: Find correct document
-		document* doc;
-		
-		try
-		{
-			doc->on_net_record(*rec);
-		}
-		catch(...)
-		{
-			delete doc;
-			throw;
-		}
-	}
+		on_net_record(pack, *from_user);
 }
 
 bool obby::server_buffer::on_auth(net6::server::peer& peer,
@@ -214,3 +203,59 @@ void obby::server_buffer::register_signal_handlers()
 	m_server->data_event().connect(
 		sigc::mem_fun(*this, &server_buffer::on_data) );
 }
+
+obby::document& obby::server_buffer::add_document(unsigned int id)
+{
+	document* doc = new server_document(id, *m_server);
+	m_doclist.push_back(doc);
+	return *doc;
+}
+
+void obby::server_buffer::on_net_record(const net6::packet& pack, user& from)
+{
+	// Create record from packet
+	record* rec = record::from_packet(pack);
+	if(!rec) return;
+
+	// Set correct sender
+	rec->set_from(from.get_id() );
+	
+	// Find correct document
+	document* doc = find_document(rec->get_document() );
+	if(!doc) { delete rec; return; }
+		
+	try
+	{
+		// Delegate to document
+		doc->on_net_record(*rec);
+	}
+	catch(...)
+	{
+		// Release the record if document::on_net_record throws an
+		// exception.
+		delete rec;
+		throw;
+	}
+}
+
+void obby::server_buffer::on_net_document_create(const net6::packet& pack,
+                                                 user& from)
+{
+	document& doc = create_document();
+	m_signal_insert_document.emit(doc);
+}
+
+void obby::server_buffer::on_net_document_remove(const net6::packet& pack,
+                                                 user& from)
+{
+	if(pack.get_param_count() < 1) return;
+	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
+
+	unsigned int id = pack.get_param(0).as_int();
+	document* doc = find_document(id);
+	if(!doc) return;
+
+	m_signal_remove_document.emit(*doc);
+	remove_document(doc);
+}
+

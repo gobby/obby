@@ -53,6 +53,12 @@ public:
 	 */
 	virtual void on_net_record(record& rec);
 
+	/** Synchronization functions called while synchronizing documents.
+	 */
+	virtual void on_net_sync_init(const net6::packet& pack);
+	virtual void on_net_sync_line(const net6::packet& pack);
+	virtual void on_net_sync_final(const net6::packet& pack);
+
 protected:
 	std::list<record*> m_unsynced;
 	net6::client& m_client;

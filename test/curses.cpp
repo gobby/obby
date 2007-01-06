@@ -203,8 +203,10 @@ void screen::scroll_to_cursor()
 	if(cursor_x < m_scroll_x)
 		m_scroll_x = cursor_x;
 
+v v v v v v v
 	if(m_scroll_y + LINES <= cursor_y)
 		m_scroll_y = cursor_y - LINES + 1;
+^ ^ ^ ^ ^ ^ ^
 	if(cursor_y < m_scroll_y)
 		m_scroll_y = cursor_y;
 }
@@ -238,7 +240,9 @@ protected:
 };
 
 curses_editor::curses_editor(int argc, char* argv[])
+v v v v v v v
  : m_port(argc > 3 ? strtol(argv[3], NULL, 10) : 6522), m_quit(true),
+^ ^ ^ ^ ^ ^ ^
    m_synced(false), m_buffer(argv[2], m_port), m_screen(m_buffer)
 {
 	srand( time(NULL) );

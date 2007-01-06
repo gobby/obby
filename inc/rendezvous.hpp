@@ -23,12 +23,13 @@
 
 #include <sigc++/signal.h>
 #include <howl.h>
+#include <net6/non_copyable.hpp>
 #include <net6/address.hpp>
 
 namespace obby
 {
 
-class rendezvous
+class rendezvous : private net6::non_copyable
 {
 public:
 	typedef sigc::signal<void, const std::string&, 

@@ -11,6 +11,8 @@ Serious:
 Important:
  * Implement automatic service announcement and discovery.
  * Fix initial syncing
+ * on_login / on_part vs. on_connect / on_disconnect.
+ * delete -> remove in document, erase -> remove in document, 4 great Konsistenz
  * Implement chat 
  * Implement user colorizing
 

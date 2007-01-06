@@ -53,11 +53,14 @@ public:
 	 */
 	void select(unsigned int timeout);
 	
-	/** Adds a new document with the given ID to the buffer. The internal
-	 * ID counter is set to the new given document ID.
+	/** Creates a new document.
 	 */
-	virtual document& add_document(unsigned int id);
+	document& create_document();
 
+	/** Removes an existing document.
+	 */
+	void remove_document(document* doc);
+	
 	/** Signal which will be emitted if a new client has connected.
 	 */
 	signal_join_type join_event() const;
@@ -83,6 +86,11 @@ protected:
 	 */
 	void register_signal_handlers();
 
+	/** Adds a new document with the given ID to the buffer. The internal
+	 * ID counter is set to the new given document ID.
+	 */
+	virtual document& add_document(unsigned int id);
+
 	void on_join(net6::server::peer& peer);
 	void on_login(net6::server::peer& peer, const net6::packet& pack);
 	void on_part(net6::server::peer& peer);
@@ -91,6 +99,12 @@ protected:
 	             std::string& reason);
 	void on_extend(net6::server::peer& peer, net6::packet& pack);
 
+	void on_net_record(const net6::packet& pack, user& from);
+
+	void on_net_document_create(const net6::packet& pack, user& from);
+	void on_net_document_remove(const net6::packet& pack, user& from);
+
+	unsigned int m_doc_counter;
 	net6::server* m_server;
 
 	signal_join_type m_signal_join;
@@ -100,4 +114,4 @@ protected:
 
 }
 
-#endif // _OBBY_SERVER_DOCUMENT_HPP_
+#endif // _OBBY_SERVER_BUFFER_HPP_

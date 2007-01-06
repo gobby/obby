@@ -57,6 +57,10 @@ public:
 	 */
 	virtual void on_net_record(record& rec);
 
+	/** Synchronize document to a peer.
+	 */
+	void synchronize(net6::server::peer& peer);
+
 protected:
 	net6::server& m_server;
 };

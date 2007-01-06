@@ -58,6 +58,16 @@ public:
 	 */
 	void login(const std::string& name, int red, int green, int blue);
 
+	/** Requests a new document by the server. signal_insert_doc will be
+	 * emitted if the server authorized the creation process.
+	 */
+	void request_create_document();
+
+	/** Requests the deletion of a document by the server. signal_remove_doc
+	 * will be emitted if the server authorized the deletion.
+	 */
+	void request_remove_document(unsigned int id);
+
 	/** Returns the local user.
 	 */
 	user& get_self();
@@ -73,11 +83,6 @@ public:
 	/** Waits for incoming events or <em>timeout</em> expired.
 	 */
 	void select(unsigned int timeout);
-
-        /** Adds a new document with the given ID to the buffer. The internal
-	 * ID counter is set to the new given document ID.
-	 */
-	virtual document& add_document(unsigned int id);
 
 	// TODO: Move join_event and part_event to buffer?
 	/** Signal which will be emitted if a new client joined the session.
@@ -113,16 +118,26 @@ protected:
 	 */
 	void register_signal_handlers();
 
+        /** Adds a new document with the given ID to the buffer. The internal
+	 * ID counter is set to the new given document ID.
+	 */
+	virtual document& add_document(unsigned int id);
+
 	void on_join(net6::client::peer& peer, const net6::packet& pack);
 	void on_part(net6::client::peer& peer);
 	void on_close();
 	void on_data(const net6::packet& pack);
 	void on_login_failed(const std::string& reason);
 
-	// TODO: Sync all documents
 	void on_net_record(const net6::packet& pack);
+
+	void on_net_document_create(const net6::packet& pack);
+	void on_net_document_remove(const net6::packet& pack);
+
 	void on_net_sync_init(const net6::packet& pack);
-	void on_net_sync_line(const net6::packet& pack);
+	void on_net_sync_doc_init(const net6::packet& pack);
+	void on_net_sync_doc_line(const net6::packet& pack);
+	void on_net_sync_doc_final(const net6::packet& pack);
 	void on_net_sync_final(const net6::packet& pack);
 
 	std::list<record*> m_unsynced;

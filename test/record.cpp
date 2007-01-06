@@ -22,7 +22,7 @@ bool ins_ins(const std::string& message, const obby::position& pos,
 {
 	++ count;
 	std::cout << count << ": " << message << std::endl;
-	obby::insert_record record(pos, "foobar", 0, 0);
+	obby::insert_record record(pos, "foobar", 0, 0, 0);
 	record.on_insert(ins_pos, insert);
 	if(record.get_position() != target)
 		std::cout << "failed. got " << record.get_position() << ", but expected " << target << std::endl;
@@ -35,7 +35,7 @@ bool ins_del(const std::string& message, const obby::position& pos,
 {
 	++ count;
 	std::cout << count << ": " << message << std::endl;
-	obby::insert_record record(pos, "foobar", 0, 0);
+	obby::insert_record record(pos, "foobar", 0, 0, 0);
 	record.on_delete(begin, end);
 	if(record.get_position() != target)
 		std::cout << "failed. got " << record.get_position() << ", but expected " << target << std::endl;

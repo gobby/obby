@@ -22,6 +22,7 @@
 #include <string>
 #include <list>
 #include <sigc++/signal.h>
+#include <net6/non_copyable.hpp>
 #include "position.hpp"
 #include "record.hpp"
 #include "insert_record.hpp"
@@ -34,7 +35,7 @@ namespace obby
  * text that is synchronized to all other participiants in the obby session.
  */
 	
-class document
+class document : private net6::non_copyable
 {
 public:
 	typedef sigc::signal<void, const insert_record&> signal_insert_type;

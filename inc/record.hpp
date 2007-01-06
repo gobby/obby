@@ -20,6 +20,7 @@
 #define _OBBY_RECORD_HPP_
 
 #include <string>
+#include <net6/non_copyable.hpp>
 #include <net6/packet.hpp>
 #include "position.hpp"
 
@@ -28,7 +29,7 @@ namespace obby
 
 class document;
 
-class record
+class record : private net6::non_copyable
 {
 public:
 	record(unsigned int document, unsigned int revision, unsigned int from);

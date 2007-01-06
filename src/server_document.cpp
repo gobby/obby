@@ -81,3 +81,30 @@ void obby::server_document::on_net_record(record& rec)
 	// Emit changed signal
 	rec.emit_document_signal(*this);
 }
+
+void obby::server_document::synchronize(net6::server::peer& peer)
+{
+	// Send doc initial sync packet with document revision
+	net6::packet init_pack("obby_sync_doc_init");
+	init_pack << m_id << m_revision;
+	m_server.send(init_pack, peer);
+
+	// Send buffer
+	std::string::size_type pos = 0, prev = 0;
+	while( (pos = m_buffer.find('\n', pos) ) != std::string::npos)
+	{
+		net6::packet line_pack("obby_sync_doc_line");
+		line_pack << m_id << m_buffer.substr(prev, pos - prev);
+		m_server.send(line_pack, peer);
+	}
+
+	net6::packet line_pack("obby_sync_doc_line");
+	line_pack << m_id << m_buffer.substr(prev);
+	m_server.send(line_pack, peer);
+
+	// Send final sync packet
+	net6::packet final_pack("obby_sync_doc_final");
+	final_pack << m_id;
+	m_server.send(final_pack, peer);
+}
+

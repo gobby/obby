@@ -22,6 +22,7 @@
 #include <string>
 #include <list>
 #include <sigc++/signal.h>
+#include <net6/non_copyable.hpp>
 #include "user.hpp"
 #include "document.hpp"
 
@@ -32,24 +33,14 @@ namespace obby
  * that are synchronized through many users and a user list.
  */
 
-class buffer
+class buffer : private net6::non_copyable
 {
 public:
-	typedef sigc::signal<void, document&> signal_insert_doc_type;
-	typedef sigc::signal<void, document&> signal_remove_doc_type;
+	typedef sigc::signal<void, document&> signal_insert_document_type;
+	typedef sigc::signal<void, document&> signal_remove_document_type;
 
 	buffer();
 	virtual ~buffer();
-
-	/** Adds a new document to the buffer and uses the internal ID counter
-	 * to assign a unique ID to it.
-	 */
-	document& add_document();
-
-	/** Adds a new document with the given ID to the buffer. The internal
-	 * ID counter is set to the new given document ID.
-	 */
-	virtual document& add_document(unsigned int id) = 0;
 
 	/** Looks for a document with the given ID.
 	 */
@@ -66,23 +57,27 @@ public:
 	/** Signal which will be emitted when another participiant in the
 	 * obby session has created a new document.
 	 */
-	signal_insert_doc_type insert_doc_event() const;
+	signal_insert_document_type insert_document_event() const;
 
 	/** Signal which will be emitted when another participiant in the
 	 * obby session has removed an existing document.
 	 */
-	signal_remove_doc_type remove_doc_event() const;
+	signal_remove_document_type remove_document_event() const;
 protected:
 	/** Internal function to add a new user to the user list.
 	 */
 	virtual user* add_user(net6::peer& peer, int red, int green, int blue);
 
-	unsigned int m_doc_counter;
+	/** Adds a new document with the given ID to the buffer. The internal
+	 * ID counter is set to the new given document ID.
+	 */
+	virtual document& add_document(unsigned int id) = 0;
+
 	std::list<document*> m_doclist;
 	std::list<user*> m_userlist;
 
-	signal_insert_doc_type signal_insert_doc;
-	signal_remove_doc_type signal_remove_doc;
+	signal_insert_document_type m_signal_insert_document;
+	signal_remove_document_type m_signal_remove_document;
 };
 
 }

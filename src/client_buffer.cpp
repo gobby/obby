@@ -54,6 +54,18 @@ void obby::client_buffer::login(const std::string& name, int red, int green,
 	m_client->custom_login(login_pack);
 }
 
+void obby::client_buffer::request_create_document()
+{
+	net6::packet request_pack("obby_document_create");
+	m_client->send(request_pack);
+}
+
+void obby::client_buffer::request_remove_document(unsigned int id)
+{
+	net6::packet request_pack("obby_document_remove");
+	m_client->send(request_pack);
+}
+
 obby::user& obby::client_buffer::get_self()
 {
 	return *m_self;
@@ -72,14 +84,6 @@ void obby::client_buffer::select()
 void obby::client_buffer::select(unsigned int timeout)
 {
 	m_client->select(timeout);
-}
-
-obby::document& obby::client_buffer::add_document(unsigned int id)
-{
-	document* doc = new client_document(id, *m_client);
-	m_doc_counter = id;
-	m_doclist.push_back(doc);
-	return *doc;
 }
 
 obby::client_buffer::signal_join_type obby::client_buffer::join_event() const
@@ -149,12 +153,23 @@ void obby::client_buffer::on_close()
 
 void obby::client_buffer::on_data(const net6::packet& pack)
 {
+	// TODO: std::map<> from command to function?
 	if(pack.get_command() == "obby_record")
 		on_net_record(pack);
+
+	if(pack.get_command() == "obby_document_create")
+		on_net_document_create(pack);
+	if(pack.get_command() == "obby_document_remove")
+		on_net_document_remove(pack);
+
 	if(pack.get_command() == "obby_sync_init")
 		on_net_sync_init(pack);
-	if(pack.get_command() == "obby_sync_line")
-		on_net_sync_line(pack);
+	if(pack.get_command() == "obby_sync_doc_init");
+		on_net_sync_doc_init(pack);
+	if(pack.get_command() == "obby_sync_doc_line")
+		on_net_sync_doc_line(pack);
+	if(pack.get_command() == "obby_sync_doc_final");
+		on_net_sync_doc_final(pack);
 	if(pack.get_command() == "obby_sync_final")
 		on_net_sync_final(pack);
 }
@@ -171,7 +186,8 @@ void obby::client_buffer::on_net_record(const net6::packet& pack)
 	if(!rec) return;
 
 	// TODO: Find suitable document
-	document* doc;
+	document* doc = find_document(rec->get_document() );
+	if(!doc) { delete rec; return; }
 
 	try
 	{
@@ -184,28 +200,75 @@ void obby::client_buffer::on_net_record(const net6::packet& pack)
 	}
 }
 
-// TODO: FIX ME!	
-void obby::client_buffer::on_net_sync_init(const net6::packet& pack)
+void obby::client_buffer::on_net_document_create(const net6::packet& pack)
 {
 	if(pack.get_param_count() < 1) return;
 	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
 
-//	m_revision = pack.get_param(0).as_int();
-//	m_buffer = "";
+	unsigned int id = pack.get_param(0).as_int();
+	assert(find_document(id) == NULL);
+
+	document& new_doc = add_document(id);
+	m_signal_insert_document.emit(new_doc);
 }
 
-void obby::client_buffer::on_net_sync_line(const net6::packet& pack)
+void obby::client_buffer::on_net_document_remove(const net6::packet& pack)
 {
 	if(pack.get_param_count() < 1) return;
-	if(pack.get_param(0).get_type() != net6::packet::param::STRING) return;
+	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
 
-/*	if(!m_buffer.empty() )
+	unsigned int id = pack.get_param(0).as_int();
+	
+	std::list<document*>::iterator iter;
+	for(iter = m_doclist.begin(); iter != m_doclist.end(); ++ iter)
 	{
-		m_lines.push_back(m_buffer.length() );
-		m_buffer += "\n";
-	}
+		if( (*iter)->get_id() == id)
+		{
+			m_signal_remove_document.emit(**iter);
 
-	m_buffer += pack.get_param(0).as_string();*/
+			delete *iter;
+			m_doclist.erase(iter);
+			break;
+		}
+	}
+}
+
+void obby::client_buffer::on_net_sync_init(const net6::packet& pack)
+{
+	// t0l.
+}
+
+void obby::client_buffer::on_net_sync_doc_init(const net6::packet& pack)
+{
+	if(pack.get_param_count() < 1) return;
+	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
+
+	unsigned int id = pack.get_param(0).as_int();
+
+	client_document& doc = static_cast<client_document&>(add_document(id) );
+	doc.on_net_sync_init(pack);
+}
+
+void obby::client_buffer::on_net_sync_doc_line(const net6::packet& pack)
+{
+	if(pack.get_param_count() < 1) return;
+	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
+
+	unsigned int id = pack.get_param(0).as_int();
+
+	client_document* doc = static_cast<client_document*>(find_document(id));
+	if(doc) doc->on_net_sync_line(pack);
+}
+
+void obby::client_buffer::on_net_sync_doc_final(const net6::packet& pack)
+{
+	if(pack.get_param_count() < 1) return;
+	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
+
+	unsigned int id = pack.get_param(0).as_int();
+
+	client_document* doc = static_cast<client_document*>(find_document(id));
+	if(doc) doc->on_net_sync_final(pack);
 }
 
 void obby::client_buffer::on_net_sync_final(const net6::packet& pack)
@@ -225,5 +288,12 @@ void obby::client_buffer::register_signal_handlers()
 		sigc::mem_fun(*this, &client_buffer::on_data) );
 	m_client->login_failed_event().connect(
 		sigc::mem_fun(*this, &client_buffer::on_login_failed) );
+}
+
+obby::document& obby::client_buffer::add_document(unsigned int id)
+{
+	document* doc = new client_document(id, *m_client);
+	m_doclist.push_back(doc);
+	return *doc;
 }
 
