@@ -185,21 +185,34 @@ void obby::client_buffer::on_net_record(const net6::packet& pack)
 		}
 	}
 
+	if(sync_record && !sync_record->is_valid() )
+		goto end;
+
 	// Apply unsynced changes on new record and the syncing record to move
 	// them to the current position
 	for(iter = m_unsynced.begin(); iter != m_unsynced.end(); ++ iter)
 	{
-		if(sync_record != NULL)
-			(*iter)->apply(*sync_record);
-		(*iter)->apply(*rec);
+		if( (*iter)->is_valid() )
+		{
+			if(sync_record != NULL)
+				(*iter)->apply(*sync_record);
+			(*iter)->apply(*rec);
+		}
 	}
+
+	if(!rec->is_valid() )
+		goto end;
 
 	// Undo the unsynced change that we are syncing
 	if(sync_record)
 	{
+		if(!sync_record->is_valid() )
+			goto end;
+
 		record* undo_record = sync_record->reverse(*this);
 		for(iter = m_unsynced.begin(); iter != m_unsynced.end(); ++iter)
-			undo_record->apply(**iter);
+			if( (*iter)->is_valid() )
+				undo_record->apply(**iter);
 		undo_record->apply(*this);
 		undo_record->emit_buffer_signal(*this);
 		delete undo_record;
@@ -207,13 +220,15 @@ void obby::client_buffer::on_net_record(const net6::packet& pack)
 
 	// Redo synced change
 	for(iter = m_unsynced.begin(); iter != m_unsynced.end(); ++ iter)
-		rec->apply(**iter);
+		if( (*iter)->is_valid() )
+			rec->apply(**iter);
 	rec->apply(*this);
 	rec->emit_buffer_signal(*this);
 
 	// Update revision number
 	m_revision = rec->get_revision();
 
+end:
 	delete rec; // Note that only a copy has been put into history
 	delete sync_record;
 }
