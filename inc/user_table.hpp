@@ -116,19 +116,6 @@ public:
 			);
 		}
 
-		/*iterator& operator--()
-		{
-			base_iterator::operator--();
-			dec_valid();
-			return *this;
-		}
-
-		iterator operator--(int)
-		{
-			iterator temp(*this);
-			operator--();
-			return temp;
-		}*/
 	protected:
 		void inc_valid()
 		{
@@ -142,19 +129,12 @@ public:
 			}
 		}
 
-		/*void dec_valid()
-		{
-			while( (*this != m_map.end()) && (m_inverse ? (
-				((*this)->get_flags() & m_flags) != 0) : (
-				((*this)->get_flags() & m_flags) != m_flags))
-			)
-				base_iterator::operator--();
-		}*/
-
 		const map_type& m_map;
 		user::flags m_inc_flags;
 		user::flags m_exc_flags;
 	};
+
+	typedef sigc::signal<void> signal_deserialised_type;
 
 	user_table();
 	virtual ~user_table();
@@ -246,6 +226,11 @@ public:
 	 */
 	size_type count(user::flags inc_flags,
 	                user::flags exc_flags) const;
+
+	/** @brief Signal that is emitted after the user table has been
+	 * deserialised.
+	 */
+	signal_deserialised_type deserialised_event() const;
 protected:
 	/** Internal function to find a user with the given ID that has to be
 	 * in the user table.
@@ -259,6 +244,8 @@ protected:
 	/** List holding the users.
 	 */
 	user_map m_user_map;
+
+	signal_deserialised_type m_signal_deserialised;
 };
 
 }

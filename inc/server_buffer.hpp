@@ -71,6 +71,13 @@ public:
 
 	/** Opens the server on the given port and resumes the obby session
 	 * stored in the given file.
+	 *
+	 * Note that the session deserialisation is not atomic. So, if an
+	 * error occured while loading the session, the session is partly
+	 * loaded (but the server is closed) and the old session is gone.
+	 *
+	 * Keep an old buffer while trying to open a new one if you would like
+	 * to keep old data on deserialisation error.
 	 */
 	virtual void open(const std::string& session, unsigned int port);
 
@@ -298,6 +305,7 @@ template<typename Document, typename Selector>
 void basic_server_buffer<Document, Selector>::open(const std::string& session,
                                                    unsigned int port)
 {
+	// TODO: Close server when session deserialisation failed
 	if(basic_buffer<Document, Selector>::is_open() )
 	{
 		throw std::logic_error(

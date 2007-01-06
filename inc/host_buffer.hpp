@@ -127,6 +127,11 @@ protected:
 	 */
 	virtual base_net_type* new_net();
 
+	/** @brief Creates the local user after the user table has been
+	 * deserialised.
+	 */
+	void on_user_table_deserialised();
+
 	/** @brief Closes the session.
 	 */
 	virtual void session_close();
@@ -141,6 +146,11 @@ protected:
 
 	const user* m_self;
 private:
+	/** @brief Common initialisation function called by both constructors
+	 * to avoid code duplication.
+	 */
+	void init_impl();
+
 	/** This function provides access to the underlaying net6::basic_host
 	 * object.
 	 */
@@ -163,6 +173,7 @@ basic_host_buffer<Document, Selector>::
 	basic_server_buffer<Document, Selector>(),
 	m_username(username), m_colour(colour), m_self(NULL)
 {
+	init_impl();
 }
 
 template<typename Document, typename Selector>
@@ -176,13 +187,19 @@ basic_host_buffer<Document, Selector>::
 	basic_server_buffer<Document, Selector>(public_key, private_key),
 	m_username(username), m_colour(colour), m_self(NULL)
 {
+	init_impl();
 }
 
 template<typename Document, typename Selector>
 void basic_host_buffer<Document, Selector>::open(unsigned int port)
 {
+	// Must NULL m_self here. If server open fails, the user table will
+	// be cleared without having called on_user_table_deserialised 
+	// and m_self would refer to nothing anymore.
+	m_self = NULL;
 	basic_server_buffer<Document, Selector>::open(port);
-
+	on_user_table_deserialised();
+	/*
 	// Create local user
 	m_self = basic_buffer<Document, Selector>::m_user_table.add_user(
 		basic_buffer<Document, Selector>::m_user_table.find_free_id(),
@@ -191,25 +208,17 @@ void basic_host_buffer<Document, Selector>::open(unsigned int port)
 	);
 
 	basic_buffer<Document, Selector>::m_signal_user_join.emit(*m_self);
+	*/
 }
 
 template<typename Document, typename Selector>
 void basic_host_buffer<Document, Selector>::open(const std::string& session,
                                                  unsigned int port)
 {
+	m_self = NULL; // (same as above)
 	basic_server_buffer<Document, Selector>::open(session, port);
-
-	// Create user
-	// TODO: This MUST be done directly after the user table has been
-	// deserialised so it is available to the documents that are
-	// loaded after the user table.
-	m_self = basic_buffer<Document, Selector>::m_user_table.add_user(
-		basic_buffer<Document, Selector>::m_user_table.find_free_id(),
-		net6_host().get_self(),
-		m_colour
-	);
-
-	basic_buffer<Document, Selector>::m_signal_user_join.emit(*m_self);
+	// on_user_table_deserialised() is called automatically by the user
+	// table after all other users have been loaded
 }
 
 template<typename Document, typename Selector>
@@ -314,6 +323,19 @@ void basic_host_buffer<Document, Selector>::set_colour(const colour& colour)
 }
 
 template<typename Document, typename Selector>
+void basic_host_buffer<Document, Selector>::on_user_table_deserialised()
+{
+	// Create user local user
+	m_self = basic_buffer<Document, Selector>::m_user_table.add_user(
+		basic_buffer<Document, Selector>::m_user_table.find_free_id(),
+		net6_host().get_self(),
+		m_colour
+	);
+
+	basic_buffer<Document, Selector>::m_signal_user_join.emit(*m_self);
+}
+
+template<typename Document, typename Selector>
 void basic_host_buffer<Document, Selector>::session_close()
 {
 	session_close_impl();
@@ -325,6 +347,18 @@ template<typename Document, typename Selector>
 void basic_host_buffer<Document, Selector>::session_close_impl()
 {
 	// Keep self until reopening
+}
+
+template<typename Document, typename Selector>
+void basic_host_buffer<Document, Selector>::init_impl()
+{
+	user_table& table = basic_buffer<Document, Selector>::m_user_table;
+	table.deserialised_event().connect(
+		sigc::mem_fun(
+			*this,
+			&basic_host_buffer::on_user_table_deserialised
+		)
+	);
 }
 
 template<typename Document, typename Selector>

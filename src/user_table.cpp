@@ -77,6 +77,8 @@ void obby::user_table::deserialise(const serialise::object& obj)
 			throw serialise::error(str.str(), iter->get_line() );
 		}
 	}
+
+	m_signal_deserialised.emit();
 }
 
 void obby::user_table::clear()
@@ -250,6 +252,12 @@ obby::user_table::size_type obby::user_table::count(user::flags inc_flags,
 	}
 
 	return c;
+}
+
+obby::user_table::signal_deserialised_type
+obby::user_table::deserialised_event() const
+{
+	return m_signal_deserialised;
 }
 
 obby::user& obby::user_table::lookup(unsigned int id)
