@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -26,30 +26,31 @@
 namespace obby
 {
 
-template<typename selector_type>
+template<typename Document, typename Selector>
 class basic_host_buffer;
 
 /** Information about a document that is provided without being subscribed to
  * a document.
  */
-template<typename selector_type>
-class basic_host_document_info :
-	virtual public basic_local_document_info<obby::document, selector_type>,
-	virtual public basic_server_document_info<selector_type>
+template<typename Document, typename Selector>
+class basic_host_document_info:
+	virtual public basic_local_document_info<Document, Selector>,
+	virtual public basic_server_document_info<Document, Selector>
 {
 public:
-	basic_host_document_info(
-		const basic_host_buffer<selector_type>& buffer,
-		net6::basic_host<selector_type>& net,
-		const user* owner, unsigned int id,
-		const std::string& title, const std::string& content
-	);
+	typedef basic_host_buffer<Document, Selector> buffer_type;
+	typedef typename buffer_type::net_type net_type;
 
-	basic_host_document_info(
-		const basic_host_buffer<selector_type>& buffer,
-		net6::basic_host<selector_type>& net,
-		const serialise::object& obj
-	);
+	basic_host_document_info(const buffer_type& buffer,
+	                         net_type& net,
+	                         const user* owner,
+	                         unsigned int id,
+	                         const std::string& title,
+	                         const std::string& content);
+
+	basic_host_document_info(const buffer_type& buffer,
+	                         net_type& net,
+	                         const serialise::object& obj);
 
 	/** Inserts the given text at the given position into the document.
 	 */
@@ -85,31 +86,47 @@ protected:
 public:
 	/** Returns the buffer to which this document_info belongs.
 	 */
-	const basic_host_buffer<selector_type>& get_buffer() const;
+	const buffer_type& get_buffer() const;
 
 protected:
 	/** Returns the underlaying net6 object.
 	 */
-	net6::basic_host<selector_type>& get_net6();
+	net_type& get_net6();
 
 	/** Returns the underlaying net6 object.
 	 */
-	const net6::basic_host<selector_type>& get_net6() const;
+	const net_type& get_net6() const;
 };
 
-typedef basic_host_document_info<net6::selector> host_document_info;
-
-template<typename selector_type>
-basic_host_document_info<selector_type>::basic_host_document_info(
-	const basic_host_buffer<selector_type>& buffer,
-	net6::basic_host<selector_type>& net,
-	const user* owner, unsigned int id,
-	const std::string& title, const std::string& content
-):
-	basic_document_info<obby::document, selector_type>(buffer, net, owner, id, title),
-	basic_local_document_info<obby::document, selector_type>(buffer, net, owner, id, title),
- 	basic_server_document_info<selector_type>(
-		buffer, net, owner, id, title, content
+template<typename Document, typename Selector>
+basic_host_document_info<Document, Selector>::
+	basic_host_document_info(const buffer_type& buffer,
+	                         net_type& net,
+	                         const user* owner,
+	                         unsigned int id,
+	                         const std::string& title,
+	                         const std::string& content):
+	basic_document_info<Document, Selector>(
+		buffer,
+		net,
+		owner,
+		id,
+		title
+	),
+	basic_local_document_info<Document, Selector>(
+		buffer,
+		net,
+		owner,
+		id,
+		title
+	),
+ 	basic_server_document_info<Document, Selector>(
+		buffer,
+		net,
+		owner,
+		id,
+		title,
+		content
 	)
 {
 	// Server adds owner automagically to jupiter algo. If the local user
@@ -118,70 +135,69 @@ basic_host_document_info<selector_type>::basic_host_document_info(
 	// ctor
 	if(&buffer.get_self() == owner)
 	{
-		basic_server_document_info<selector_type>::
+		basic_server_document_info<Document, Selector>::
 			m_jupiter->client_remove(*owner);
 	}
 }
 
-template<typename selector_type>
-basic_host_document_info<selector_type>::basic_host_document_info(
-	const basic_host_buffer<selector_type>& buffer,
-	net6::basic_host<selector_type>& net,
-	const serialise::object& obj
-):
-	basic_document_info<obby::document, selector_type>(buffer, net, obj),
-	basic_local_document_info<obby::document, selector_type>(buffer, net, obj),
-	basic_server_document_info<selector_type>(buffer, net, obj)
+template<typename Document, typename Selector>
+basic_host_document_info<Document, Selector>::
+	basic_host_document_info(const buffer_type& buffer,
+	                         net_type& net,
+	                         const serialise::object& obj):
+	basic_document_info<Document, Selector>(buffer, net, obj),
+	basic_local_document_info<Document, Selector>(buffer, net, obj),
+	basic_server_document_info<Document, Selector>(buffer, net, obj)
 {
 }
 
-template<typename selector_type>
-void basic_host_document_info<selector_type>::
-	insert(position pos, const std::string& text)
+template<typename Document, typename Selector>
+void basic_host_document_info<Document, Selector>::
+	insert(position pos,
+	       const std::string& text)
 {
 	const user* self = &get_buffer().get_self();
 
-	basic_server_document_info<selector_type>::
+	basic_server_document_info<Document, Selector>::
 		insert_impl(pos, text, self);
 }
 
-template<typename selector_type>
-void basic_host_document_info<selector_type>::
-	erase(position pos, position len)
+template<typename Document, typename Selector>
+void basic_host_document_info<Document, Selector>::
+	erase(position pos,
+	      position len)
 {
-	basic_server_document_info<selector_type>::
+	basic_server_document_info<Document, Selector>::
 		erase_impl(pos, len, &get_buffer().get_self() );
 }
 
-template<typename selector_type>
-void basic_host_document_info<selector_type>::
+template<typename Document, typename Selector>
+void basic_host_document_info<Document, Selector>::
 	rename(const std::string& new_title)
 {
-	basic_server_document_info<selector_type>::
+	basic_server_document_info<Document, Selector>::
 		rename_impl(new_title, &get_buffer().get_self() );
 }
 
-template<typename selector_type>
-void basic_host_document_info<selector_type>::
-	subscribe()
+template<typename Document, typename Selector>
+void basic_host_document_info<Document, Selector>::subscribe()
 {
 	// TODO: Call a base-class method that does not try to sync the document
 	// contents to the user, it is not senseful in our case.
-	basic_server_document_info<selector_type>::
+	basic_server_document_info<Document, Selector>::
 		subscribe_user(get_buffer().get_self() );
 }
 
-template<typename selector_type>
-void basic_host_document_info<selector_type>::
-	unsubscribe()
+template<typename Document, typename Selector>
+void basic_host_document_info<Document, Selector>::unsubscribe()
 {
 	// TODO: Same here
-	basic_server_document_info<selector_type>::
+	basic_server_document_info<Document, Selector>::
 		unsubscribe_user(get_buffer().get_self() );
 }
 
-template<typename selector_type>
-void basic_host_document_info<selector_type>::
+template<typename Document, typename Selector>
+void basic_host_document_info<Document, Selector>::
 	user_subscribe(const user& user)
 {
 	// TODO: Clean this up by a function like add_client_to_jupiter /
@@ -190,55 +206,55 @@ void basic_host_document_info<selector_type>::
 
 	// Do not call server function because it will add the client to
 	// jupiter in any case.
-	basic_document_info<obby::document, selector_type>::user_subscribe(user);
+	basic_document_info<Document, Selector>::user_subscribe(user);
 
 	// Add client to jupiter if it is not the local client
 	if(&user != &get_buffer().get_self() )
 	{
-		basic_server_document_info<selector_type>::
+		basic_server_document_info<Document, Selector>::
 			m_jupiter->client_add(user);
 	}
 }
 
-template<typename selector_type>
-void basic_host_document_info<selector_type>::
+template<typename Document, typename Selector>
+void basic_host_document_info<Document, Selector>::
 	user_unsubscribe(const user& user)
 {
 	// Remove client from jupiter if is is not the local client
 	if(&user != &get_buffer().get_self() )
 	{
-		basic_server_document_info<selector_type>::
+		basic_server_document_info<Document, Selector>::
 			m_jupiter->client_remove(user);
 	}
 
 	// Call base function
-	basic_document_info<obby::document, selector_type>::user_unsubscribe(user);
+	basic_document_info<Document, Selector>::user_unsubscribe(user);
 }
 
-template<typename selector_type>
-const basic_host_buffer<selector_type>&
-basic_host_document_info<selector_type>::get_buffer() const
+template<typename Document, typename Selector>
+const typename basic_host_document_info<Document, Selector>::buffer_type&
+basic_host_document_info<Document, Selector>::get_buffer() const
 {
-	return dynamic_cast<const basic_host_buffer<selector_type>&>(
-		basic_document_info<obby::document, selector_type>::m_buffer
+	return dynamic_cast<const buffer_type&>(
+		basic_server_document_info<Document, Selector>::get_buffer()
 	);
 }
 
-template<typename selector_type>
-net6::basic_host<selector_type>&
-basic_host_document_info<selector_type>::get_net6()
+template<typename Document, typename Selector>
+typename basic_host_document_info<Document, Selector>::net_type&
+basic_host_document_info<Document, Selector>::get_net6()
 {
-	return dynamic_cast<net6::basic_host<selector_type>&>(
-		basic_document_info<obby::document, selector_type>::m_net
+	return dynamic_cast<net_type&>(
+		basic_server_document_info<Document, Selector>::get_net6()
 	);
 }
 
-template<typename selector_type>
-const net6::basic_host<selector_type>&
-basic_host_document_info<selector_type>::get_net6() const
+template<typename Document, typename Selector>
+const typename basic_host_document_info<Document, Selector>::net_type&
+basic_host_document_info<Document, Selector>::get_net6() const
 {
-	return dynamic_cast<const net6::basic_host<selector_type>&>(
-		basic_document_info<obby::document, selector_type>::m_net
+	return dynamic_cast<const net_type&>(
+		basic_server_document_info<Document, Selector>::get_net6()
 	);
 }
 
