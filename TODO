@@ -13,7 +13,6 @@ Normal:
   * Undo/Redo (#39)
   * Exchange version information (#42)
   * Authentication: Basic user authentication for reconnects (#55)
-  * Authentication: Simple global password (#56)
   * Authentication: Database-based authentication using user/password (#57)
   * Authentication: Access control lists (#58)
 
@@ -58,12 +57,6 @@ incompability and drop a corresponding error message.
  * If a user logs in the first time since the host restarted a password 
 specified by the user will be set on the server with which it could 
 authenticate itself after a connection loss.
-
-56: Authentication: Simple global password
-------------------------------------------
-''libobby'' should provide the following mean of authentication:
- * A simple global password is need to login into a server, known to all 
-users of it.
 
 57: Authentication: Database-based authentication using user/password
 ---------------------------------------------------------------------
