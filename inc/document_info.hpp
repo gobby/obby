@@ -126,7 +126,7 @@ public:
 	> user_iterator;
 
 	typedef basic_buffer<document_type, selector_type> buffer_type;
-	typedef net6::basic_object<selector_type> net_type;
+	typedef typename buffer_type::net_type net_type;
 
 	basic_document_info(const buffer_type& buffer,
 	                    net_type& net,
@@ -259,7 +259,7 @@ public:
 	 */
 	const buffer_type& get_buffer() const;
 
-private:
+protected:
 	/** Returns the underlaying net6 object through which requests are
 	 * transmitted.
 	 */

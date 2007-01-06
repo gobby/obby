@@ -51,6 +51,10 @@ public:
 	typedef basic_document_info<document_type, selector_type>
 		document_info_type;
 
+	// Same as above for net type
+	typedef net6::basic_object<selector_type> base_net_type;
+	typedef net6::basic_object<selector_type> net_type;
+
 	// Document list
 	// TODO: Outsource this to document_list<document_info_type> class
 	typedef std::list<document_info_type*> document_list;
@@ -216,7 +220,7 @@ protected:
 
 	/** Net object.
 	 */
-	std::auto_ptr<net6::basic_object<selector_type> > m_net;
+	std::auto_ptr<net_type> m_net;
 
 	/** GMP random number generator.
 	 */

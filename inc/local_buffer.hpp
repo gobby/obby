@@ -38,6 +38,11 @@ public:
 	typedef basic_local_document_info<Document, Selector>
 		document_info_type;
 
+	typedef typename basic_buffer<Document, Selector>::base_net_type
+		base_net_type;
+
+	typedef net6::basic_local<Selector> net_type;
+
 	typedef sigc::signal<void>
 		signal_user_colour_failed_type;
 
@@ -97,7 +102,7 @@ basic_local_buffer<Document, Selector>::document_find(unsigned int owner_id,
                                                       unsigned int id) const
 {
 	return dynamic_cast<document_info_type*>(
-		basic_buffer<Document, Selector>::find_document(owner_id, id)
+		basic_buffer<Document, Selector>::document_find(owner_id, id)
 	);
 }
 

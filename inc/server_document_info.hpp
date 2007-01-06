@@ -154,7 +154,7 @@ public:
 	 */
 	const basic_server_buffer<selector_type>& get_buffer() const;
 
-private:
+protected:
 	/** Returns the underlaying net6 object.
 	 */
 	net6::basic_server<selector_type>& get_net6();

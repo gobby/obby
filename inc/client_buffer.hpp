@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -32,8 +32,9 @@ namespace obby
 
 /** Buffer to establish a connection to a basic_server_buffer.
  */
-template<typename selector_type>
-class basic_client_buffer : virtual public basic_local_buffer<obby::document, selector_type>
+template<typename Document, typename Selector>
+class basic_client_buffer:
+	virtual public basic_local_buffer<Document, Selector>
 {
 public:
 	struct connection_settings {
@@ -43,13 +44,20 @@ public:
 		std::string user_password;
 	};
 
-	typedef net6::basic_client<selector_type> net_type;
+	// Document info
+	typedef typename basic_local_buffer<Document, Selector>::
+		base_document_info_type base_document_info_type;
 
-	typedef typename basic_buffer<obby::document, selector_type>::base_document_info_type
-		base_document_info;
-	typedef basic_client_document_info<selector_type>
-		document_info;
+	typedef basic_client_document_info<Document, Selector>
+		document_info_type;
 
+	// Network
+	typedef typename basic_local_buffer<Document, Selector>::
+		base_net_type base_net_type;
+
+	typedef net6::basic_client<Selector> net_type;
+
+	// Signal
 	typedef net6::default_accumulator<bool, false> login_accumulator;
 
 	typedef sigc::signal<void>
@@ -127,15 +135,15 @@ public:
 	 * signal_document_remove will be emitted if the server
 	 * authorized the deletion.
 	 */
-	virtual void document_remove(base_document_info& doc);
+	virtual void document_remove(base_document_info_type& doc);
 
 	/** Looks for a document with the given ID which belongs to the user
 	 * with the given owner ID. Note that we do not take a real user object
 	 * here because the ID is enough and one might not have a user object
 	 * to the corresponding ID. So a time-consuming lookup is obsolete.
 	 */
-	document_info* document_find(unsigned int owner_id,
-	                             unsigned int id) const;
+	document_info_type* document_find(unsigned int owner_id,
+	                                  unsigned int id) const;
 
 	/** Returns the local user.
 	 */
@@ -202,27 +210,30 @@ protected:
 
         /** Creates a new document info object according to the type of buffer.
 	 */
-	virtual document_info* new_document_info(const user* owner,
-	                                         unsigned int id,
-	                                         const std::string& title);
+	virtual base_document_info_type*
+	new_document_info(const user* owner,
+	                  unsigned int id,
+	                  const std::string& title);
 
         /** Creates a new document info object according to the type of buffer.
 	 */
-	virtual document_info* new_document_info(const user* owner,
-	                                         unsigned int id,
-	                                         const std::string& title,
-	                                         const std::string& content);
+	virtual base_document_info_type*
+	new_document_info(const user* owner,
+	                  unsigned int id,
+	                  const std::string& title,
+	                  const std::string& content);
 
         /** Creates a new document info object according to the type of buffer.
 	 */
-	virtual document_info* new_document_info(const net6::packet& pack);
+	virtual base_document_info_type*
+	new_document_info(const net6::packet& pack);
 
 	/** Creates the underlaying net6 network object corresponding to the
 	 * buffer's type.
 	 * TODO: Make server_buffer's and host_buffer's new_net parameterless
 	 * and call open() appropriately
 	 */
-	virtual net_type* new_net();
+	virtual base_net_type* new_net();
 
 	/** net6 signal handlers.
 	 */
@@ -293,25 +304,31 @@ private:
 	const net_type& net6_client() const;
 };
 
-typedef basic_client_buffer<net6::selector> client_buffer;
+typedef basic_client_buffer<obby::document, net6::selector> client_buffer;
 
-template<typename selector_type>
-basic_client_buffer<selector_type>::basic_client_buffer()
- : basic_local_buffer<obby::document, selector_type>(), m_self(NULL)
+template<typename Document, typename Selector>
+basic_client_buffer<Document, Selector>::basic_client_buffer():
+	basic_local_buffer<Document, Selector>(), m_self(NULL)
 {
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::connect(const std::string& hostname,
-                                                 unsigned int port)
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
+	connect(const std::string& hostname,
+                unsigned int port)
 {
 	if(is_connected() )
-		throw std::logic_error("obby::basic_client_buffer::connect");
+	{
+		throw std::logic_error(
+			"obby::basic_client_buffer::connect:\n"
+			"Connection already established"
+		);
+	}
 
 	// Create connection object
 	// TODO: Make the same with server_buffer
 	// (create object, register signal handlers, open server)
-	basic_buffer<obby::document, selector_type>::m_net.reset(new_net() );
+	basic_buffer<Document, Selector>::m_net.reset(new_net() );
 
 	// Register signal handlers
 	register_signal_handlers();
@@ -326,36 +343,46 @@ void basic_client_buffer<selector_type>::connect(const std::string& hostname,
 	);
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::disconnect()
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::disconnect()
 {
 	if(!is_connected() )
-		throw std::logic_error("obby::basic_client_buffer::disconnect");
+	{
+		throw std::logic_error(
+			"obby::basic_client_buffer::disconnect:\n"
+			"Client is not connected"
+		);
+	}
 
 	// TODO: Keep documents and users until reconnection
-	basic_buffer<obby::document, selector_type>::document_clear();
-	basic_buffer<obby::document, selector_type>::m_user_table.clear();
-	basic_buffer<obby::document, selector_type>::m_net.reset(NULL);
+	basic_buffer<Document, Selector>::document_clear();
+	basic_buffer<Document, Selector>::m_user_table.clear();
+	basic_buffer<Document, Selector>::m_net.reset(NULL);
 	m_self = NULL;
 
 	// Empty passwords
 	m_settings.global_password = m_settings.user_password = "";
 }
 
-template<typename selector_type>
-bool basic_client_buffer<selector_type>::is_connected() const
+template<typename Document, typename Selector>
+bool basic_client_buffer<Document, Selector>::is_connected() const
 {
-	return basic_buffer<obby::document, selector_type>::m_net.get() != NULL;
+	return basic_buffer<Document, Selector>::m_net.get() != NULL;
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
-	login(const std::string& name,
-	      const colour& colour)
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::login(const std::string& name,
+                                                    const colour& colour)
 {
 	// Need public key (which comes with welcome packet) before login
 	if(!m_public)
-		throw std::logic_error("obby::basic_client_buffer::login");
+	{
+		throw std::logic_error(
+			"obby::basic_client_buffer::login:\n"
+			"No public key available - wait for welcome packet "
+			"before calling login"
+		);
+	}
 
 	m_settings.name = name;
 	m_settings.colour = colour;
@@ -363,33 +390,35 @@ void basic_client_buffer<selector_type>::
 	net6_client().login(name);
 }
 
-template<typename selector_type>
-bool basic_client_buffer<selector_type>::is_logged_in() const
+template<typename Document, typename Selector>
+bool basic_client_buffer<Document, Selector>::is_logged_in() const
 {
 	return m_self != NULL;
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
-	document_create(const std::string& title, const std::string& content)
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
+	document_create(const std::string& title,
+	                const std::string& content)
 {
 	// TODO: Special handling if not connected
 	// Choose new ID
 	// TODO: m_doc_counter does not belong into the base class
-	unsigned int id = ++ basic_buffer<obby::document, selector_type>::m_doc_counter;
+	unsigned int id = ++ basic_buffer<Document, Selector>::m_doc_counter;
 	// Create document
-	document_info* info = new_document_info(m_self, id, title, content);
+	base_document_info_type* info =
+		new_document_info(m_self, id, title, content);
 	// Add document to list
-	basic_buffer<obby::document, selector_type>::document_add(*info);
+	basic_buffer<Document, Selector>::document_add(*info);
 	// Tell server
 	net6::packet request_pack("obby_document_create");
 	request_pack << id << title << content;
 	net6_client().send(request_pack);
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
-	document_remove(base_document_info& document)
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
+	document_remove(base_document_info_type& document)
 {
 	// Send remove request
 	net6::packet request_pack("obby_document_remove");
@@ -397,34 +426,44 @@ void basic_client_buffer<selector_type>::
 	net6_client().send(request_pack);
 }
 
-template<typename selector_type>
-typename basic_client_buffer<selector_type>::document_info*
-basic_client_buffer<selector_type>::
-	document_find(unsigned int owner_id, unsigned int id) const
+template<typename Document, typename Selector>
+typename basic_client_buffer<Document, Selector>::document_info_type*
+basic_client_buffer<Document, Selector>::
+	document_find(unsigned int owner_id,
+	              unsigned int id) const
 {
-	return dynamic_cast<document_info*>(
-		basic_buffer<obby::document, selector_type>::document_find(owner_id, id)
+	return dynamic_cast<document_info_type*>(
+		basic_local_buffer<Document, Selector>::document_find(
+			owner_id,
+			id
+		)
 	);
 }
 
-template<typename selector_type>
-const obby::user& basic_client_buffer<selector_type>::get_self() const
+template<typename Document, typename Selector>
+const obby::user& basic_client_buffer<Document, Selector>::get_self() const
 {
 	if(m_self == NULL)
-		throw std::logic_error("obby::basic_client_buffer::get_self");
+	{
+		throw std::logic_error(
+			"obby::basic_client_buffer::get_self:\n"
+			"Client is not logged in"
+		);
+	}
 
 	return *m_self;
 }
 
-template<typename selector_type>
-const std::string& basic_client_buffer<selector_type>::get_name() const
+template<typename Document, typename Selector>
+const std::string& basic_client_buffer<Document, Selector>::get_name() const
 {
+	// TODO: Do we still need this?
 	if(m_self == NULL) return m_settings.name;
-	return basic_local_buffer<obby::document, selector_type>::get_name();
+	return basic_local_buffer<Document, Selector>::get_name();
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
 	send_message(const std::string& message)
 {
 	net6::packet message_pack("obby_message");
@@ -437,8 +476,8 @@ void basic_client_buffer<selector_type>::
 	);*/
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
 	set_password(const std::string& password)
 {
 	net6::packet password_pack("obby_user_password");
@@ -446,67 +485,68 @@ void basic_client_buffer<selector_type>::
 	net6_client().send(password_pack);
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
-	set_colour(const colour& colour)
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::set_colour(const colour& colour)
 {
 	net6::packet colour_pack("obby_user_colour");
 	colour_pack << colour;
 	net6_client().send(colour_pack);
 }
 
-template<typename selector_type>
-typename basic_client_buffer<selector_type>::signal_welcome_type
-basic_client_buffer<selector_type>::welcome_event() const
+template<typename Document, typename Selector>
+typename basic_client_buffer<Document, Selector>::signal_welcome_type
+basic_client_buffer<Document, Selector>::welcome_event() const
 {
 	return m_signal_welcome;
 }
 
-template<typename selector_type>
-typename basic_client_buffer<selector_type>::signal_login_failed_type
-basic_client_buffer<selector_type>::login_failed_event() const
+template<typename Document, typename Selector>
+typename basic_client_buffer<Document, Selector>::signal_login_failed_type
+basic_client_buffer<Document, Selector>::login_failed_event() const
 {
 	return m_signal_login_failed;
 }
 
-template<typename selector_type>
-typename basic_client_buffer<selector_type>::signal_prompt_name_type
-basic_client_buffer<selector_type>::prompt_name_event() const
+template<typename Document, typename Selector>
+typename basic_client_buffer<Document, Selector>::signal_prompt_name_type
+basic_client_buffer<Document, Selector>::prompt_name_event() const
 {
 	return m_signal_prompt_name;
 }
 
-template<typename selector_type>
-typename basic_client_buffer<selector_type>::signal_prompt_colour_type
-basic_client_buffer<selector_type>::prompt_colour_event() const
+template<typename Document, typename Selector>
+typename basic_client_buffer<Document, Selector>::signal_prompt_colour_type
+basic_client_buffer<Document, Selector>::prompt_colour_event() const
 {
 	return m_signal_prompt_colour;
 }
 
-template<typename selector_type>
-typename basic_client_buffer<selector_type>::signal_prompt_global_password_type
-basic_client_buffer<selector_type>::prompt_global_password_event() const
+template<typename Document, typename Selector>
+typename basic_client_buffer<Document, Selector>::
+	signal_prompt_global_password_type
+basic_client_buffer<Document, Selector>::prompt_global_password_event() const
 {
 	return m_signal_prompt_global_password;
 }
 
-template<typename selector_type>
-typename basic_client_buffer<selector_type>::signal_prompt_user_password_type
-basic_client_buffer<selector_type>::prompt_user_password_event() const
+template<typename Document, typename Selector>
+typename basic_client_buffer<Document, Selector>::
+	signal_prompt_user_password_type
+basic_client_buffer<Document, Selector>::prompt_user_password_event() const
 {
 	return m_signal_prompt_user_password;
 }
 
-template<typename selector_type>
-typename basic_client_buffer<selector_type>::signal_close_type
-basic_client_buffer<selector_type>::close_event() const
+template<typename Document, typename Selector>
+typename basic_client_buffer<Document, Selector>::signal_close_type
+basic_client_buffer<Document, Selector>::close_event() const
 {
 	return m_signal_close;
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
-	on_join(const net6::user& user6, const net6::packet& pack)
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::on_join(const net6::user& user6,
+                                                      const net6::packet& pack)
 {
 	unsigned int id =
 		pack.get_param(2).net6::parameter::as<unsigned int>();
@@ -514,35 +554,37 @@ void basic_client_buffer<selector_type>::
 		pack.get_param(3).net6::parameter::as<obby::colour>();
 
 	// Add user
-	const user* new_user = basic_buffer<obby::document, selector_type>::m_user_table.add_user(
-		id, user6, colour
-	);
+	const user* new_user = basic_buffer<Document, Selector>::
+		m_user_table.add_user(id, user6, colour);
 
 	// The first joining user is the local one
 	if(m_self == NULL) m_self = new_user;
 
 	// Forward join message to documents
 	// TODO: Document shall connect to user_join_event
-	for(typename basic_buffer<obby::document, selector_type>::document_iterator doc_iter =
-		basic_buffer<obby::document, selector_type>::document_begin();
-	    doc_iter != basic_buffer<obby::document, selector_type>::document_end();
+	for(typename basic_buffer<Document, Selector>::document_iterator
+		doc_iter = basic_buffer<Document, Selector>::document_begin();
+	    doc_iter != basic_buffer<Document, Selector>::document_end();
 	    ++ doc_iter)
+	{
 		doc_iter->obby_user_join(*new_user);
+	}
 
 	// TODO: Move signal emission to user_table::add_user
-	basic_buffer<obby::document, selector_type>::m_signal_user_join.emit(*new_user);
+	basic_buffer<Document, Selector>::m_signal_user_join.emit(*new_user);
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
-	on_part(const net6::user& user6, const net6::packet& pack)
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::on_part(const net6::user& user6,
+                                                      const net6::packet& pack)
 {
 	// Find user
-	const user* cur_user = basic_buffer<obby::document, selector_type>::m_user_table.find(
-		user6,
-		user::flags::CONNECTED,
-		user::flags::NONE
-	);
+	const user* cur_user =
+		basic_buffer<Document, Selector>::m_user_table.find(
+			user6,
+			user::flags::CONNECTED,
+			user::flags::NONE
+		);
 
 	// Should never happen
 	if(cur_user == NULL)
@@ -554,21 +596,23 @@ void basic_client_buffer<selector_type>::
 
 	// Forward part message to the documents
 	// TODO: Documents should connect to user_part_event
-	for(typename basic_buffer<obby::document, selector_type>::document_iterator doc_iter =
-		basic_buffer<obby::document, selector_type>::document_begin();
-	    doc_iter != basic_buffer<obby::document, selector_type>::document_end();
+	for(typename basic_buffer<Document, Selector>::document_iterator
+		doc_iter = basic_buffer<Document, Selector>::document_begin();
+	    doc_iter != basic_buffer<Document, Selector>::document_end();
 	    ++ doc_iter)
+	{
 		doc_iter->obby_user_part(*cur_user);
+	}
 
 	// TODO: Should be done by user_table::remove_user
-	basic_buffer<obby::document, selector_type>::m_signal_user_part.emit(*cur_user);
+	basic_buffer<Document, Selector>::m_signal_user_part.emit(*cur_user);
 
 	// Remove user
-	basic_buffer<obby::document, selector_type>::m_user_table.remove_user(*cur_user);
+	basic_buffer<Document, Selector>::m_user_table.remove_user(*cur_user);
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::on_close()
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::on_close()
 {
 	// Disconnect
 	disconnect();
@@ -576,8 +620,8 @@ void basic_client_buffer<selector_type>::on_close()
 	m_signal_close.emit();
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::on_data(const net6::packet& pack)
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::on_data(const net6::packet& pack)
 {
 	if(!execute_packet(pack) )
 	{
@@ -587,8 +631,8 @@ void basic_client_buffer<selector_type>::on_data(const net6::packet& pack)
 	}
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
 	on_login_failed(net6::login::error error)
 {
 	if(error == net6::login::ERROR_NAME_IN_USE)
@@ -617,8 +661,9 @@ void basic_client_buffer<selector_type>::
 	}
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::on_login_extend(net6::packet& pack)
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
+	on_login_extend(net6::packet& pack)
 {
 	// Add user colour and, if given, (hashed) passwords.
 	pack << m_settings.colour;
@@ -631,8 +676,8 @@ void basic_client_buffer<selector_type>::on_login_extend(net6::packet& pack)
 	}
 }
 
-template<typename selector_type>
-bool basic_client_buffer<selector_type>::
+template<typename Document, typename Selector>
+bool basic_client_buffer<Document, Selector>::
 	execute_packet(const net6::packet& pack)
 {
 	// TODO: std::map<> from command to function
@@ -672,8 +717,8 @@ bool basic_client_buffer<selector_type>::
 	return false;
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
 	on_net_welcome(const net6::packet& pack)
 {
 	// Get the OBBY version the server is running and compare to the version
@@ -681,7 +726,8 @@ void basic_client_buffer<selector_type>::
 	unsigned long server_version =
 		pack.get_param(0).net6::parameter::as<unsigned long>();
 
-	if(server_version != basic_buffer<obby::document, selector_type>::PROTOCOL_VERSION)
+	if(server_version !=
+	   basic_buffer<Document, Selector>::PROTOCOL_VERSION)
 	{
 		on_login_failed(login::ERROR_PROTOCOL_VERSION_MISMATCH);
 		return;
@@ -709,14 +755,14 @@ void basic_client_buffer<selector_type>::
 	m_signal_welcome.emit();
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
 	on_net_document_create(const net6::packet& pack)
 {
 	// Get owner, id and title
 	const user* owner = pack.get_param(0).net6::parameter::as<const user*>(
 		::serialise::hex_context<const user*>(
-			basic_buffer<obby::document, selector_type>::get_user_table()
+			basic_buffer<Document, Selector>::get_user_table()
 		)
 	);
 
@@ -746,39 +792,42 @@ void basic_client_buffer<selector_type>::
 	}
 
 	// Add new document
-	document_info* info = new_document_info(owner, id, title);
-	basic_buffer<obby::document, selector_type>::document_add(*info);
+	base_document_info_type* info = new_document_info(owner, id, title);
+	basic_buffer<Document, Selector>::document_add(*info);
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
 	on_net_document_remove(const net6::packet& pack)
 {
 	// Get document to remove
-	document_info& doc = dynamic_cast<document_info&>(
-		*pack.get_param(0).net6::parameter::as<base_document_info*>(
-			::serialise::hex_context<base_document_info*>(*this)
-		)
+	document_info_type& doc = dynamic_cast<document_info_type&>(
+		*pack.get_param(0).net6::parameter::as<
+			base_document_info_type*
+		>(::serialise::hex_context<base_document_info_type*>(*this))
 	);
 
 	// Emit unsubscribe singal for users who were subscribed to this doc
 	// TODO: Do this is in document_delete!
-	for(typename document_info::user_iterator user_iter = doc.user_begin();
+	for(typename document_info_type::user_iterator user_iter =
+		doc.user_begin();
 	    user_iter != doc.user_end();
 	    ++ user_iter)
+	{
 		doc.unsubscribe_event().emit(*user_iter);
+	}
 
 	// Delete document
-	basic_buffer<obby::document, selector_type>::document_delete(doc);
+	basic_buffer<Document, Selector>::document_delete(doc);
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
 	on_net_message(const net6::packet& pack)
 {
 	const user* writer = pack.get_param(0).net6::parameter::as<const user*>(
 		::serialise::hex_context<const user*>(
-			basic_buffer<obby::document, selector_type>::get_user_table()
+			basic_buffer<Document, Selector>::get_user_table()
 		)
 	);
 
@@ -789,56 +838,57 @@ void basic_client_buffer<selector_type>::
 	// the server sent the message directly
 	if(writer != NULL)
 	{
-		basic_buffer<obby::document, selector_type>::m_chat.add_user_message(
+		basic_buffer<Document, Selector>::m_chat.add_user_message(
 			message,
 			*writer
 		);
 	}
 	else
 	{
-		basic_buffer<obby::document, selector_type>::m_chat.add_server_message(
+		basic_buffer<Document, Selector>::m_chat.add_server_message(
 			message
 		);
 	}
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
 	on_net_user_colour(const net6::packet& pack)
 {
 	const user* from = pack.get_param(0).net6::parameter::as<const user*>(
 		::serialise::hex_context<const user*>(
-			basic_buffer<obby::document, selector_type>::get_user_table()
+			basic_buffer<Document, Selector>::get_user_table()
 		)
 	);
 
-	basic_buffer<obby::document, selector_type>::m_user_table.set_user_colour(
+	basic_buffer<Document, Selector>::m_user_table.set_user_colour(
 		*from,
 		pack.get_param(1).net6::parameter::as<obby::colour>()
 	);
 
 	// TODO: user::set_colour should emit the signal
-	basic_buffer<obby::document, selector_type>::m_signal_user_colour.emit(*from);
+	basic_buffer<Document, Selector>::m_signal_user_colour.emit(*from);
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
 	on_net_user_colour_failed(const net6::packet& pack)
 {
-	basic_local_buffer<obby::document, selector_type>::m_signal_user_colour_failed.emit();
+	basic_local_buffer<Document, Selector>::
+		m_signal_user_colour_failed.emit();
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
 	on_net_sync_init(const net6::packet& pack)
 {
-	basic_buffer<obby::document, selector_type>::m_signal_sync_init.emit(
+	basic_buffer<Document, Selector>::m_signal_sync_init.emit(
 		pack.get_param(0).net6::parameter::as<unsigned int>()
 	);
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
 	on_net_sync_usertable_user(const net6::packet& pack)
 {
 	// User that was already in the obby session, but isn't anymore.
@@ -852,7 +902,7 @@ void basic_client_buffer<selector_type>::
 		pack.get_param(2).net6::parameter::as<obby::colour>();
 
 	// Add user into user table
-	basic_buffer<obby::document, selector_type>::m_user_table.add_user(
+	basic_buffer<Document, Selector>::m_user_table.add_user(
 		id, name, colour
 	);
 
@@ -860,21 +910,19 @@ void basic_client_buffer<selector_type>::
 	// function call above
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
 	on_net_sync_doclist_document(const net6::packet& pack)
 {
 	// Get data from packet
 	const user* owner = pack.get_param(0).net6::parameter::as<const user*>(
 		::serialise::hex_context<const user*>(
-			basic_buffer<obby::document, selector_type>::get_user_table()
+			basic_buffer<Document, Selector>::get_user_table()
 		)
 	);
 
 	unsigned int id =
 		pack.get_param(1).net6::parameter::as<unsigned int>();
-//	const std::string& title =
-//		pack.get_param(2).net6::basic_parameter::as<std::string>();
 
 	// Get document owner ID
 	unsigned int owner_id = (owner == NULL ? 0 : owner->get_id() );
@@ -888,27 +936,27 @@ void basic_client_buffer<selector_type>::
 	}
 
 	// Create document_info from packet
-	document_info* info = new_document_info(pack);
+	base_document_info_type* info = new_document_info(pack);
 	// Add to buffer
-	basic_buffer<obby::document, selector_type>::document_add(*info);
+	basic_buffer<Document, Selector>::document_add(*info);
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
 	on_net_sync_final(const net6::packet& pack)
 {
-	basic_buffer<obby::document, selector_type>::m_signal_sync_final.emit();
+	basic_buffer<Document, Selector>::m_signal_sync_final.emit();
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
 	on_net_document(const net6::packet& pack)
 {
 	// Get document, forward packet
-	document_info& info = dynamic_cast<document_info&>(
-		*pack.get_param(0).net6::parameter::as<base_document_info*>(
-			::serialise::hex_context<base_document_info*>(*this)
-		)
+	document_info_type& info = dynamic_cast<document_info_type&>(
+		*pack.get_param(0).net6::parameter::as<
+			base_document_info_type*
+		>(::serialise::hex_context<base_document_info_type*>(*this))
 	);
 
 	// TODO: Rename this function. Think about providing a signal that may
@@ -916,8 +964,8 @@ void basic_client_buffer<selector_type>::
 	info.on_net_packet(document_packet(pack) );
 }
 
-template<typename selector_type>
-void basic_client_buffer<selector_type>::register_signal_handlers()
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::register_signal_handlers()
 {
 	net6_client().join_event().connect(
 		sigc::mem_fun(*this, &basic_client_buffer::on_join) );
@@ -933,57 +981,61 @@ void basic_client_buffer<selector_type>::register_signal_handlers()
 		sigc::mem_fun(*this, &basic_client_buffer::on_login_extend) );
 }
 
-template<typename selector_type>
-typename basic_client_buffer<selector_type>::document_info*
-basic_client_buffer<selector_type>::
-	new_document_info(const user* owner, unsigned int id,
+template<typename Document, typename Selector>
+typename basic_client_buffer<Document, Selector>::base_document_info_type*
+basic_client_buffer<Document, Selector>::
+	new_document_info(const user* owner,
+	                  unsigned int id,
 	                  const std::string& title)
 {
 	// Create client_document_info, according to client_buffer
-	return new document_info(*this, net6_client(), owner, id, title);
+	return new document_info_type(*this, net6_client(), owner, id, title);
 }
 
-template<typename selector_type>
-typename basic_client_buffer<selector_type>::document_info*
-basic_client_buffer<selector_type>::
-	new_document_info(const user* owner, unsigned int id,
-	                  const std::string& title, const std::string& content)
+template<typename Document, typename Selector>
+typename basic_client_buffer<Document, Selector>::base_document_info_type*
+basic_client_buffer<Document, Selector>::
+	new_document_info(const user* owner,
+	                  unsigned int id,
+	                  const std::string& title,
+	                  const std::string& content)
 {
-	return new document_info(
+	return new document_info_type(
 		*this, net6_client(), owner, id, title, content
 	);
 }
 
-template<typename selector_type>
-typename basic_client_buffer<selector_type>::document_info*
-basic_client_buffer<selector_type>::new_document_info(const net6::packet& pack)
+template<typename Document, typename Selector>
+typename basic_client_buffer<Document, Selector>::base_document_info_type*
+basic_client_buffer<Document, Selector>::
+	new_document_info(const net6::packet& pack)
 {
-	return new document_info(*this, net6_client(), pack);
+	return new document_info_type(*this, net6_client(), pack);
 }
 
-template<typename selector_type>
-typename basic_client_buffer<selector_type>::net_type*
-basic_client_buffer<selector_type>::new_net()
+template<typename Document, typename Selector>
+typename basic_client_buffer<Document, Selector>::base_net_type*
+basic_client_buffer<Document, Selector>::new_net()
 {
 	// Connect to remote host
 	return new net_type;
 }
 
-template<typename selector_type>
-typename basic_client_buffer<selector_type>::net_type&
-basic_client_buffer<selector_type>::net6_client()
+template<typename Document, typename Selector>
+typename basic_client_buffer<Document, Selector>::net_type&
+basic_client_buffer<Document, Selector>::net6_client()
 {
 	return dynamic_cast<net_type&>(
-		*basic_buffer<obby::document, selector_type>::m_net.get()
+		*basic_buffer<Document, Selector>::m_net.get()
 	);
 }
 
-template<typename selector_type>
-const typename basic_client_buffer<selector_type>::net_type&
-basic_client_buffer<selector_type>::net6_client() const
+template<typename Document, typename Selector>
+const typename basic_client_buffer<Document, Selector>::net_type&
+basic_client_buffer<Document, Selector>::net6_client() const
 {
 	return dynamic_cast<const net_type&>(
-		*basic_buffer<obby::document, selector_type>::m_net.get()
+		*basic_buffer<Document, Selector>::m_net.get()
 	);
 }
 
