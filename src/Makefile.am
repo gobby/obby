@@ -6,7 +6,7 @@ lib_LTLIBRARIES = libobby.la
 #     ^     :     ^    :       ^
 #     |     :   minor  :       |
 # interface :  changes : compatibility
-libobby_la_LDFLAGS = -version-info 0:0:0 -release 0.3
+libobby_la_LDFLAGS = -version-info 0:0:0 -release 0.4
 
 libobby_la_LIBADD = serialise/libserialise.la $(libobby_LIBS) @extra_libraries@
 
