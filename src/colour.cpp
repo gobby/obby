@@ -55,9 +55,9 @@ std::string
 serialise::context<obby::colour>::to_string(const obby::colour& from) const
 {
 	unsigned int val =
-		(from.get_red()   <<  0) |
+		(from.get_red()   << 16) |
 		(from.get_green() <<  8) |
-		(from.get_blue()  << 16);
+		(from.get_blue()  <<  0);
 
 	std::stringstream stream;
 	stream << std::hex << val;
@@ -71,5 +71,5 @@ serialise::context<obby::colour>::from_string(const std::string& string) const
 	std::stringstream stream(string);
 	stream >> std::hex >> val;
 
-	return obby::colour(val & 0xff, (val >> 8) & 0xff, (val >> 16) & 0xff);
+	return obby::colour( (val >> 16) & 0xff, (val >> 8) & 0xff, val & 0xff);
 }
