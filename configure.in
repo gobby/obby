@@ -55,11 +55,11 @@ if test "x$ac_gmp_lib_found" != "xyes" ; then
 ][  ###  GNU multiple precision arithmetic library not found or
 ][  ###  not compiled with C++ support!
 ][  ###
-][  ###  If your GNU multiple precision (MP) libraries are in an unusual
-][  ###  location, specify the directory where they are located with:
-][  ###
-][  ###       --with-gmp=DIR
-][  ###
+#][  ###  If your GNU multiple precision (MP) libraries are in an unusual
+#][  ###  location, specify the directory where they are located with:
+#][  ###
+#][  ###       --with-gmp=DIR
+#][  ###
 ][  ###  If you don't have the GNU MP development files on your system,
 ][  ###  download and install them from the following URL:
 ][  ###
