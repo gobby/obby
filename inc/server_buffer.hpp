@@ -553,6 +553,7 @@ void basic_server_buffer<Document, Selector>::
 	             << token
 	             << m_public.get_n().get_str(36)
 	             << m_public.get_k().get_str(36);
+
 	net6_server().send(welcome_pack, user6);
 
 	// User connected

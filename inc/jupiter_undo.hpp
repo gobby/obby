@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -29,13 +29,16 @@ namespace obby
 {
 
 /** Undo manager for the jupiter class.
+ *
+ * TODO: IMPLEMENT ME!
  */
+template<typename Document>
 class jupiter_undo: private net6::non_copyable
 {
 public:
-	static const unsigned int MAX_UNDO;
+	typedef Document document_type;
 
-	jupiter_undo(const document& doc);
+	jupiter_undo(const document_type& doc);
 	~jupiter_undo();
 
 	/** Adds a new client to the undo manager.
@@ -62,17 +65,54 @@ public:
 	 */
 	std::auto_ptr<operation> undo();
 protected:
-	typedef ring<operation*> operation_ring;
-	//typedef std::map<const user*, operation_ring*> operation_map;
-
-	/** Internal function to transform the complete undo ring against a
-	 * single operation.
-	 */
-	void transform_undo_ring(const operation& op);
-
-	const document& m_doc;
-	operation_ring m_opring;
+	const document_type& m_doc;
 };
+
+template<typename Document>
+jupiter_undo<Document>::jupiter_undo(const document_type& document):
+	m_doc(document)
+{
+}
+
+template<typename Document>
+jupiter_undo<Document>::~jupiter_undo()
+{
+}
+
+template<typename Document>
+void jupiter_undo<Document>::client_add(const user& client)
+{
+}
+
+template<typename Document>
+void jupiter_undo<Document>::client_remove(const user& client)
+{
+}
+
+template<typename Document>
+void jupiter_undo<Document>::local_op(const operation& op, const user* from)
+{
+}
+
+template<typename Document>
+void jupiter_undo<Document>::remote_op(const operation& op, const user* from)
+{
+}
+
+template<typename Document>
+bool jupiter_undo<Document>::can_undo()
+{
+	return false;
+}
+
+template<typename Document>
+std::auto_ptr<operation> jupiter_undo<Document>::undo()
+{
+	throw std::logic_error(
+		"obby::jupiter_undo::undo:\n"
+		"Not implemented!"
+	);
+}
 
 } // namespace obby
 

@@ -42,6 +42,7 @@ class basic_client_document_info:
 public:
 	typedef basic_client_buffer<Document, Selector> buffer_type;
 	typedef typename buffer_type::net_type net_type;
+	typedef jupiter_client<Document> jupiter_type;
 
 	/** Constructor which does not automatically create an underlaying
 	 * document.
@@ -162,7 +163,7 @@ protected:
 	 */
 	virtual void on_jupiter_record(const record& rec, const user* from);
 
-	std::auto_ptr<jupiter_client> m_jupiter;
+	std::auto_ptr<jupiter_type> m_jupiter;
 
 public:
 	/** Returns the buffer to which this document_info belongs.
@@ -472,7 +473,7 @@ void basic_client_document_info<Document, Selector>::
 
 		// Create jupiter algorithm to merge changes
 		m_jupiter.reset(
-			new jupiter_client(
+			new jupiter_type(
 				*basic_document_info<Document, Selector>::
 					m_document
 			)

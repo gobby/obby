@@ -45,6 +45,7 @@ class basic_server_document_info:
 public:
 	typedef basic_server_buffer<Document, Selector> buffer_type;
 	typedef typename buffer_type::net_type net_type;
+	typedef jupiter_server<Document> jupiter_type;
 
 	basic_server_document_info(const buffer_type& buffer,
 	                           net_type& net,
@@ -152,7 +153,7 @@ protected:
 	virtual void on_jupiter_record(const record& rec, const user& user,
 	                               const obby::user* from);
 
-	std::auto_ptr<jupiter_server> m_jupiter;
+	std::auto_ptr<jupiter_type> m_jupiter;
 
 public:
 	/** Returns the buffer to which this document_info belongs.
@@ -186,7 +187,7 @@ basic_server_document_info<Document, Selector>::
 		m_document->insert(0, content, NULL);
 
 	// Create jupiter server implementation
-	m_jupiter.reset(new jupiter_server(
+	m_jupiter.reset(new jupiter_type(
 		*basic_document_info<Document, Selector>::m_document
 	) );
 
@@ -218,7 +219,7 @@ basic_server_document_info<Document, Selector>::
 		m_document->deserialise(obj, buffer.get_user_table() );
 
 	// Create jupiter server implementation
-	m_jupiter.reset(new jupiter_server(
+	m_jupiter.reset(new jupiter_type(
 		*basic_document_info<Document, Selector>::m_document
 	) );
 	// Connect to signals

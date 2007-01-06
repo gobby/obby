@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -18,6 +18,7 @@
 
 #include "jupiter_algorithm.hpp"
 
+#if 0
 obby::jupiter_algorithm::operation_wrapper::
 	operation_wrapper(unsigned int count, const operation& op)
  : m_count(count), m_operation(op.clone() )
@@ -120,7 +121,7 @@ void obby::jupiter_algorithm::discard_operations(const record& rec)
 			// Delete operation
 			delete *iter;
 			// Remove from list
-			iter = m_ack_list.erase(iter);
+			//iter = m_ack_list.erase(iter);
 		}
 		else
 		{
@@ -191,3 +192,4 @@ void obby::jupiter_algorithm::check_preconditions(const record& rec) const
 		);
 	}
 }
+#endif

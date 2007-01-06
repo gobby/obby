@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -18,6 +18,7 @@
 
 #include "jupiter_undo.hpp"
 
+#if 0
 const unsigned int obby::jupiter_undo::MAX_UNDO = 0x7f;
 
 obby::jupiter_undo::jupiter_undo(const obby::document& doc):
@@ -81,3 +82,4 @@ void obby::jupiter_undo::transform_undo_ring(const operation& op)
 		delete old_op;
 	}
 }
+#endif

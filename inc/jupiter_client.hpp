@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -30,16 +30,21 @@ namespace obby
 
 /** Jupiter client implementation.
  */
+template<typename Document>
 class jupiter_client: private net6::non_copyable
 {
 public:
+	typedef Document document_type;
+	typedef jupiter_algorithm<document_type> algorithm_type;
+	typedef jupiter_undo<document_type> undo_type;
+
 	typedef sigc::signal<void, const record&, const user*>
 		signal_record_type;
 
 	/** Creates a new jupiter_client which uses the given document.
 	 * Local and remote changes are applied to this document.
 	 */
-	jupiter_client(document& doc);
+	jupiter_client(document_type& doc);
 
 	/** Adds a new client to the jupiter algorithm.
 	 */
@@ -69,12 +74,65 @@ public:
 	signal_record_type record_event() const;
 
 protected:
-	jupiter_algorithm m_algorithm;
-	jupiter_undo m_undo;
+	algorithm_type m_algorithm;
+	undo_type m_undo;
 
-	document& m_document;
+	document_type& m_document;
 	signal_record_type m_signal_record;
 };
+
+template<typename Document>
+jupiter_client<Document>::jupiter_client(document_type& doc):
+	m_undo(doc), m_document(doc)
+{
+}
+
+template<typename Document>
+void jupiter_client<Document>::client_add(const user& client)
+{
+	m_undo.client_add(client);
+}
+
+template<typename Document>
+void jupiter_client<Document>::client_remove(const user& client)
+{
+	m_undo.client_remove(client);
+}
+
+template<typename Document>
+void jupiter_client<Document>::local_op(const operation& op, const user* from)
+{
+	op.apply(m_document, from);
+	m_undo.local_op(op, from);
+	std::auto_ptr<record> rec(m_algorithm.local_op(op) );
+	m_signal_record.emit(*rec, from);
+}
+
+template<typename Document>
+void jupiter_client<Document>::remote_op(const record& rec, const user* from)
+{
+	std::auto_ptr<operation> op(m_algorithm.remote_op(rec) );
+	op->apply(m_document, from);
+	m_undo.remote_op(*op, from);
+}
+
+template<typename Document>
+void jupiter_client<Document>::undo_op(const user* from)
+{
+	std::auto_ptr<operation> op = m_undo.undo();
+	op->apply(m_document, from);
+	std::auto_ptr<record> rec(m_algorithm.local_op(*op) );
+	m_signal_record.emit(*rec, from);
+}
+
+template<typename Document>
+typename jupiter_client<Document>::signal_record_type
+jupiter_client<Document>::record_event() const
+{
+	return m_signal_record;
+}
+
+
 
 } // namespace obby
 

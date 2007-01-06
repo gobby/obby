@@ -26,6 +26,7 @@ pkginclude_HEADERS += insert_operation.hpp
 pkginclude_HEADERS += delete_operation.hpp
 pkginclude_HEADERS += reversible_insert_operation.hpp
 pkginclude_HEADERS += record.hpp
+pkginclude_HEADERS += jupiter_error.hpp
 pkginclude_HEADERS += jupiter_algorithm.hpp
 pkginclude_HEADERS += jupiter_undo.hpp
 pkginclude_HEADERS += jupiter_client.hpp
