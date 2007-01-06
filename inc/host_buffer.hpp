@@ -335,7 +335,7 @@ template<typename Document, typename Selector>
 typename basic_host_buffer<Document, Selector>::base_net_type*
 basic_host_buffer<Document, Selector>::new_net()
 {
-	return new net_type(m_username);
+	return new net_type(m_username, false);
 }
 
 template<typename Document, typename Selector>
