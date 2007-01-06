@@ -37,7 +37,6 @@ public:
 	~delete_record();
 
 	virtual void apply(buffer& buf);
-	virtual bool is_valid() const;
 
 	virtual void on_insert(const position& pos, const std::string& text);
 	virtual void on_delete(const position& from, const position& to);
