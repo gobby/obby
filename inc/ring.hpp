@@ -380,25 +380,25 @@ bool ring<value_type>::empty() const
 template<typename value_type>
 typename ring<value_type>::const_iterator ring<value_type>::begin() const
 {
-	return const_iterator(*this, m_elems.begin() );
+	return const_iterator(*this, m_begin); //m_elems.begin() );
 }
 
 template<typename value_type>
 typename ring<value_type>::const_iterator ring<value_type>::end() const
 {
-	return const_iterator(*this, m_elems.end() );
+	return const_iterator(*this, m_end); //elems.end() );
 }
 
 template<typename value_type>
 typename ring<value_type>::iterator ring<value_type>::begin()
 {
-	return iterator(*this, m_elems.begin() );
+	return iterator(*this, m_begin); //elems.begin() );
 }
 
 template<typename value_type>
 typename ring<value_type>::iterator ring<value_type>::end()
 {
-	return iterator(*this, m_elems.end() );
+	return iterator(*this, m_end); //elems.end() );
 }
 
 } // namespace obby
