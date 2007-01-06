@@ -100,7 +100,7 @@ namespace
 		// Read to next non-alphanumerical character
 		string_iterator orig = iter ++;
 		for(; iter != src.end(); ++ iter)
-			if(!isalnum(*iter) || *iter != '_')
+			if(!isalnum(*iter) && *iter != '_')
 				break;
 
 		list.add(token::TYPE_IDENTIFIER, std::string(orig, iter), line);
@@ -196,23 +196,22 @@ namespace
 	{
 		unsigned int line = 1;
 		for(string_iterator iter = src.begin();
-		    iter != src.end();
-		    ++ iter)
+		    iter != src.end();)
 		{
+			// Nullbyte identifies end of string
+			if(*iter == '\0')
+				break;
+
 			if(*iter == '\n')
 			{
 				// Line counting
 				++ line;
 
-				// Indentation following?
-				if(isspace(*(iter + 1)) )
-				{
-					// Parse it
-					++ iter;
-					tokenise_indentation(
-						list, src, iter, line
-					);
-				}
+				// Parse it
+				++ iter;
+				tokenise_indentation(
+					list, src, iter, line
+				);
 
 				continue;
 			}
@@ -240,7 +239,10 @@ namespace
 
 			// Ignore whitespace
 			if(isspace(*iter) )
+			{
+				++ iter;
 				continue;
+			}
 
 			// Special character?
 			token::type type = token::TYPE_UNKNOWN;
@@ -257,7 +259,7 @@ namespace
 			if(type == token::TYPE_UNKNOWN)
 			{
 				obby::format_string str(
-					_("Unexpected token: %0%")
+					_("Unexpected token: '%0%'")
 				);
 
 				str << *iter;
@@ -268,6 +270,44 @@ namespace
 
 			// Go on with next character
 			++ iter;
+		}
+	}
+
+	void detokenise(const token_list& list, std::string& target)
+	{
+		bool line_begin = true;
+		std::string escaped_string;
+
+		for(token_list::iterator iter = list.begin();
+		    iter != list.end();
+		    ++ iter)
+		{
+			switch(iter->get_type() )
+			{
+			case token::TYPE_INDENTATION:
+				target.append("\n" + iter->get_text() );
+				line_begin = true;
+				break;
+			case token::TYPE_STRING:
+				escaped_string = iter->get_text();
+				escape(escaped_string);
+
+				target.append("\"");
+				target.append(escaped_string);
+				target.append("\"");
+
+				line_begin = false;
+				break;
+			case token::TYPE_IDENTIFIER:
+				if(!line_begin)
+					target.append(" ");
+				// Fallthrough
+			default:
+				target.append(iter->get_text() );
+				if(iter->get_type() != token::TYPE_EXCLAMATION)
+					line_begin = false;
+				break;
+			}
 		}
 	}
 }
@@ -304,6 +344,7 @@ void obby::serialise::token_list::serialise(
 	std::string& string
 ) const
 {
+	detokenise(*this, string);
 }
 
 void obby::serialise::token_list::deserialise(

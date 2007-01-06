@@ -67,6 +67,7 @@ void obby::serialise::attribute::deserialise(
 		str << m_name;
 		throw error(str.str(), iter->get_line() );
 	}
+	m_value = iter->get_text();
 
 	tokens.next_token(iter);
 }

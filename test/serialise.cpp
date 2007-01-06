@@ -9,9 +9,11 @@ namespace
 		"root\n"
 		" child_1 foo=\"bar\"\n"
 		" child_2 bar=\"foo\"\n"
-		"  child_2_1\n"
+		"  child_2_1 bar=\"foo\" foo=\"bar\"\n"
+		"   child_2_1_1\n"
 		"  child_2_2\n"
-		" child_3";
+		" child_3\n"
+		"  child_3_1";
 }
 
 int main() try

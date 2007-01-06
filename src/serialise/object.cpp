@@ -66,6 +66,9 @@ void obby::serialise::object::serialise(
 	// Find indentation level
 	unsigned int indentation_deep = get_indentation();
 
+	// Add object name
+	tokens.add(token::TYPE_IDENTIFIER, m_name, 0);
+
 	// Add attributes
 	for(attribute_iterator iter = attributes_begin();
 	    iter != attributes_end();
@@ -82,7 +85,7 @@ void obby::serialise::object::serialise(
 		// Indent child to our indentation + 1
 		tokens.add(
 			token::TYPE_INDENTATION,
-			std::string(" ", indentation_deep + 1),
+			std::string(indentation_deep + 1, ' '),
 			0
 		);
 
@@ -103,7 +106,7 @@ void obby::serialise::object::deserialise(
 
 	// Line of object declaration
 	m_line = iter->get_line();
-	tokens.next_token(iter);
+	++ iter;
 
 	// Expect any number of attributes
 	while(iter != tokens.end() &&
