@@ -4,6 +4,12 @@ obby
 Version 0.3.0:
  * This version is *not* protocol, ABI- or API compatible to the 0.2.x series!
  * New merging algorithm (Jupiter)
+ * Session serialisation and restore, containing documents and chat messages
+ * PHP-based script to parse and visualise saved sessions
+ * MSVC8 build environment added
+ * New translations:
+   - Catalan
+   - Swedish
 
 Version 0.2.0:
  * This version is *not* protocol compatible to 0.1.0!
