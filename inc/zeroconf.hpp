@@ -83,11 +83,11 @@ protected:
 	signal_leave_type m_signal_leave;
 
 private:
-	static sw_result handle_publish_reply(sw_discovery discovery,
+	static sw_result HOWL_API handle_publish_reply(sw_discovery discovery,
 			sw_discovery_oid oid,
 			sw_discovery_publish_status status,
 			sw_opaque extra);
-	static sw_result handle_browse_reply(sw_discovery discovery,
+	static sw_result HOWL_API handle_browse_reply(sw_discovery discovery,
 			sw_discovery_oid id,
 			sw_discovery_browse_status status,
 			sw_uint32 interface_index,
@@ -95,7 +95,7 @@ private:
 			sw_const_string type,
 			sw_const_string domain,
 			sw_opaque extra);
-	static sw_result handle_resolve_reply(sw_discovery discovery,
+	static sw_result HOWL_API handle_resolve_reply(sw_discovery discovery,
 			sw_discovery_oid oid,
 			sw_uint32 interface_index,
 			sw_const_string name,
