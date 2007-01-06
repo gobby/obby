@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -16,6 +16,377 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "text.hpp"
+
+namespace
+{
+	const obby::text::size_type CHUNK_INIT =
+		~static_cast<obby::text::size_type>(0);
+}
+
+obby::text::chunk::chunk(const chunk& other):
+	m_text(other.m_text), m_author(other.m_author)
+{
+}
+
+obby::text::chunk::chunk(const string_type& string,
+                         const user* author):
+	m_text(string),
+	m_author(author)
+{
+}
+
+obby::text::chunk::chunk(const net6::packet& pack,
+                         unsigned int& index,
+                         const user_table& table):
+	m_text(pack.get_param(index + 0).as<std::string>() ),
+	m_author(
+		pack.get_param(index + 1).as<const user*>(
+			::serialise::hex_context<const user*>(table)
+		)
+	)
+{
+	index += 2;
+}
+
+obby::text::chunk::chunk(const serialise::object& obj,
+                         const user_table& table):
+	m_text(obj.get_required_attribute("content").as<std::string>() ),
+	m_author(
+		obj.get_required_attribute("author").as<const user*>(
+			::serialise::context<const user*>(table)
+		)
+	)
+{
+}
+
+void obby::text::chunk::serialise(serialise::object& obj)
+{
+	obj.add_attribute("content").set_value(m_text);
+	obj.add_attribute("author").set_value(m_author);
+}
+
+void obby::text::chunk::append_packet(net6::packet& pack)
+{
+	pack << m_text << m_author;
+}
+
+void obby::text::chunk::append(const string_type& text)
+{
+	m_text.append(text);
+}
+
+void obby::text::chunk::insert(size_type pos, const string_type& text)
+{
+	m_text.insert(pos, text);
+}
+
+void obby::text::chunk::erase(size_type pos, size_type len)
+{
+	m_text.erase(pos, len);
+}
+
+const obby::text::string_type& obby::text::chunk::get_text() const
+{
+	return m_text;
+}
+
+const obby::user* obby::text::chunk::get_author() const
+{
+	return m_author;
+}
+
+obby::text::size_type obby::text::chunk::get_length() const
+{
+	return m_text.length();
+}
+
+obby::text::text():
+	m_max_chunk(CHUNK_INIT)
+{
+}
+
+obby::text::text(const text& other):
+	m_max_chunk(other.m_max_chunk)
+{
+	for(list_type::const_iterator iter = other.m_chunks.begin();
+	    iter != other.m_chunks.end();
+	    ++ iter)
+	{
+		m_chunks.push_back(new chunk(**iter) );
+	}
+}
+
+obby::text::text(const string_type& string,
+                 const user* author):
+	m_max_chunk(CHUNK_INIT)
+{
+	m_chunks.push_back(new chunk(string, author) );
+}
+
+obby::text::text(const net6::packet& pack,
+                 unsigned int& index,
+                 const user_table& table):
+	m_max_chunk(CHUNK_INIT)
+{
+	unsigned int count = pack.get_param(index ++).as<unsigned int>();
+	for(unsigned int i = 0; i < count; ++ i)
+		m_chunks.push_back(new chunk(pack, index, table) );
+}
+
+obby::text::text(const serialise::object& obj,
+                 const user_table& table)
+{
+	for(serialise::object::child_iterator iter = obj.children_begin();
+	    iter != obj.children_end();
+	    ++ iter)
+	{
+		if(iter->get_name() == "chunk")
+		{
+			m_chunks.push_back(new chunk(*iter, table) );
+		}
+		else
+		{
+			// TODO: unexpected_child_error
+			format_string str(_("Unexpected child node: '%0%'") );
+			str << iter->get_name();
+			throw serialise::error(str.str(), iter->get_line() );
+		}
+	}
+}
+
+obby::text::~text()
+{
+	clear();
+}
+
+obby::text& obby::text::operator=(const text& other)
+{
+	if(&other == this) return *this;
+
+	clear();
+	m_max_chunk = other.m_max_chunk;
+
+	for(list_type::const_iterator iter = other.m_chunks.begin();
+	    iter != other.m_chunks.end();
+	    ++ iter)
+	{
+		m_chunks.push_back(new chunk(**iter) );
+	}
+
+	return *this;
+}
+
+void obby::text::serialise(serialise::object& obj)
+{
+	for(list_type::iterator it = m_chunks.begin();
+	    it != m_chunks.end();
+	    ++ it)
+	{
+		serialise::object& part = obj.add_child();
+		part.set_name("chunk");
+		(*it)->serialise(part);
+//		part.add_attribute("content").set_value( (*it)->get_text() );
+//		part.add_attribute("author").set_value( (*it)->get_author() );
+	}
+}
+
+void obby::text::append_packet(net6::packet& pack)
+{
+	pack << m_chunks.size();
+	for(list_type::iterator it = m_chunks.begin();
+	    it != m_chunks.end();
+	    ++ it)
+	{
+		(*it)->append_packet(pack);
+	}
+}
+
+void obby::text::clear()
+{
+	for(list_type::iterator it = m_chunks.begin();
+	    it != m_chunks.end();
+	    ++ it)
+	{
+		delete *it;
+	}
+
+	m_chunks.clear();
+}
+
+obby::text obby::text::substr(size_type pos, size_type len)
+{
+	size_type cur_len = 0;
+	chunk* cur_chunk = NULL;
+	text new_text;
+
+	new_text.m_max_chunk = m_max_chunk;
+	for(list_type::iterator it = m_chunks.begin();
+	    it != m_chunks.end();
+	    ++ it)
+	{
+		size_type chunk_len = (*it)->get_length();
+		cur_len += (*it)->get_text().length();
+
+		if(cur_len <= pos)
+			continue;
+
+		// Chunk is part of substr
+		size_type begin = 0;
+		if(cur_len - chunk_len < pos)
+			begin = pos - (cur_len - chunk_len);
+
+		size_type end = chunk_len;
+		if(len != npos && cur_len >= pos + len)
+			end = cur_len - (pos + len);
+
+		// Not necessary since m_max_chunk is copied from *this
+		//if(end - begin > new_text.m_max_chunk)
+		//	end = begin + new_text.m_max_chunk;
+
+		if(cur_chunk != NULL &&
+		   cur_chunk->get_author() == (*it)->get_author() &&
+		   cur_chunk->get_length() < new_text.m_max_chunk)
+		{
+			// Merge with current
+			cur_chunk->append(
+				(*it)->get_text().substr(
+					begin,
+					end - begin
+				)
+			);
+		}
+		else
+		{
+			// No current chunk, make new one
+			cur_chunk = new chunk(
+				(*it)->get_text().substr(begin, end - begin),
+				(*it)->get_author()
+			);
+
+			new_text.m_chunks.push_back(cur_chunk);
+		}
+
+		if(len != npos && cur_len >= pos + len)
+			break;
+	}
+
+	return new_text;
+}
+
+void obby::text::insert(size_type pos,
+                        const string_type& str,
+                        const user* author)
+{
+	// TODO: Optimize to have not to construct a text object here!
+	insert(pos, text(str, author) );
+}
+
+void obby::text::insert(size_type pos,
+                        const text& str)
+{
+	size_type cur_len = 0;
+	list_type::iterator it;
+	for(it = m_chunks.begin(); it != m_chunks.end(); ++ it)
+	{
+		cur_len += (*it)->get_text().length();
+		if(cur_len >= pos)
+			break;
+	}
+
+	chunk* cur_chunk = NULL;
+	list_type::iterator ins_pos = it;
+	size_type chunk_pos = 0;
+
+	if(it == m_chunks.end() )
+	{
+		// Insert first chunk
+		if(pos != 0)
+		{
+			// No appropriate position found
+			throw std::logic_error(
+				"obby::text::insert:\n"
+				"pos exceeds text's size"
+			);
+		}
+	}
+	else
+	{
+		cur_chunk = *it;
+		chunk_pos = pos - (cur_len - (*it)->get_length() );
+		++ ins_pos;
+	}
+
+	for(list_type::const_iterator it = str.m_chunks.begin();
+	    it != str.m_chunks.end();
+	    ++ it)
+	{
+		// No chunk available
+		if(cur_chunk == NULL)
+		{
+			cur_chunk = new chunk(**it);
+			m_chunks.insert(ins_pos, cur_chunk);
+			chunk_pos = (*it)->get_length();
+		}
+		// Merge with previous chunk if possible
+		else if(cur_chunk->get_author() == (*it)->get_author() &&
+		        cur_chunk->get_length() + (*it)->get_length() <=
+			m_max_chunk)
+		{
+			cur_chunk->insert(
+				chunk_pos,
+				(*it)->get_text()
+			);
+
+			chunk_pos += (*it)->get_length();
+		}
+		// Split current chunk if necessary
+		else if(cur_chunk->get_author() != (*it)->get_author() &&
+		        chunk_pos < cur_chunk->get_length() )
+		{
+			chunk* new_chunk = new chunk(
+				cur_chunk->get_text().substr(chunk_pos),
+				cur_chunk->get_author()
+			);
+
+			ins_pos = m_chunks.insert(ins_pos, new_chunk);
+			cur_chunk->erase(chunk_pos);
+
+			cur_chunk = new chunk(**it);
+			m_chunks.insert(ins_pos, cur_chunk);
+			chunk_pos = (*it)->get_length();
+		}
+		else
+		{
+			cur_chunk = new chunk(**it);
+			m_chunks.insert(ins_pos, cur_chunk);
+			chunk_pos = (*it)->get_length();
+		}
+	}
+
+	// Merge ins_pos with cur_chunk if possible
+	if(ins_pos != m_chunks.end() &&
+	   cur_chunk->get_author() == (*ins_pos)->get_author() &&
+	   cur_chunk->get_length() + (*ins_pos)->get_length() < m_max_chunk)
+	{
+		cur_chunk->append( (*ins_pos)->get_text() );
+
+		delete *ins_pos;
+		m_chunks.erase(ins_pos);
+	}
+}
+
+obby::text::chunk_iterator obby::text::chunk_begin() const
+{
+	return chunk_iterator(m_chunks.begin() );
+}
+
+obby::text::chunk_iterator obby::text::chunk_end() const
+{
+	return chunk_iterator(m_chunks.end() );
+}
+
+#if 0
 #include <cassert>
 #include "common.hpp"
 #include "line.hpp"
@@ -347,4 +718,4 @@ void obby::line::compress_authors()
 
 	m_authors.swap(new_vec);
 }
-
+#endif

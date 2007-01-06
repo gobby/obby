@@ -19,7 +19,7 @@
 #ifndef _OBBY_INSERT_OPERATION_HPP_
 #define _OBBY_INSERT_OPERATION_HPP_
 
-#include "line.hpp"
+#include "text.hpp"
 #include "operation.hpp"
 
 namespace obby
@@ -116,15 +116,15 @@ protected:
  * TODO: Rename in reversed_insert_operation
  */
 template<typename Document>
-class reversible_insert_operation: public basic_insert_operation<Document, line>
+class reversible_insert_operation: public basic_insert_operation<Document, text>
 {
 public:
 	typedef operation<Document> operation_type;
-	typedef typename basic_insert_operation<Document, line>::
+	typedef typename basic_insert_operation<Document, text>::
 		base_insert_operation_type base_insert_operation_type;
 
 	typedef typename operation_type::document_type document_type;
-	typedef typename basic_insert_operation<Document, line>::string_type
+	typedef typename basic_insert_operation<Document, text>::string_type
 		string_type;
 
 	reversible_insert_operation(position pos,
@@ -278,7 +278,7 @@ template<typename Document>
 reversible_insert_operation<Document>::
 	reversible_insert_operation(position pos,
 	                            const string_type& text):
-	basic_insert_operation<Document, line>(pos, text)
+	basic_insert_operation<Document, obby::text>(pos, text)
 {
 }
 
@@ -287,9 +287,9 @@ reversible_insert_operation<Document>::
 	reversible_insert_operation(const net6::packet& pack,
 	                            unsigned int& index,
 	                            const user_table& user_table):
-	basic_insert_operation<Document, line>(
+	basic_insert_operation<Document, text>(
 		pack.get_param(index ++).net6::parameter::as<int>(),
-		line(pack, index, user_table)
+		text(pack, index, user_table)
 	)
 {
 }
@@ -299,8 +299,8 @@ void reversible_insert_operation<Document>::apply(document_type& doc,
                                                   const user* author) const
 {
 	doc.insert(
-		basic_insert_operation<Document, line>::m_pos,
-		basic_insert_operation<Document, line>::m_text
+		basic_insert_operation<Document, text>::m_pos,
+		basic_insert_operation<Document, text>::m_text
 	);
 }
 
@@ -308,8 +308,8 @@ template<typename Document>
 void reversible_insert_operation<Document>::
 	append_packet(net6::packet& pack) const
 {
-	pack << "revins" << basic_insert_operation<Document, line>::m_pos;
-	basic_insert_operation<Document, line>::m_text.append_packet(pack);
+	pack << "revins" << basic_insert_operation<Document, text>::m_pos;
+	basic_insert_operation<Document, text>::m_text.append_packet(pack);
 }
 
 template<typename Document>

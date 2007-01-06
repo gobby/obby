@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -16,21 +16,135 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef _OBBY_LINE_HPP_
-#define _OBBY_LINE_HPP_
+#ifndef _OBBY_TEXT_HPP_
+#define _OBBY_TEXT_HPP_
 
 #include <string>
-#include <vector>
+#include <list>
 #include <net6/packet.hpp>
+#include "ptr_iterator.hpp"
 #include "user.hpp"
 
+/** @brief Obby text that stores which user wrote what.
+ */
 namespace obby
 {
 
+class text
+{
+public:
+	typedef std::string string_type;
+	typedef string_type::size_type size_type;
+	static const size_type npos = string_type::npos;
+
+protected:
+	class chunk
+	{
+	public:
+		chunk(const chunk& other);
+		chunk(const string_type& string,
+		      const user* author);
+		chunk(const net6::packet& pack,
+		      unsigned int& index,
+		      const user_table& table);
+		chunk(const serialise::object& obj,
+		      const user_table& table);
+
+		void serialise(serialise::object& obj);
+		void append_packet(net6::packet& pack);
+
+		void append(const string_type& text);
+		void insert(size_type pos, const string_type& text);
+		void erase(size_type pos, size_type len = npos);
+
+		const string_type& get_text() const;
+		size_type get_length() const;
+		const user* get_author() const;
+	protected:
+		string_type m_text;
+		const user* m_author;
+	};
+
+	typedef std::list<chunk*> list_type;
+
+public:
+	// TODO: Cache iterators to serveral points in the text
+	// to optimize insert, erase and other functions
+	typedef ptr_iterator<
+		const chunk,
+		list_type,
+		list_type::const_iterator
+	> chunk_iterator;
+/*	class chunk_iterator
+	{
+	public:
+		chunk_iterator& operator++();
+		chunk_iterator operator++(int);
+
+		const user* get_author() const;
+		const std::string& get_text() const;
+
+		bool operator==(const chunk_iterator& iter);
+		bool operator!=(const chunk_iterator& iter);
+	protected:
+		list_type::iterator m_internal;
+	};*/
+
+	text();
+	text(const text& other);
+	text(const string_type& string,
+	     const user* author);
+	text(const net6::packet& pack,
+	     unsigned int& index,
+	     const user_table& table);
+	text(const serialise::object& obj,
+	     const user_table& table);
+	~text();
+
+	text& operator=(const text& other);
+
+	void serialise(serialise::object& obj);
+	void append_packet(net6::packet& pack);
+
+	void clear();
+
+	text substr(size_type pos,
+	            size_type len = npos);
+	void insert(size_type pos,
+	            const string_type& str,
+	            const user* author);
+	void insert(size_type pos,
+	            const text& str);
+	void erase(size_type pos,
+	           size_type len = npos);
+
+	size_type length() const;
+
+	bool operator==(const text& other);
+	bool operator!=(const text& other);
+	bool operator==(const string_type& other);
+	bool operator!=(const string_type& other);
+	bool operator<(const string_type& other);
+	bool operator>(const string_type& other);
+	bool operator<=(const string_type& other);
+	bool operator>=(const string_type& other);
+
+	chunk_iterator chunk_begin() const;
+	chunk_iterator chunk_end() const;
+
+	void set_max_chunk_size(size_type max_chunk);
+
+	operator const std::string&() const;
+protected:
+	size_type m_max_chunk;
+	list_type m_chunks;
+};
+
+#if 0
 class document;
 
 /** Line in a obby document. It stores the content of the line and which user
- * edited which part of the line.
+ * edited which chunk of the line.
  */
 
 class line
@@ -137,7 +251,7 @@ public:
 	 */
 	void append(const string_type& text, const user_type* author);
 
-	/** Erases parts of the line.
+	/** Erases chunks of the line.
 	 * @param from Position where to erase text.
 	 * @param len Number of characters to erase.
 	 */
@@ -173,8 +287,9 @@ protected:
 	 */
 	std::vector<user_pos> m_authors;
 };
-	
+#endif
+
 }
 
-#endif // _OBBY_LINE_HPP_
+#endif // _OBBY_TEXT_HPP_
 

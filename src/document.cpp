@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -19,6 +19,7 @@
 #include "common.hpp"
 #include "document.hpp"
 
+#if 0
 obby::document::document()
  : m_lines(1, line() )
 {
@@ -297,4 +298,4 @@ obby::position obby::document::position_eob() const
 	return coord_to_position(m_lines.size() - 1,
 	       	m_lines[m_lines.size() - 1].length() );
 }
-
+#endif

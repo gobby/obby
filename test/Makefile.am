@@ -17,7 +17,8 @@ endif
 noinst_PROGRAMS = \
 	ring \
 	rsa \
-	serialise
+	serialise \
+	text
 
 #noinst_PROGRAMS += buffer
 #noinst_PROGRAMS += curses
@@ -30,6 +31,7 @@ noinst_PROGRAMS = \
 ring_SOURCES = ring.cpp
 rsa_SOURCES = rsa.cpp
 serialise_SOURCES = serialise.cpp
+text_SOURCES = text.cpp
 
 if WITH_HOWL
 noinst_PROGRAMS += discover

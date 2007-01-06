@@ -23,11 +23,36 @@
 #include "duplex_signal.hpp"
 #include "user.hpp"
 #include "user_table.hpp"
-#include "line.hpp"
+#include "text.hpp"
 
 namespace obby
 {
 
+class document: private net6::non_copyable
+{
+public:
+	typedef text::chunk_iterator chunk_iterator;
+
+	void clear();
+
+	position size() const;
+
+	std::string get_text() const;
+
+	void insert(position pos,
+	            const text& str);
+
+	void erase(position pos,
+	           position len);
+
+	chunk_iterator chunk_begin() const;
+	chunk_iterator chunk_end() const;
+
+protected:
+	text m_text; // Max chunk size of 1024 or so
+};
+
+#if 0
 /** Contains the content of a document. Note that all positions pointing into
  * the document refer to byte offsets.
  */
@@ -41,17 +66,28 @@ public:
 		sigc::signal<void, position, position, const user*>
 	> signal_delete_type;
 
+	class chunk_iterator
+	{
+	public:
+		chunk_iterator(const document& doc);
+
+		const std::string& text() const;
+		const user* author() const;
+	protected:
+		std::vector<line>::iterator m_iter;
+	};
+
 	document();
 
 	/** Serialises the document into a serialisation object.
 	 */
-	void serialise(serialise::object& obj) const;
+//	void serialise(serialise::object& obj) const;
 
 	/** Deserialises the document.
 	 * TODO: Should be ctor?
 	 */
-	void deserialise(const serialise::object& obj,
-	                 const user_table& user_table);
+/*	void deserialise(const serialise::object& obj,
+	                 const user_table& user_table);*/
 
 	/** Returns the whole content of the document.
 	 */
@@ -70,7 +106,7 @@ public:
 	 * @param text Text to insert.
 	 * @param author User that has written <em>text</em>.
 	 */
-	void insert(position pos, const std::string& text, const user* author);
+	//void insert(position pos, const std::string& text, const user* author);
 
 	/** Inserts a given chunk into the document.
 	 * @param pos Position where to insert <em>text</em>
@@ -88,12 +124,12 @@ public:
 	/** Signal which will be emitted if text has been inserted into the
 	 * document.
 	 */
-	signal_insert_type insert_event() const;
+	//signal_insert_type insert_event() const;
 
 	/** Signal which will be emitted if text has been deleted from the
 	 * document.
 	 */
-	signal_delete_type delete_event() const;
+	//signal_delete_type delete_event() const;
 
 	/** Clears all the lines in the document. Note that a document with no
 	 * lines is invalid and cannot be operated with insert() or erase().
@@ -101,20 +137,20 @@ public:
 	 * function. Note that a call to this function does not emit
 	 * insert or erase signals.
 	 */
-	void clear_lines();
+	//void clear_lines();
 
 	/** Adds a line to the document. Note that a call to this function does
 	 * not emit insert or erase signals.
 	 */
-	void add_line(const line& line);
+	//void add_line(const line& line);
 
 	/** Returns the given line of text.
 	 */
-	const line& get_line(unsigned int index) const;
+	//const line& get_line(unsigned int index) const;
 
 	/** Returns the amount of lines in the buffer.
 	 */
-	unsigned int get_line_count() const;
+	//unsigned int get_line_count() const;
 
 	/** Converts a row/column pair to a obby::position.
 	 */
@@ -128,7 +164,7 @@ public:
 
 	/** Returns an obby::position pointing at the end of the buffer.
 	 */
-	position position_eob() const;
+	//position position_eob() const;
 
 protected:
 	// TODO: Add history
@@ -138,6 +174,7 @@ protected:
 	signal_insert_type m_signal_insert;
 	signal_delete_type m_signal_delete;
 };
+#endif
 
 }
 
