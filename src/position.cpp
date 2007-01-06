@@ -27,6 +27,16 @@ obby::position::position(unsigned int line, unsigned int col)
 {
 }
 
+obby::position::position(const std::string& str)
+ : m_line(1)
+{
+	std::string::size_type cur = 0, prev = 0;
+	while((cur = str.find('\n', cur)) != std::string::npos)
+		{ prev = ++cur; ++ m_line; }
+
+	m_col = str.length() - prev;	
+}
+
 obby::position::position(const position& other)
  : m_line(other.m_line), m_col(other.m_col)
 {

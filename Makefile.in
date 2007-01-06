@@ -67,7 +67,7 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgconfigdir)" \
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libobby_la_LIBADD =
-am_libobby_la_OBJECTS = position.lo record.lo
+am_libobby_la_OBJECTS = position.lo record.lo insert_record.lo
 libobby_la_OBJECTS = $(am_libobby_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/inc
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -214,7 +214,8 @@ pkginclude_HEADERS = \
 
 libobby_la_SOURCES = \
 	src/position.cpp \
-	src/record.cpp
+	src/record.cpp \
+	src/insert_record.cpp
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = lobby-1.0.pc
@@ -310,6 +311,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/insert_record.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/position.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/record.Plo@am__quote@
 
@@ -347,6 +349,13 @@ record.lo: src/record.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/record.cpp' object='record.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o record.lo `test -f 'src/record.cpp' || echo '$(srcdir)/'`src/record.cpp
+
+insert_record.lo: src/insert_record.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT insert_record.lo -MD -MP -MF "$(DEPDIR)/insert_record.Tpo" -c -o insert_record.lo `test -f 'src/insert_record.cpp' || echo '$(srcdir)/'`src/insert_record.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/insert_record.Tpo" "$(DEPDIR)/insert_record.Plo"; else rm -f "$(DEPDIR)/insert_record.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='src/insert_record.cpp' object='insert_record.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o insert_record.lo `test -f 'src/insert_record.cpp' || echo '$(srcdir)/'`src/insert_record.cpp
 
 mostlyclean-libtool:
 	-rm -f *.lo

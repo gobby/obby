@@ -19,14 +19,17 @@
 #ifndef _OBBY_POSITION_HPP_
 #define _OBBY_POSITION_HPP_
 
+#include <string>
+
 namespace obby
 {
-
+	
 class position
 {
 public:
 	position();
 	position(unsigned int line, unsigned int col);
+	position(const std::string& str); // Create position at end of string
 	position(const position& other);
 	~position();
 	

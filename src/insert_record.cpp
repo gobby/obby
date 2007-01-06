@@ -17,6 +17,7 @@
  */
 
 #include "insert_record.hpp"
+#include "buffer.hpp"
 
 namespace
 {
@@ -84,7 +85,7 @@ void obby::insert_record::on_delete(const position& from, const position& to)
 				from.get_col() - to.get_col()
 			);
 		else
-			m_pos.move_move_by(from.get_line() - to.get_line(), 0);
+			m_pos.move_by(from.get_line() - to.get_line(), 0);
 	}
 	else if(m_pos >= from && m_pos < to)
 	{
