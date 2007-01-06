@@ -32,14 +32,18 @@ public:
 	rendezvous();
 	~rendezvous();
 
-	/** Publishes a record to the local rendezvous community */
-	void publish(const std::string& name,
-		     const std::string& type,
-		     const std::string& domain,
-		     unsigned int port);
-	
-	void discover(const std::string& type,
-		      const std::string& domain);
+	/** Publishes a record to other users of this library within the
+	 * default domain (.local). It uses the service identifier
+	 * _lobby._tcp. <em>name</em> is the value which should be displayed
+	 * when other users are discovering this record. */
+	void publish(const std::string& name, unsigned int port);
+
+	/** Discovers other users in the local network within the default
+	 * domain (.local). It searches for participants with the service
+	 * identifier set to _lobby._tcp. It emits a signal when a new user
+	 * is found, handing over the name, the ip and the port of the
+	 * participant. */
+	void discover();
 	
 protected:
 	sw_discovery m_session;

@@ -29,16 +29,18 @@ obby::rendezvous::rendezvous()
 
 obby::rendezvous::~rendezvous()
 {
+	sw_discovery_fina(m_session);
 }
 
-void obby::rendezvous::publish(const std::string& name, const std::string& type,
-	const std::string& domain, unsigned int port)
+void obby::rendezvous::publish(const std::string& name, unsigned int port)
 {
 	sw_discovery_oid oid;
 	sw_result result;
 
+	/* This publishes a record for other users of this library within the
+	 * default domain (.local) */
 	if((result = sw_discovery_publish(m_session, 0, name.c_str(),
-		type.c_str(), domain.c_str(), NULL, port, NULL, 0,
+		"_lobby._tcp.", NULL, NULL, port, NULL, 0,
 	       	&rendezvous::handle_publish_reply,
 		static_cast<sw_opaque>(this), &oid)) != SW_OKAY)
 	{
@@ -48,8 +50,7 @@ void obby::rendezvous::publish(const std::string& name, const std::string& type,
 	}
 }
 
-void obby::rendezvous::discover(const std::string& type,
-	const std::string& domain)
+void obby::rendezvous::discover()
 {
 }
 
