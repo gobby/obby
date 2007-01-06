@@ -54,6 +54,13 @@ TIMESTAMP=" (1.1220.2.246 2005/05/16 10:00:18)"
 if test -n "${ZSH_VERSION+set}" ; then
   setopt NO_GLOB_SUBST
 fi
+# Same for EGREP, and just to be sure, do LTCC as well
+if test "X$EGREP" = X ; then
+    EGREP=egrep
+fi
+if test "X$LTCC" = X ; then
+    LTCC=${CC-gcc}
+fi
 
 # Check that we have a working $echo.
 if test "X$1" = X--no-reexec; then
@@ -5299,6 +5306,9 @@ fi\
 		if test -z "$libdir"; then
 		  $echo "$modename: \`$deplib' is not a valid libtool archive" 1>&2
 		  exit $EXIT_FAILURE
+		fi
+		if test "X$EGREP" = X ; then
+			EGREP=egrep
 		fi
 		# We do not want portage's install root ($D) present.  Check only for
 		# this if the .la is being installed.
