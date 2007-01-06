@@ -22,7 +22,6 @@
 #include <set>
 #include <list>
 
-#include <gmpxx.h>
 #include <net6/main.hpp>
 #include <net6/object.hpp>
 
@@ -258,8 +257,6 @@ protected:
 	net6::main m_netkit;
 	std::auto_ptr<net_type> m_net;
 
-	gmp_randclass m_rclass;
-
 	user_table m_user_table;
 	chat m_chat;
 
@@ -277,14 +274,11 @@ const unsigned long basic_buffer<Document, Selector>::PROTOCOL_VERSION = 8ul;
 
 template<typename Document, typename Selector>
 basic_buffer<Document, Selector>::basic_buffer():
-	m_rclass(GMP_RAND_ALG_LC, 16), m_chat(*this, 0xff),
+	m_chat(*this, 0xff),
 	m_doc_counter(0), m_package(obby_package(), obby_localedir())
 {
 	// Initialize gettext
 	init_gettext(m_package);
-
-	// Seed random number generator with system time
-	m_rclass.seed(std::time(NULL) );
 }
 
 template<typename Document, typename Selector>

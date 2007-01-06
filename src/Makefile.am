@@ -27,7 +27,6 @@ libobby_la_SOURCES += duplex_signal.cpp
 libobby_la_SOURCES += ring.cpp
 libobby_la_SOURCES += ptr_iterator.cpp
 libobby_la_SOURCES += vector_time.cpp
-libobby_la_SOURCES += sha1.cpp
 libobby_la_SOURCES += colour.cpp
 libobby_la_SOURCES += user.cpp
 libobby_la_SOURCES += user_table.cpp

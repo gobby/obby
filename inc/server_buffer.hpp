@@ -23,7 +23,6 @@
 #include "serialise/parser.hpp"
 #include "common.hpp"
 #include "error.hpp"
-#include "sha1.hpp"
 #include "command.hpp"
 #include "buffer.hpp"
 #include "server_document_info.hpp"
@@ -223,12 +222,6 @@ protected:
 	 * a base function.
 	 */
 	void session_close_impl();
-
-	/** This map temporarily caches all tokens issued to the various
-	 * clients, they get removed as soon as they are copied into the
-	 * corresponding user object.
-	 */
-	std::map<const net6::user*, std::string> m_tokens;
 
 	/** Global session password. Only people who know this password are
 	 * allowed to join the session.
@@ -577,20 +570,9 @@ template<typename Document, typename Selector>
 void basic_server_buffer<Document, Selector>::
 	on_connect(const net6::user& user6)
 {
-	// Create random token for this connection
-	mpz_class toknum = basic_buffer<Document, Selector>::
-		m_rclass.get_z_bits(48);
-	std::string token = toknum.get_str(36);
-
-	// Add the token for this user into the token map until a obby::user
-	// object exists. The token is required for the login process
-	// (password authentication and such) when there is no obby::user.
-	m_tokens[&user6] = token;
-
-	// Send token and the server's public key with the welcome packet
+	// Send our protocol version.
 	net6::packet welcome_pack("obby_welcome");
-	welcome_pack << basic_buffer<Document, Selector>::PROTOCOL_VERSION
-	             << token;
+	welcome_pack << basic_buffer<Document, Selector>::PROTOCOL_VERSION;
 
 	net6_server().send(welcome_pack, user6);
 
@@ -756,25 +738,10 @@ bool basic_server_buffer<Document, Selector>::
 		return false;
 	}
 
-	// Get token for this client
-	std::map<const net6::user*, std::string>::iterator token_iter =
-		m_tokens.find(&user6);
-
-	// Should not happen
-	if(token_iter == m_tokens.end() )
-	{
-		format_string str("No token available for user %0%");
-		str << user6.get_id();
-		throw net6::bad_value(str.str() );
-	}
-
-	// Get token from iterator
-	const std::string& token = token_iter->second;
-
 	// Check global password
 	if(!m_global_password.empty() )
 	{
-		if(global_password != SHA1::hash(token + m_global_password) )
+		if(global_password != m_global_password)
 		{
 			error = login::ERROR_WRONG_GLOBAL_PASSWORD;
 			return false;
@@ -792,7 +759,7 @@ bool basic_server_buffer<Document, Selector>::
 	// Compare user password
 	if(user && !user->get_password().empty() )
 	{
-		if(user_password != SHA1::hash(token + user->get_password()) )
+		if(user_password != user->get_password() )
 		{
 			error = login::ERROR_WRONG_USER_PASSWORD;
 			return false;
@@ -822,27 +789,6 @@ void basic_server_buffer<Document, Selector>::
 		basic_buffer<Document, Selector>::m_user_table.add_user(
 			user_id, user6, colour
 		);
-
-	// Remove token from temporary token list because token can now be
-	// stored in the user object.
-	std::map<const net6::user*, std::string>::iterator token_iter =
-		m_tokens.find(&user6);
-
-	// Should not happen
-	if(token_iter == m_tokens.end() )
-	{
-		format_string str("No token available for user %0%");
-		str << user6.get_id();
-		throw net6::bad_value(str.str() );
-	}
-
-	// Store token in user, remove from list
-	basic_buffer<Document, Selector>::m_user_table.set_user_token(
-		*new_user,
-		token_iter->second
-	);
-
-	m_tokens.erase(token_iter);
 
 	// Send initial sync packet; this is here in on_login() for it to
 	// happen before net6 syncs its users.

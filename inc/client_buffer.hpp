@@ -22,7 +22,6 @@
 #include <net6/default_accumulator.hpp>
 #include <net6/client.hpp>
 #include "error.hpp"
-#include "sha1.hpp"
 #include "command.hpp"
 #include "local_buffer.hpp"
 #include "client_document_info.hpp"
@@ -307,8 +306,6 @@ protected:
 	void session_close_impl();
 
 	const user* m_self;
-
-	std::string m_token;
 
 	connection_settings m_settings;
 
@@ -754,9 +751,9 @@ void basic_client_buffer<Document, Selector>::
 	if(!m_settings.global_password.empty() ||
 	   !m_settings.user_password.empty() )
 	{
-		pack << SHA1::hash(m_token + m_settings.global_password);
+		pack << m_settings.global_password;
 		if(!m_settings.user_password.empty() )
-			pack << SHA1::hash(m_token + m_settings.user_password);
+			pack << m_settings.user_password;
 	}
 }
 
@@ -822,11 +819,6 @@ void basic_client_buffer<Document, Selector>::
 		on_login_failed(login::ERROR_PROTOCOL_VERSION_MISMATCH);
 		return;
 	}
-
-	// This token is prepended to every hashed password that is sent over
-	// the line. Because every client has its individual token, it is
-	// not possible to take one's password hash and send it to the server.
-	m_token = pack.get_param(1).net6::parameter::as<std::string>();
 
 	// Emit welcome signal to indicate that the user may now perform a
 	// login() call.
