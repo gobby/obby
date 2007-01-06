@@ -631,11 +631,15 @@ bool basic_server_buffer<selector_type>::
 	colour colour =
 		pack.get_param(1).net6::parameter::as<obby::colour>();
 
-	// Get global and user password
-	const std::string global_password =
-		pack.get_param(2).net6::parameter::as<std::string>();
-	const std::string user_password =
-		pack.get_param(3).net6::parameter::as<std::string>();
+	// Get global and user password, if given
+	std::string global_password, user_password;
+	if(pack.get_param_count() > 2)
+		global_password =
+			pack.get_param(2).net6::parameter::as<std::string>();
+
+	if(pack.get_param_count() > 3)
+		user_password =
+			pack.get_param(3).net6::parameter::as<std::string>();
 
 	// Check colour
 	if(!basic_buffer<selector_type>::check_colour(colour) )
