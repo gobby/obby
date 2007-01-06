@@ -45,6 +45,16 @@ const obby::document& obby::buffer::document_iterator::operator*() const
 	return *base_iterator::operator*();
 }
 
+obby::document* obby::buffer::document_iterator::operator->()
+{
+	return *base_iterator::operator->();
+}
+
+const obby::document* obby::buffer::document_iterator::operator->() const
+{
+	return *base_iterator::operator->();
+}
+
 obby::buffer::buffer()
 {
 }

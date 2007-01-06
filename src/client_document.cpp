@@ -45,7 +45,7 @@ void obby::client_document::insert(position pos, const std::string& text)
 
 void obby::client_document::erase(position from, position to)
 {
-	std::string text = m_buffer.substr(from, to - from);
+	std::string text = get_sub_buffer(from, to);
 	// Delete from buffer
 	erase_nosync(from, to);
 	// Add to unsynced changes
@@ -143,6 +143,8 @@ void obby::client_document::on_net_sync_init(const net6::packet& pack)
 
 	m_id = pack.get_param(0).as_int();
 	m_revision = pack.get_param(1).as_int();
+
+	m_lines.clear();
 }
 
 void obby::client_document::on_net_sync_line(const net6::packet& pack)
@@ -151,13 +153,7 @@ void obby::client_document::on_net_sync_line(const net6::packet& pack)
 	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
 	if(pack.get_param(1).get_type() != net6::packet::param::STRING) return;
 
-	if(!m_lines.empty() )
-	{
-		m_lines.push_back(m_buffer.length() );
-		m_buffer += "\n";
-	}
-
-	m_buffer += pack.get_param(1).as_string();
+	m_lines.push_back(pack.get_param(1).as_string() );
 }
 
 void obby::client_document::on_net_sync_final(const net6::packet& pack)

@@ -50,7 +50,7 @@ public:
 
 	/** Returns the whole content of the document.
 	 */
-	const std::string& get_whole_buffer() const;
+	std::string get_whole_buffer() const;
 
 	/** Returns a part of the document's contents.
 	 */
@@ -92,17 +92,16 @@ public:
 	/** Returns the amount of lines in the buffer.
 	 */
 	unsigned int get_line_count() const;
-	unsigned int get_line_position(unsigned int line) const
-		{ return m_lines[line]; }
 
-	/** Converts a x/y coordinate (column and row) into an obby::position
+	/** Converts a row/column pair to a obby::position.
 	 */
-	position coord_to_position(unsigned int x, unsigned int y) const;
+	position coord_to_position(unsigned int row, unsigned int col) const;
 
-	/** Convert an obby::position to a x/y coordinate (column and row)
+	/** Convert an obby::position to a row/column pair.
 	 */
-	void position_to_coord(position pos, unsigned int& x,
-	                       unsigned int& y) const;
+	void position_to_coord(position pos,
+	                       unsigned int& row,
+	                       unsigned int& col) const;
 
 	/** Called by the buffer if another user changed anything.
 	 */
@@ -113,8 +112,7 @@ protected:
 	std::list<record*> m_history;
 	unsigned int m_revision;
 
-	std::string m_buffer;
-	std::vector<position> m_lines;
+	std::vector<std::string> m_lines;
 
 	signal_insert_type m_signal_insert;
 	signal_delete_type m_signal_delete;

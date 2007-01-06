@@ -70,28 +70,28 @@ unsigned int screen::get_cursor() const
 unsigned int screen::get_cursor_x() const
 {
 	unsigned int cursor_x, cursor_y;
-	m_document.position_to_coord(m_cursor, cursor_x, cursor_y);
+	m_document.position_to_coord(m_cursor, cursor_y, cursor_x);
 	return cursor_x;
 }
 
 unsigned int screen::get_cursor_y() const
 {
 	unsigned int cursor_x, cursor_y;
-	m_document.position_to_coord(m_cursor, cursor_x, cursor_y);
+	m_document.position_to_coord(m_cursor, cursor_y, cursor_x);
 	return cursor_y;
 }
 
 void screen::set_cursor(unsigned int x, unsigned int y)
 {
 	unsigned int cursor_x, cursor_y;
-	m_document.position_to_coord(m_cursor, cursor_x, cursor_y);
+	m_document.position_to_coord(m_cursor, cursor_y, cursor_x);
 	move_cursor(x - cursor_x, y - cursor_y, false);
 }
 
 void screen::move_cursor(int by_x, int by_y, bool priority_x)
 {
 	unsigned int cx, cy;
-	m_document.position_to_coord(m_cursor, cx, cy);
+	m_document.position_to_coord(m_cursor, cy, cx);
 	int cursor_x = static_cast<int>(cx) + by_x;
 	int cursor_y = static_cast<int>(cy) + by_y;
 
@@ -139,7 +139,7 @@ void screen::move_cursor(int by_x, int by_y, bool priority_x)
 		}
 	}
 
-	m_cursor = m_document.coord_to_position(cursor_x, cursor_y);
+	m_cursor = m_document.coord_to_position(cursor_y, cursor_x);
 	scroll_to_cursor();
 	redraw();
 }
@@ -186,7 +186,7 @@ void screen::redraw()
 	}
 
 	unsigned int cursor_x, cursor_y;
-	m_document.position_to_coord(m_cursor, cursor_x, cursor_y);
+	m_document.position_to_coord(m_cursor, cursor_y, cursor_x);
 	int cx = cursor_x, cy = cursor_y;
 	cx -= m_scroll_x, cy -= m_scroll_y;
 
@@ -197,7 +197,7 @@ void screen::redraw()
 void screen::scroll_to_cursor()
 {
 	unsigned int cursor_x, cursor_y;
-	m_document.position_to_coord(m_cursor, cursor_x, cursor_y);
+	m_document.position_to_coord(m_cursor, cursor_y, cursor_x);
 
 	if(m_scroll_x + COLS <= cursor_x)
 		m_scroll_x = cursor_x - COLS + 1;
