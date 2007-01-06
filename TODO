@@ -11,7 +11,6 @@ Normal:
   * Hide equivalent insert / change calls (#28)
   * Implement records to (un)indent lines of text (#30)
   * Undo/Redo (#39)
-  * Exchange version information (#42)
   * Authentication: Database-based authentication using user/password (#57)
   * Authentication: Access control lists (#58)
 
@@ -43,12 +42,6 @@ repository.''
 The current undo/redo implementation is taken directly from GtkSourceView. 
 This is not good because text that other people have written may be undone. 
 We need a proper undo/redo handling in libobby.
-
-42: Exchange version information
---------------------------------
-The client should send it's version of libobby when sending the login 
-packet. The server may compare the versions and detect protocol 
-incompability and drop a corresponding error message.
 
 57: Authentication: Database-based authentication using user/password
 ---------------------------------------------------------------------
