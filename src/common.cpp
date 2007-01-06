@@ -19,8 +19,15 @@
 #include "common.hpp"
 #include "config.hpp"
 
-const char* libobby_version()
+const char* obby_version()
 {
 	return PACKAGE_VERSION;
 }
+
+#ifdef WITH_HOWL
+/* This is an entry point for which external scripts could check. */
+void obby_has_howl()
+{
+}
+#endif
 

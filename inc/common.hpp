@@ -21,7 +21,7 @@
 
 extern "C" {
 
-const char* libobby_version();
+const char* obby_version();
 
 }
 

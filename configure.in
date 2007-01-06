@@ -31,6 +31,7 @@ AC_ARG_WITH([howl],
 AC_CACHE_CHECK([whether to use howl], [ac_cv_use_howl], [ac_cv_use_howl=no])
 if test "x$ac_cv_use_howl" != "xno" ; then
 	extra_requires="howl"
+	AC_DEFINE([WITH_HOWL], 1, [Define whether to use howl.])
 fi
 AC_SUBST(extra_requires)
 AM_CONDITIONAL(WITH_HOWL, test x$ac_cv_use_howl != xno)
