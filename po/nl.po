@@ -1,172 +1,159 @@
-# Swedish translation for obby
-# Copyright (c) (c) 2005 Canonical Ltd, and Rosetta Contributors 2005
+# Dutch translation for obby
+# Copyright (c) (c) 2006 Canonical Ltd, and Rosetta Contributors 2006
 # This file is distributed under the same license as the obby package.
-# Daniel Nylander <po@danielnylander.se>, 2005.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2006.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: obby 0.3.0\n"
+"Project-Id-Version: obby\n"
 "Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
 "POT-Creation-Date: 2006-08-17 14:17+0200\n"
-"PO-Revision-Date: 2006-04-03 13:45+0000\n"
-"Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
-"Language-Team: Swedish <sv@li.org>\n"
+"PO-Revision-Date: 2006-06-29 17:23+0000\n"
+"Last-Translator: Rik van achterberg <rik@vanachterberg.com>\n"
+"Language-Team: Dutch <nl@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Rosetta-Version: 0.1\n"
 
 #: inc/server_buffer.hpp:279
 msgid "Sends an action to the chat."
-msgstr ""
+msgstr "Verstuurt een actie naar de chat."
 
 #: inc/server_buffer.hpp:338
 msgid "File is not an obby document"
-msgstr "Filen är inte ett obby-dokument"
+msgstr "Bestand is geen obby-document"
 
 #: inc/server_buffer.hpp:345
 msgid "File is not a stored obby session"
-msgstr "Filen är inte en sparad obby-session"
+msgstr "Bestand is geen opgeslagen obby-sessie"
 
 #: inc/server_buffer.hpp:388 src/user_table.cpp:75 src/chat.cpp:251
 #: src/text.cpp:188
 #, c-format
 msgid "Unexpected child node: '%0%'"
-msgstr "Oväntad barn-nod: '%0%'"
+msgstr "Onverwachte dochternode: '%0%'"
 
 #: inc/serialise/attribute.hpp:127
 #, c-format
 msgid "Attribute '%0%' has unexpected type: %1%"
-msgstr "Attribut'%0%' har en oväntad typ: %1%"
+msgstr "Attribuut '%0%' heeft onverwacht type: %1%"
 
 #: src/error.cpp:39
 msgid "Colour is already in use"
-msgstr "Färgen används redan"
+msgstr "Kleur is al in gebruik"
 
 #: src/error.cpp:41
 msgid "Wrong session password"
-msgstr "Fel sessionslösenord"
+msgstr "Onjuist sessiewachtwoord"
 
 #: src/error.cpp:43
 msgid "Wrong user password"
-msgstr "Fel användarlösenord"
+msgstr "Onjuist gebruikerswachtwoord"
 
 #: src/error.cpp:45
 msgid "Protocol version mismatch"
-msgstr "Protokollversionen stämmer inte"
+msgstr "Protocolversie komt niet overeen"
 
 #: src/error.cpp:47
 msgid "Connection is not yet encrypted"
-msgstr ""
+msgstr "Verbinding is nog niet versleuteld"
 
 #: src/user_table.cpp:58
 #, c-format
 msgid "User ID %0% is already in use"
-msgstr "Användarid %0% används redan"
+msgstr "Gebruikers-ID %0% is al in gebruik"
 
 #: src/chat.cpp:257
 msgid "Restored session"
-msgstr "Återställd session"
+msgstr "Herstelde sessie"
 
 #: src/chat.cpp:332
 #, c-format
 msgid "%0% has joined"
-msgstr "%0% har anslutit"
+msgstr "%0% heeft zich bij de sessie gevoegd"
 
 #: src/chat.cpp:339
 #, c-format
 msgid "%0% has left"
-msgstr "%0% har lämnat"
+msgstr "%0% heeft de sessie verlaten"
 
 #: src/serialise/token.cpp:94
 #, c-format
 msgid "Unexpected escape sequence: \\%0%"
-msgstr "Oväntad escape-sekvens: \\%0%"
+msgstr "Onverwachte ontsnappingsopeenvolging: \\%0%"
 
 #: src/serialise/token.cpp:170
 msgid "String not closed"
-msgstr "Sträng ej terminerad"
+msgstr "Tekenreeks niet afgesloten"
 
 #: src/serialise/token.cpp:275
 #, c-format
 msgid "Unexpected token: '%0%'"
-msgstr "Oväntad token: '%0%'"
+msgstr "Onverwachte eenheid: '%0%'"
 
 #: src/serialise/token.cpp:395
 msgid "Unexpected end of input"
-msgstr "Oväntat slut på indata"
+msgstr "Onverwachte beëindiging van invoer"
 
 #: src/serialise/attribute.cpp:54
 #, c-format
 msgid "Expected '=' after %0%"
-msgstr "Väntade '=' efter %0%"
+msgstr "'=' verwacht achter %0%"
 
 #: src/serialise/attribute.cpp:65
 #, c-format
 msgid "Expected string literal as value for attribute '%0%'"
-msgstr "Väntade strängliteral som värde för attribut '%0%'"
+msgstr "Verwachte tekenreeks letterlijke waarde voor attribuut '%0%'"
 
 #: src/serialise/object.cpp:135
 msgid "Child object's indentation must be parent's plus one"
-msgstr "Barnobjektets indrag måste vara förälderns + 1"
+msgstr ""
 
 #: src/serialise/object.cpp:148
 msgid "Expected child object after indentation"
-msgstr "Väntade barnobjekt efter indrag"
+msgstr ""
 
 #: src/serialise/object.cpp:159
 #, c-format
 msgid "Expected child object instead of '%0%'"
-msgstr "Väntade barnobjekt itstället för '%0%'"
+msgstr ""
 
 #: src/serialise/object.cpp:220 src/serialise/object.cpp:234
 #, c-format
 msgid "Object '%0%' requires attribute '%1%'"
-msgstr "Objekt '%0%' kräver attribut '%1%'"
+msgstr ""
 
 #: src/serialise/parser.cpp:36
 #, c-format
 msgid "Could not open file '%0%' for reading"
-msgstr "Kunde inte öppna filen '%0%' för läsning"
+msgstr ""
 
 #: src/serialise/parser.cpp:97
 msgid "Expected initial exclamation mark"
-msgstr "Väntade inledande utropstecken"
+msgstr ""
 
 #: src/serialise/parser.cpp:107
 msgid "Expected document type after '!'"
-msgstr "Väntade dokumenttyp efter '!'"
+msgstr ""
 
 #: src/serialise/parser.cpp:118
 msgid "Expected newline after document type"
-msgstr "Väntade en ny rad efter dokumenttyp"
+msgstr ""
 
 #: src/serialise/parser.cpp:127
 msgid "Expected top-level object after document type"
-msgstr "Väntade topnivå-objekt efter dokumenttyp"
+msgstr ""
 
 #: src/serialise/parser.cpp:137
 msgid "Expected root object after document type"
-msgstr "Väntade rotobjekt efter dokumenttyp"
+msgstr ""
 
 #: src/serialise/parser.cpp:147
 #, c-format
 msgid "Expected end of input instead of '%0%'"
-msgstr "Väntade slut på indata istället för '%0%'"
+msgstr ""
 
 #: src/serialise/parser.cpp:159
 #, c-format
 msgid "Could not open file '%0%' for writing"
-msgstr "Kund inte öppna filen '%0%' för skrivning"
-
-#~ msgid "%0% has created a new document: %1%"
-#~ msgstr "%0% har skapat ett nytt dokument: %1%"
-
-#~ msgid "A new document was created: %0%"
-#~ msgstr "Ett nytt dokument har skapats: %0%"
-
-#~ msgid "Document needs at least one line"
-#~ msgstr "Dokumentet behöver ha minst en rad"
-
-#~ msgid "No server public key available, wait for the welcome packet"
-#~ msgstr "Ingen publik servernyckel tillgänglig, väntar på välkomstpaketet"
+msgstr ""
