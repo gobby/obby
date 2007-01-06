@@ -21,7 +21,6 @@ Minor:
 Trivial:
 
 Enhancement:
-  * Session serialisation (#20)
   * Implement server-side commands for remote actions (#29) [network]
   * Servers should be elected (#86)
 
@@ -74,21 +73,6 @@ the NAT box to the one on which the game runs.
 which implements NAT traversal through UPNP. I don't know yet if we could 
 borrow some code there or integrate it. This would solve at least some 
 hosting problems of a centralised model.
-
-20: Session serialisation
--------------------------
-When multiple persons are editing a document the situation that one 
-(perhaps the host) has to leave is quite common. ''libobby'' should support 
-some kind of session serialisation while preserving the history (and thus 
-the attribution of each character to the corresponding user) so that it 
-could be easily resumed. Probably (possibly compressed) XML should be used 
-to serialise a tree of objects. The following features should be 
-implemented:
-
- * Load/save documents to/from file and/or memory (while preserving 
-history)
- * Load/save complete obby session
- * Load/save connection settings
 
 29: Implement server-side commands for remote actions
 -----------------------------------------------------
