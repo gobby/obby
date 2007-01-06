@@ -66,3 +66,5 @@ abc|1->ins(1@0),2->ins(2@0)|12abc
 
 # concurrent insertion and deletion
 abc|1->del(0-3),2->ins(1@2)|1
+abc|1->del(0-3),2->ins(1@1),2->ins(2@3)|12
+abc|1->del(0-3),2->ins(1@1),2->ins(2@3),2->del(0-3)|2

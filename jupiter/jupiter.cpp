@@ -96,21 +96,22 @@ public:
 
 	virtual void apply(document& doc) const
 	{
+		m_second->apply(doc);
 		m_first->apply(doc);
 
 		// Transform second operation with first because the first one
 		// has already been applied to the document.
-		operation* second = m_first->transform(*m_second, true);
-		second->apply(doc);
-		delete second;
+	//	operation* second = m_first->transform(*m_second, true);
+	//	second->apply(doc);
+	//	delete second;
 	}
 
 	virtual operation* transform(const operation& base_op, bool client) const
 	{
 		// Transform base_op against first operation
-		operation* op1 = m_first->transform(base_op, client);
+		operation* op1 = m_second->transform(base_op, client);
 		// Transform result against second
-		operation* op2 = m_second->transform(*op1, client);
+		operation* op2 = m_first->transform(*op1, client);
 		// Delete first, no longer needed
 		delete op1;
 		// Return result
