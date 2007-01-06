@@ -110,6 +110,8 @@ void obby::server_document::synchronise(net6::server::peer& peer)
 void obby::server_document::insert(position pos, const std::string& text,
                                    unsigned int author_id)
 {
+	// Emit change signal before changing anything
+	m_signal_change.before().emit();
 	// Build record
 	record* rec =
 		new insert_record(pos, text, m_id, ++ m_revision, author_id);
@@ -117,6 +119,8 @@ void obby::server_document::insert(position pos, const std::string& text,
 	rec->apply(*this);
 	// Insert into history
 	m_history.push_front(rec);
+	// Changes have been performed
+	m_signal_change.after().emit();
 	// Synchronize to clients
 	m_server.send(rec->to_packet() );
 }
@@ -124,6 +128,8 @@ void obby::server_document::insert(position pos, const std::string& text,
 void obby::server_document::erase(position from, position to,
                                   unsigned int author_id)
 {
+	// Emit change signal before changing anything
+	m_signal_change.before().emit();
 	// Get erased text
 	std::string erased = get_sub_buffer(from, to);
 	// Create record
@@ -133,6 +139,8 @@ void obby::server_document::erase(position from, position to,
 	rec->apply(*this);
 	// Insert into history
 	m_history.push_front(rec);
+	// Changes have been performed
+	m_signal_change.after().emit();
 	// Synchronize to clients
 	m_server.send(rec->to_packet() );
 }
