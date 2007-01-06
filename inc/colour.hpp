@@ -75,6 +75,6 @@ public:
 	virtual obby::colour from_string(const std::string& string) const;
 };
 
-};
+} // namespace serialise
 
 #endif // _OBBY_COLOUR_HPP_
