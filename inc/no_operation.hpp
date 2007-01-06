@@ -49,6 +49,11 @@ public:
 	 */
 	virtual operation* clone() const;
 
+	/** Creates the reverse operation of this one.
+	 * @param doc Document to receive additional information from.
+	 */
+	virtual operation* reverse(const document& doc) const;
+
 	/** Applies this operation to a document. Since this is a no_operation,
 	 * nothing will be done.
 	 */
@@ -83,3 +88,4 @@ protected:
 } // namespace obby
 
 #endif // _OBBY_NO_OPERATION_HPP_
+

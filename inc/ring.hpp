@@ -36,11 +36,11 @@ public:
 	typedef std::size_t size_type;
 	typedef std::vector<value_type> container_type;
 
-	template<typename base_iterator>
+	template<typename ring_type, typename base_iterator>
 	class basic_iterator
 	{
 	public:
-		basic_iterator(const ring& container,
+		basic_iterator(ring_type& container,
 		               const base_iterator& base_iter);
 
 		basic_iterator& operator++();
@@ -55,17 +55,21 @@ public:
 		bool operator==(const basic_iterator& rhs) const;
 		bool operator!=(const basic_iterator& lhs) const;
 	protected:
-		const ring& m_ring;
+		ring_type& m_ring;
 		base_iterator m_iter;
 	};
 
 	class const_iterator:
-		public basic_iterator<typename container_type::const_iterator>
+		public basic_iterator<
+			const ring<value_type>,
+			typename container_type::const_iterator
+		>
 	{
 	public:
+		typedef const ring<value_type> ring_type;
 		typedef typename container_type::const_iterator base_iterator;
 
-		const_iterator(const ring& container,
+		const_iterator(ring_type& container,
 		               const base_iterator& base_iter);
 
 		const value_type& operator*() const;
@@ -73,12 +77,16 @@ public:
 	};
 
 	class iterator:
-		public basic_iterator<typename container_type::iterator>
+		public basic_iterator<
+			ring<value_type>,
+			typename container_type::iterator
+		>
 	{
 	public:
+		typedef ring<value_type> ring_type;
 		typedef typename container_type::iterator base_iterator;
 
-		iterator(const ring& container,
+		iterator(ring_type& container,
 		         const base_iterator& base_iter);
 
 		value_type& operator*();
@@ -141,17 +149,19 @@ private:
 	typename container_type::iterator m_end;
 };
 
-template<typename value_type> template<typename base_iterator>
-ring<value_type>::basic_iterator<base_iterator>::
-	basic_iterator(const ring& container,
+template<typename value_type>
+template<typename ring_type, typename base_iterator>
+ring<value_type>::basic_iterator<ring_type, base_iterator>::
+	basic_iterator(ring_type& container,
 	               const base_iterator& base_iter):
 	m_ring(container), m_iter(base_iter)
 {
 }
 
-template<typename value_type> template<typename base_iterator>
-ring<value_type>::basic_iterator<base_iterator>&
-ring<value_type>::basic_iterator<base_iterator>::operator++()
+template<typename value_type>
+template<typename ring_type, typename base_iterator>
+ring<value_type>::basic_iterator<ring_type, base_iterator>&
+ring<value_type>::basic_iterator<ring_type, base_iterator>::operator++()
 {
 	if(m_iter == m_ring.m_end)
 	{
@@ -167,18 +177,20 @@ ring<value_type>::basic_iterator<base_iterator>::operator++()
 	return *this;
 }
 
-template<typename value_type> template<typename base_iterator>
-ring<value_type>::basic_iterator<base_iterator>
-ring<value_type>::basic_iterator<base_iterator>::operator++(int)
+template<typename value_type>
+template<typename ring_type, typename base_iterator>
+ring<value_type>::basic_iterator<ring_type, base_iterator>
+ring<value_type>::basic_iterator<ring_type, base_iterator>::operator++(int)
 {
 	const_iterator temp(*this);
 	operator++();
 	return temp;
 }
 
-template<typename value_type> template<typename base_iterator>
-ring<value_type>::basic_iterator<base_iterator>&
-ring<value_type>::basic_iterator<base_iterator>::operator--()
+template<typename value_type>
+template<typename ring_type, typename base_iterator>
+ring<value_type>::basic_iterator<ring_type, base_iterator>&
+ring<value_type>::basic_iterator<ring_type, base_iterator>::operator--()
 {
 	if(m_iter == m_ring.m_elems.end() )
 	{
@@ -195,38 +207,43 @@ ring<value_type>::basic_iterator<base_iterator>::operator--()
 	return *this;
 }
 
-template<typename value_type> template<typename base_iterator>
-ring<value_type>::basic_iterator<base_iterator>
-ring<value_type>::basic_iterator<base_iterator>::operator--(int)
+template<typename value_type>
+template<typename ring_type, typename base_iterator>
+ring<value_type>::basic_iterator<ring_type, base_iterator>
+ring<value_type>::basic_iterator<ring_type, base_iterator>::operator--(int)
 {
 	const_iterator temp(*this);
 	operator--();
 	return temp;
 }
 
-template<typename value_type> template<typename base_iterator>
-bool ring<value_type>::basic_iterator<base_iterator>::
+template<typename value_type>
+template<typename ring_type, typename base_iterator>
+bool ring<value_type>::basic_iterator<ring_type, base_iterator>::
 	operator==(const base_iterator& rhs) const
 {
 	return m_iter == rhs;
 }
 
-template<typename value_type> template<typename base_iterator>
-bool ring<value_type>::basic_iterator<base_iterator>::
+template<typename value_type>
+template<typename ring_type, typename base_iterator>
+bool ring<value_type>::basic_iterator<ring_type, base_iterator>::
 	operator!=(const base_iterator& rhs) const
 {
 	return m_iter != rhs;
 }
 
-template<typename value_type> template<typename base_iterator>
-bool ring<value_type>::basic_iterator<base_iterator>::
+template<typename value_type>
+template<typename ring_type, typename base_iterator>
+bool ring<value_type>::basic_iterator<ring_type, base_iterator>::
 	operator==(const basic_iterator& rhs) const
 {
 	return m_iter == rhs.m_iter;
 }
 
-template<typename value_type> template<typename base_iterator>
-bool ring<value_type>::basic_iterator<base_iterator>::
+template<typename value_type>
+template<typename ring_type, typename base_iterator>
+bool ring<value_type>::basic_iterator<ring_type, base_iterator>::
 	operator!=(const basic_iterator& rhs) const
 {
 	return m_iter != rhs.m_iter;
@@ -234,49 +251,50 @@ bool ring<value_type>::basic_iterator<base_iterator>::
 
 template<typename value_type>
 ring<value_type>::const_iterator::
-	const_iterator(const ring<value_type>& container,
+	const_iterator(ring_type& container,
 	               const base_iterator& base_iter):
-	basic_iterator<base_iterator>(container, base_iter)
+	basic_iterator<ring_type, base_iterator>(container, base_iter)
 {
 }                                                
 
 template<typename value_type>
 const value_type& ring<value_type>::const_iterator::operator*() const
 {
-	return basic_iterator<base_iterator>::m_iter.operator*();
+	return basic_iterator<ring_type, base_iterator>::m_iter.operator*();
 }
 
 template<typename value_type>
 const value_type* ring<value_type>::const_iterator::operator->() const
 {
-	return basic_iterator<base_iterator>::m_iter.operator->();
+	return basic_iterator<ring_type, base_iterator>::m_iter.operator->();
 }
 
 template<typename value_type>
-ring<value_type>::iterator::iterator(const ring<value_type>& container,
+ring<value_type>::iterator::iterator(ring_type& container,
                                      const base_iterator& base_iter):
-	basic_iterator<base_iterator>(container, base_iter)
+	basic_iterator<ring_type, base_iterator>(container, base_iter)
 {
 }                             
 
 template<typename value_type>
 value_type& ring<value_type>::iterator::operator*()
 {
-	return basic_iterator<base_iterator>::m_iter.operator*();
+	return basic_iterator<ring_type, base_iterator>::m_iter.operator*();
 }
 
 template<typename value_type>
 value_type* ring<value_type>::iterator::operator->()
 {
-	return basic_iterator<base_iterator>::m_iter.operator->();
+	return basic_iterator<ring_type, base_iterator>::m_iter.operator->();
 }
 
 template<typename value_type>
-ring<value_type>::iterator::operator typename ring<value_type>::const_iterator() const
+ring<value_type>::iterator::
+	operator typename ring<value_type>::const_iterator() const
 {
 	return const_iterator(
-		basic_iterator<base_iterator>::m_ring,
-		basic_iterator<base_iterator>::m_iter
+		basic_iterator<ring_type, base_iterator>::m_ring,
+		basic_iterator<ring_type, base_iterator>::m_iter
 	);
 }
 

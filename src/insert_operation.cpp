@@ -17,6 +17,7 @@
  */
 
 #include "insert_operation.hpp"
+#include "delete_operation.hpp"
 
 obby::insert_operation::insert_operation(position pos, const std::string& text)
  : operation(), m_pos(pos), m_text(text)
@@ -46,6 +47,11 @@ obby::insert_operation::insert_operation(const net6::packet& pack,
 obby::operation* obby::insert_operation::clone() const
 {
 	return new insert_operation(m_pos, m_text, m_original);
+}
+
+obby::operation* obby::insert_operation::reverse(const document& doc) const
+{
+	return new delete_operation(m_pos, m_text.length() );
 }
 
 void obby::insert_operation::apply(document& doc, const user* author) const
@@ -120,4 +126,5 @@ void obby::insert_operation::append_packet(net6::packet& pack) const
 {
 	pack << "ins" << m_pos << m_text;
 }
+
 

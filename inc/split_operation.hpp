@@ -53,11 +53,18 @@ public:
 
 	/** Reads a split_operation from the given network packet.
 	 */
-	split_operation(const net6::packet& pack, unsigned int& index);
+	split_operation(const net6::packet& pack,
+	                unsigned int& index,
+	                const user_table& user_table);
 
 	/** Creates a copy of this operation.
 	 */
 	virtual operation* clone() const;
+
+	/** Creates the reverse operation of this one.
+	 * @param doc Document to receive additional information from.
+	 */
+	virtual operation* reverse(const document& doc) const;
 
 	/** Applies this operation to a document. The split_operation just
 	 * forwards this request to both wrapped operations.
@@ -103,3 +110,4 @@ protected:
 } // namespace obby
 
 #endif // _OBBY_SPLIT_OPERATION_HPP_
+

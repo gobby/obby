@@ -57,16 +57,26 @@ public:
 	 */
 	std::string get_text() const;
 
-	/** Returns a part of the document's contents.
+	/** Returns a part of the document's content.
 	 */
-	std::string get_slice(position from, position len) const;
+	//std::string get_slice(position from, position len) const;
+
+	/** Returns a part of the document's content and user assignment.
+	 */
+	line get_slice(position from, position len) const;
 
 	/** Inserts text into the document.
-	 * @param pos Position where to insert text.
+	 * @param pos Position where to insert <em>text</em>.
 	 * @param text Text to insert.
-	 * @param author User that has written this text.
+	 * @param author User that has written <em>text</em>.
 	 */
 	void insert(position pos, const std::string& text, const user* author);
+
+	/** Inserts a given chunk into the document.
+	 * @param pos Position where to insert <em>text</em>
+	 * @param text Chunk to insert.
+	 */
+	void insert(position pos, const line& text);
 
 	/** Removes text from the document.
 	 * @param pos Beginning of the range where to delete text.

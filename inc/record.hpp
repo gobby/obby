@@ -45,7 +45,9 @@ public:
 	 * <em>index</em>. After the call, <em>index</em> points to the next
 	 * parameter in the packet.
 	 */
-	record(const net6::packet& pack, unsigned int& index);
+	record(const net6::packet& pack,
+	       unsigned int& index,
+	       const user_table& user_table);
 
 	/** Returns the operation of the record.
 	 */

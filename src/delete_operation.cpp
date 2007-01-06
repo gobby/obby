@@ -19,6 +19,7 @@
 #include "no_operation.hpp"
 #include "split_operation.hpp"
 #include "delete_operation.hpp"
+#include "reversible_insert_operation.hpp"
 
 obby::delete_operation::delete_operation(position pos, position len)
  : operation(), m_pos(pos), m_len(len)
@@ -49,6 +50,18 @@ obby::delete_operation::delete_operation(const net6::packet& pack,
 obby::operation* obby::delete_operation::clone() const
 {
 	return new delete_operation(m_pos, m_len, m_original);
+}
+
+obby::operation* obby::delete_operation::reverse(const document& doc) const
+{
+	// Need to convert it to a reversible_insert_operation
+	// (TODO: Rename to reversed_insert_operation) becasue the normal
+	// insert operation does not hold user information but just the text
+	// to insert.
+	return new reversible_insert_operation(
+		m_pos,
+		doc.get_slice(m_pos, m_len)
+	);
 }
 
 void obby::delete_operation::apply(document& doc, const user* author) const
@@ -152,4 +165,5 @@ void obby::delete_operation::append_packet(net6::packet& pack) const
 {
 	pack << "del" << m_pos << m_len;
 }
+
 

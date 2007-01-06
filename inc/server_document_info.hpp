@@ -101,10 +101,10 @@ protected:
 	 */
 	virtual void user_unsubscribe(const user& user);
 
-	/** Inserts text into the document. The operation is performed by
-	 * <em>author</em>.
+	/** Inserts text written by <em>author</em> into the document.
 	 */
-	void insert_impl(position pos, const std::string& text,
+	void insert_impl(position pos,
+	                 const std::string& text,
 	                 const user* author);
 
 	/** Erases text from the document. The operation is performed by
@@ -367,7 +367,6 @@ template<typename selector_type>
 void basic_server_document_info<selector_type>::
 	erase_impl(position pos, position len, const user* author)
 {
-	// TODO: Store delete_undo_operation locally
 	delete_operation op(pos, len);
 	m_jupiter->local_op(op, author);
 }
@@ -421,7 +420,12 @@ void basic_server_document_info<selector_type>::
 	on_net_record(const document_packet& pack, const user& from)
 {
 	unsigned int index = 2;
-	record rec(pack, index);
+
+	record rec(
+		pack,
+		index,
+		basic_document_info<selector_type>::m_buffer.get_user_table()
+	);
 
 	m_jupiter->remote_op(rec, &from);
 }
@@ -442,7 +446,9 @@ void basic_server_document_info<selector_type>::
 
 template<typename selector_type>
 void basic_server_document_info<selector_type>::
-	on_jupiter_local(const record& rec, const user& user, const obby::user* from)
+	on_jupiter_local(const record& rec,
+	                 const user& user,
+	                 const obby::user* from)
 {
 	document_packet pack(*this, "record");
 	pack << from;

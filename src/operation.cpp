@@ -21,6 +21,7 @@
 #include "split_operation.hpp"
 #include "insert_operation.hpp"
 #include "delete_operation.hpp"
+#include "reversible_insert_operation.hpp"
 
 obby::operation::operation()
  : m_original(NULL)
@@ -54,7 +55,9 @@ obby::operation::~operation()
 }
 
 std::auto_ptr<obby::operation>
-obby::operation::from_packet(const net6::packet& pack, unsigned int& index)
+obby::operation::from_packet(const net6::packet& pack,
+                             unsigned int& index,
+                             const user_table& user_table)
 {
 	// Get type
 	const std::string& type = pack.get_param(index ++).as<std::string>();
@@ -71,11 +74,21 @@ obby::operation::from_packet(const net6::packet& pack, unsigned int& index)
 	}
 	else if(type == "split")
 	{
-		op.reset(new split_operation(pack, index) );
+		op.reset(new split_operation(pack, index, user_table) );
 	}
 	else if(type == "noop")
 	{
 		op.reset(new no_operation(pack, index) );
+	}
+	else if(type == "revins")
+	{
+		op.reset(
+			new reversible_insert_operation(
+				pack,
+				index,
+				user_table
+			)
+		);
 	}
 	else
 	{

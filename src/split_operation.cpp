@@ -56,10 +56,11 @@ obby::split_operation::split_operation(operation* first, operation* second,
 }
 
 obby::split_operation::split_operation(const net6::packet& pack,
-                                       unsigned int& index)
+                                       unsigned int& index,
+                                       const user_table& user_table)
  : operation(),
-   m_first(operation::from_packet(pack, index).release() ),
-   m_second(operation::from_packet(pack, index).release() )
+   m_first(operation::from_packet(pack, index, user_table).release() ),
+   m_second(operation::from_packet(pack, index, user_table).release() )
 {
 //	std::auto_ptr<operation> first = operation::from_packet(pack, index);
 //	std::auto_ptr<operation> second = operation::from_packet(pack, index);
@@ -74,6 +75,14 @@ obby::split_operation::split_operation(const net6::packet& pack,
 obby::operation* obby::split_operation::clone() const
 {
 	return new split_operation(*m_first, *m_second, m_original);
+}
+
+obby::operation* obby::split_operation::reverse(const document& doc) const
+{
+	return new split_operation(
+		m_first->reverse(doc),
+		m_second->reverse(doc)
+	);
 }
 
 void obby::split_operation::apply(document& doc, const user* author) const
@@ -122,4 +131,5 @@ void obby::split_operation::append_packet(net6::packet& pack) const
 	m_first->append_packet(pack);
 	m_second->append_packet(pack);
 }
+
 

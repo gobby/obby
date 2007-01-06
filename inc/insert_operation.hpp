@@ -47,6 +47,11 @@ public:
 	 */
 	virtual operation* clone() const;
 
+	/** Creates the reverse operation of this one.
+	 * @param doc Document to receive additional information from.
+	 */
+	virtual operation* reverse(const document& doc) const;
+
 	/** Applies this operation to a document.
 	 */
 	virtual void apply(document& doc, const user* author) const;
@@ -67,7 +72,7 @@ public:
 
 	/** Appends the operation to the given packet.
 	 */
-	void append_packet(net6::packet& pack) const;
+	virtual void append_packet(net6::packet& pack) const;
 protected:
 	/** Constructor taking an original_operation struct.
 	 */
@@ -81,3 +86,4 @@ protected:
 } // namespace obby
 
 #endif // _OBBY_INSERT_OPERATION_HPP_
+

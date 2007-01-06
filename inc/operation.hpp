@@ -46,6 +46,11 @@ public:
 	 */
 	virtual operation* clone() const = 0;
 
+	/** Creates the reverse operation of this one.
+	 * @param doc Document to receive additional information from.
+	 */
+	virtual operation* reverse(const document& doc) const = 0;
+
 	/** Applies this operation to a document.
 	 * @param doc Document to apply this operation to.
 	 * @param author User who performed this operation.
@@ -73,9 +78,13 @@ public:
 	/** Reads an operation from the given packet.
 	 * @param pack Packet to read from.
 	 * @param index From which parameter to read at.
+	 * @param user_table User table were to read potential user
+	 * information from.
 	 */
-	static std::auto_ptr<operation> from_packet(const net6::packet& pack,
-	                                            unsigned int& index);
+	static std::auto_ptr<operation>
+		from_packet(const net6::packet& pack,
+	                    unsigned int& index,
+	                    const user_table& user_table);
 protected:
 	/** Struct containing an original operation with a reference counter
 	 * attached to it.
@@ -99,3 +108,4 @@ protected:
 } // namespace obby
 
 #endif // _OBBY_OPERATION_HPP_
+

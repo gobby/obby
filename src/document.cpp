@@ -84,33 +84,41 @@ std::string obby::document::get_text() const
 	return content;
 }
 
-std::string obby::document::get_slice(position from, position len) const
+obby::line obby::document::get_slice(position from, position len) const
 {
 	// Find range to extract
 	unsigned int from_row, from_col, to_row, to_col;
 	position_to_coord(from, from_row, from_col);
 	position_to_coord(from + len, to_row, to_col);
 
-	// Preallocate memory
-	std::string buffer;
-	buffer.reserve(len);
+	// Preallocate memory for the string
+	line buffer;
+	// TODO: Stupid assumption here, make better one - or leave zero.
+	buffer.reserve(len, (to_col - from_col) * 10);
 
 	// Iterate through affected rows
 	for(std::vector<line>::size_type i = from_row; i <= to_row; ++ i)
 	{
 		// Find columns in this row where to extract text
-		std::string::size_type begin = 0, end = m_lines[i].length();
+		line::size_type begin = 0, end = m_lines[i].length();
 		if(i == from_row)
 			begin = from_col;
 		if(i == to_row)
 			end = to_col;
 
 		// Append to target buffer
-		buffer += m_lines[i].substr(begin, end - begin);
+		buffer.append(m_lines[i].substr(begin, end - begin) );
 
 		// Append newline, if this is not the last line
 		if(i != to_row)
-			buffer += "\n";
+		{
+			line::author_iterator last =
+				m_lines[i].author_end() - 1;
+
+			// TODO: Last author may not neccesarily be author
+			// of the newline character
+			buffer.append(line("\n", last->author) );
+		}
 	}
 
 	// Verify that the returned length is the same as the required one
@@ -123,10 +131,16 @@ std::string obby::document::get_slice(position from, position len) const
 void obby::document::insert(position pos, const std::string& text,
                             const user* author)
 {
+	insert(pos, line(text, author) );
+}
+
+void obby::document::insert(position pos, const line& text)
+{
 	// Convert position to row and column
 	unsigned int pos_row, pos_col;
 	position_to_coord(pos, pos_row, pos_col);
 
+	const std::string& str = static_cast<const std::string&>(text);
 	std::vector<line>::iterator iter = m_lines.begin() + pos_row;
 
 	// Line that holds a carry from the first line when text contains
@@ -135,11 +149,14 @@ void obby::document::insert(position pos, const std::string& text,
 	unsigned int ins_col = pos_col;
 
 	// Notify signal handlers before making any changes
-	m_signal_insert.before().emit(pos, text, author);
+	// TODO: Sigal handler taking line. The here given author is just the
+	// first one, this is wrong and works only with
+	// insert(position, const std::string&, const user*)
+	m_signal_insert.before().emit(pos, text, text.author_begin()->author);
 
 	// Insert line by line
 	std::string::size_type nl_pos = 0, nl_prev = 0;
-	while( (nl_pos = text.find('\n', nl_pos)) != std::string::npos)
+	while( (nl_pos = str.find('\n', nl_pos)) != std::string::npos)
 	{
 		// First line?
 		if(nl_prev == 0)
@@ -153,7 +170,7 @@ void obby::document::insert(position pos, const std::string& text,
 		}
 
 		// Append line
-		iter->append(text.substr(nl_prev, nl_pos - nl_prev), author);
+		iter->append(text.substr(nl_prev, nl_pos - nl_prev) );
 		// Insert new line
 		iter = m_lines.insert(++ iter, line() );
 		nl_prev = ++ nl_pos;
@@ -161,10 +178,13 @@ void obby::document::insert(position pos, const std::string& text,
 
 	// Insert first_line_carry (if any) and the text in the last line
 	iter->insert(ins_col, first_line_carry);
-	iter->insert(ins_col, text.substr(nl_prev), author);
+	iter->insert(ins_col, text.substr(nl_prev) );
 
 	// Notify signal handlers after operation
-	m_signal_insert.after().emit(pos, text, author);
+	// TODO: Sigal handler taking line. The here given author is just the
+	// first one, this is wrong and works only with
+	// insert(position, const std::string&, const user*)
+	m_signal_insert.after().emit(pos, text, text.author_begin()->author);
 }
 
 void obby::document::erase(position pos, position len, const user* author)

@@ -24,10 +24,9 @@
 namespace obby
 {
 
-/** delete_operation inserts an amount of text at a specified position in
- * the document.
+/** delete_operation deletes text from a document.
  */
-class delete_operation : public operation
+class delete_operation: public operation
 {
 public:
 	/** Standard constructor with no original operation assigned.
@@ -46,6 +45,11 @@ public:
 	/** Creates a copy of this operation.
 	 */
 	virtual operation* clone() const;
+
+	/** Creates the reverse operation of this one.
+	 * @param doc Document to receive additional information from.
+	 */
+	virtual operation* reverse(const document& doc) const;
 
 	/** Applies this operation to a document.
 	 */
@@ -81,3 +85,4 @@ protected:
 } // namespace obby
 
 #endif // _OBBY_DELETE_OPERATION_HPP_
+

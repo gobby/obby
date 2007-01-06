@@ -44,6 +44,11 @@ obby::operation* obby::no_operation::clone() const
 	return new no_operation(m_original);
 }
 
+obby::operation* obby::no_operation::reverse(const document& doc) const
+{
+	return new no_operation;
+}
+
 void obby::no_operation::apply(document& doc, const user* author) const
 {
 }
@@ -74,4 +79,5 @@ void obby::no_operation::append_packet(net6::packet& pack) const
 	pack << "noop";
 	// Nothing to append
 }
+
 

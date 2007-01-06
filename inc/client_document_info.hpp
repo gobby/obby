@@ -297,7 +297,6 @@ void basic_client_document_info<selector_type>::
 		);
 	}
 
-	// TODO: Store delete_undo_operation locally
 	delete_operation op(pos, len);
 	m_jupiter->local_op(op, &get_buffer().get_self() );
 }
@@ -495,7 +494,11 @@ void basic_client_document_info<selector_type>::
 	// Extract record from packet (TODO: virtualness for document_packet,
 	// would allow to remove "+ 2" here)
 	unsigned int index = 1 + 2;
-	record rec(pack, index);
+	record rec(
+		pack,
+		index,
+		basic_document_info<selector_type>::m_buffer.get_user_table()
+	);
 
 	// Apply remote operation
 	m_jupiter->remote_op(rec, author);
@@ -543,8 +546,9 @@ void basic_client_document_info<selector_type>::
 	}
 
 	// Add line to document
+	unsigned int index = 2;
 	basic_document_info<selector_type>::m_document->add_line(
-		line(pack, 2, get_buffer().get_user_table())
+		line(pack, index, get_buffer().get_user_table())
 	);
 }
 

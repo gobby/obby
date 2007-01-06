@@ -139,8 +139,10 @@ template<typename selector_type>
 void basic_host_document_info<selector_type>::
 	insert(position pos, const std::string& text)
 {
+	const user* self = &get_buffer().get_self();
+
 	basic_server_document_info<selector_type>::
-		insert_impl(pos, text, &get_buffer().get_self() );
+		insert_impl(pos, text, self);
 }
 
 template<typename selector_type>

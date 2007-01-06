@@ -70,12 +70,12 @@ public:
 
 	/** Reads a line from a network packet as appended by append_packet
 	 * @param pack The net6::packet to read the line from.
-	 * @param from Parameter were to start to read.
+	 * @param index Parameter were to start to read.
 	 * @param user_table obby::user_table where to find the authors of this
 	 * line
 	 */
 	line(const net6::packet& pack,
-	     unsigned int from,
+	     unsigned int& index,
 	     const user_table& user_table);
 
 	/** Deserialises a line from a serialisation object.
@@ -90,6 +90,11 @@ public:
 	/** Copies a line with its authors.
 	 */
 	line& operator=(const line& other);
+
+	/** Reserves space for <em>len</em> characters of the string chunk and
+	 * <em>pos</em> user positions.
+	 */
+	void reserve(size_type len, size_type pos);
 
 	/** Serialises the line into a serialisation object.
 	 */

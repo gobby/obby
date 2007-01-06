@@ -41,23 +41,23 @@ obby::line::line(const string_type& text, const user_type* author)
 }
 
 obby::line::line(const net6::packet& pack,
-                 unsigned int from,
+                 unsigned int& index,
                  const user_table& user_table)
 {
 	// First there is the string
-	m_line = pack.get_param(from).as<std::string>();
+	m_line = pack.get_param(index ++).as<std::string>();
 
 	// Reserve space in author vector
-	m_authors.reserve( (pack.get_param_count() - from - 1) / 2);
+	m_authors.reserve( (pack.get_param_count() - index) / 2);
 	
 	// Add authors
-	for(unsigned int i = from + 1; i < pack.get_param_count(); i += 2)
+	while(index < pack.get_param_count() )
 	{
 		// Get position and author
 		unsigned int pos =
-			pack.get_param(i).as<unsigned int>();
+			pack.get_param(index ++).as<unsigned int>();
 		const user* author =
-			pack.get_param(i + 1).as<const user*>(user_table);
+			pack.get_param(index ++).as<const user*>(user_table);
 
 		// Add to vector
 		user_pos upos = { author, pos };
@@ -124,6 +124,12 @@ obby::line::line(const line& other)
 {
 }
 
+void obby::line::reserve(size_type len, size_type pos)
+{
+	m_line.reserve(len);
+	m_authors.reserve(pos);
+}
+
 obby::line& obby::line::operator=(const line& other)
 {
 	m_line = other.m_line;
@@ -152,6 +158,8 @@ obby::line::size_type obby::line::length() const
 void obby::line::insert(size_type pos, const line& text)
 {
 	// Build new author vector
+	// TODO: Compress directly 4 great performance, something like a
+	// private (anonymous namespace) function.
 	std::vector<user_pos> new_vec;
 	new_vec.reserve(m_authors.size() + text.m_authors.size() + 1);
 	std::vector<user_pos>::size_type i, j;
@@ -282,6 +290,7 @@ obby::line obby::line::substr(size_type from, size_type len) const
 	new_line.m_line = m_line.substr(from, len);
 	
 	// Compress author list
+	// TODO: Is this really necessary if the current line is compressed?
 	new_line.compress_authors();
 
 	return new_line;
