@@ -21,6 +21,15 @@
 #include "client_document.hpp"
 #include "client_buffer.hpp"
 
+/** These variables are used to store the wished user color from the login()
+ * call to the login_extend signal handler.
+ * TODO: This is not thread-safe. But, does anyone want to use threads to login
+ * with two client_buffers at the same time..?
+ * Another solution would be to establish the connection to the login_extend
+ * just in the login() call and bind the colour components to it.
+ */
+namespace { int st_red, st_green, st_blue; }
+
 obby::client_buffer::client_buffer()
  : buffer(), m_unsynced(), m_client(NULL), m_self(NULL)
 {
@@ -58,9 +67,11 @@ obby::client_buffer::~client_buffer()
 void obby::client_buffer::login(const std::string& name, int red, int green,
                                 int blue)
 {
-	net6::packet login_pack("net6_client_login");
-	login_pack << name << red << green << blue;
-	m_client->custom_login(login_pack);
+	st_red = red; st_green = green; st_blue = blue;
+	m_client->login(name);
+//	net6::packet login_pack("net6_client_login");
+//	login_pack << name << red << green << blue;
+//	m_client->custom_login(login_pack);
 }
 
 void obby::client_buffer::create_document(const std::string& title,
@@ -198,6 +209,11 @@ void obby::client_buffer::on_data(const net6::packet& pack)
 void obby::client_buffer::on_login_failed(const std::string& reason)
 {
 	m_signal_login_failed.emit(reason);
+}
+
+void obby::client_buffer::on_login_extend(net6::packet& pack)
+{
+	pack << st_red << st_green << st_blue;
 }
 
 void obby::client_buffer::on_net_record(const net6::packet& pack)
@@ -370,6 +386,8 @@ void obby::client_buffer::register_signal_handlers()
 		sigc::mem_fun(*this, &client_buffer::on_data) );
 	m_client->login_failed_event().connect(
 		sigc::mem_fun(*this, &client_buffer::on_login_failed) );
+	m_client->login_extend_event().connect(
+		sigc::mem_fun(*this, &client_buffer::on_login_extend) );
 }
 
 obby::document& obby::client_buffer::add_document(unsigned int id)

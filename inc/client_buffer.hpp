@@ -128,6 +128,7 @@ protected:
 	void on_close();
 	void on_data(const net6::packet& pack);
 	void on_login_failed(const std::string& reason);
+	void on_login_extend(net6::packet& pack);
 
 	void on_net_record(const net6::packet& pack);
 
