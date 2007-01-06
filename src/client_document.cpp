@@ -22,7 +22,7 @@
 
 obby::client_document::client_document(const client_document_info& info,
                                        net6::client& client)
- : local_document(info), document(info), m_client(client)
+ : document(info), local_document(info), m_client(client)
 {
 }
 

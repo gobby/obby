@@ -22,7 +22,7 @@
 
 obby::host_document::host_document(const host_document_info& info,
                                    net6::host& host)
- : server_document(info, host), local_document(info), document(info)
+ : document(info), server_document(info, host), local_document(info)
 {
 }
 

@@ -24,7 +24,7 @@ obby::client_document_info::client_document_info(const client_buffer& buf,
                                                  net6::client& client,
                                                  unsigned int id,
                                                  const std::string& title)
- : local_document_info(buf, id, title), document_info(buf, id, title),
+ : document_info(buf, id, title), local_document_info(buf, id, title),
    m_client(client)
 {
 }
