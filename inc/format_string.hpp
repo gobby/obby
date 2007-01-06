@@ -20,6 +20,7 @@
 #define _OBBY_FORMATSTRING_HPP_
 
 #include <string>
+#include <vector>
 #include <sstream>
 #include <sigc++/signal.h>
 
@@ -34,49 +35,64 @@ class basic_format_string
 {
 public:
 	basic_format_string(const string_type& format) 
-	 : m_content(format), m_argument(0) { }
+	 : m_content(format) { }
 	basic_format_string(const basic_format_string& other)
-	 : m_content(other.m_content), m_argument(other.m_argument) { }
+	 : m_content(other.m_content), m_arguments(other.m_arguments) { }
 	~basic_format_string() { }
 
 	basic_format_string& operator=(const string_type& format) {
 		m_content = format;
-		m_argument = 0;
+		m_arguments.clear();
 		return *this;
 	}
 	basic_format_string& operator=(const basic_format_string& other) {
 		m_content = other.m_content;
-		m_argument = other.m_argument;
+		m_arguments = other.m_arguments;
 		return *this;
 	}
 
-	const string_type& str() const {
-		return m_content;
+	string_type str() const {
+		// Copy content 
+		string_type content(m_content);
+
+		// Replace place holders
+		typename string_type::size_type pos = 0, end = 0;
+		while( (pos = content.find('%', pos)) != string_type::npos)
+		{
+			// Got first % char, look for second one.
+			end = content.find('%', pos + 1);
+			if(end == std::string::npos)
+				break;
+
+			// %% -> % in string
+			if(pos + 1 == end)
+			{
+				content.erase(++ pos, 1);
+				continue;
+			}
+
+			// Convert text in between to int
+			int argnum = strtol(content.c_str() + pos+1, NULL, 10);
+			const string_type& arg = m_arguments[argnum];
+			content.replace(pos, end - pos + 1, arg);
+			pos += arg.length();
+		}
+
+		// Return new string
+		return content;
 	}
 
-	// TODO: Some sort of escaping
 	template<class value_type>
 	basic_format_string& operator<<(const value_type& value) {
 		stream_type value_stream;
 		value_stream << value;
-		string_type value_str = value_stream.str();
-
-		stream_type find_stream;
-		find_stream << "%" << (m_argument ++);
-		string_type find_str = find_stream.str();
-		
-		typename string_type::size_type pos = 0;
-		while( (pos = m_content.find(find_str, pos)) !=
-		      string_type::npos) {
-			m_content.replace(pos, find_str.length(), value_str);
-			pos += value_str.length();
-		}
-
+		m_arguments.push_back(value_stream.str() );
 		return *this;
 	}
+
 protected:
 	string_type m_content;
-	unsigned int m_argument;
+	std::vector<string_type> m_arguments;
 };
 
 typedef basic_format_string<std::string, std::stringstream> format_string;

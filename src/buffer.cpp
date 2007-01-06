@@ -202,7 +202,7 @@ obby::buffer::translate_user(const std::string& str) const
 	if(found_user == NULL)
 	{
 		// No such user
-		format_string str("User ID %0 does not exist");
+		format_string str("User ID %0% does not exist");
 		str << user_id;
 		throw net6::basic_parameter::bad_format(str.str() );
 	}
@@ -230,7 +230,8 @@ obby::buffer::translate_document(const std::string& str) const
 	if(!info)
 	{
 		// No such document
-		format_string str("Document ID %0 from User %1 does not exist");
+		format_string str(
+			"Document ID %0% from User %1% does not exist");
 		str << document_id << owner_id;
 		throw net6::basic_parameter::bad_format(str.str() );
 	}
