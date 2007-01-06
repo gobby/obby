@@ -4,7 +4,7 @@
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ i* version 2 of the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,22 +16,25 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "local_document.hpp"
+#include "local_document_info.hpp"
 #include "local_buffer.hpp"
 
-obby::local_buffer::local_buffer()
- : buffer()
+obby::local_document::local_document(const local_document_info& info)
+ : document(info)
 {
 }
 
-obby::local_buffer::~local_buffer()
+obby::local_document::~local_document()
 {
 }
 
-obby::local_document_info*
-obby::local_buffer::find_document(unsigned int id) const
+const obby::local_document_info& obby::local_document::get_info() const
 {
-	return dynamic_cast<obby::local_document_info*>(
-		buffer::find_document(id)
-	);
+	return dynamic_cast<const obby::local_document_info&>(m_info);
 }
 
+const obby::local_buffer& obby::local_document::get_buffer() const
+{
+	return dynamic_cast<const obby::local_buffer&>(m_info.get_buffer() );
+}

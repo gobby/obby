@@ -20,6 +20,7 @@
 #define _OBBY_LOCAL_BUFFER_HPP_
 
 #include "buffer.hpp"
+#include "local_document_info.hpp"
 
 namespace obby
 {
@@ -40,6 +41,16 @@ public:
 	/** Returns the local user.
 	 */
 	virtual const user& get_self() const = 0;
+
+	/** Looks for a document with the given ID.
+	 */
+	local_document_info* find_document(unsigned int id) const;
+
+protected:
+        /** Adds a new client_document with the given ID to the buffer.
+	 */
+	virtual document_info& add_document_info(unsigned int id,
+	                                         const std::string& title) = 0;
 };
 
 }

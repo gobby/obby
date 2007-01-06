@@ -19,33 +19,30 @@
 #ifndef _OBBY_SERVER_DOCUMENT_HPP_
 #define _OBBY_SERVER_DOCUMENT_HPP_
 
-#include <sigc++/signal.h>
 #include <net6/server.hpp>
-#include "insert_record.hpp"
-#include "delete_record.hpp"
 #include "document.hpp"
-//#include "server_document.hpp"
-//#include "buffer.hpp"
 
 namespace obby
 {
 
+class server_document_info;
 class server_buffer;
 
 /** Document used by server_buffer. Usually you do not create or delete
  * documents yourself, the buffers manage them.
  */
 
-class server_document : public document
+class server_document : virtual public document
 {
 public: 
 	/** Creates a new server document.
-	 * @param id Unique ID for this document.
-	 * @param server net6::server object to synchronise data to.
 	 */
-	server_document(unsigned int id, net6::server& server,
-	                const server_buffer& buf);
+	server_document(const server_document_info& info, net6::server& server);
 	virtual ~server_document();
+
+	/** Returns the document info for this document.
+	 */
+	const server_document_info& get_info() const;
 
 	/** Returns the buffer to which the document is assigned.
 	 */
@@ -61,13 +58,13 @@ public:
 	 */
 	virtual void erase(position begin, position end);
 
-	/** Call this function if a record from a client has arrived.
+	/** Applys a record to the document.
 	 */
-	virtual void on_net_record(record& rec);
+	void apply_record(const record& rec);
 
-	/** Synchronize document to a peer.
+	/** Synchronizes the document to a user.
 	 */
-	void synchronise(net6::server::peer& peer);
+	void synchronise(const user& to);
 
 protected:
 	/** Inserts <em>text</em> at the given position and marks it as
@@ -80,6 +77,11 @@ protected:
 	 * changes as performed by the user with the id <em>author_id</em>.
 	 */
 	void erase(position begin, position end, unsigned int author_id);
+
+	/** Forwards a given record to all the clients that are subscribed
+	 * to this document.
+	 */
+	void forward_record(const record& rec) const;
 
 	net6::server& m_server;
 };

@@ -22,9 +22,12 @@
 #include <string>
 #include <net6/address.hpp>
 #include <net6/peer.hpp>
+#include "ptr_iterator.hpp"
 
 namespace obby
 {
+
+class document_info;
 
 /** User in a obby session.
  */
@@ -36,6 +39,12 @@ public:
 		NONE = 0x00,
 		CONNECTED = 0x01
 	};
+
+	/*typedef ptr_iterator<
+		document_info,
+		std::list<document_info*>,
+		std::list<document_info*>::const_iterator
+	> document_iterator;*/
 	
 	/** Creates a new user from an existing peer.
 	 * @param peer Underlaying net6 peer object.
@@ -43,7 +52,7 @@ public:
 	 * @param green Green colour component of the user colour (0-255)
 	 * @param blue Blue colour component of the user colour (0-255)
 	 */
-	user(const net6::peer& peer, int red, int green, int blue);
+	user(net6::peer& peer, int red, int green, int blue);
 
 	/** Creates a new user that represents a peer that has already left
 	 * the obby session.
@@ -68,11 +77,11 @@ public:
 	 * left the obby session and rejoined (maybe with another colour, in
 	 * this case the colour in all the documents gets updated).
 	 */
-	void assign_peer(const net6::peer& peer, int red, int green, int blue);
+	void assign_peer(net6::peer& peer, int red, int green, int blue);
 
 	/** Returns the underlaying peer object.
 	 */
-	const net6::peer* get_peer() const;
+	net6::peer* get_peer() const;
 
 	/** Returns the user name of this user.
 	 */
@@ -111,8 +120,42 @@ public:
 	/** Removes the given flags from this user's flags.
 	 */
 	void remove_flags(flags old_flags);
+
+#if 0
+	/** Adds this document to the user's list of subscribed documents.
+	 * Note that this function does not add the user to the subscribe
+	 * list of the document. Use local_document_info::subscribe to
+	 * subscribe the local user to a document.
+	 */
+	void subscribe(document_info& document);
+
+	/** Removes the given document from the user's list of subscribed
+	 * documents. Note that this function does not remove the user
+	 * from the subscribe list of the document. Use
+	 * local_document_info::unsubscribe to unsubscribe the local user
+	 * from a document.
+	 */
+	void unsubscribe(document_info& document);
+
+	/** Looks for a given document ID in the list of subscribed documents.
+	 */
+	document_info* find_document(unsigned int id) const;
+
+	/** Looks if the user is subscribed to the given document.
+	 */
+	bool is_subscribed(const document_info& document) const;
+
+	/** Returns the begin of the document list the user is subscribed to.
+	 */
+	document_iterator document_begin() const;
+
+	/** Returns the end of the document list the user is subscribed to.
+	 */
+	document_iterator document_end() const;
+#endif
 protected:
-	const net6::peer* m_peer;
+	net6::peer* m_peer;
+//	std::list<document_info*> m_documents;
 
 	unsigned int m_id;
 	std::string m_name;

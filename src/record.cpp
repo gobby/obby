@@ -83,48 +83,53 @@ void obby::record::invalidate()
 
 obby::record* obby::record::from_packet(const net6::packet& pack)
 {
-	if(pack.get_param_count() < 5) return NULL;
-	if(pack.get_param(0).get_type() != net6::packet::param::STRING)
+	if(pack.get_param_count() < 6) return NULL;
+	// Parameters 0 and 1 are checked by the document
+	/*if(pack.get_param(0).get_type() != net6::packet::param::INT)
 		return NULL;
-	if(pack.get_param(1).get_type() != net6::packet::param::INT)
-		return NULL;
-	if(pack.get_param(2).get_type() != net6::packet::param::INT)
+	if(pack.get_param(1).get_type() != net6::packet::param::STRING)
+		return NULL;*/
+	if(pack.get_param(2).get_type() != net6::packet::param::STRING)
 		return NULL;
 	if(pack.get_param(3).get_type() != net6::packet::param::INT)
 		return NULL;
 	if(pack.get_param(4).get_type() != net6::packet::param::INT)
 		return NULL;
+	if(pack.get_param(5).get_type() != net6::packet::param::INT)
+		return NULL;
 
-	const std::string& operation = pack.get_param(0).as_string();
-	unsigned int id = pack.get_param(1).as_int();
-	unsigned int document = pack.get_param(2).as_int();
-	unsigned int revision = pack.get_param(3).as_int();
-	unsigned int from = pack.get_param(4).as_int();
+	// param 0 is document id
+	// param 1 is "record"
+	const std::string& operation = pack.get_param(2).as_string();
+	unsigned int id = pack.get_param(3).as_int();
+	unsigned int document = pack.get_param(0).as_int();
+	unsigned int revision = pack.get_param(4).as_int();
+	unsigned int from = pack.get_param(5).as_int();
 
 	if(operation == "insert")
 	{
-		if(pack.get_param_count() < 7) return NULL;
-		if(pack.get_param(5).get_type() != net6::packet::param::INT)
+		if(pack.get_param_count() < 8) return NULL;
+		if(pack.get_param(6).get_type() != net6::packet::param::INT)
 			return NULL;
-		if(pack.get_param(6).get_type() != net6::packet::param::STRING)
+		if(pack.get_param(7).get_type() != net6::packet::param::STRING)
 			return NULL;
 
-		unsigned int pos = pack.get_param(5).as_int();
-		const std::string& text = pack.get_param(6).as_string();
+		unsigned int pos = pack.get_param(6).as_int();
+		const std::string& text = pack.get_param(7).as_string();
 		
 		return new insert_record(pos, text, document, 
 		                         revision, from, id);
 	}
 	else if(operation == "delete")
 	{
-		if(pack.get_param_count() < 7) return NULL;
-		if(pack.get_param(5).get_type() != net6::packet::param::INT)
+		if(pack.get_param_count() < 8) return NULL;
+		if(pack.get_param(6).get_type() != net6::packet::param::INT)
 			return NULL;
-		if(pack.get_param(6).get_type() != net6::packet::param::STRING)
+		if(pack.get_param(7).get_type() != net6::packet::param::STRING)
 			return NULL;
 
-		unsigned int pos = pack.get_param(5).as_int();
-		const std::string& text = pack.get_param(6).as_string();
+		unsigned int pos = pack.get_param(6).as_int();
+		const std::string& text = pack.get_param(7).as_string();
 
 		return new delete_record(pos, text, document,
 		                         revision, from, id);

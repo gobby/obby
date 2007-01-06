@@ -41,7 +41,7 @@ public:
 	
 	virtual void apply(document& doc) const = 0;
 	virtual void apply(record& rec) const = 0;
-	virtual net6::packet to_packet() = 0;
+	virtual net6::packet to_packet() const = 0;
 	virtual record* reverse() = 0;
 
 	bool is_valid() const;

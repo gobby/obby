@@ -43,7 +43,7 @@ public:
 
 	virtual void apply(document& doc) const;
 	virtual void apply(record& rec) const;
-	virtual net6::packet to_packet();
+	virtual net6::packet to_packet() const;
 	virtual record* reverse();
 
 	virtual void on_insert(position pos, const std::string& text);

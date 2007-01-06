@@ -18,16 +18,17 @@
 
 #include <cassert>
 #include "host_document.hpp"
+#include "host_document_info.hpp"
 #include "host_buffer.hpp"
 
 obby::host_buffer::host_buffer()
- : server_buffer(), m_self(NULL)
+ : buffer(), local_buffer(), server_buffer(), m_self(NULL)
 {
 }
 
 obby::host_buffer::host_buffer(unsigned int port, const std::string& username,
                                int red, int green, int blue)
- : server_buffer(), local_buffer(), m_self(NULL)
+ : buffer(), local_buffer(), server_buffer(), m_self(NULL)
 {
 	net6::host* host = new net6::host(port, username, false);
 	m_server = host;
@@ -47,6 +48,12 @@ obby::host_buffer::~host_buffer()
 	}
 }
 
+obby::host_document_info*
+obby::host_buffer::find_document(unsigned int id) const
+{
+	return dynamic_cast<host_document_info*>(buffer::find_document(id) );
+}
+
 obby::user& obby::host_buffer::get_self()
 {
 	return *m_self;
@@ -59,21 +66,27 @@ const obby::user& obby::host_buffer::get_self() const
 
 void obby::host_buffer::send_message(const std::string& message)
 {
+	// Send message from local peer object instead of the server.
 	m_signal_message.emit(*m_self, message);
-	relay_message(m_self->get_id(), message);
-}
-
-obby::document& obby::host_buffer::add_document(unsigned int id)
-{
-	net6::host* host = static_cast<net6::host*>(m_server);
-	document* doc = new host_document(id, *host, *this);
-	m_doclist.push_back(doc);
-	return *doc;
+	send_message_impl(message, m_self->get_id() );
 }
 
 void obby::host_buffer::create_document(const std::string& title,
                                         const std::string& content)
 {
-	server_buffer::create_document(title, content, m_self->get_id() );
+	// Create message from local peer object instead of the server.
+	create_document_impl(title, content, m_self->get_id() );
+}
+
+obby::document_info&
+obby::host_buffer::add_document_info(unsigned int id,
+                                     const std::string& title)
+{
+	// Get net6 host object by casting the underlaying server object
+	// (we create a corresponding net6::host in our constructor).
+	net6::host* host = static_cast<net6::host*>(m_server);
+	document_info* doc = new host_document_info(*this, *host, id, title);
+	m_doclist.push_back(doc);
+	return *doc;
 }
 

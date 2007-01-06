@@ -55,11 +55,11 @@ void obby::insert_record::apply(record& rec) const
 	rec.on_insert(m_pos, m_text);
 }
 
-net6::packet obby::insert_record::to_packet()
+net6::packet obby::insert_record::to_packet() const
 {
-	net6::packet pack("obby_record");
-	pack << "insert" << m_id << m_document << m_revision << m_from
-	     << static_cast<unsigned int>(m_pos) << m_text;
+	net6::packet pack("obby_document");
+	pack << m_document << "record" << "insert" << m_id  << m_revision
+	     << m_from << static_cast<unsigned int>(m_pos) << m_text;
 	return pack;
 }
 

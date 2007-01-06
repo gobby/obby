@@ -19,17 +19,9 @@
 #ifndef _OBBY_CLIENT_BUFFER_HPP_
 #define _OBBY_CLIENT_BUFFER_HPP_
 
-#include <string>
-#include <list>
-#include <sigc++/signal.h>
-#include <net6/client.hpp>
 #include "error.hpp"
-#include "record.hpp"
-#include "user.hpp"
-#include "insert_record.hpp"
-#include "delete_record.hpp"
-#include "buffer.hpp"
 #include "local_buffer.hpp"
+#include "client_document_info.hpp"
 
 namespace obby
 {
@@ -37,7 +29,7 @@ namespace obby
 /** Buffer for establish a connection to a server_buffer.
  */
 
-class client_buffer : virtual public local_buffer,
+class client_buffer : public local_buffer,
                       public sigc::trackable
 {
 public:
@@ -60,22 +52,21 @@ public:
 	void login(const std::string& name, int red, int green, int blue);
 
 	/** Requests a new document at the server and sync its initial
-	 * contents. signal_insert_document will be emitted if the server
+	 * contents. signal_document_insert will be emitted if the server
 	 * authorised the creation process.
 	 */
 	virtual void create_document(const std::string& title,
 	                             const std::string& content = "");
 
-	/** Requests a new name for an existing document.
-	 */
-	virtual void rename_document(document& doc,
-	                             const std::string& new_title);
-
 	/** Requests the deletion of a document at the server.
-	 * signal_remove_document will be emitted if the server
+	 * signal_document_remove will be emitted if the server
 	 * authorized the deletion.
 	 */
-	virtual void remove_document(document& doc);
+	virtual void remove_document(document_info& doc);
+
+	/** Looks for a document with the given ID.
+	 */
+	client_document_info* find_document(unsigned int id) const;
 
 	/** Returns the local user.
 	 */
@@ -97,8 +88,8 @@ public:
 	 */
 	virtual void send_message(const std::string& message);
 
-	/** Signal which will be emitted if the initial synchronization of
-	 * the documents has been completed.
+	/** Signal which will be emitted if the initial synchronization of the
+	 * user list and the document list has been completed.
 	 */
 	signal_sync_type sync_event() const;
 
@@ -124,8 +115,11 @@ protected:
 
         /** Adds a new client_document with the given ID to the buffer.
 	 */
-	virtual document& add_document(unsigned int id);
+	virtual document_info& add_document_info(unsigned int id,
+	                                         const std::string& title);
 
+	/** net6 signal handlers.
+	 */
 	void on_join(net6::client::peer& peer, const net6::packet& pack);
 	void on_part(net6::client::peer& peer, const net6::packet& pack);
 	void on_close();
@@ -133,22 +127,29 @@ protected:
 	void on_login_failed(net6::login::error error);
 	void on_login_extend(net6::packet& pack);
 
-	void on_net_record(const net6::packet& pack);
+	/** Executes a given network packet.
+	 */
+	virtual bool execute_packet(const net6::packet& pack);
 
+	/** Document concerning network commands.
+	 */
 	void on_net_document_create(const net6::packet& pack);
-	void on_net_document_rename(const net6::packet& pack);
 	void on_net_document_remove(const net6::packet& pack);
 
+	/** messaging commands.
+	 */
 	void on_net_message(const net6::packet& pack);
-	
-	void on_net_sync_init(const net6::packet& pack);
+
+	/** Synchronisation commands.
+	 */
 	void on_net_sync_usertable_user(const net6::packet& pack);
-	void on_net_sync_doc_init(const net6::packet& pack);
-	void on_net_sync_doc_line(const net6::packet& pack);
-	void on_net_sync_doc_final(const net6::packet& pack);
+	void on_net_sync_doclist_document(const net6::packet& pack);
 	void on_net_sync_final(const net6::packet& pack);
 
-//	std::list<record*> m_unsynced;
+	/** Forwarding commands.
+	 */
+	void on_net_document(const net6::packet& pack);
+
 	net6::client* m_client;
 	user* m_self;
 

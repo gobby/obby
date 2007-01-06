@@ -43,21 +43,21 @@ obby::line::line(const string_type& text, const user_type* author)
 
 obby::line::line(const net6::packet& pack, const user_table& user_table)
 {
-	if(pack.get_param_count() < 2) return;
-	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
-	if(pack.get_param(1).get_type() != net6::packet::param::STRING) return;
+	if(pack.get_param_count() < 3) return;
+	// Parameters 0 and 1 are checked by buffer.
+	if(pack.get_param(2).get_type() != net6::packet::param::STRING) return;
 
 	// Parameter 0 is the document ID which we do not need here.
-	m_line = pack.get_param(1).as_string();
+	m_line = pack.get_param(2).as_string();
 
-	// We need even parameter count (pos->author, pos->author, etc.)
-	if(pack.get_param_count() % 2) return;
+	// We need odd parameter count (line, pos->author, pos->author, etc.)
+	if( (pack.get_param_count() % 2) == 0) return;
 
 	// Reserve space in author vector
-	m_authors.reserve( (pack.get_param_count() - 2) / 2);
+	m_authors.reserve( (pack.get_param_count() - 3) / 2);
 	
 	// Add authors
-	for(unsigned int i = 2; i < pack.get_param_count(); i += 2)
+	for(unsigned int i = 3; i < pack.get_param_count(); i += 2)
 	{
 		// Verify parameters
 		if(pack.get_param(i).get_type() != net6::packet::param::INT)
@@ -296,9 +296,9 @@ void obby::line::compress_authors()
 
 net6::packet obby::line::to_packet(unsigned int document_id) const
 {
-	net6::packet pack("obby_sync_doc_line", net6::packet::DEFAULT_PRIORITY,
+	net6::packet pack("obby_document", net6::packet::DEFAULT_PRIORITY,
 	                  2 + m_authors.size() * 2);
-	pack << document_id << m_line;
+	pack << document_id << "sync_line" << m_line;
 
 	std::vector<user_pos>::const_iterator iter;
 	for(iter = m_authors.begin(); iter != m_authors.end(); ++ iter)

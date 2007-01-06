@@ -19,7 +19,7 @@
 #include <cassert>
 #include "delete_record.hpp"
 #include "insert_record.hpp"
-#include "buffer.hpp"
+#include "document.hpp"
 
 obby::delete_record::delete_record(position pos, const std::string& text,
                                    unsigned int document, unsigned int revision,                                   unsigned int from)
@@ -46,7 +46,7 @@ obby::record* obby::delete_record::clone() const
 
 void obby::delete_record::apply(document& doc) const
 {
-	assert(doc.get_sub_buffer(m_pos, m_pos + m_text.length()) == m_text);
+	assert(doc.get_slice(m_pos, m_pos + m_text.length()) == m_text);
 	doc.erase_nosync(*this);
 }
 
@@ -55,11 +55,11 @@ void obby::delete_record::apply(record& rec) const
 	rec.on_delete(m_pos, m_pos + m_text.length() );
 }
 
-net6::packet obby::delete_record::to_packet()
+net6::packet obby::delete_record::to_packet() const
 {
-	net6::packet pack("obby_record");
-	pack << "delete" << m_id << m_document << m_revision << m_from
-	     << static_cast<unsigned int>(m_pos) << m_text;
+	net6::packet pack("obby_document");
+	pack << m_document << "record" << "delete" << m_id << m_revision
+	     << m_from << static_cast<unsigned int>(m_pos) << m_text;
 	return pack;
 }
 

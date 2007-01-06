@@ -17,11 +17,12 @@
  */
 
 #include "host_document.hpp"
+#include "host_document_info.hpp"
 #include "host_buffer.hpp"
 
-obby::host_document::host_document(unsigned int id, net6::host& host,
-                                   const host_buffer& buf)
- : server_document(id, host, buf)
+obby::host_document::host_document(const host_document_info& info,
+                                   net6::host& host)
+ : server_document(info, host), local_document(info), document(info)
 {
 }
 
@@ -29,10 +30,14 @@ obby::host_document::~host_document()
 {
 }
 
+const obby::host_document_info& obby::host_document::get_info() const
+{
+	return dynamic_cast<const host_document_info&>(m_info);
+}
+
 const obby::host_buffer& obby::host_document::get_buffer() const
 {
-	// static_cast does not work with virtual inheritance
-	return dynamic_cast<const host_buffer&>(m_buffer);
+	return dynamic_cast<const host_buffer&>(m_info.get_buffer() );
 }
 
 void obby::host_document::insert(position pos, const std::string& text)

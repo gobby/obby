@@ -18,8 +18,9 @@
 
 #include <net6/server.hpp>
 #include "user.hpp"
+#include "document_info.hpp"
 
-obby::user::user(const net6::peer& peer, int red, int green, int blue)
+obby::user::user(net6::peer& peer, int red, int green, int blue)
  : m_peer(&peer), m_id(peer.get_id() ), m_name(peer.get_name() ), m_red(red),
    m_green(green), m_blue(blue), m_flags(CONNECTED)
 {
@@ -42,8 +43,7 @@ void obby::user::release_peer()
 	remove_flags(CONNECTED);
 }
 
-void obby::user::assign_peer(const net6::peer& peer, int red, int green,
-                             int blue)
+void obby::user::assign_peer(net6::peer& peer, int red, int green, int blue)
 {
 	// User must not be already connected
 	assert(~get_flags() & CONNECTED);
@@ -59,7 +59,7 @@ void obby::user::assign_peer(const net6::peer& peer, int red, int green,
 	add_flags(CONNECTED);
 }
 
-const net6::peer* obby::user::get_peer() const
+net6::peer* obby::user::get_peer() const
 {
 	return m_peer;
 }
@@ -109,3 +109,40 @@ void obby::user::remove_flags(flags old_flags)
 	m_flags &= ~old_flags;
 }
 
+#if 0
+void obby::user::subscribe(document_info& document)
+{
+	m_documents.push_back(&document);
+}
+
+void obby::user::unsubscribe(document_info& document)
+{
+	m_documents.erase(
+		std::remove(m_documents.begin(), m_documents.end(), &document),
+		m_documents.end()
+	);
+}
+
+obby::document_info* obby::user::find_document(unsigned int id) const
+{
+	for(document_iterator i = document_begin(); i != document_end(); ++ i)
+		if(i->get_id() == id)
+			return &(*i);
+	return NULL;
+}
+
+bool obby::user::is_subscribed(const document_info& document) const
+{
+	return find_document(document.get_id() ) != NULL;
+}
+
+obby::user::document_iterator obby::user::document_begin() const
+{
+	return m_documents.begin();
+}
+
+obby::user::document_iterator obby::user::document_end() const
+{
+	return m_documents.end();
+}
+#endif

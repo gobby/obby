@@ -21,9 +21,8 @@
 #include "document.hpp"
 #include "buffer.hpp"
 
-obby::document::document(unsigned int id, const buffer& buf)
- : m_id(id), m_title(), m_history(), m_revision(0), m_buffer(buf),
-   m_lines(1, line())
+obby::document::document(const obby::document_info& info)
+ : m_info(info), m_history(), m_revision(0), m_lines(1, line())
 {
 }
 
@@ -36,12 +35,22 @@ obby::document::~document()
 
 unsigned int obby::document::get_id() const
 {
-	return m_id;
+	return m_info.get_id();
 }
 
 const std::string& obby::document::get_title() const
 {
-	return m_title;
+	return m_info.get_title();
+}
+
+const obby::document_info& obby::document::get_info() const
+{
+	return m_info;
+}
+
+const obby::buffer& obby::document::get_buffer() const
+{
+	return m_info.get_buffer();
 }
 
 unsigned int obby::document::get_revision() const
@@ -49,17 +58,7 @@ unsigned int obby::document::get_revision() const
 	return m_revision;
 }
 
-void obby::document::set_title(const std::string& title)
-{
-	m_title = title;
-}
-
-const obby::buffer& obby::document::get_buffer() const
-{
-	return m_buffer;
-}
-
-std::string obby::document::get_whole_buffer() const
+std::string obby::document::get_text() const
 {
 	std::string content;
 	std::vector<line>::const_iterator iter;
@@ -71,7 +70,7 @@ std::string obby::document::get_whole_buffer() const
 	return content;
 }
 
-std::string obby::document::get_sub_buffer(position from, position to) const
+std::string obby::document::get_slice(position from, position to) const
 {
 	unsigned int from_row, from_col, to_row, to_col;
 	position_to_coord(from, from_row, from_col);

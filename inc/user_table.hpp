@@ -248,17 +248,17 @@ public:
 	/** Searches a user which represents the given underlaying peer.
 	 */
 	template<user::flags matching_flags, bool inverse>
-	user* find_user(const net6::peer& peer) const {
+	user* find_user(net6::peer& peer) const {
 		return find_user<matching_flags, inverse,
-			const net6::peer*, &user::get_peer>(&peer);
+			net6::peer*, &user::get_peer>(&peer);
 	}
 
 	template<user::flags matching_flags>
-	user* find_user(const net6::peer& peer) const {
+	user* find_user(net6::peer& peer) const {
 		return find_user<matching_flags, false>(peer);
 	}
 
-	user* find_user(const net6::peer& peer) const {
+	user* find_user(net6::peer& peer) const {
 		return find_user<user::NONE, false>(peer);
 	}
 

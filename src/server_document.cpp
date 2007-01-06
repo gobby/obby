@@ -17,11 +17,12 @@
  */
 
 #include "server_document.hpp"
+#include "server_document_info.hpp"
 #include "server_buffer.hpp"
 
-obby::server_document::server_document(unsigned int id, net6::server& server,
-                                       const server_buffer& buf)
- : document(id, buf), m_server(server)
+obby::server_document::server_document(const server_document_info& info,
+                                       net6::server& server)
+ : document(info), m_server(server)
 {
 }
 
@@ -29,10 +30,14 @@ obby::server_document::~server_document()
 {
 }
 
+const obby::server_document_info& obby::server_document::get_info() const
+{
+	return dynamic_cast<const server_document_info&>(m_info);
+}
+
 const obby::server_buffer& obby::server_document::get_buffer() const
 {
-	// static_cast does not work with virtual inheritance
-	return dynamic_cast<const obby::server_buffer&>(m_buffer);
+	return dynamic_cast<const server_buffer&>(m_info.get_buffer() );
 }
 
 void obby::server_document::insert(position pos, const std::string& text)
@@ -45,8 +50,15 @@ void obby::server_document::erase(position begin, position end)
 	erase(begin, end, 0);
 }
 
-void obby::server_document::on_net_record(record& rec)
+void obby::server_document::apply_record(const record& rec_)
 {
+	// TODO: Use the same algorithm as in the client (undo changes in the
+	// document instead of moving the record around), then this evil hack
+	// may be removed, too. Maybe, a mysterious bug will also be fixed
+	// with this, which strangly merges texts if two users begin to
+	// type at the same position.
+	record& rec = const_cast<record&>(rec_);
+
 	// Look for wished revision
 	std::list<record*>::iterator iter;
 	for(iter = m_history.begin(); iter != m_history.end(); ++ iter)
@@ -86,25 +98,7 @@ void obby::server_document::on_net_record(record& rec)
 	m_signal_change.after().emit();
 
 	// Tell clients
-	m_server.send(rec.to_packet() );
-}
-
-void obby::server_document::synchronise(net6::server::peer& peer)
-{
-	// Send doc initial sync packet with document revision
-	net6::packet init_pack("obby_sync_doc_init");
-	init_pack << m_id << m_title << m_revision;
-	m_server.send(init_pack, peer);
-
-	// Send buffer
-	std::vector<line>::const_iterator iter;
-	for(iter = m_lines.begin(); iter != m_lines.end(); ++ iter)
-		m_server.send(iter->to_packet(m_id), peer);
-
-	// Send final sync packet
-	net6::packet final_pack("obby_sync_doc_final");
-	final_pack << m_id;
-	m_server.send(final_pack, peer);
+	forward_record(rec);
 }
 
 void obby::server_document::insert(position pos, const std::string& text,
@@ -113,8 +107,9 @@ void obby::server_document::insert(position pos, const std::string& text,
 	// Emit change signal before changing anything
 	m_signal_change.before().emit();
 	// Build record
-	record* rec =
-		new insert_record(pos, text, m_id, ++ m_revision, author_id);
+	record* rec = new insert_record(
+		pos, text, get_id(), ++ m_revision, author_id
+	);
 	// Apply on document
 	rec->apply(*this);
 	// Insert into history
@@ -122,7 +117,7 @@ void obby::server_document::insert(position pos, const std::string& text,
 	// Changes have been performed
 	m_signal_change.after().emit();
 	// Synchronize to clients
-	m_server.send(rec->to_packet() );
+	forward_record(*rec);
 }
 
 void obby::server_document::erase(position from, position to,
@@ -131,10 +126,11 @@ void obby::server_document::erase(position from, position to,
 	// Emit change signal before changing anything
 	m_signal_change.before().emit();
 	// Get erased text
-	std::string erased = get_sub_buffer(from, to);
+	std::string erased = get_slice(from, to);
 	// Create record
-	record* rec =
-		new delete_record(from, erased, m_id, ++ m_revision, author_id);
+	record* rec = new delete_record(
+		from, erased, get_id(), ++ m_revision, author_id
+	);
 	// Apply on document
 	rec->apply(*this);
 	// Insert into history
@@ -142,6 +138,41 @@ void obby::server_document::erase(position from, position to,
 	// Changes have been performed
 	m_signal_change.after().emit();
 	// Synchronize to clients
-	m_server.send(rec->to_packet() );
+	forward_record(*rec);
+}
+
+void obby::server_document::synchronise(const user& to)
+{
+	net6::server::peer& peer =
+		*static_cast<net6::server::peer*>(to.get_peer() );
+
+	// Send doc initial sync packet with document revision
+	net6::packet init_pack("obby_document");
+	init_pack << get_id() << "sync_init" << m_revision;
+	m_server.send(init_pack, peer);
+
+	// Send buffer
+	std::vector<line>::const_iterator iter;
+	for(iter = m_lines.begin(); iter != m_lines.end(); ++ iter)
+		m_server.send(iter->to_packet(get_id()), peer);
+}
+
+void obby::server_document::forward_record(const record& rec) const
+{
+	// Build packet from record
+	net6::packet pack = rec.to_packet();
+	// Get info
+	const server_document_info& info = get_info();
+
+	for(server_document_info::user_iterator iter = info.user_begin();
+	    iter != info.user_end();
+	    ++ iter)
+	{
+		// Send the packet to each subscribed user
+		m_server.send(
+			pack,
+			*static_cast<net6::server::peer*>(iter->get_peer())
+		);
+	}
 }
 

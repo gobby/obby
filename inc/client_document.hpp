@@ -20,28 +20,30 @@
 #define _OBBY_CLIENT_DOCUMENT_HPP_
 
 #include <net6/client.hpp>
-#include "position.hpp"
-#include "record.hpp"
-#include "document.hpp"
+#include "local_document.hpp"
 
 namespace obby
 {
 
+class client_document_info;
 class client_buffer;
 
 /** Document used by client_buffer. Usually you do not have create or delete
  * document objects by youself, the equivalent buffers do this.
  */
 
-class client_document : public document
+class client_document : public local_document
 {
 public:
 	/** Creates a new client_document with given ID. <em>client</em> is
 	 * a net6::client object to synchronise changes to.
 	 */
-	client_document(unsigned int id, net6::client& client,
-	                const client_buffer& buf);
+	client_document(const client_document_info& info, net6::client& client);
 	virtual ~client_document();
+
+	/** Returns the document info for this document.
+	 */
+	const client_document_info& get_info() const;
 
 	/** Returns the buffer to which the document is assigned.
 	 */
@@ -55,20 +57,35 @@ public:
 	 */
 	virtual void erase(position from, position to);
 
-	/** Called by the client_buffer if another user changed anything in this
-	 * document.
+	/** Returns the amount of unsynced changes.
 	 */
-	virtual void on_net_record(record& rec);
+	std::list<record*>::size_type unsynced_count() const;
 
+	/** Applys the given record to the document. Note that the operation
+	 * will not be synchronised to other users. Use the insert() and
+	 * erase() functions instead.
+	 */
+	void apply_record(const record& rec);
+
+	/** Initialises the document with a given revision.
+	 */
+	void initialise(unsigned int revision);
+
+	/** Adds a line to the document. This is only useful during the
+	 * synchronisation process and called by the document_info.
+	 * TODO: document_info should provide insert/erase functions that
+	 * are forwarded to the document and only provide a const document*
+	 * to the user.
+	 */
+	void add_line(const line& line);
+
+#if 0
 	/** Synchronization functions called while synchronizing documents.
 	 */
 	virtual void on_net_sync_init(const net6::packet& pack);
 	virtual void on_net_sync_line(const net6::packet& pack);
 	virtual void on_net_sync_final(const net6::packet& pack);
-
-	/** Returns the amount of unsynced changes.
-	 */
-	std::list<record*>::size_type unsynced_count() const;
+#endif
 protected:
 	std::list<record*> m_unsynced;
 	net6::client& m_client;

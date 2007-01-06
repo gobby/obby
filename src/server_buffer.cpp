@@ -20,6 +20,7 @@
 #include <iostream>
 #include "error.hpp"
 #include "server_document.hpp"
+#include "server_document_info.hpp"
 #include "server_buffer.hpp"
 
 obby::server_buffer::server_buffer()
@@ -57,39 +58,52 @@ void obby::server_buffer::select(unsigned int timeout)
 void obby::server_buffer::create_document(const std::string& title,
                                           const std::string& content)
 {
-	// Create the document with the special server id 0.
-	create_document(title, content, 0);
+	// Create the document with the special ID 0, which means that this
+	// document is created by the server.
+	create_document_impl(title, content, 0);
 }
 
-void obby::server_buffer::rename_document(document& doc,
-                                          const std::string& new_title)
+void obby::server_buffer::remove_document(document_info& doc)
 {
-	doc.set_title(new_title);
+	// Emit unsubscribe singal for all users that were
+	// subscribed to this document.
+	for(document_info::user_iterator user_iter = doc.user_begin();
+	    user_iter != doc.user_end();
+	    ++ user_iter)
+		doc.unsubscribe_event().emit(*user_iter);
 
-	net6::packet pack("obby_document_rename");
-	pack << doc.get_id() << new_title;
-	m_server->send(pack);
+	// Emit signal that the document will be removed
+	m_signal_document_remove.emit(doc);
 
-	m_signal_rename_document.emit(doc, new_title);
-}
+	// Remove from list
+	m_doclist.erase(
+		std::remove(m_doclist.begin(), m_doclist.end(), &doc),
+		m_doclist.end()
+	);
 
-void obby::server_buffer::remove_document(document& doc)
-{
-	m_signal_remove_document.emit(doc);
-	m_doclist.erase(std::remove(m_doclist.begin(), m_doclist.end(), &doc),
-	                m_doclist.end() );
-	
+	// Tell other clients that the document will be removed
 	net6::packet pack("obby_document_remove");
 	pack << doc.get_id();
 	m_server->send(pack);
 
+	// Free associated resources.
 	delete &doc;
+}
+
+obby::server_document_info*
+obby::server_buffer::find_document(unsigned int id) const
+{
+	return dynamic_cast<server_document_info*>(buffer::find_document(id) );
 }
 
 void obby::server_buffer::send_message(const std::string& message)
 {
+	// The server sent a message: Emit corresponding signal.
 	m_signal_server_message.emit(message);
-	relay_message(0, message);
+
+	// Call send_message_impl with the ID 0 which means, that the server
+	// has sent this message.
+	send_message_impl(message, 0);
 }
 
 obby::server_buffer::signal_connect_type
@@ -104,60 +118,32 @@ obby::server_buffer::disconnect_event() const
 	return m_signal_disconnect;
 }
 
-void obby::server_buffer::register_signal_handlers()
-{
-	m_server->connect_event().connect(
-		sigc::mem_fun(*this, &server_buffer::on_connect) );
-	m_server->disconnect_event().connect(
-		sigc::mem_fun(*this, &server_buffer::on_disconnect) );
-	m_server->join_event().connect(
-		sigc::mem_fun(*this, &server_buffer::on_join) );
-	m_server->part_event().connect(
-		sigc::mem_fun(*this, &server_buffer::on_part) );
-	m_server->login_auth_event().connect(
-		sigc::mem_fun(*this, &server_buffer::on_auth) );
-	m_server->login_event().connect(
-		sigc::mem_fun(*this, &server_buffer::on_login) );
-	m_server->login_extend_event().connect(
-		sigc::mem_fun(*this, &server_buffer::on_extend) );
-	m_server->data_event().connect(
-		sigc::mem_fun(*this, &server_buffer::on_data) );
-}
-
-obby::document& obby::server_buffer::add_document(unsigned int id)
-{
-	document* doc = new server_document(id, *m_server, *this);
-	m_doclist.push_back(doc);
-	return *doc;
-}
-
-void obby::server_buffer::create_document(const std::string& title,
-                                          const std::string& content,
-                                          unsigned int author_id)
+void obby::server_buffer::create_document_impl(const std::string& title,
+                                               const std::string& content,
+                                               unsigned int author_id)
 {
 	// Internally create the document
 	unsigned int id = ++ m_doc_counter;
-	document& doc = add_document(id);
-	doc.set_title(title);
+	document_info& doc = add_document_info(id, title);
 
 	// Publish the new document to the users
 	net6::packet pack("obby_document_create");
-	pack << id << title << author_id << content;
+	pack << id << title;
 	m_server->send(pack);
 
-	// Insert the document's content, syncing is done by the create packet.
+	// Insert the document's initial content.
 	insert_record rec(0, content, id, 0, author_id, 0);
-	doc.insert_nosync(rec);
+	doc.get_document()->insert_nosync(rec);
 
 	// Emit the signal
-	m_signal_insert_document.emit(doc);
+	m_signal_document_insert.emit(doc);
 }
 
-void obby::server_buffer::relay_message(unsigned int uid,
-                                        const std::string& message)
+void obby::server_buffer::send_message_impl(const std::string& message,
+                                            unsigned int user_id)
 {
 	net6::packet pack("obby_message");
-	pack << uid << message;
+	pack << user_id << message;
 	m_server->send(pack);
 }
 
@@ -182,12 +168,7 @@ void obby::server_buffer::on_join(net6::server::peer& peer)
 		return;
 	}
 
-	// Client logged in. Synchronise the complete buffer, but
-	// seperate it into multiple packets to not block other high-priority
-	// network packets like chat packets.
-	net6::packet init_sync("obby_sync_init");
-	init_sync << static_cast<unsigned int>(m_doclist.size() );
-	m_server->send(init_sync, peer);
+	// Client logged in. Begin with synchronising.
 
 	// Synchronise not-connected users.
 	for(user_table::user_iterator<user::CONNECTED, true> iter =
@@ -202,18 +183,33 @@ void obby::server_buffer::on_join(net6::server::peer& peer)
 		m_server->send(user_pack, peer);
 	}
 
-	// Synchronise the documents
+	// Synchronise the document list
 	for(document_iterator iter = document_begin();
 	    iter != document_end();
 	    ++ iter)
 	{
-		static_cast<server_document&>(*iter).synchronise(peer);
+		// Setup document packet with ID and title
+		net6::packet doc_pack("obby_sync_doclist_document");
+		doc_pack << iter->get_id() << iter->get_title();
+
+		// Add users that are subscribed to this document
+		for(document_info::user_iterator user_iter = iter->user_begin();
+		    user_iter != iter->user_end();
+		    ++ user_iter)
+			doc_pack << iter->get_id();
+
+		m_server->send(doc_pack, peer);
 	}
 
 	// Done with synchronising
 	net6::packet final_sync("obby_sync_final");
 	m_server->send(final_sync, peer);
 
+	// Forward join message to documents
+	for(document_iterator i = document_begin(); i != document_end(); ++ i)
+		i->obby_user_join(*new_user);
+
+	// User joined successfully.
 	m_signal_user_join.emit(*new_user);
 }
 
@@ -224,16 +220,19 @@ void obby::server_buffer::on_part(net6::server::peer& peer)
 	if(!cur_user)
 	{
 		// Not found: Drop error message...
-		// TODO: Throw localied exceptions when we have format strings.
+		// TODO: Throw localised exceptions when we have format strings.
 		std::cerr << "obby::server_buffer::on_part: User "
 		          << peer.get_id() << " is not connected" << std::endl;
+		return;
 	}
-	else
-	{
-		// Emit part signal, remove user from user list.
-		m_signal_user_part.emit(*cur_user);
-		m_usertable.remove_user(cur_user);
-	}
+
+	// Forward part message to documents
+	for(document_iterator i = document_begin(); i != document_end(); ++ i)
+		i->obby_user_part(*cur_user);
+
+	// Emit part signal, remove user from user list.
+	m_signal_user_part.emit(*cur_user);
+	m_usertable.remove_user(cur_user);
 }
 
 bool obby::server_buffer::on_auth(net6::server::peer& peer,
@@ -255,6 +254,7 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 	int blue = pack.get_param(3).as_int();
 
 	// Check for existing colors
+	// TODO: Check for colors that non-connected user occupy?
 	std::list<user*>::iterator iter;
 	for(user_table::user_iterator<user::CONNECTED> iter =
 		m_usertable.user_begin<user::CONNECTED>();
@@ -308,6 +308,7 @@ void obby::server_buffer::on_extend(net6::server::peer& peer,
 void obby::server_buffer::on_data(net6::server::peer& peer,
                                   const net6::packet& pack)
 {
+	// Find user from peer
 	user* from_user = m_usertable.find_user<user::CONNECTED>(peer);
 	if(!from_user)
 	{
@@ -316,43 +317,49 @@ void obby::server_buffer::on_data(net6::server::peer& peer,
 		return;
 	}
 
-	if(pack.get_command() == "obby_record")
-		on_net_record(pack, *from_user);
-	if(pack.get_command() == "obby_document_create")
-		on_net_document_create(pack, *from_user);
-	if(pack.get_command() == "obby_document_rename")
-		on_net_document_rename(pack, *from_user);
-	if(pack.get_command() == "obby_document_remove")
-		on_net_document_remove(pack, *from_user);
-	if(pack.get_command() == "obby_message")
-		on_net_message(pack, *from_user);
+	// Execute packet
+	if(!execute_packet(pack, *from_user) )
+	{
+		std::cerr << "obby::server_buffer::on_data: Command "
+		          << pack.get_command() << " "
+		          << "does not exist" << std::endl;
+	}
 }
 
-void obby::server_buffer::on_net_record(const net6::packet& pack, user& from)
+bool obby::server_buffer::execute_packet(const net6::packet& pack, user& from)
 {
-	// Create record from packet
-	record* rec = record::from_packet(pack);
-	if(!rec) return;
+	// TODO: std::map<> mapping command to function
 
-	// Set correct sender
-	rec->set_from(from.get_id() );
-	
-	// Find correct document
-	document* doc = find_document(rec->get_document() );
-	if(!doc) { delete rec; return; }
-		
-	try
+	if(pack.get_command() == "obby_document_create")
 	{
-		// Delegate to document
-		doc->on_net_record(*rec);
+		// Document create request
+		on_net_document_create(pack, from);
+		return true;
 	}
-	catch(...)
+
+	if(pack.get_command() == "obby_document_remove")
 	{
-		// Release the record if document::on_net_record throws an
-		// exception.
-		delete rec;
-		throw;
+		// Document remove request
+		on_net_document_remove(pack, from);
+		return true;
 	}
+
+	if(pack.get_command() == "obby_message")
+	{
+		// Chat message
+		on_net_message(pack, from);
+		return true;
+	}
+
+	if(pack.get_command() == "obby_document")
+	{
+		// Forward to the document sub system
+		on_net_document(pack, from);
+		return true;
+	}
+
+	// Command unknown
+	return false;
 }
 
 void obby::server_buffer::on_net_document_create(const net6::packet& pack,
@@ -365,23 +372,7 @@ void obby::server_buffer::on_net_document_create(const net6::packet& pack,
 	const std::string& title = pack.get_param(0).as_string();
 	const std::string& content = pack.get_param(1).as_string();
 
-	create_document(title, content, from.get_id() );
-}
-
-void obby::server_buffer::on_net_document_rename(const net6::packet& pack,
-		                                 user& from)
-{
-	if(pack.get_param_count() < 2) return;
-	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
-	if(pack.get_param(1).get_type() != net6::packet::param::STRING) return;
-
-	unsigned int id = pack.get_param(0).as_int();
-	const std::string& title = pack.get_param(1).as_string();
-	
-	document* doc = find_document(id);
-	if(!doc) return;
-
-	rename_document(*doc, title);
+	create_document_impl(title, content, from.get_id() );
 }
 
 void obby::server_buffer::on_net_document_remove(const net6::packet& pack,
@@ -390,9 +381,20 @@ void obby::server_buffer::on_net_document_remove(const net6::packet& pack,
 	if(pack.get_param_count() < 1) return;
 	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
 
+	// Get document to remove
 	unsigned int id = pack.get_param(0).as_int();
-	document* doc = find_document(id);
-	if(!doc) return;
+	document_info* doc = find_document(id);
+
+	// TODO: Auth
+
+	// Check if we remove a valid document
+	if(!doc)
+	{
+		std::cerr << "obby::server_buffer::on_net_document_remove: "
+		          << "Document " << id << " does not exist"
+		          << std::endl;
+		return;
+	}
 
 	remove_document(*doc);
 }
@@ -414,6 +416,60 @@ void obby::server_buffer::on_net_message(const net6::packet& pack, user& from)
 	else
 	{
 		m_signal_message.emit(*user, message);
-		relay_message(uid, message);
+		send_message_impl(message, uid);
 	}
 }
+
+void obby::server_buffer::on_net_document(const net6::packet& pack, user& from)
+{
+	if(pack.get_param_count() < 2) return;
+	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
+	if(pack.get_param(1).get_type() != net6::packet::param::STRING) return;
+
+	unsigned int id = pack.get_param(0).as_int();
+	// Param 1 is a kind of sub-command for the document.
+
+	// Find document to which the packet belongs
+	server_document_info* doc = find_document(id);
+	if(!doc)
+	{
+		// No such document
+		std::cerr << "obby::server_buffer::on_net_document: Document "
+		          << id << " does not exist" << std::endl;
+		return;
+	}
+
+	// Forward packet
+	doc->obby_data(pack, from);
+}
+
+void obby::server_buffer::register_signal_handlers()
+{
+	m_server->connect_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_connect) );
+	m_server->disconnect_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_disconnect) );
+	m_server->join_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_join) );
+	m_server->part_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_part) );
+	m_server->login_auth_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_auth) );
+	m_server->login_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_login) );
+	m_server->login_extend_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_extend) );
+	m_server->data_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_data) );
+}
+
+obby::document_info&
+obby::server_buffer::add_document_info(unsigned int id,
+                                       const std::string& title)
+{
+	document_info* doc =
+		new server_document_info(*this, *m_server, id, title);
+	m_doclist.push_back(doc);
+	return *doc;
+}
+

@@ -19,29 +19,32 @@
 #ifndef _OBBY_HOST_DOCUMENT_HPP_
 #define _OBBY_HOST_DOCUMENT_HPP_
 
-#include <sigc++/signal.h>
 #include <net6/host.hpp>
+#include "local_document.hpp"
 #include "server_document.hpp"
 
 namespace obby
 {
 
+class host_document_info;
 class host_buffer;
 
 /** host_document used by host_buffer. Usually you do not have to create or
  * delete documents yourself, the buffers manage them.
  */
 	
-class host_document : public server_document
+class host_document : public local_document,
+                      public server_document
 {
 public: 
 	/** Creates a new host_document.
-	 * @param id Unique ID for this document.
-	 * @param host net6::host object to synchronise data to.
 	 */
-	host_document(unsigned int id, net6::host& host,
-	              const host_buffer& buf);
+	host_document(const host_document_info& info, net6::host& host);
 	virtual ~host_document();
+
+	/** Returns the document info for this document.
+	 */
+	const host_document_info& get_info() const;
 
 	/** Returns the buffer to which the document is assigned.
 	 */

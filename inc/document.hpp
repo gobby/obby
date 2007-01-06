@@ -19,24 +19,20 @@
 #ifndef _OBBY_DOCUMENT_HPP_
 #define _OBBY_DOCUMENT_HPP_
 
-#include <string>
-#include <list>
-#include <sigc++/signal.h>
-#include <net6/non_copyable.hpp>
-#include "position.hpp"
 #include "duplex_signal.hpp"
-#include "record.hpp"
+#include "line.hpp"
 #include "insert_record.hpp"
 #include "delete_record.hpp"
-#include "line.hpp"
 
 namespace obby
 {
 
+class document_info;
 class buffer;
 
 /** Abstract base class for obby documents. A document contains an amount of
- * text that is synchronised to all other participants in the obby session.
+ * text that is synchronised to all participants that are subscribed to this
+ * document.
  */
 
 class document : private net6::non_copyable
@@ -49,7 +45,7 @@ public:
 	typedef duplex_signal<sigc::signal<void> >
 		signal_change_type;
 
-	document(unsigned int id, const buffer& buf);
+	document(const document_info& info);
 	virtual ~document();
 
 	/** Returns a unique ID for this document.
@@ -60,27 +56,25 @@ public:
 	 */
 	const std::string& get_title() const;
 
+	/** Returns the document info for this document.
+	 */
+	const document_info& get_info() const;
+
+	/** Returns the buffer that is associated to this document.
+	 */
+	const buffer& get_buffer() const;
+
 	/** Returns the current revision number for this document.
 	 */
 	unsigned int get_revision() const;
 
-	/** Sets a new title for this document. Be careful! Titles set with
-	 * this function or not synced to other users. Use
-	 * buffer::rename_document instead.
-	 */
-	void set_title(const std::string& title);
-
-	/** Returns the buffer to which the document is assigned.
-	 */
-	const buffer& get_buffer() const;
-
 	/** Returns the whole content of the document.
 	 */
-	std::string get_whole_buffer() const;
+	std::string get_text() const;
 
 	/** Returns a part of the document's contents.
 	 */
-	std::string get_sub_buffer(position from, position to) const;
+	std::string get_slice(position from, position to) const;
 
 	/** Inserts <em>text</em> at <em>pos</em> and synchronises this change
 	 * to other users.
@@ -145,13 +139,10 @@ public:
 
 	/** Called by the buffer if another user changed anything.
 	 */
-	virtual void on_net_record(record& rec) = 0;
+//	virtual void on_net_record(record& rec) = 0;
 
 protected:
-	unsigned int m_id;
-	const buffer& m_buffer;
-
-	std::string m_title;
+	const document_info& m_info;
 	std::list<record*> m_history;
 	unsigned int m_revision;
 

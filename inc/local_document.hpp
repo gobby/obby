@@ -16,22 +16,37 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "local_buffer.hpp"
+#ifndef _OBBY_LOCAL_DOCUMENT_HPP_
+#define _OBBY_LOCAL_DOCUMENT_HPP_
 
-obby::local_buffer::local_buffer()
- : buffer()
+#include "document.hpp"
+
+namespace obby
 {
+
+class local_document_info;
+class local_buffer;
+
+/** Abstract base class for obby documents that have a local user.
+ */
+class local_document : virtual public document
+{
+public:
+	local_document(const local_document_info& info);
+	//local_document(const void** foo, const local_document_info& bar);
+	virtual ~local_document();
+
+	/** Returns the document info for this document.
+	 */
+	const local_document_info& get_info() const;
+
+	/** Returns the buffer that is associated to this document.
+	 */
+	const local_buffer& get_buffer() const;
+
+protected:
+};
+
 }
 
-obby::local_buffer::~local_buffer()
-{
-}
-
-obby::local_document_info*
-obby::local_buffer::find_document(unsigned int id) const
-{
-	return dynamic_cast<obby::local_document_info*>(
-		buffer::find_document(id)
-	);
-}
-
+#endif // _OBBY_LOCAL_DOCUMENT_HPP_

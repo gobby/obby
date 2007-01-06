@@ -19,16 +19,11 @@
 #ifndef _OBBY_SERVER_BUFFER_HPP_
 #define _OBBY_SERVER_BUFFER_HPP_
 
-#include <sigc++/signal.h>
-#include <net6/server.hpp>
-#include "insert_record.hpp"
-#include "delete_record.hpp"
 #include "buffer.hpp"
+#include "server_document_info.hpp"
 
 namespace obby
 {
-
-class server_user_table;
 
 /** Buffer that serves as (dedicated) server. It listens for incoming
  * connections from client_buffers and synchronises their changes.
@@ -46,10 +41,6 @@ public:
 	server_buffer(unsigned int port);
 	virtual ~server_buffer();
 
-	/** Returns the user table associated with the buffer.
-	 */
-	const server_user_table& get_user_table() const;
-
 	/** Waits indefinitely for incoming events.
 	 */
 	virtual void select();
@@ -59,20 +50,19 @@ public:
 	virtual void select(unsigned int timeout);
 	
 	/** Creates a new document with predefined content.
-	 * signal_insert_document will be emitted and may be used to access
-	 * the resulting obby::document.
+	 * signal_document_insert will be emitted and may be used to access
+	 * the resulting obby::document_info.
 	 */
 	virtual void create_document(const std::string& title,
 	                             const std::string& content = "");
 
-	/** Renames an existing document.
-	 */
-	virtual void rename_document(document& doc,
-	                             const std::string& new_title);
-
 	/** Removes an existing document.
 	 */
-	virtual void remove_document(document& doc);
+	virtual void remove_document(document_info& doc);
+
+	/** Looks for a document with the given ID.
+	 */
+	server_document_info* find_document(unsigned int id) const;
 
 	/** Sends a global message to all users.
 	 */
@@ -100,21 +90,25 @@ protected:
 	 */
 	void register_signal_handlers();
 
-	/** Adds a new document with the given ID to the buffer. The internal
-	 * ID counter is set to the new given document ID.
+	/** Adds a new document with the given ID to the buffer.
 	 */
-	virtual document& add_document(unsigned int id);
+	virtual document_info& add_document_info(unsigned int id,
+	                                         const std::string& title);
 
-	/** Internal function to create a document with predefined content
-	 * and the creator's id.
+	/** Internal function to create a document with predefined content,
+	 * that the user with the ID <em>author_id</em> created.
+	 * obby::host_buffer uses this function to create documents with
+	 * the ID of its local user.
 	 */
-	virtual void create_document(const std::string& title,
-	                             const std::string& content,
-				     unsigned int author_id);
+	virtual void create_document_impl(const std::string& title,
+	                                  const std::string& content,
+				          unsigned int author_id);
 
-	/** Relays a message to the other users.
+	/** Relays a message to the other users. The message is originally
+	 * sent by the user with the ID <em>user_id</em>.
 	 */
-	void relay_message(unsigned int uid, const std::string& message);
+	void send_message_impl(const std::string& message,
+	                       unsigned int user_id);
 	
 	/** net6 signal handlers.
 	 */
@@ -129,13 +123,22 @@ protected:
 	void on_extend(net6::server::peer& peer, net6::packet& pack);
 	void on_data(net6::server::peer& from, const net6::packet& pack);
 
-	void on_net_record(const net6::packet& pack, user& from);
+	/** Executes a network packet.
+	 */
+	bool execute_packet(const net6::packet& pack, user& from);
 
+	/** Document commands.
+	 */
 	void on_net_document_create(const net6::packet& pack, user& from);
-	void on_net_document_rename(const net6::packet& pack, user& from);
 	void on_net_document_remove(const net6::packet& pack, user& from);
 
+	/** Messaging commands.
+	 */
 	void on_net_message(const net6::packet& pack, user& from);
+
+	/** Forwarding commands.
+	 */
+	void on_net_document(const net6::packet& pack, user& from);
 
 	unsigned int m_doc_counter;
 	net6::server* m_server;

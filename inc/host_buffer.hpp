@@ -21,16 +21,15 @@
 
 #include <sigc++/signal.h>
 #include <net6/host.hpp>
+#include "host_document_info.hpp"
 #include "server_buffer.hpp"
 #include "local_buffer.hpp"
 
 namespace obby
 {
 
-class host_user_table;
-
-class host_buffer : virtual public server_buffer,
-                    virtual public local_buffer
+class host_buffer : public local_buffer,
+                    public server_buffer
 {
 public: 
 	/** Returns a new host_buffer.
@@ -43,6 +42,10 @@ public:
 	host_buffer(unsigned int port, const std::string& username, int red,
 	            int green, int blue);
 	virtual ~host_buffer();
+
+	/** Looks for a document with the given ID.
+	 */
+	host_document_info* find_document(unsigned int id) const;
 
 	/** Returns the local user.
 	 */
@@ -71,10 +74,10 @@ protected:
 	 */
 	host_buffer();
 	
-	/** Adds a new document with the given ID to the buffer. The internal
-	 * ID counter is set to the new given document ID.
+	/** Adds a new document with the given ID to the buffer.
 	 */
-	virtual document& add_document(unsigned int id);
+	virtual document_info& add_document_info(unsigned int id,
+	                                         const std::string& title);
 
 	user* m_self;
 };

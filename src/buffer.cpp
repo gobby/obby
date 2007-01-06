@@ -26,7 +26,7 @@ obby::buffer::buffer()
 
 obby::buffer::~buffer()
 {
-	std::list<document*>::iterator doc_i;
+	std::list<document_info*>::iterator doc_i;
 	for(doc_i = m_doclist.begin(); doc_i != m_doclist.end(); ++ doc_i)
 		delete *doc_i;
 }
@@ -36,34 +36,14 @@ const obby::user_table& obby::buffer::get_user_table() const
 	return m_usertable;
 }
 
-obby::document* obby::buffer::find_document(unsigned int id) const
+obby::document_info* obby::buffer::find_document(unsigned int id) const
 {
-	std::list<document*>::const_iterator iter;
+	std::list<document_info*>::const_iterator iter;
 	for(iter = m_doclist.begin(); iter != m_doclist.end(); ++ iter)
 		if( (*iter)->get_id() == id)
 			return *iter;
 	return NULL;
 }
-
-#if 0
-obby::user* obby::buffer::find_user(unsigned int id) const
-{
-	std::list<user*>::const_iterator iter;
-	for(iter = m_userlist.begin(); iter != m_userlist.end(); ++ iter)
-		if( (*iter)->get_id() == id)
-			return *iter;
-	return NULL;
-}
-
-obby::user* obby::buffer::find_user(const std::string& name) const
-{
-	std::list<user*>::const_iterator iter;
-	for(iter = m_userlist.begin(); iter != m_userlist.end(); ++ iter)
-		if( (*iter)->get_name() == name)
-			return *iter;
-	return NULL;
-}
-#endif
 
 obby::buffer::document_iterator obby::buffer::document_begin() const
 {
@@ -75,16 +55,11 @@ obby::buffer::document_iterator obby::buffer::document_end() const
 	return static_cast<document_iterator>(m_doclist.end() );
 }
 
-std::list<obby::document*>::size_type obby::buffer::document_count() const
+obby::buffer::document_size_type obby::buffer::document_count() const
 {
 	return m_doclist.size();
 }
-#if 0
-std::list<obby::user*>::size_type obby::buffer::user_count() const
-{
-	return m_userlist.size();
-}
-#endif
+
 obby::buffer::signal_user_join_type obby::buffer::user_join_event() const
 {
 	return m_signal_user_join;
@@ -95,16 +70,22 @@ obby::buffer::signal_user_part_type obby::buffer::user_part_event() const
 	return m_signal_user_part;
 }
 
-obby::buffer::signal_insert_document_type
-obby::buffer::insert_document_event() const
+obby::buffer::signal_document_insert_type
+obby::buffer::document_insert_event() const
 {
-	return m_signal_insert_document;
+	return m_signal_document_insert;
 }
 
-obby::buffer::signal_remove_document_type
-obby::buffer::remove_document_event() const
+obby::buffer::signal_document_rename_type
+obby::buffer::document_rename_event() const
 {
-	return m_signal_remove_document;
+	return m_signal_document_rename;
+}
+
+obby::buffer::signal_document_remove_type
+obby::buffer::document_remove_event() const
+{
+	return m_signal_document_remove;
 }
 
 obby::buffer::signal_message_type
@@ -118,49 +99,3 @@ obby::buffer::server_message_event() const
 	return m_signal_server_message;
 }
 
-#if 0
-obby::user* obby::buffer::add_user(net6::peer& peer, int red, int green,
-                                   int blue)
-{
-	// Search for an existing user with this ID that rejoins currently.
-	user* existing_user = NULL;
-	for(user_iterator<user::NONE> iter = user_begin<user::NONE, false>();
-	    iter != user_end<user::NONE, false>();
-	    ++ iter)
-	{
-		if(iter->get_id() == peer.get_id() )
-		{
-			existing_user = &(*iter);
-			break;
-		}
-	}
-
-	if(existing_user)
-	{
-		// If this user would be connected, net6 should have denied
-		// the login process with the "Name is already in use" error
-		assert(~existing_user->get_flags() & user::CONNECTED);
-
-		// Assign new peer to existing user.
-		existing_user->assign_peer(peer, red, green, blue);
-
-		return existing_user;
-	}
-	else
-	{
-		// User seems to be here for his first time: Create a new user.
-		user* new_user = new user(peer, red, green, blue);
-
-		// Insert user into user list
-		m_userlist.push_back(new_user);
-
-		return new_user;
-	}
-}
-
-void obby::buffer::remove_user(user* user_to_remove)
-{
-	// Release user object from underlaying peer
-	user_to_remove->release_peer();
-}
-#endif
