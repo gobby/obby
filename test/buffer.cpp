@@ -26,6 +26,8 @@ void client_sync(obby::client_buffer& buffer)
 	std::cout << "---" << std::endl;
 
 	buffer.insert(0, "A");
+	buffer.insert(1, "B");
+	buffer.insert(2, "C");
 }
 
 void client_part(net6::client::peer& peer)
