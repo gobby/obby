@@ -104,10 +104,6 @@ public:
 
 	/** Returns the local user.
 	 */
-	//virtual user& get_self();
-
-	/** Returns the local user.
-	 */
 	virtual const user& get_self() const;
 
 	/** Returns the name of the local user even if the login process has
@@ -178,9 +174,20 @@ protected:
 
         /** Creates a new document info object according to the type of buffer.
 	 */
-	virtual typename basic_buffer<selector_type>::document_info*
-	new_document_info(const user* owner, unsigned int id,
-	                  const std::string& title);
+	virtual document_info* new_document_info(const user* owner,
+	                                         unsigned int id,
+	                                         const std::string& title);
+
+        /** Creates a new document info object according to the type of buffer.
+	 */
+	virtual document_info* new_document_info(const user* owner,
+	                                         unsigned int id,
+	                                         const std::string& title,
+	                                         const std::string& content);
+
+        /** Creates a new document info object according to the type of buffer.
+	 */
+	virtual document_info* new_document_info(const net6::packet& pack);
 
 	/** net6 signal handlers.
 	 */
@@ -307,23 +314,11 @@ void basic_client_buffer<selector_type>::
 	// Choose new ID
 	// TODO: m_doc_counter does not belong into the base class
 	unsigned int id = ++ basic_buffer<selector_type>::m_doc_counter;
-
+	// Create document
+	document_info* info = new_document_info(m_self, id, title, content);
 	// Add document to list
-	document_info& info = dynamic_cast<document_info&>(
-		basic_buffer<selector_type>::document_add(m_self, id, title)
-	);
-
-	// TODO: Emit signal in document_add
-	basic_buffer<selector_type>::m_signal_document_insert.emit(info);
-	// Assign new document to info, subscribe local user
-	// TODO: Do it otherwhere. Maybe another client_document_info
-	// constructor that is called somehow...
-	info.obby_local_init(content);
-	// info.obby_sync_subscribe(*m_self);
-	// Emit subscription signal: TODO: Do it in obby_sync_subscribe
-	// and/or obby_local_init
-	info.subscribe_event().emit(*m_self);
-	// Tell others
+	basic_buffer<selector_type>::document_add(*info);
+	// Tell server
 	net6::packet request_pack("obby_document_create");
 	request_pack << id << title << content;
 	net6_client().send(request_pack);
@@ -651,14 +646,19 @@ void basic_client_buffer<selector_type>::
 	const std::string& title =
 		pack.get_param(2).net6::basic_parameter::as<std::string>();
 
-	// Ignore the packet if it is a document from us because we added it
-	// already without waiting for server acknowledge
-	if(owner == m_self) return;
-
 	// Get owner ID
 	unsigned int owner_id = (owner == NULL ? 0 : owner->get_id() );
 
-	// Is there already such a document
+	// Document owner must not be the local user because if we created the
+	// document, the create_document request is not sent back to us.
+	if(owner == m_self)
+	{
+		format_string str("Owner of document %0%/%1% is self");
+		str << owner_id << id;
+		throw net6::basic_parameter::bad_value(str.str() );
+	}
+
+	// Is there already such a document?
 	if(document_find(owner_id, id) )
 	{
 		format_string str("Document %0%/%1% exists already");
@@ -667,18 +667,8 @@ void basic_client_buffer<selector_type>::
 	}
 
 	// Add new document
-	document_info& new_doc = dynamic_cast<document_info&>(
-		basic_buffer<selector_type>::document_add(owner, id, title)
-	);
-
-	// TODO: document_add should emit this signal
-	basic_buffer<selector_type>::m_signal_document_insert.emit(new_doc);
-	// Emit subscription signal for owner
-	// TODO: Should be done implicitly by calling some other function, like
-	// new_doc.obby_sync_subscribe(owner) or, better, another
-	// client_document_info constructor
-	new_doc.obby_sync_subscribe(*owner);
-	new_doc.subscribe_event().emit(*owner);
+	document_info* info = new_document_info(owner, id, title);
+	basic_buffer<selector_type>::document_add(*info);
 }
 
 template<typename selector_type>
@@ -695,10 +685,6 @@ void basic_client_buffer<selector_type>::
 	    user_iter != doc->user_end();
 	    ++ user_iter)
 		doc->unsubscribe_event().emit(*user_iter);
-
-	// Emit document remove signal
-	// TODO: Should be done in document_delete!
-	basic_buffer<selector_type>::m_signal_document_remove.emit(*doc);
 
 	// Delete document
 	basic_buffer<selector_type>::document_delete(*doc);
@@ -798,8 +784,8 @@ void basic_client_buffer<selector_type>::
 		pack.get_param(0).net6::basic_parameter::as<user*>();
 	unsigned int id =
 		pack.get_param(1).net6::basic_parameter::as<int>();
-	const std::string& title =
-		pack.get_param(2).net6::basic_parameter::as<std::string>();
+//	const std::string& title =
+//		pack.get_param(2).net6::basic_parameter::as<std::string>();
 
 	// Get document owner ID
 	unsigned int owner_id = (owner == NULL ? 0 : owner->get_id() );
@@ -812,25 +798,10 @@ void basic_client_buffer<selector_type>::
 		throw net6::basic_parameter::bad_value(str.str() );
 	}
 
-	// TODO: Emit document_insert signal, should be done by
-	// document_add
-	document_info& info = dynamic_cast<document_info&>(
-		basic_buffer<selector_type>::document_add(owner, id, title)
-	);
-
-	// Add users who subscribed to this document.
-	// TODO: Refactor this, somehow.
-	info.obby_sync_init();
-	for(unsigned int i = 3; i < pack.get_param_count(); ++ i)
-	{
-		// Get user from parameter
-		const user* cur_user =
-			pack.get_param(i).net6::basic_parameter::as<user*>();
-
-		// Subscribe it
-		// TODO: Emit subscription signal (by obby_sync_subscribe)
-		info.obby_sync_subscribe(*cur_user);
-	}
+	// Create document_info from packet
+	document_info* info = new_document_info(pack);
+	// Add to buffer
+	basic_buffer<selector_type>::document_add(*info);
 }
 
 template<typename selector_type>
@@ -874,13 +845,31 @@ void basic_client_buffer<selector_type>::register_signal_handlers()
 }
 
 template<typename selector_type>
-typename basic_buffer<selector_type>::document_info*
+typename basic_client_buffer<selector_type>::document_info*
 basic_client_buffer<selector_type>::
 	new_document_info(const user* owner, unsigned int id,
 	                  const std::string& title)
 {
 	// Create client_document_info, according to client_buffer
 	return new document_info(*this, net6_client(), owner, id, title);
+}
+
+template<typename selector_type>
+typename basic_client_buffer<selector_type>::document_info*
+basic_client_buffer<selector_type>::
+	new_document_info(const user* owner, unsigned int id,
+	                  const std::string& title, const std::string& content)
+{
+	return new document_info(
+		*this, net6_client(), owner, id, title, content
+	);
+}
+
+template<typename selector_type>
+typename basic_client_buffer<selector_type>::document_info*
+basic_client_buffer<selector_type>::new_document_info(const net6::packet& pack)
+{
+	return new document_info(*this, net6_client(), pack);
 }
 
 template<typename selector_type>

@@ -108,16 +108,16 @@ protected:
 
         /** Creates a new document info object according to the type of buffer.
 	 */
-	virtual typename basic_buffer<selector_type>::document_info*
-	new_document_info(const user* owner, unsigned int id,
-	                  const std::string& title);
+	virtual document_info* new_document_info(const user* owner,
+	                                         unsigned int id,
+	                                         const std::string& title,
+	                                         const std::string& content);
 
 	/** Internal function to create a document with the given owner.
 	 */
-	void document_create_impl(const std::string& title,
-	                          const std::string& content,
-	                          const obby::user* owner,
-	                          unsigned int id);
+	void document_create_impl(const obby::user* owner, unsigned int id,
+	                          const std::string& title,
+	                          const std::string& content);
 
 	/** Internal function send a message to all users that comes from
 	 * the user <em>writer</em>.
@@ -276,7 +276,7 @@ void basic_server_buffer<selector_type>::
 
 	// Create the document with the special owner NULL which means that
 	// this document was created by the server.
-	document_create_impl(title, content, NULL, id);
+	document_create_impl(NULL, id, title, content);
 }
 
 template<typename selector_type>
@@ -291,13 +291,9 @@ void basic_server_buffer<selector_type>::
 	    ++ user_iter)
 		info.unsubscribe_event().emit(*user_iter);
 
-	// Emit document remove signal
-	// TODO: Do this in document_delete
-	basic_buffer<selector_type>::m_signal_document_remove.emit(info);
-
 	// Tell other clients about removal
 	net6::packet remove_pack("obby_document_remove");
-	remove_pack << static_cast<basic_document_info<selector_type>&>(info);
+	remove_pack << info;
 	net6_server().send(remove_pack);
 
 	// Delete document
@@ -342,15 +338,14 @@ basic_server_buffer<selector_type>::disconnect_event() const
 
 template<typename selector_type>
 void basic_server_buffer<selector_type>::
-	document_create_impl(const std::string& title,
-	                     const std::string& content, const user* owner,
-	                     unsigned int id)
+	document_create_impl(const user* owner, unsigned int id,
+	                     const std::string& title,
+                             const std::string& content)
 {
-	// Create document
-	document_info& info = dynamic_cast<document_info&>(
-		basic_buffer<selector_type>::document_add(owner, id, title)
-	);
-
+	// Create new document
+	document_info* info = new_document_info(owner, id, title, content);
+	// Add to buffer
+	basic_buffer<selector_type>::document_add(*info);
 	// Publish the new document to the users. Note that we do not have
 	// to send the document's initial content because no user is currently
 	// subscribed, and the content is synced with the subscription.
@@ -377,7 +372,7 @@ void basic_server_buffer<selector_type>::
 	// the other way...
 	// Additionally, the host_document would not mark the new document
 	// as written by itself...
-	info.insert(0, content);
+	//info.insert(0, content);
 	// Emit insertion signal (TODO: Should be done by document_add, but make
 	// sure that the content has been inserted before - like a ctor or
 	// something).
@@ -386,11 +381,11 @@ void basic_server_buffer<selector_type>::
 	// on client side. Server should always subscribe owner...)
 	// TODO: Make also sure that a subscribe_event for the owner is emitted
 	// _after_ the document_insert signal.
-	basic_buffer<selector_type>::m_signal_document_insert.emit(info);
+	//basic_buffer<selector_type>::m_signal_document_insert.emit(info);
 	// Emit subscription signal for the owner.
 	// TODO: Do this elsewhere. (Should already be done in infos ctor, but
 	// nobody can be connected at this point - is this necessary?)
-	if(owner != NULL) info.subscribe_event().emit(*owner);
+	//if(owner != NULL) info.subscribe_event().emit(*owner);
 }
 
 template<typename selector_type>
@@ -747,7 +742,7 @@ void basic_server_buffer<selector_type>::
 	const std::string& content =
 		pack.get_param(2).net6::basic_parameter::as<std::string>();
 
-	document_create_impl(title, content, &from, id);
+	document_create_impl(&from, id, title, content);
 }
 
 template<typename selector_type>
@@ -854,13 +849,15 @@ void basic_server_buffer<selector_type>::register_signal_handlers()
 }
 
 template<typename selector_type>
-typename basic_buffer<selector_type>::document_info*
+typename basic_server_buffer<selector_type>::document_info*
 basic_server_buffer<selector_type>::
 	new_document_info(const user* owner, unsigned int id,
-                          const std::string& title)
+                          const std::string& title, const std::string& content)
 {
 	// Create server_document_info, according to server_buffer
-	return new document_info(*this, net6_server(), owner, id, title);
+	return new document_info(
+		*this, net6_server(), owner, id, title, content
+	);
 }
 
 template<typename selector_type>

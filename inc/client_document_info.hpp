@@ -40,11 +40,34 @@ class basic_client_document_info
  : virtual public basic_local_document_info<selector_type>
 {
 public:
+	/** Constructor which does not automatically create an underlaying
+	 * document.
+	 */
 	basic_client_document_info(
 		const basic_client_buffer<selector_type>& buffer,
 		net6::basic_client<selector_type>& net,
 		const user* owner, unsigned int id,
 	        const std::string& title
+	);
+
+	/** Constructor which allows to give initial content and as such creates
+	 * an underlaying document assuming the local client just created the
+	 * document.
+	 */
+	basic_client_document_info(
+		const basic_client_buffer<selector_type>& buffer,
+		net6::basic_client<selector_type>& net,
+		const user* owner, unsigned int id,
+		const std::string& title, const std::string& content
+	);
+
+	/** Constructor which reads the document_info from a network packet
+	 * that is received when the document list is initially synchronised.
+	 */
+	basic_client_document_info(
+		const basic_client_buffer<selector_type>& buffer,
+		net6::basic_client<selector_type>& net,
+		const net6::packet& init_pack
 	);
 
 	/** Inserts the given text at the given position into the document.
@@ -165,6 +188,85 @@ basic_client_document_info<selector_type>::basic_client_document_info(
 ) : basic_document_info<selector_type>(buffer, net, owner, id, title),
     basic_local_document_info<selector_type>(buffer, net, owner, id, title)
 {
+	// If we created this document, the constructor with initial content
+	// should be called.
+	if(owner == &buffer.get_self() )
+	{
+		throw std::logic_error(
+			"obby::basic_client_document_info::"
+			"basic_client_document_info"
+		);
+	}
+
+	// Implictly subscribe owner
+	if(owner != NULL)
+		user_subscribe(*owner);
+}
+
+template<typename selector_type>
+basic_client_document_info<selector_type>::basic_client_document_info(
+	const basic_client_buffer<selector_type>& buffer,
+	net6::basic_client<selector_type>& net,
+	const user* owner, unsigned int id,
+	const std::string& title, const std::string& content
+) : basic_document_info<selector_type>(buffer, net, owner, id, title),
+    basic_local_document_info<selector_type>(buffer, net, owner, id, title)
+{
+	// content is provided, so we should have created this document
+	if(owner != &buffer.get_self() )
+	{
+		throw std::logic_error(
+			"obby::basic_client_document_info::"
+			"basic_client_document_info"
+		);
+	}
+
+	// Assign document, initialise content
+	basic_document_info<selector_type>::assign_document();
+	basic_document_info<selector_type>::
+		m_document->insert(0, content, NULL);
+
+	// Subscribe owner
+	user_subscribe(*owner);
+}
+
+template<typename selector_type>
+basic_client_document_info<selector_type>::basic_client_document_info(
+	const basic_client_buffer<selector_type>& buffer,
+	net6::basic_client<selector_type>& net,
+	const net6::packet& init_pack
+) : basic_document_info<selector_type>(
+	buffer, net,
+	init_pack.get_param(0).net6::basic_parameter::as<user*>(),
+	init_pack.get_param(1).net6::basic_parameter::as<int>(),
+	init_pack.get_param(2).net6::basic_parameter::as<std::string>()
+   ), basic_local_document_info<selector_type>(
+	buffer, net,
+	init_pack.get_param(0).net6::basic_parameter::as<user*>(),
+	init_pack.get_param(1).net6::basic_parameter::as<int>(),
+	init_pack.get_param(2).net6::basic_parameter::as<std::string>()
+   )
+{
+	// Load initially subscribed users
+	for(unsigned int i = 3; i < init_pack.get_param_count(); ++ i)
+	{
+		// Get user
+		const user* cur_user = init_pack.get_param(i).net6::
+			basic_parameter::as<user*>();
+
+		// Must not be local user (who just joined the session and now
+		// synchronises the document list)
+		if(cur_user == &buffer.get_self() )
+		{
+			throw std::logic_error(
+				"obby::basic_client_document_info::"
+				"basic_client_document_info"
+			);
+		}
+
+		// Subscribe it
+		user_subscribe(*cur_user);
+	}
 }
 
 template<typename selector_type>

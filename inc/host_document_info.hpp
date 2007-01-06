@@ -42,7 +42,7 @@ public:
 		const basic_host_buffer<selector_type>& buffer,
 		net6::basic_host<selector_type>& net,
 		const user* owner, unsigned int id,
-		const std::string& title
+		const std::string& title, const std::string& content
 	);
 
 	/** Inserts the given text at the given position into the document.
@@ -98,10 +98,12 @@ basic_host_document_info<selector_type>::basic_host_document_info(
 	const basic_host_buffer<selector_type>& buffer,
 	net6::basic_host<selector_type>& net,
 	const user* owner, unsigned int id,
-	const std::string& title
+	const std::string& title, const std::string& content
 ) : basic_document_info<selector_type>(buffer, net, owner, id, title),
     basic_local_document_info<selector_type>(buffer, net, owner, id, title),
-    basic_server_document_info<selector_type>(buffer, net, owner, id, title)
+    basic_server_document_info<selector_type>(
+	buffer, net, owner, id, title, content
+    )
 {
 	// Server adds owner automagically to jupiter algo. If the local user
 	// is the owner, it does not need to be added to jupiter.

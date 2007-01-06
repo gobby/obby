@@ -168,10 +168,9 @@ public:
 	 */
 	static const unsigned long PROTOCOL_VERSION;
 protected:
-        /** Internal function to document with the given title to the buffer.
+        /** Internal function to add a document to the buffer.
 	 */
-	document_info& document_add(const user* owner, unsigned int id,
-	                            const std::string& title);
+	void document_add(document_info& document);
 
 	/** Internal function to delete a document from the buffer.
 	 */
@@ -180,13 +179,6 @@ protected:
 	/** Internal function to clear the whole document list.
 	 */
 	void document_clear();
-
-	/** Creates a new document info object according to the current
-	 * type of buffer.
-	 */
-	virtual document_info* new_document_info(const user* owner,
-	                                         unsigned int id,
-	                                         const std::string& title) = 0;
 
 	/** Translates a user parameter back to a net6 packet parameter.
 	 */
@@ -474,22 +466,26 @@ basic_buffer<selector_type>::translate_document(const std::string& str) const
 }
 
 template<typename selector_type>
-typename basic_buffer<selector_type>::document_info&
-basic_buffer<selector_type>::document_add(const user* owner, unsigned int id,
-                                          const std::string& title)
+void basic_buffer<selector_type>::document_add(document_info& document)
 {
-	// TODO: Add initial content to parameter list
-	document_info* new_info = new_document_info(owner, id, title);
-	m_docs.push_back(new_info);
-	// TODO: Emit document_insert signal
-	return *new_info;
+	// Add new document into list
+	m_docs.push_back(&document);
+	// Emit document_insert signal
+	m_signal_document_insert.emit(document);
+	// Emit user_subscribe signal for each user that is initially
+	// subscribed to the document.
+	for(typename document_info::user_iterator iter = document.user_begin();
+	    iter != document.user_end();
+	    ++ iter)
+		document.subscribe_event().emit(*iter);
 }
 
 template<typename selector_type>
 void basic_buffer<selector_type>::document_delete(document_info& info)
 {
-	// TODO: Emit document_remove signal
-
+	// TODO: Emit user_unsubscribe signal for each user that was subscribed?
+	// Emit document_remove signal
+	m_signal_document_remove.emit(info);
 	// Delete from list
 	m_docs.erase(
 		std::remove(m_docs.begin(), m_docs.end(), &info),

@@ -98,9 +98,9 @@ protected:
 
 	/** Creates a new document info object according to the type of buffer.
 	 */
-	virtual typename basic_buffer<selector_type>::document_info*
+	virtual typename basic_server_buffer<selector_type>::document_info*
 	new_document_info(const user* owner, unsigned int id,
-	                  const std::string& title);
+	                  const std::string& title, const std::string& content);
 
 	user* m_self;
 private:
@@ -230,7 +230,7 @@ void basic_host_buffer<selector_type>::
 	// Create document with local user as owner instead of NULL indicating
 	// that it is the server's docuent.
 	basic_server_buffer<selector_type>::document_create_impl(
-		title, content, m_self, id
+		m_self, id, title, content
 	);
 }
 
@@ -258,13 +258,13 @@ void basic_host_buffer<selector_type>::set_colour(int red, int green, int blue)
 }
 
 template<typename selector_type>
-typename basic_buffer<selector_type>::document_info*
+typename basic_server_buffer<selector_type>::document_info*
 basic_host_buffer<selector_type>::
 	new_document_info(const user* owner, unsigned int id,
-	                  const std::string& title)
+	                  const std::string& title, const std::string& content)
 {
 	// Create host_document_info, according to host_buffer
-	return new document_info(*this, net6_host(), owner, id, title);
+	return new document_info(*this, net6_host(), owner, id, title, content);
 }
 
 template<typename selector_type>

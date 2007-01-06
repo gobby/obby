@@ -45,7 +45,7 @@ public:
 		const basic_server_buffer<selector_type>& buffer,
 		net6::basic_server<selector_type>& net,
 		const user* owner, unsigned int id,
-		const std::string& title
+		const std::string& title, const std::string& content
 	);
 
 	/** Inserts the given text at the given position into the document.
@@ -167,11 +167,14 @@ basic_server_document_info<selector_type>::basic_server_document_info(
 	const basic_server_buffer<selector_type>& buffer,
 	net6::basic_server<selector_type>& net,
 	const user* owner, unsigned int id,
-	const std::string& title
+	const std::string& title, const std::string& content
 ) : basic_document_info<selector_type>(buffer, net, owner, id, title)
 {
 	// Assign document content
 	basic_document_info<selector_type>::assign_document();
+	// Create initial content
+	basic_document_info<selector_type>::
+		m_document->insert(0, content, NULL);
 
 	// Create jupiter server implementation
 	m_jupiter.reset(new jupiter_server(
@@ -180,10 +183,7 @@ basic_server_document_info<selector_type>::basic_server_document_info(
 
 	// Owner is subscribed implicitely
 	if(owner != NULL)
-	{
-		basic_document_info<selector_type>::user_subscribe(*owner);
-		m_jupiter->client_add(*owner);
-	}
+		user_subscribe(*owner);
 
 	// Connect to signals
 	m_jupiter->local_event().connect(
