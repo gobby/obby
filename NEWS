@@ -2,11 +2,21 @@ libobby
 =======
 
 Version 0.2.0:
- [This version is NOT protocol compatible to 0.1.0]
- * Better win32 network handling
- * Internal improvements
- * Adjusted to the new features available in net6 (depends on 1.1.0)
- * Document synchronisation on request
+ * This version is *not* protocol compatible to 0.1.0!
+ * New features (in no particular order):
+   - Better win32 network handling
+   - Many internal improvements
+   - Adjusted to the new features available in net6 (depends on 1.1.0)
+   - Document synchronisation on request
+   - Global session passwords
+   - Basic user authentication to protect the nickname
+   - Localisation through GNU gettext
+ * Changes in the build system:
+   - New dependency on GNU MP: The GNU multi precision arithmetic library
+     provides big integers which are used to secure the password transmission
+     on the wire.
+   - New optional dependency on `howl': The howl library is used to provide
+     local network service publishing and discover through Zeroconf.
 
 Version 0.1.0:
  * Initial release
