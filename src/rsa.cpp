@@ -166,19 +166,12 @@ std::string obby::RSA::encrypt(const Key& key, const std::string& msg)
 {
 	mpz_class t;
 	std::string result;
-	// Well, we are using the reverse here mainly because 
-	// decrypt_num_to_str was easier this way. However, the
-	// reverse string here should probably be optimised. But
-	// please beware from breaking the things submitted over
-	// the wire or the protocol itself breaks just again.
-	std::string str(msg);
-	std::reverse(str.begin(), str.end() );
-	for(std::string::size_type i = 0; i < str.length(); ++i)
+	for(std::string::size_type i = msg.length(); i > 0; --i)
 	{
 		// Perhaps we could optimise here by checking the bit
 		// count of both numbers. [TODO]
 		t <<= 8;
-		t |= mpz_class(str[i]);
+		t |= mpz_class(msg[i - 1]);
 
 		// When the number gets bigger than the RSA modulus, we
 		// need to split it up, otherwise the algorithm fails.
@@ -187,7 +180,7 @@ std::string obby::RSA::encrypt(const Key& key, const std::string& msg)
 			t >>= 8;
 			encrypt_num_to_str(key, t, result);
 			result += '|'; // Separation of the values
-			t = str[i];
+			t = msg[i - 1];
 		}
 	}
 	encrypt_num_to_str(key, t, result);
