@@ -23,6 +23,7 @@
 #include <list>
 #include <sigc++/signal.h>
 #include <net6/non_copyable.hpp>
+#include <net6/main.hpp>
 #include "user.hpp"
 #include "document.hpp"
 #include "user_table.hpp"
@@ -167,6 +168,10 @@ protected:
 	 * ID counter is set to the new given document ID.
 	 */
 	virtual document& add_document(unsigned int id) = 0;
+
+	/** net6 main object to keep net6 initialised during the obby session.
+	 */
+	net6::main m_netkit;
 
 	/** User table to identify users through multiple obby sessions.
 	 */

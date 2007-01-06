@@ -56,7 +56,7 @@ const obby::document* obby::buffer::document_iterator::operator->() const
 }
 
 obby::buffer::buffer()
- : m_usertable(NULL)
+ : m_netkit(), m_usertable(NULL)
 {
 }
 
