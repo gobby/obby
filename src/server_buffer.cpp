@@ -16,6 +16,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "server_document.hpp"
 #include "server_buffer.hpp"
 
 obby::server_buffer::server_buffer()
@@ -48,18 +49,12 @@ void obby::server_buffer::select(unsigned int timeout)
 	m_server->select(timeout);
 }
 
-void obby::server_buffer::insert(position pos, const std::string& text)
+obby::document& obby::server_buffer::add_document(unsigned int id)
 {
-	// TODO: Insert to buffer
-	// TODO: Add to history
-	// TODO: Tell clients new revision
-}
-
-void obby::server_buffer::erase(position from, position to)
-{
-	// TODO: Delete from buffer
-	// TODO: Add to history
-	// TODO: Tell clients new revision
+	document* doc = new server_document(id, *m_server);
+	m_doc_counter = id;
+	m_doclist.push_back(doc);
+	return *doc;
 }
 
 obby::server_buffer::signal_join_type obby::server_buffer::join_event() const
@@ -90,11 +85,12 @@ void obby::server_buffer::on_login(net6::server::peer& peer,
 	int blue = pack.get_param(3).as_int();
 	user* new_user = add_user(peer, red, green, blue);
 
+	// TODO: Sync every document!
 	// Client logged in. Synchronise the complete buffer, but
 	// seperate it into multiple packets to not block other high-priority
 	// network packets like chat packets.
-	net6::packet init_sync("obby_sync_init");
-	init_sync << static_cast<int>(m_revision);
+/*	net6::packet init_sync("obby_sync_init");
+	init_sync << m_revision;
 	m_server->send(init_sync, peer);
 
 	std::string::size_type pos = 0, prev = 0;
@@ -111,7 +107,7 @@ void obby::server_buffer::on_login(net6::server::peer& peer,
 	m_server->send(line_sync, peer);
 
 	net6::packet final_sync("obby_sync_final");
-	m_server->send(final_sync, peer);
+	m_server->send(final_sync, peer);*/
 
 	m_signal_login.emit(*new_user);
 }
@@ -142,49 +138,21 @@ void obby::server_buffer::on_data(const net6::packet& pack,
 		record* rec = record::from_packet(pack);
 		if(!rec) return;
 
-		// Look for wished revision
-		std::list<record*>::iterator iter;
-		for(iter = m_history.begin(); iter != m_history.end(); ++ iter)
-			if( (*iter)->get_revision() == rec->get_revision() )
-				break;
-
-		// Wished Revision does not exist
-		if(iter == m_history.end() && rec->get_revision() != 0)
-			return;
-
-		// Apply newer Revision on the new record
-		while(iter != m_history.begin() )
-		{
-			-- iter;
-
-			if( (*iter)->get_from() != rec->get_from() )
-				(*iter)->apply(*rec);
-		}
-
-		// Ignore record if it got invalid
-		if(!rec->is_valid() )
-		{
-			delete rec;
-			return;
-		}
-
-		// Apply record on buffer
-		rec->apply(*this);
-
-		// Increment revision
-		rec->set_revision(++ m_revision);
-
 		// Set correct sender
 		rec->set_from(peer.get_id() );
 
-		// Add change to history
-		m_history.push_front(rec);
-
-		// Tell clients
-		m_server->send(rec->to_packet() );
-
-		// Emit changed signal
-		rec->emit_buffer_signal(*this);
+		// TODO: Find correct document
+		document* doc;
+		
+		try
+		{
+			doc->on_net_record(*rec);
+		}
+		catch(...)
+		{
+			delete doc;
+			throw;
+		}
 	}
 }
 
@@ -224,7 +192,7 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 void obby::server_buffer::on_extend(net6::server::peer& peer,
                                     net6::packet& pack)
 {
-	user* ideq_user = find(peer.get_id() );
+	user* ideq_user = find_user(peer.get_id() );
 	if(!ideq_user) return;
 
 	pack << ideq_user->get_red() << ideq_user->get_green()
@@ -246,4 +214,3 @@ void obby::server_buffer::register_signal_handlers()
 	m_server->data_event().connect(
 		sigc::mem_fun(*this, &server_buffer::on_data) );
 }
-

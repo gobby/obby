@@ -26,27 +26,30 @@
 namespace obby
 {
 
+class document;
+
 class delete_record : public record
 {
 public:
 	delete_record(position pos, const std::string& text,
-	              unsigned int revision, unsigned int from);
+	              unsigned int document, unsigned int revision,
+	              unsigned int from);
 	delete_record(position pos, const std::string& text,
-	              unsigned int revision, unsigned int from,
-	              unsigned int id);
+	              unsigned int document, unsigned int revision,
+	              unsigned int from, unsigned int id);
 	~delete_record();
 
 	virtual record* clone() const;
 
-	virtual void apply(buffer& buf) const;
+	virtual void apply(document& doc) const;
 	virtual void apply(record& rec) const;
 	virtual net6::packet to_packet();
-	virtual record* reverse(const buffer& buf);
+	virtual record* reverse();
 
 	virtual void on_insert(position pos, const std::string& text);
 	virtual void on_delete(position from, position to);
 
-	virtual void emit_buffer_signal(const buffer& buf) const;
+	virtual void emit_document_signal(const document& doc) const;
 
 	position get_begin() const;
 	position get_end() const;

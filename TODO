@@ -10,7 +10,7 @@ Serious:
 
 Important:
  * Implement automatic service announcement and discovery.
- * Implement multiple document interface
+ * Fix initial syncing
  * Implement chat 
  * Implement user colorizing
 

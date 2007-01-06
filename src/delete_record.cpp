@@ -22,15 +22,15 @@
 #include "buffer.hpp"
 
 obby::delete_record::delete_record(position pos, const std::string& text,
-                                   unsigned int revision, unsigned int from)
- : record(revision, from), m_pos(pos), m_text(text)
+                                   unsigned int document, unsigned int revision,                                   unsigned int from)
+ : record(document, revision, from), m_pos(pos), m_text(text)
 {
 }
 
 obby::delete_record::delete_record(position pos, const std::string& text,
-                                   unsigned int revision, unsigned int from,
-                                   unsigned int id)
- : record(revision, from, id), m_pos(pos), m_text(text)
+                                   unsigned int document, unsigned int revision,
+                                   unsigned int from, unsigned int id)
+ : record(document, revision, from, id), m_pos(pos), m_text(text)
 {
 }
 
@@ -43,10 +43,10 @@ obby::record* obby::delete_record::clone() const
 	return new delete_record(m_pos, m_text, m_revision, m_from, m_id);
 }
 
-void obby::delete_record::apply(buffer& buf) const
+void obby::delete_record::apply(document& doc) const
 {
-	assert(buf.get_sub_buffer(m_pos, m_pos + m_text.length()) == m_text);
-	buf.erase_nosync(m_pos, m_pos + m_text.length() );
+	assert(doc.get_sub_buffer(m_pos, m_pos + m_text.length()) == m_text);
+	doc.erase_nosync(m_pos, m_pos + m_text.length() );
 }
 
 void obby::delete_record::apply(record& rec) const
@@ -57,15 +57,15 @@ void obby::delete_record::apply(record& rec) const
 net6::packet obby::delete_record::to_packet()
 {
 	net6::packet pack("obby_record");
-	pack << "delete" << static_cast<int>(m_id)
-	     << static_cast<int>(m_revision) << static_cast<int>(m_from)
-	     << static_cast<int>(m_pos) << m_text;
+	pack << "delete" << m_id << m_document << m_revision << m_from
+	     << m_pos << m_text;
 	return pack;
 }
 
-obby::record* obby::delete_record::reverse(const buffer& buf)
+obby::record* obby::delete_record::reverse()
 {
-	return new insert_record(m_pos, m_text, m_revision, m_from, m_id);
+	return new insert_record(m_pos, m_text, m_document,
+	                         m_revision, m_from, m_id);
 }
 
 void obby::delete_record::on_insert(position pos, const std::string& text)
@@ -124,8 +124,8 @@ const std::string& obby::delete_record::get_text() const
 	return m_text;
 }
 
-void obby::delete_record::emit_buffer_signal(const buffer& buf) const
+void obby::delete_record::emit_document_signal(const document& doc) const
 {
-	buf.delete_event().emit(*this);
+	doc.delete_event().emit(*this);
 }
 

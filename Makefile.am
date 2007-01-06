@@ -14,6 +14,10 @@ pkginclude_HEADERS = \
 	inc/record.hpp \
 	inc/delete_record.hpp \
 	inc/insert_record.hpp \
+	inc/document.hpp \
+	inc/client_document.hpp \
+	inc/server_document.hpp \
+	inc/host_document.hpp \
 	inc/buffer.hpp \
 	inc/client_buffer.hpp \
 	inc/server_buffer.hpp \
@@ -27,6 +31,10 @@ libobby_la_SOURCES = \
 	src/record.cpp \
 	src/insert_record.cpp \
 	src/delete_record.cpp \
+	src/document.cpp \
+	src/client_document.cpp \
+	src/server_document.cpp \
+	src/host_document.cpp \
 	src/buffer.cpp \
 	src/client_buffer.cpp \
 	src/server_buffer.cpp \

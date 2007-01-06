@@ -17,6 +17,7 @@
  */
 
 #include <cassert>
+#include "host_document.hpp"
 #include "host_buffer.hpp"
 
 obby::host_buffer::host_buffer()
@@ -57,3 +58,11 @@ const obby::user& obby::host_buffer::get_self() const
 	return *m_self;
 }
 
+obby::document& obby::host_buffer::add_document(unsigned int id)
+{
+	net6::host* host = static_cast<net6::host*>(m_server);
+	document* doc = new host_document(id, *host);
+	m_doc_counter = id;
+	m_doclist.push_back(doc);
+	return *doc;
+}

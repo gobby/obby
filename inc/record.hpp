@@ -26,25 +26,27 @@
 namespace obby
 {
 
-class buffer;
+class document;
 
 class record
 {
 public:
-	record(unsigned int revision, unsigned int from);
-	record(unsigned int revision, unsigned int from, unsigned int id);
+	record(unsigned int document, unsigned int revision, unsigned int from);
+	record(unsigned int document, unsigned int revision, unsigned int from,
+	       unsigned int id);
 	~record();
 
 	virtual record* clone() const = 0;
 	
-	virtual void apply(buffer& buf) const = 0;
+	virtual void apply(document& doc) const = 0;
 	virtual void apply(record& rec) const = 0;
 	virtual net6::packet to_packet() = 0;
-	virtual record* reverse(const buffer& buf) = 0;
+	virtual record* reverse() = 0;
 
 	bool is_valid() const;
 
 	unsigned int get_id() const;
+	unsigned int get_document() const;
 	unsigned int get_from() const;
 	unsigned int get_revision() const;
 
@@ -54,13 +56,14 @@ public:
 	virtual void on_insert(position pos, const std::string& text) = 0;
 	virtual void on_delete(position from, position to) = 0;
 
-	virtual void emit_buffer_signal(const buffer& buf) const = 0;
+	virtual void emit_document_signal(const document& doc) const = 0;
 
 	static record* from_packet(const net6::packet& pack);
 protected:
 	void invalidate();
 
 	unsigned int m_id;
+	unsigned int m_document;
 	unsigned int m_revision;
 	unsigned int m_from;
 	bool m_valid;

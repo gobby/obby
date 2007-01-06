@@ -28,24 +28,46 @@
 namespace obby
 {
 
+/** Buffer that serves as (dedicated) server. It listens for incoming
+ * connections from client_buffers and synchronizes their changes.
+ */
+	
 class server_buffer : public buffer, public sigc::trackable
 {
 public: 
+	// TODO: Make a differnce for part and disconnect and join and connect
 	typedef sigc::signal<void, net6::server::peer&> signal_join_type;
 	typedef sigc::signal<void, user&> signal_login_type;
 	typedef sigc::signal<void, net6::server::peer&> signal_part_type;
 
+	/** Creates a new server buffer listening on port <em>port</em>.
+	 */
 	server_buffer(unsigned int port);
 	virtual ~server_buffer();
 
+	/** Waits indefinitely for incoming events.
+	 */
 	void select();
+
+	/** Waits for incoming events or until <em>timeout</em> expires.
+	 */
 	void select(unsigned int timeout);
+	
+	/** Adds a new document with the given ID to the buffer. The internal
+	 * ID counter is set to the new given document ID.
+	 */
+	virtual document& add_document(unsigned int id);
 
-	virtual void insert(position pos, const std::string& text);
-	virtual void erase(position from, position end);
-
+	/** Signal which will be emitted if a new client has connected.
+	 */
 	signal_join_type join_event() const;
+
+	/** Signal which will be emitted if a new client has logged in.
+	 */
 	signal_login_type login_event() const;
+
+	/** Signal which will be emitted if a client has quit.
+	 */
 	signal_part_type part_event() const;
 
 protected:
@@ -78,4 +100,4 @@ protected:
 
 }
 
-#endif // _OBBY_SERVER_BUFFER_HPP_
+#endif // _OBBY_SERVER_DOCUMENT_HPP_

@@ -22,59 +22,67 @@
 #include <string>
 #include <list>
 #include <sigc++/signal.h>
-#include "position.hpp"
 #include "user.hpp"
-#include "record.hpp"
-#include "insert_record.hpp"
-#include "delete_record.hpp"
+#include "document.hpp"
 
 namespace obby
 {
 
+/** Abstract base class for obby buffers. A buffer contains multiple documents
+ * that are synchronized through many users and a user list.
+ */
+
 class buffer
 {
 public:
-	typedef sigc::signal<void, const insert_record&> signal_insert_type;
-	typedef sigc::signal<void, const delete_record&> signal_delete_type;
+	typedef sigc::signal<void, document&> signal_insert_doc_type;
+	typedef sigc::signal<void, document&> signal_remove_doc_type;
 
 	buffer();
 	virtual ~buffer();
 
-	const std::string& get_whole_buffer() const;
-	std::string get_sub_buffer(position from, position to) const;
+	/** Adds a new document to the buffer and uses the internal ID counter
+	 * to assign a unique ID to it.
+	 */
+	document& add_document();
 
-	virtual void insert(position pos, const std::string& text) = 0;
-	virtual void erase(position from, position to) = 0;
+	/** Adds a new document with the given ID to the buffer. The internal
+	 * ID counter is set to the new given document ID.
+	 */
+	virtual document& add_document(unsigned int id) = 0;
 
-	void insert_nosync(position pos, const std::string& text);
-	void erase_nosync(position from, position to);
+	/** Looks for a document with the given ID.
+	 */
+	document* find_document(unsigned int id) const;
 
-	signal_insert_type insert_event() const;
-	signal_delete_type delete_event() const;
+	/** Looks for a user with the given ID.
+	 */
+	user* find_user(unsigned int id) const;
 
-	std::string get_line(unsigned int index) const;
-	unsigned int get_line_count() const;
-	unsigned int get_line_position(unsigned int line) const { return m_lines[line]; }
+	/** Looks for a user with the given user name.
+	 */
+	user* find_user(const std::string& name) const;
 
-	user* find(unsigned int id) const;
-	user* find(const std::string& name) const;
+	/** Signal which will be emitted when another participiant in the
+	 * obby session has created a new document.
+	 */
+	signal_insert_doc_type insert_doc_event() const;
 
-	position coord_to_position(unsigned int x, unsigned int y) const;
-	void position_to_coord(position pos, unsigned int& x,
-	                       unsigned int& y) const;
+	/** Signal which will be emitted when another participiant in the
+	 * obby session has removed an existing document.
+	 */
+	signal_remove_doc_type remove_doc_event() const;
 protected:
-	user* add_user(net6::peer& peer, int red, int green, int blue);
+	/** Internal function to add a new user to the user list.
+	 */
+	virtual user* add_user(net6::peer& peer, int red, int green, int blue);
 
-	std::list<record*> m_history;
-	unsigned int m_revision;
-
-	std::string m_buffer;
-	std::vector<position> m_lines;
-
+	unsigned int m_doc_counter;
+	std::list<document*> m_doclist;
 	std::list<user*> m_userlist;
 
-	signal_insert_type m_signal_insert;
-	signal_delete_type m_signal_delete;
+	signal_insert_doc_type signal_insert_doc;
+	signal_remove_doc_type signal_remove_doc;
 };
 
 }

@@ -47,6 +47,11 @@ public:
 	/** Returns the local user.
 	 */
 	const user& get_self() const;
+
+	/** Adds a new document with the given ID to the buffer. The internal
+	 * ID counter is set to the new given document ID.
+	 */
+	virtual document& add_document(unsigned int id);
 protected:
 	/** Private constructor used by derived classed. It does not create
 	 * a net6::host object to allow derived classed to create derived

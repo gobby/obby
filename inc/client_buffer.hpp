@@ -32,6 +32,9 @@
 namespace obby
 {
 
+/** Buffer for establish a connection to a server_buffer.
+ */
+	
 class client_buffer : public buffer, public sigc::trackable
 {
 public:
@@ -41,40 +44,89 @@ public:
 	typedef sigc::signal<void>                     signal_close_type;
 	typedef sigc::signal<void, const std::string&> signal_login_failed_type;
 	
+	/** Creates a new client_buffer and connects to <em>hostname</em>
+	 * at <em>port</em>
+	 */
 	client_buffer(const std::string& hostname, unsigned int port);
 	virtual ~client_buffer();
 	
+	/** Sends a login request for this client.
+	 * @param name User name for this client.
+	 * @param red Red color component for the user color.
+	 * @param green Green color component for the user color.
+	 * @param blue Blue color component for the user color.
+	 */
 	void login(const std::string& name, int red, int green, int blue);
 
+	/** Returns the local user.
+	 */
 	user& get_self();
+
+	/** Returns the local user.
+	 */
 	const user& get_self() const;
 
+	/** Waits indefinitly for incoming events.
+	 */
 	void select();
+
+	/** Waits for incoming events or <em>timeout</em> expired.
+	 */
 	void select(unsigned int timeout);
 
-	virtual void insert(position pos, const std::string& text);
-	virtual void erase(position from, position to);
+        /** Adds a new document with the given ID to the buffer. The internal
+	 * ID counter is set to the new given document ID.
+	 */
+	virtual document& add_document(unsigned int id);
 
+	// TODO: Move join_event and part_event to buffer?
+	/** Signal which will be emitted if a new client joined the session.
+	 */
 	signal_join_type join_event() const;
+
+	/** Signal which will be emitted if the initial synchronization of
+	 * the documents has been completed.
+	 */
 	signal_sync_type sync_event() const;
+
+	/** Signal which will be emitted if another client has quit.
+	 */
 	signal_part_type part_event() const;
+
+	/** Signal which will be emitted if the connection to the server
+	 * has been lost.
+	 */
 	signal_close_type close_event() const;
+
+	/** Signal which will be emitted if a login request did not succeed.
+	 */
 	signal_login_failed_type login_failed_event() const;
 
 protected:
+	/** Private constructor which may be used by derived objects from
+	 * client_buffer to create a derived vesion of net6::client.
+	 */
+	client_buffer();
+
+	/** Registers the signal handlers for the net6::client object. It may
+	 * be used by derived classed to register these signal handlers.
+	 */
+	void register_signal_handlers();
+
 	void on_join(net6::client::peer& peer, const net6::packet& pack);
 	void on_part(net6::client::peer& peer);
 	void on_close();
 	void on_data(const net6::packet& pack);
 	void on_login_failed(const std::string& reason);
 
+	// TODO: Sync all documents
 	void on_net_record(const net6::packet& pack);
 	void on_net_sync_init(const net6::packet& pack);
 	void on_net_sync_line(const net6::packet& pack);
 	void on_net_sync_final(const net6::packet& pack);
 
 	std::list<record*> m_unsynced;
-	net6::client m_connection;
+	net6::client* m_client;
 	user* m_self;
 
 	signal_join_type m_signal_join;
