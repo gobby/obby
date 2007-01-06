@@ -19,6 +19,8 @@
 #ifndef _OBBY_CLIENT_BUFFER_HPP_
 #define _OBBY_CLIENT_BUFFER_HPP_
 
+#include <net6/default_accumulator.hpp>
+#include <net6/client.hpp>
 #include "error.hpp"
 #include "rsa.hpp"
 #include "local_buffer.hpp"
@@ -34,13 +36,18 @@ class client_buffer : public local_buffer,
                       public sigc::trackable
 {
 public:
+	typedef net6::default_accumulator<bool, false> password_accumulator;
+
 	typedef sigc::signal<void>               signal_welcome_type;
 	typedef sigc::signal<void, login::error> signal_login_failed_type;
-	typedef sigc::signal<bool, std::string&> signal_global_password_type;
-	typedef sigc::signal<bool, std::string&> signal_user_password_type;
 	typedef sigc::signal<void, unsigned int> signal_sync_init_type;
 	typedef sigc::signal<void>               signal_sync_final_type;
 	typedef sigc::signal<void>               signal_close_type;
+
+	typedef sigc::signal<bool, std::string&>
+		::accumulated<password_accumulator> signal_global_password_type;
+	typedef sigc::signal<bool, std::string&>
+		::accumulated<password_accumulator> signal_user_password_type;
 
 	/** Creates a new client_buffer and connects to <em>hostname</em>
 	 * at <em>port</em>
