@@ -243,9 +243,9 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 	std::list<user*>::iterator iter;
 	for(iter = m_userlist.begin(); iter != m_userlist.end(); ++ iter)
 	{
-		if(abs(red   - (*iter)->get_red()) < 32 &&
-		   abs(green - (*iter)->get_green()) < 32 &&
-		   abs(blue  - (*iter)->get_blue()) < 32)
+		if((abs(red   - (*iter)->get_red()) +
+		    abs(green - (*iter)->get_green()) +
+		    abs(blue  - (*iter)->get_blue())) < 32)
 		{
 			reason = "Color is already in use";
 			return false;
