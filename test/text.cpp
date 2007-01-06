@@ -231,7 +231,8 @@ namespace
 		{ "[1]foo[2]bar[1]baz", 3, 3, "[1]foobaz" },
 		{ "[1]foo[2]bar[1]baz", 4, 3, "[1]foo[2]b[1]az" },
 		{ "[1]foo[2]b[3]az[1]o", 2, 5, "[1]fo" },
-		{ "[1]foo[2]bar[3]baz[2]qux[3]fo[2]gneh[1]grah", 0, 10, "[2]ux[3]fo[2]gneh[1]grah" }
+		{ "[1]foo[2]bar[3]baz[2]qux[3]fo[2]gneh[1]grah", 0, 10, "[2]ux[3]fo[2]gneh[1]grah" },
+		{ "[1]foo[2]bar", 2, obby::text::npos, "[1]fo" }
 	};
 
 	append_test APPEND_TESTS[] = {
@@ -318,8 +319,9 @@ namespace
 	}
 
 	template<typename Test>
-	void test_suite(const Test* tests, std::size_t num)
+	bool test_suite(const Test* tests, std::size_t num)
 	{
+		bool result = true;
 		for(std::size_t i = 0; i < num; ++ i)
 		{
 			try
@@ -332,22 +334,32 @@ namespace
 				          << " failed:\n" << e.what()
 				          << "\n" << std::endl;
 
+				result = false;
 				continue;
 			}
 
 			std::cerr << Test::NAME << " test #" << (i + 1)
 			          << " passed" << std::endl;
 		}
+
+		return result;
 	}
 }
 
 int main()
 {
-	test_suite(INSERT_TESTS, ARRAY_SIZE(INSERT_TESTS) );
-	test_suite(SUBSTR_TESTS, ARRAY_SIZE(SUBSTR_TESTS) );
-	test_suite(ERASE_TESTS, ARRAY_SIZE(ERASE_TESTS) );
-	test_suite(APPEND_TESTS, ARRAY_SIZE(APPEND_TESTS) );
-	test_suite(PREPEND_TESTS, ARRAY_SIZE(PREPEND_TESTS) );
+	bool result = true;
 
-	return EXIT_SUCCESS;
+	result = test_suite(INSERT_TESTS, ARRAY_SIZE(INSERT_TESTS) ) &&
+		result;
+	result = test_suite(SUBSTR_TESTS, ARRAY_SIZE(SUBSTR_TESTS) ) &&
+		result;
+	result = test_suite(ERASE_TESTS, ARRAY_SIZE(ERASE_TESTS) ) &&
+		result;
+	result = test_suite(APPEND_TESTS, ARRAY_SIZE(APPEND_TESTS) ) &&
+		result;
+	result = test_suite(PREPEND_TESTS, ARRAY_SIZE(PREPEND_TESTS) ) &&
+		result;
+
+	return result ? EXIT_SUCCESS : EXIT_FAILURE;
 }

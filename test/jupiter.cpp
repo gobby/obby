@@ -282,18 +282,16 @@ int main(int argc, char* argv[])
 	std::cout << "See the file \"base_file\" for how to build tests" << std::endl;
 	std::cout << std::endl;
 
-	if(argc < 2)
-	{
-		std::cerr << "Usage: " << argv[0] << " test-file" << std::endl;
-		return EXIT_FAILURE;
-	}
+	std::string filename = "base_file";
+	if(argc >= 2) filename = argv[1];
 
-	std::ifstream file(argv[1]);
+	std::ifstream file(filename.c_str());
 	std::string line;
 	unsigned int count = 0;
 	unsigned int success = 0;
 	unsigned int line_num = 0;
 
+	bool result = true;
 	while(std::getline(file, line) )
 	{
 		++ line_num;
@@ -312,6 +310,7 @@ int main(int argc, char* argv[])
 		catch(std::exception& e)
 		{
 			std::cout << e.what() << std::endl;
+			result = false;
 			continue;
 		}
 
@@ -319,6 +318,5 @@ int main(int argc, char* argv[])
 		++ success;
 	}
 
-	std::cout << success << " out of " << count << " tests passed!" << std::endl;
-	return EXIT_SUCCESS;
+	return result ? EXIT_SUCCESS : EXIT_FAILURE;
 }

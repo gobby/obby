@@ -28,5 +28,7 @@ int main()
 	
 	while(true)
 		zeroconf.select();
+
+	return EXIT_SUCCESS;
 }
 
