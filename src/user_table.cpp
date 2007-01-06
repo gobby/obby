@@ -72,7 +72,7 @@ void obby::user_table::deserialise(const serialise::object& obj)
 		else
 		{
 			// TODO: unexpected_child_error
-			format_string str("Unexpected child node: '%0%'");
+			format_string str(_("Unexpected child node: '%0%'") );
 			str << iter->get_name();
 			throw serialise::error(str.str(), iter->get_line() );
 		}
