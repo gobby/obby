@@ -12,6 +12,10 @@ Version 0.4.0:
  * Removal of SHA1 and RSA routines, thus losing the GMP dependency
  * New command subsystem
  * Added basic IPv6 support
+ * New translations:
+   - Catalan (complete)
+   - Spanish (complete)
+   - Dutch (partial)
 
 Version 0.3.0:
  * This version is *not* protocol, ABI- or API compatible to the 0.2.x series!
