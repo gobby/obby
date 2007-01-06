@@ -54,6 +54,10 @@ public:
 	> document_iterator;
 
 	// Signal types
+	typedef sigc::signal<void, unsigned int>
+		signal_sync_init_type;
+	typedef sigc::signal<void>
+		signal_sync_final_type;
 	typedef sigc::signal<void, const user&>
 		signal_user_join_type;
 	typedef sigc::signal<void, const user&>
@@ -132,6 +136,16 @@ public:
 	bool check_colour(const colour& colour,
 	                  const user* ignore = NULL) const;
 
+	/** Signal which will be emitted when the initial syncrhonisation
+	 * begins, thus if the client has logged in successfully.
+	 */
+	signal_sync_init_type sync_init_event() const;
+
+	/** Signal which will be emitted when the initial synchronisation of
+	 * the user list and the document list has been completed.
+	 */
+	signal_sync_final_type sync_final_event() const;
+
 	/** Signal which will be emitted if a new user has joined the obby
 	 * session.
 	 */
@@ -175,6 +189,9 @@ protected:
 	/** Internal function to clear the whole document list.
 	 */
 	void document_clear();
+
+	signal_sync_init_type m_signal_sync_init;
+	signal_sync_final_type m_signal_sync_final;
 
 	signal_user_join_type m_signal_user_join;
 	signal_user_part_type m_signal_user_part;
@@ -365,6 +382,20 @@ typename basic_buffer<selector_type>::document_size_type
 basic_buffer<selector_type>::document_count() const
 {
 	return m_docs.size();
+}
+
+template<typename selector_type>
+typename basic_buffer<selector_type>::signal_sync_init_type
+basic_buffer<selector_type>::sync_init_event() const
+{
+	        return m_signal_sync_init;
+}
+
+template<typename selector_type>
+typename basic_buffer<selector_type>::signal_sync_final_type
+basic_buffer<selector_type>::sync_final_event() const
+{
+	        return m_signal_sync_final;
 }
 
 template<typename selector_type>

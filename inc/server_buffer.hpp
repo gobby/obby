@@ -250,6 +250,8 @@ void basic_server_buffer<selector_type>::open(unsigned int port)
 
 	basic_buffer<selector_type>::m_net.reset(new_net(port) );
 	register_signal_handlers();
+	basic_buffer<selector_type>::m_signal_sync_init.emit(0);
+	basic_buffer<selector_type>::m_signal_sync_final.emit();
 }
 
 template<typename selector_type>
@@ -262,6 +264,7 @@ void basic_server_buffer<selector_type>::open(const std::string& session,
 	// Open server
 	basic_buffer<selector_type>::m_net.reset(new_net(port) );
 	register_signal_handlers();
+	basic_buffer<selector_type>::m_signal_sync_init.emit(0);
 
 	// Deserialise file
 	serialise::parser parser;
@@ -321,6 +324,8 @@ void basic_server_buffer<selector_type>::open(const std::string& session,
 			throw serialise::error(str.str(), iter->get_line() );
 		}
 	}
+
+	basic_buffer<selector_type>::m_signal_sync_final.emit();
 }
 
 template<typename selector_type>
@@ -583,7 +588,7 @@ void basic_server_buffer<selector_type>::on_join(const net6::user& user6)
 	net6::packet final_pack("obby_sync_final");
 	net6_server().send(final_pack, user6);
 
-	// Forward join message to docuemnts
+	// Forward join message to documents
 	// TODO: Let the documents connect to signal_user_join
 	for(typename basic_buffer<selector_type>::document_iterator iter =
 		basic_buffer<selector_type>::document_begin();

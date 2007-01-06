@@ -56,10 +56,6 @@ public:
 		signal_welcome_type;
 	typedef sigc::signal<void, login::error>
 		signal_login_failed_type;
-	typedef sigc::signal<void, unsigned int>
-		signal_sync_init_type;
-	typedef sigc::signal<void>
-		signal_sync_final_type;
 	typedef sigc::signal<void>
 		signal_close_type;
 
@@ -173,16 +169,6 @@ public:
 	 */
 	signal_welcome_type welcome_event() const;
 
-	/** Signal which will be emitted if the initial synchronisation begins.
-	 * This means, that the client has logged in successfully.
-	 */
-	signal_sync_init_type sync_init_event() const;
-
-	/** Signal which will be emitted if the initial synchronisation of the
-	 * user list and the document list has been completed.
-	 */
-	signal_sync_final_type sync_final_event() const;
-
 	/** Signal which will be emitted if the connection to the server
 	 * has been lost.
 	 */
@@ -288,8 +274,6 @@ protected:
 	connection_settings m_settings;
 
 	signal_welcome_type m_signal_welcome;
-	signal_sync_init_type m_signal_sync_init;
-	signal_sync_final_type m_signal_sync_final;
 	signal_close_type m_signal_close;
 	signal_login_failed_type m_signal_login_failed;
 
@@ -476,20 +460,6 @@ typename basic_client_buffer<selector_type>::signal_welcome_type
 basic_client_buffer<selector_type>::welcome_event() const
 {
 	return m_signal_welcome;
-}
-
-template<typename selector_type>
-typename basic_client_buffer<selector_type>::signal_sync_init_type
-basic_client_buffer<selector_type>::sync_init_event() const
-{
-	return m_signal_sync_init;
-}
-
-template<typename selector_type>
-typename basic_client_buffer<selector_type>::signal_sync_final_type
-basic_client_buffer<selector_type>::sync_final_event() const
-{
-	return m_signal_sync_final;
 }
 
 template<typename selector_type>
@@ -848,7 +818,7 @@ template<typename selector_type>
 void basic_client_buffer<selector_type>::
 	on_net_sync_init(const net6::packet& pack)
 {
-	m_signal_sync_init.emit(
+	basic_buffer<selector_type>::m_signal_sync_init.emit(
 		pack.get_param(0).net6::parameter::as<unsigned int>()
 	);
 }
@@ -909,7 +879,7 @@ template<typename selector_type>
 void basic_client_buffer<selector_type>::
 	on_net_sync_final(const net6::packet& pack)
 {
-	m_signal_sync_final.emit();
+	basic_buffer<selector_type>::m_signal_sync_final.emit();
 }
 
 template<typename selector_type>

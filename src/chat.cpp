@@ -271,6 +271,20 @@ void obby::chat::add_message(message* msg)
 	m_signal_message.emit(*msg);
 }
 
+void obby::chat::on_sync_init(unsigned int)
+{
+	m_user_join_conn.block();
+	m_user_part_conn.block();
+	m_document_insert_conn.block();
+}
+
+void obby::chat::on_sync_final()
+{
+	m_user_join_conn.unblock();
+	m_user_part_conn.unblock();
+	m_document_insert_conn.unblock();
+}
+
 void obby::chat::on_user_join(const user& user)
 {
 	if(~user.get_flags() & user::flags::CONNECTED)
@@ -287,3 +301,25 @@ void obby::chat::on_user_part(const user& user)
 	str << user.get_name();
 	add_message(new system_message(str.str(), std::time(NULL)) );
 }
+
+void obby::chat::on_document_insert(document_info& document)
+{
+	const user* user = document.get_owner();
+	std::string localised_str;
+	// The document has no owner, it was created by the server.
+	if(user != NULL)
+	{
+		obby::format_string str(
+			_("%0% has created a new document: %1%") );
+		str << (*user).get_name() << document.get_title();
+		localised_str = str.str();
+	}
+	else
+	{
+		obby::format_string str(_("A new document was created: %0%") );
+		str << document.get_title();
+		localised_str = str.str();
+	}
+	add_message(new system_message(localised_str, std::time(NULL)) );
+}
+

@@ -22,8 +22,10 @@
 #include <ctime>
 #include <list>
 #include <sigc++/signal.h>
+#include <sigc++/connection.h>
 #include "user.hpp"
 #include "user_table.hpp"
+#include "document_info.hpp"
 
 namespace obby
 {
@@ -121,10 +123,16 @@ public:
 	chat(const buffer_type& buffer, unsigned int max_messages):
 		m_max_messages(max_messages)
 	{
-		buffer.user_join_event().connect(
+		buffer.sync_init_event().connect(
+			sigc::mem_fun(*this, &chat::on_sync_init) );
+		buffer.sync_final_event().connect(
+			sigc::mem_fun(*this, &chat::on_sync_final) );
+		m_user_join_conn = buffer.user_join_event().connect(
 			sigc::mem_fun(*this, &chat::on_user_join) );
-		buffer.user_part_event().connect(
+		m_user_part_conn = buffer.user_part_event().connect(
 			sigc::mem_fun(*this, &chat::on_user_part) );
+		m_document_insert_conn = buffer.document_insert_event().connect(
+			sigc::mem_fun(*this, &chat::on_document_insert) );
 	}
 
 	~chat();
@@ -168,15 +176,24 @@ public:
 protected:
 	void add_message(message* msg);
 
+	void on_sync_init(unsigned int);
+	void on_sync_final();
+
 	void on_user_join(const user& user);
 	void on_user_part(const user& user);
+	void on_document_insert(document_info& document);
 
 	unsigned int m_max_messages;
 	std::list<message*> m_messages;
 
 	signal_message_type m_signal_message;
+
+	sigc::connection m_user_join_conn;
+	sigc::connection m_user_part_conn;
+	sigc::connection m_document_insert_conn;
 };
 
 } // namespace obby
 
 #endif // _OBBY_CHAT_HPP_
+
