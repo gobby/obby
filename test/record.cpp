@@ -1,7 +1,8 @@
 #include <iostream>
-#include <libobby/record.hpp>
-#include <libobby/insert_record.hpp>
-#include <libobby/delete_record.hpp>
+
+#include "record.hpp"
+#include "insert_record.hpp"
+#include "delete_record.hpp"
 
 unsigned int count = 0;
 

@@ -1,12 +1,12 @@
 #include <iostream>
 #include <sigc++/bind.h>
 
-#include <libobby/record.hpp>
-#include <libobby/insert_record.hpp>
-#include <libobby/delete_record.hpp>
-#include <libobby/buffer.hpp>
-#include <libobby/client_buffer.hpp>
-#include <libobby/server_buffer.hpp>
+#include "record.hpp"
+#include "insert_record.hpp"
+#include "delete_record.hpp"
+#include "buffer.hpp"
+#include "client_buffer.hpp"
+#include "server_buffer.hpp"
 
 int port = 6521;
 bool quit = false;
