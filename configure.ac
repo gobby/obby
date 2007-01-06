@@ -82,13 +82,16 @@ AC_CACHE_SAVE
 
 # WIN32 build checks
 AC_MSG_CHECKING([whether to enable WIN32 specific flags])
-if test "x$host_os" = "xmingw32" ; then
-        win32=true
-        AC_MSG_RESULT([yes])
-else
-        win32=false
-        AC_MSG_RESULT([no])
-fi
+case "$host_os" in
+*mingw*)
+	win32=true
+	AC_MSG_RESULT([yes])
+	;;
+*)
+	win32=false
+	AC_MSG_RESULT([no])
+	;;
+esac
 AM_CONDITIONAL(WIN32, test x$win32 = xtrue)
 
 # Allow to disable the build of the tests.
