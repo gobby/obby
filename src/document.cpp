@@ -54,7 +54,7 @@ std::string obby::document::get_whole_buffer() const
 	for(iter = m_lines.begin(); iter != m_lines.end(); ++ iter)
 	{
 		content += *iter;
-		content += "\n";
+		content += (iter != m_lines.end() - 1) ? "\n" : "";
 	}
 	return content;
 }
