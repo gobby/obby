@@ -89,6 +89,10 @@ public:
 	basic_buffer();
 	virtual ~basic_buffer();
 
+	/** @brief Returns whether the session is open.
+	 */
+	virtual bool is_open() const;
+
 	/** Returns the user table associated with the buffer.
 	 */
 	const user_table& get_user_table() const;
@@ -279,6 +283,12 @@ template<typename Document, typename Selector>
 basic_buffer<Document, Selector>::~basic_buffer()
 {
 	document_clear();
+}
+
+template<typename Document, typename Selector>
+bool basic_buffer<Document, Selector>::is_open() const
+{
+	return m_net.get() != NULL;
 }
 
 template<typename Document, typename Selector>

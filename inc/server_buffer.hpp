@@ -80,7 +80,7 @@ public:
 
 	/** Returns true if the obby session has been opened.
 	 */
-	bool is_open() const;
+	//bool is_open() const;
 
 	/** Changes the global password for this session.
 	 */
@@ -273,7 +273,7 @@ basic_server_buffer<Document, Selector>::
 template<typename Document, typename Selector>
 void basic_server_buffer<Document, Selector>::open(unsigned int port)
 {
-	if(is_open() )
+	if(basic_buffer<Document, Selector>::is_open() )
 	{
 		throw std::logic_error(
 			"obby::basic_server_buffer::open:\n"
@@ -298,7 +298,7 @@ template<typename Document, typename Selector>
 void basic_server_buffer<Document, Selector>::open(const std::string& session,
                                                    unsigned int port)
 {
-	if(is_open() )
+	if(basic_buffer<Document, Selector>::is_open() )
 	{
 		throw std::logic_error(
 			"obby::basic_server_buffer::open:\n"
@@ -385,7 +385,7 @@ void basic_server_buffer<Document, Selector>::open(const std::string& session,
 template<typename Document, typename Selector>
 void basic_server_buffer<Document, Selector>::close()
 {
-	if(!is_open() )
+	if(!basic_buffer<Document, Selector>::is_open() )
 	{
 		throw std::logic_error(
 			"obby::basic_server_buffer::close:\n"
@@ -398,11 +398,13 @@ void basic_server_buffer<Document, Selector>::close()
 	session_close();
 }
 
+#if 0
 template<typename Document, typename Selector>
 bool basic_server_buffer<Document, Selector>::is_open() const
 {
 	return basic_buffer<Document, Selector>::m_net.get() != NULL;
 }
+#endif
 
 template<typename Document, typename Selector>
 void basic_server_buffer<Document, Selector>::
@@ -430,7 +432,7 @@ template<typename Document, typename Selector>
 void basic_server_buffer<Document, Selector>::
 	document_remove(base_document_info_type& info)
 {
-	if(is_open() )
+	if(basic_buffer<Document, Selector>::is_open() )
 	{
 		// Emit unsubscribe signal for all users that were
 		// subscribed to this document
@@ -494,7 +496,7 @@ void basic_server_buffer<Document, Selector>::
 	                     const std::string& encoding,
                              const std::string& content)
 {
-	if(!is_open() )
+	if(!basic_buffer<Document, Selector>::is_open() )
 	{
 		throw std::logic_error(
 			"obby::basic_server_buffer::document_create_impl:\n"
@@ -531,7 +533,7 @@ template<typename Document, typename Selector>
 void basic_server_buffer<Document, Selector>::
 	send_message_impl(const std::string& message, const user* writer)
 {
-	if(is_open() )
+	if(basic_buffer<Document, Selector>::is_open() )
 	{
 		net6::packet message_pack("obby_message");
 		message_pack << writer << message;
@@ -564,7 +566,7 @@ void basic_server_buffer<Document, Selector>::
 	// TODO: user::set_colour should emit this signal
 	basic_buffer<Document, Selector>::m_signal_user_colour.emit(user);
 
-	if(is_open() )
+	if(basic_buffer<Document, Selector>::is_open() )
 	{
 		net6::packet colour_pack("obby_user_colour");
 		colour_pack << &user << colour;

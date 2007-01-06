@@ -109,7 +109,7 @@ public:
 
 	/** Checks if we are currently connected to an obby session.
 	 */
-	bool is_connected() const;
+	//bool is_connected() const;
 
 	/** Requests encryption of the connection.
 	 */
@@ -345,7 +345,7 @@ void basic_client_buffer<Document, Selector>::
 	connect(const std::string& hostname,
                 unsigned int port)
 {
-	if(is_connected() )
+	if(basic_buffer<Document, Selector>::is_open() )
 	{
 		throw std::logic_error(
 			"obby::basic_client_buffer::connect:\n"
@@ -374,7 +374,7 @@ void basic_client_buffer<Document, Selector>::
 template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::disconnect()
 {
-	if(!is_connected() )
+	if(!basic_buffer<Document, Selector>::is_open() )
 	{
 		throw std::logic_error(
 			"obby::basic_client_buffer::disconnect:\n"
@@ -386,16 +386,18 @@ void basic_client_buffer<Document, Selector>::disconnect()
 	session_close();
 }
 
+#if 0
 template<typename Document, typename Selector>
 bool basic_client_buffer<Document, Selector>::is_connected() const
 {
 	return basic_buffer<Document, Selector>::m_net.get() != NULL;
 }
+#endif
 
 template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::request_encryption()
 {
-	if(!is_connected() )
+	if(!basic_buffer<Document, Selector>::is_open() )
 	{
 		throw std::logic_error(
 			"obby::basic_client_buffer::request_encryption:\n"
