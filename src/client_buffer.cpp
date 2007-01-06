@@ -63,9 +63,10 @@ void obby::client_buffer::login(const std::string& name, int red, int green,
 	m_client->custom_login(login_pack);
 }
 
-void obby::client_buffer::request_create_document()
+void obby::client_buffer::request_create_document(const std::string& title)
 {
 	net6::packet request_pack("obby_document_create");
+	request_pack << title;
 	m_client->send(request_pack);
 }
 
@@ -203,12 +204,14 @@ void obby::client_buffer::on_net_document_create(const net6::packet& pack)
 {
 	if(pack.get_param_count() < 1) return;
 	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
+	if(pack.get_param(1).get_type() != net6::packet::param::STRING) return;
 
 	unsigned int id = pack.get_param(0).as_int();
+	const std::string& title = pack.get_param(1).as_string();
 	assert(find_document(id) == NULL);
 
 	document& new_doc = add_document(id);
-	m_signal_insert_document.emit(new_doc);
+	m_signal_insert_document.emit(new_doc, title);
 }
 
 void obby::client_buffer::on_net_document_rename(const net6::packet& pack)

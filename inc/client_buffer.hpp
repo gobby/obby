@@ -56,10 +56,10 @@ public:
 	 */
 	void login(const std::string& name, int red, int green, int blue);
 
-	/** Requests a new document by the server. signal_insert_doc will be
+	/** Requests a new document on the server. signal_insert_doc will be
 	 * emitted if the server authorized the creation process.
 	 */
-	void request_create_document();
+	void request_create_document(const std::string& title);
 
 	/** Requests the deletion of a document by the server. signal_remove_doc
 	 * will be emitted if the server authorized the deletion.

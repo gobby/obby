@@ -60,26 +60,27 @@ void obby::server_buffer::select(unsigned int timeout)
 	m_server->select(timeout);
 }
 
-obby::document& obby::server_buffer::create_document()
+obby::document& obby::server_buffer::create_document(const std::string& title)
 {
 	unsigned int id = ++ m_doc_counter;
 	document& doc = add_document(id);
 	
 	net6::packet pack("obby_document_create");
 	pack << id;
+	pack << title;
 	m_server->send(pack);
 
 	return doc;
 }
 
 void obby::server_buffer::rename_document(document& doc,
-                                          const std::string& name)
+                                          const std::string& title)
 {
-	doc.set_title(name);
+	doc.set_title(title);
 
 	net6::packet pack("obby_document_rename");
 	pack << doc.get_id();
-	pack << name;
+	pack << title;
 	m_server->send(pack);
 }
 
@@ -283,8 +284,13 @@ void obby::server_buffer::on_net_record(const net6::packet& pack, user& from)
 void obby::server_buffer::on_net_document_create(const net6::packet& pack,
                                                  user& from)
 {
-	document& doc = create_document();
-	m_signal_insert_document.emit(doc);
+	if(pack.get_param_count() < 1) return;
+	if(pack.get_param(0).get_type() != net6::packet::param::STRING) return;
+
+	const std::string& title = pack.get_param(0).as_string();
+
+	document& doc = create_document(title);
+	m_signal_insert_document.emit(doc, title);
 }
 
 void obby::server_buffer::on_net_document_rename(const net6::packet& pack,
@@ -295,13 +301,13 @@ void obby::server_buffer::on_net_document_rename(const net6::packet& pack,
 	if(pack.get_param(1).get_type() != net6::packet::param::STRING) return;
 
 	unsigned int id = pack.get_param(0).as_int();
-	const std::string& name = pack.get_param(1).as_string();
+	const std::string& title = pack.get_param(1).as_string();
 	
 	document* doc = find_document(id);
 	if(!doc) return;
 
-	m_signal_rename_document.emit(*doc, name);
-	rename_document(*doc, name);
+	m_signal_rename_document.emit(*doc, title);
+	rename_document(*doc, title);
 }
 
 void obby::server_buffer::on_net_document_remove(const net6::packet& pack,

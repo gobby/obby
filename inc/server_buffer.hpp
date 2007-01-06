@@ -53,11 +53,11 @@ public:
 	
 	/** Creates a new document.
 	 */
-	document& create_document();
+	document& create_document(const std::string& title);
 
 	/** Renames a document
 	 */
-	void rename_document(document& doc, const std::string& name);
+	void rename_document(document& doc, const std::string& title);
 
 	/** Removes an existing document.
 	 */
