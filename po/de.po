@@ -39,106 +39,107 @@ msgstr "Benutzer-ID %0% wird bereits benutzt"
 #: src/user_table.cpp:75 src/chat.cpp:220 src/line.cpp:94 src/document.cpp:57
 #, c-format
 msgid "Unexpected child node: '%0%'"
-msgstr ""
+msgstr "Kindknoten '%0%' unerwartet"
 
 #: src/chat.cpp:226
 msgid "Restored session"
-msgstr ""
+msgstr "Sitzung wiederhergestellt"
 
 #: src/chat.cpp:279
 #, c-format
 msgid "%0% has joined"
-msgstr ""
+msgstr "%0% hat die Sitzung betreten"
 
 #: src/chat.cpp:286
 #, c-format
 msgid "%0% has left"
-msgstr ""
+msgstr "%0% hat die Sitzung verlassen"
 
 #: src/document.cpp:66
 msgid "Document needs at least one line"
-msgstr ""
+msgstr "Das Dokument muss mindestens eine Zeile enthalten"
 
 #: src/serialise/token.cpp:87
 #, c-format
 msgid "Unexpected escape sequence: \\%0%"
-msgstr ""
+msgstr "Unerwartete Escapesequenz: %0%"
 
 #: src/serialise/token.cpp:163
 msgid "String not closed"
-msgstr ""
+msgstr "Zeichenkette nicht geschlossen"
 
 #: src/serialise/token.cpp:268
 #, c-format
 msgid "Unexpected token: '%0%'"
-msgstr ""
+msgstr "Unerwartetes Token: '%0%'"
 
 #: src/serialise/token.cpp:388
 msgid "Unexpected end of input"
-msgstr ""
+msgstr "Unerwartetes Ende der Eingabe"
 
 #: src/serialise/attribute.cpp:54
 #, c-format
 msgid "Expected '=' after %0%"
-msgstr ""
+msgstr "'=' nach '%0%' erwartet"
 
 #: src/serialise/attribute.cpp:65
 #, c-format
 msgid "Expected string literal as value for attribute '%0%'"
-msgstr ""
+msgstr "Zeichenkette als Wert für das Attribut '%0%' erwartet"
 
 #: src/serialise/object.cpp:135
 msgid "Child object's indentation must be parent's plus one"
 msgstr ""
+"Einrückung des Kindobjektes muss der des Elternobjektes plus eins entsprechen"
 
 #: src/serialise/object.cpp:148
 msgid "Expected child object after indentation"
-msgstr ""
+msgstr "Kindobjekt nach Einrückung erwartet"
 
 #: src/serialise/object.cpp:159
 #, c-format
 msgid "Expected child object instead of '%0%'"
-msgstr ""
+msgstr "Kindobjekt statt '%0%' erwartet"
 
 #: src/serialise/object.cpp:220 src/serialise/object.cpp:234
 #, c-format
 msgid "Object '%0%' requires attribute '%1%'"
-msgstr ""
+msgstr "Objekt '%0%' erfordert das Attribut '%1%'"
 
 #: src/serialise/parser.cpp:36
 #, c-format
 msgid "Could not open file '%0%' for reading"
-msgstr ""
+msgstr "Konnte die Datei '%0%' nicht zum Lesen öffnen"
 
 #: src/serialise/parser.cpp:79
 msgid "Expected initial exclamation mark"
-msgstr ""
+msgstr "Ausrufezeichen zu Beginn erwartet"
 
 #: src/serialise/parser.cpp:89
 msgid "Expected document type after '!'"
-msgstr ""
+msgstr "Dokumenttyp nach '!' erwartet"
 
 #: src/serialise/parser.cpp:100
 msgid "Expected newline after document type"
-msgstr ""
+msgstr "Zeilenumbruch nach dem Dokumenttyp erwartet"
 
 #: src/serialise/parser.cpp:109
 msgid "Expected top-level object after document type"
-msgstr ""
+msgstr "Objekt auf oberster Ebene nach dem Dokumenttyp erwartet"
 
 #: src/serialise/parser.cpp:119
 msgid "Expected root object after document type"
-msgstr ""
+msgstr "Wurzelobjekt nach dem Dokumenttyp erwartet"
 
 #: src/serialise/parser.cpp:129
 #, c-format
 msgid "Expected end of input instead of '%0%'"
-msgstr ""
+msgstr "Eingabeende nach '%0%' erwartet"
 
 #: src/serialise/parser.cpp:141
 #, c-format
 msgid "Could not open file '%0%' for writing"
-msgstr ""
+msgstr "Konnte die Datei '%0%' nicht zum Schreiben öffnen"
 
 #~ msgid "No server public key available, wait for the welcome packet"
 #~ msgstr ""

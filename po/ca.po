@@ -15,7 +15,6 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1\n"
 
 #: src/error.cpp:37
 msgid "Colour is already in use"
@@ -45,12 +44,12 @@ msgstr ""
 
 #: src/chat.cpp:226
 msgid "Restored session"
-msgstr ""
+msgstr "S'ha restaurat la sessió"
 
 #: src/chat.cpp:279
 #, c-format
 msgid "%0% has joined"
-msgstr ""
+msgstr "%0% s'ha unit"
 
 #: src/chat.cpp:286
 #, c-format
