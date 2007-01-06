@@ -151,12 +151,6 @@ void obby::user_table::remove_user(const user& user_to_remove)
 	const_cast<user&>(user_to_remove).release_net6();
 }
 
-void obby::user_table::set_user_token(const user& user,
-                                      const std::string& token)
-{
-	lookup(user.get_id()).set_token(token);
-}
-
 void obby::user_table::set_user_password(const user& user,
                                          const std::string& password)
 {

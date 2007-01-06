@@ -126,11 +126,6 @@ const obby::colour& obby::user::get_colour() const
 	return m_colour;
 }
 
-const std::string& obby::user::get_token() const
-{
-	return m_token;
-}
-
 const std::string& obby::user::get_password() const
 {
 	return m_password;
@@ -144,11 +139,6 @@ obby::user::flags obby::user::get_flags() const
 void obby::user::set_colour(const colour& colour)
 {
 	m_colour = colour;
-}
-
-void obby::user::set_token(const std::string& token)
-{
-	m_token = token;
 }
 
 void obby::user::set_password(const std::string& password)

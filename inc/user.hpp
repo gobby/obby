@@ -161,10 +161,6 @@ public:
 	 */
 	const colour& get_colour() const;
 
-	/** Returns the random token set for this user.
-	 */
-	const std::string& get_token() const;
-
 	/** Returns the password for this user (only available with server
 	 * or host buffers).
 	 */
@@ -177,10 +173,6 @@ public:
 	/** Sets the three colour components of the user colour.
 	 */
 	void set_colour(const colour& colour);
-
-	/** Changes the token to the one the server generated for this user.
-	 */
-	void set_token(const std::string& token);
 
 	/** Changes the password for this user
 	 */
@@ -201,7 +193,6 @@ protected:
 	std::string m_name;
 	colour m_colour;
 
-	std::string m_token;
 	std::string m_password;
 
 	flags m_flags;

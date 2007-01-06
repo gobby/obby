@@ -176,10 +176,6 @@ public:
 	 */
 	void remove_user(const user& user_to_remove);
 
-	/** Assigns a token to this user that is used for password hashing.
-	 */
-	void set_user_token(const user& user, const std::string& token);
-
 	/** Assigns a password to this user.
 	 */
 	void set_user_password(const user& user, const std::string& password);
