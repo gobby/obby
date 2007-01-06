@@ -14,17 +14,16 @@ Normal:
   * Implement records to (un)indent lines of text (#30)
   * Undo/Redo (#39)
   * libobby localisation (#40)
+  * Exchange version information (#42)
 
 Minor:
 
 Trivial:
 
 Enhancement:
-  * Flags for obby::user (#8)
   * Syncronise documents on request (#10)
   * Session serialisation (#20)
   * Document owners (#38)
-  * Reintroduce user table (#41)
 
 
 21: Provide some means of authentication
@@ -52,10 +51,10 @@ repository.''
 
 29: Implement server-side commands for remote actions
 -----------------------------------------------------
-Implement server-side commands to let the server act on the remote side
-
-''This is a stub and generated out of the old TODO located in the 
-repository.''
+The possibility to send server-side commands would enable one to e.g. save 
+the current document to a directory on the server or to perform other 
+actions. ''libobby'' should provide the framework for this and ''Gobby'' 
+some command interface to submit such commands to the server.
 
 30: Implement records to (un)indent lines of text
 -------------------------------------------------
@@ -74,19 +73,11 @@ We need a proper undo/redo handling in libobby.
 ------------------------
 libobby has one string to be localised (see src/error.cpp).
 
-8: Flags for obby::user
------------------------
-Extend obby::user with a 'flags' field. The idea behind is to introduce a 
-flag like obby::user::connected which specifies if this user is currently 
-connected to the obby session. We would not need the user_table classes any 
-longer and resolve the confusion of obby::user vs. obby::user_table::user.
-
-However, this feature _is_ dangerous because many code would have to be 
-adjusted to ignore non-connected user. Maybe we can provide two iterators: 
-user_iterator and connected_user_iterator or something. Or 
-user_iterator::step(user::flags).
-
-We should think and discuss about this before doing anything.
+42: Exchange version information
+--------------------------------
+The client should send it's version of libobby when sending the login 
+packet. The server may compare the versions and detect protocol 
+incompability and drop a corresponding error message.
 
 10: Syncronise documents on request
 -----------------------------------
@@ -127,13 +118,4 @@ document, such as ''none'', ''read'', ''read/write''.
 '''and''' the ID of the document owner. This allows that a document appears 
 immediately on the client side without waiting for server acknowledegment 
 because the identifications for a document cannot conflict.
-
-41: Reintroduce user table
---------------------------
-Remove all the user stuff from obby::buffer (which is quite much) and move 
-it to user_table to get a cleaner obby::buffer class. user_table should 
-provide the user_iterator that the obby::buffer class currently provides as 
-well as methods to find user by ids, names and flags.
-
-Depends on #8.
 
