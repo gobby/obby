@@ -10,11 +10,10 @@ Serious:
 Important:
  * Implement automatic service announcement and discovery.
  * Implement chat 
- * Catch connection resets in net6::server/client and handle them just as normal
-   EOF
 
 Normal:
- * Priority constants
+ * Sync-On-Request
+ * Document names
 
 Minor:
  * Implement indent_record and unindent_record to (un)indent lines of text
