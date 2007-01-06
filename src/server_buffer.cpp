@@ -72,6 +72,17 @@ obby::document& obby::server_buffer::create_document()
 	return doc;
 }
 
+void obby::server_buffer::rename_document(document& doc,
+                                          const std::string& name)
+{
+	doc.set_title(name);
+
+	net6::packet pack("obby_document_rename");
+	pack << doc.get_id();
+	pack << name;
+	m_server->send(pack);
+}
+
 void obby::server_buffer::remove_document(document* doc)
 {
 	m_doclist.erase(std::remove(m_doclist.begin(), m_doclist.end(), doc),
@@ -113,7 +124,7 @@ void obby::server_buffer::on_data(const net6::packet& pack,
 		on_net_document_create(pack, *from_user);
 	if(pack.get_command() == "obby_document_rename")
 		on_net_document_rename(pack, *from_user);
-	if(pack.get_command() == "obby_document_remove");
+	if(pack.get_command() == "obby_document_remove")
 		on_net_document_remove(pack, *from_user);
 }
 
@@ -290,7 +301,7 @@ void obby::server_buffer::on_net_document_rename(const net6::packet& pack,
 	if(!doc) return;
 
 	m_signal_rename_document.emit(*doc, name);
-	doc->set_title(name);
+	rename_document(*doc, name);
 }
 
 void obby::server_buffer::on_net_document_remove(const net6::packet& pack,
