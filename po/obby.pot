@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
-"POT-Creation-Date: 2005-07-27 19:33+0200\n"
+"POT-Creation-Date: 2005-11-14 11:02+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,6 +32,111 @@ msgstr ""
 msgid "Protocol version mismatch"
 msgstr ""
 
-#: src/client_buffer.cpp:63
-msgid "No server public key available, wait for the welcome packet"
+#: src/user_table.cpp:58
+#, c-format
+msgid "User ID %0% is already in use"
+msgstr ""
+
+#: src/user_table.cpp:75 src/chat.cpp:220 src/line.cpp:94 src/document.cpp:57
+#, c-format
+msgid "Unexpected child node: '%0%'"
+msgstr ""
+
+#: src/chat.cpp:226
+msgid "Restored session"
+msgstr ""
+
+#: src/chat.cpp:279
+#, c-format
+msgid "%0% has joined"
+msgstr ""
+
+#: src/chat.cpp:286
+#, c-format
+msgid "%0% has left"
+msgstr ""
+
+#: src/document.cpp:66
+msgid "Document needs at least one line"
+msgstr ""
+
+#: src/serialise/token.cpp:87
+#, c-format
+msgid "Unexpected escape sequence: \\%0%"
+msgstr ""
+
+#: src/serialise/token.cpp:163
+msgid "String not closed"
+msgstr ""
+
+#: src/serialise/token.cpp:268
+#, c-format
+msgid "Unexpected token: '%0%'"
+msgstr ""
+
+#: src/serialise/token.cpp:388
+msgid "Unexpected end of input"
+msgstr ""
+
+#: src/serialise/attribute.cpp:54
+#, c-format
+msgid "Expected '=' after %0%"
+msgstr ""
+
+#: src/serialise/attribute.cpp:65
+#, c-format
+msgid "Expected string literal as value for attribute '%0%'"
+msgstr ""
+
+#: src/serialise/object.cpp:135
+msgid "Child object's indentation must be parent's plus one"
+msgstr ""
+
+#: src/serialise/object.cpp:148
+msgid "Expected child object after indentation"
+msgstr ""
+
+#: src/serialise/object.cpp:159
+#, c-format
+msgid "Expected child object instead of '%0%'"
+msgstr ""
+
+#: src/serialise/object.cpp:220 src/serialise/object.cpp:234
+#, c-format
+msgid "Object '%0%' requires attribute '%1%'"
+msgstr ""
+
+#: src/serialise/parser.cpp:36
+#, c-format
+msgid "Could not open file '%0%' for reading"
+msgstr ""
+
+#: src/serialise/parser.cpp:79
+msgid "Expected initial exclamation mark"
+msgstr ""
+
+#: src/serialise/parser.cpp:89
+msgid "Expected document type after '!'"
+msgstr ""
+
+#: src/serialise/parser.cpp:100
+msgid "Expected newline after document type"
+msgstr ""
+
+#: src/serialise/parser.cpp:109
+msgid "Expected top-level object after document type"
+msgstr ""
+
+#: src/serialise/parser.cpp:119
+msgid "Expected root object after document type"
+msgstr ""
+
+#: src/serialise/parser.cpp:129
+#, c-format
+msgid "Expected end of input instead of '%0%'"
+msgstr ""
+
+#: src/serialise/parser.cpp:141
+#, c-format
+msgid "Could not open file '%0%' for writing"
 msgstr ""
