@@ -104,6 +104,8 @@ public:
 	            const text& str);
 	void erase(size_type pos,
 	           size_type len = npos);
+	void append(const string_type& str);
+	void prepend(const string_type& str);
 
 	size_type length() const;
 

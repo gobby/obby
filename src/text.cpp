@@ -220,72 +220,50 @@ void obby::text::clear()
 obby::text obby::text::substr(size_type pos, size_type len)
 {
 	text new_text;
-	new_text.m_max_chunk = m_max_chunk;
+	list_type::iterator iter = find_chunk(pos);
 
-	size_type cur_len = 0;
-	chunk* cur_chunk = NULL;
-
-	if(len == 0)
-		return new_text;
-
-	for(list_type::iterator it = m_chunks.begin();
-	    it != m_chunks.end();
-	    ++ it)
+	chunk* prev_chunk = NULL;
+	while( (len == npos || len > 0) && (iter != m_chunks.end()) )
 	{
-		size_type chunk_len = (*it)->get_length();
-		cur_len += chunk_len;
+		chunk* cur_chunk = *iter;
 
-		if(cur_len <= pos)
-			continue;
+		size_type count = cur_chunk->get_length() - pos;
+		if(len != npos) count = std::min(count, len);
 
-		// Chunk is part of substr
-		size_type begin = 0;
-		if(cur_len - chunk_len < pos)
-			begin = pos - (cur_len - chunk_len);
-
-		size_type end = chunk_len;
-		if(len != npos && cur_len >= pos + len)
-			end = pos + len - (cur_len - chunk_len);
-
-		// Not necessary since m_max_chunk is copied from *this
-		//if(end - begin > new_text.m_max_chunk)
-		//	end = begin + new_text.m_max_chunk;
-
-		if(cur_chunk != NULL &&
-		   cur_chunk->get_author() == (*it)->get_author() &&
-		   cur_chunk->get_length() < new_text.m_max_chunk)
+		if(prev_chunk != NULL &&
+		   prev_chunk->get_author() == cur_chunk->get_author() &&
+		   prev_chunk->get_length() + cur_chunk->get_length() <=
+		   m_max_chunk)
 		{
-			// Merge with current
-			cur_chunk->append(
-				(*it)->get_text().substr(
-					begin,
-					end - begin
-				)
+			prev_chunk->append(
+				cur_chunk->get_text().substr(pos, count)
 			);
 		}
 		else
 		{
-			// No current chunk, make new one
-			cur_chunk = new chunk(
-				(*it)->get_text().substr(begin, end - begin),
-				(*it)->get_author()
+			prev_chunk = new chunk(
+				cur_chunk->get_text().substr(pos, count),
+				cur_chunk->get_author()
 			);
 
-			new_text.m_chunks.push_back(cur_chunk);
+			new_text.m_chunks.push_back(prev_chunk);
 		}
 
-		if(len != npos && cur_len >= pos + len)
-			return new_text;
+		if(len != npos)
+			len -= count;
+
+		++ iter; pos = 0;
 	}
 
-	if(len != npos)
+	if(len > 0 && len != npos)
 	{
-		// PANICK
+		throw std::logic_error(
+			"obby::text::substr:\n"
+			"len is out or range"
+		);
 	}
-	else
-	{
-		return new_text;
-	}
+
+	return new_text;
 }
 
 void obby::text::insert(size_type pos,
@@ -313,6 +291,10 @@ void obby::text::insert(size_type pos,
 	}
 }
 
+void obby::text::erase(size_type pos, size_type len)
+{
+}
+
 obby::text::chunk_iterator obby::text::chunk_begin() const
 {
 	return chunk_iterator(m_chunks.begin() );
@@ -329,7 +311,7 @@ obby::text::list_type::iterator obby::text::find_chunk(size_type& pos)
 	    it != m_chunks.end();
 	    ++ it)
 	{
-		if( (*it)->get_length() >= pos)
+		if( (*it)->get_length() > pos)
 			return it;
 		else
 			pos -= (*it)->get_length();
@@ -354,100 +336,101 @@ obby::text::insert_chunk(list_type::iterator chunk_it,
 
 	list_type::iterator ins_pos = chunk_it;
 
-	// Need to insert new chunk. Find corresponding position
-	if(cur_chunk == NULL)
+	// Get previous chunk
+	chunk* prev_chunk = NULL;
+	list_type::iterator prev_pos = ins_pos;
+	if(prev_pos != m_chunks.begin() )
+	{
+		-- prev_pos;
+		prev_chunk = *prev_pos;
+	}
+
+	// Merge with previous
+	if(prev_chunk != NULL &&
+	   chunk_pos == 0 &&
+	   author == prev_chunk->get_author() &&
+	   str.length() + prev_chunk->get_length() <= m_max_chunk)
+	{
+		prev_chunk->append(str);
+		return chunk_it;
+	}
+	else if(cur_chunk == NULL)
+	{
+		// Insertion at end (no current chunk) and cannot merge with
+		// previous: Need to create a new one, do nothing here - this
+		// is done below
+	}
+	// Merge with current
+	else if(author == cur_chunk->get_author() &&
+	        str.length() + cur_chunk->get_length() <= m_max_chunk)
+	{
+		cur_chunk->insert(chunk_pos, str);
+		chunk_pos += str.length();
+		return chunk_it;
+	}
+	// Insert new chunk after current chunk if str is inserted at
+	// end of current chunk
+	else if(chunk_pos == cur_chunk->get_length() )
 	{
 		++ ins_pos;
 	}
-	else
+	// Insert new chunk before current chunk if str is inserted at
+	// the beginning of current chunk
+	else if(chunk_pos > 0)
 	{
-		chunk* next_chunk = NULL;
-		list_type::iterator next_pos = ins_pos; ++ next_pos;
-		if(next_pos != m_chunks.end() ) next_chunk = *next_pos;
+		// Split up otherwise
+		chunk* new_chunk = new chunk(
+			cur_chunk->get_text().substr(chunk_pos),
+			cur_chunk->get_author()
+		);
 
-		// Merge with current
-		if(author == cur_chunk->get_author() &&
-		   str.length() + cur_chunk->get_length() <= m_max_chunk)
-		{
-			cur_chunk->insert(chunk_pos, str);
-			chunk_pos += str.length();
-			return chunk_it;
-		}
-		// Merge with next
-		else if(next_chunk != NULL &&
-		        chunk_pos == cur_chunk->get_length() &&
-		        author == next_chunk->get_author() &&
-		        str.length() + next_chunk->get_length() <= m_max_chunk)
-		{
-			next_chunk->prepend(str);
-			chunk_pos = str.length();
-			return next_pos;
-		}
-		// TODO: Merge with previous?
-		// Insert new chunk after current chunk if str is inserted at
-		// end of current chunk
-		else if(chunk_pos == cur_chunk->get_length() )
-		{
-			++ ins_pos;
-		}
-		// Insert new chunk before current chunk if str is inserted at
-		// the beginning of current chunk
-		else if(chunk_pos > 0)
-		{
-			// Split up otherwise
-			chunk* new_chunk = new chunk(
-				cur_chunk->get_text().substr(chunk_pos),
-				cur_chunk->get_author()
-			);
+		cur_chunk->erase(chunk_pos);
+		chunk_pos = 0;
 
-			cur_chunk->erase(chunk_pos);
-			chunk_pos = 0;
+		++ ins_pos;
+		ins_pos = m_chunks.insert(
+			ins_pos,
+			new_chunk
+		);
 
-			++ ins_pos;
-			ins_pos = m_chunks.insert(
-				ins_pos,
-				new_chunk
-			);
-
-			// Try to merge with both chunks - they may be smaller
-			// and thus fit into max chunk size
-			if(cur_chunk->get_author() == author)
+		// Try to merge with both chunks - they may be smaller
+		// and thus fit into max chunk size
+		if(cur_chunk->get_author() == author)
+		{
+			if(cur_chunk->get_length() + str.length() <=
+			   m_max_chunk)
 			{
-				if(cur_chunk->get_length() + str.length() <=
-				   m_max_chunk)
-				{
-					cur_chunk->append(str);
-					chunk_pos = cur_chunk->get_length();
-					-- ins_pos;
-					return ins_pos;
-				}
-				else if(new_chunk->get_length() +
-				        str.length() <= m_max_chunk)
-				{
-					new_chunk->prepend(str);
-					chunk_pos = str.length();
-					return ins_pos;
-				}
+				cur_chunk->append(str);
+				chunk_pos = cur_chunk->get_length();
+				-- ins_pos;
+				return ins_pos;
 			}
-
-			// If not insert another new chunk between
-			// the chunks split up - ins_pos points already
-			// to the correct position
+			else if(new_chunk->get_length() +
+			        str.length() <= m_max_chunk)
+			{
+				new_chunk->prepend(str);
+				chunk_pos = str.length();
+				return ins_pos;
+			}
 		}
+
+		// If not insert another new chunk between
+		// the chunks split up - ins_pos points already
+		// to the correct position
 	}
 
 	// Insert one new chunk if str fits into
 	if(str.length() <= m_max_chunk)
 	{
-		chunk_pos = str.length();
-		return m_chunks.insert(ins_pos, new chunk(str, author) );
+		chunk_pos = 0;
+		m_chunks.insert(ins_pos, new chunk(str, author) );
+		return ins_pos;
 	}
 	else
 	{
 		// Make multiple chunks otherwise
 		// TODO: Fill up previous chunk if author matches and ins_pos
 		// is != m_chunks.begin()
-		list_type::iterator result;
 		cur_chunk = ( (ins_pos == m_chunks.end()) ? NULL : *ins_pos);
 		for(size_type n = 0; n < str.length(); n += m_max_chunk)
 		{
@@ -467,15 +450,15 @@ obby::text::insert_chunk(list_type::iterator chunk_it,
 			}
 			else
 			{
-				result = m_chunks.insert(
+				/*result =*/ m_chunks.insert(
 					ins_pos,
 					new chunk(str.substr(n, len), author)
 				);
 			}
 		}
 
-		chunk_pos = (*result)->get_length();
-		return result;
+		chunk_pos = 0;
+		return ins_pos;
 	}
 }
 
