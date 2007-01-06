@@ -109,7 +109,7 @@ public:
 
 	/** Returns the given line of text.
 	 */
-	std::string get_line(unsigned int index) const;
+	const line& get_line(unsigned int index) const;
 
 	/** Returns the amount of lines in the buffer.
 	 */

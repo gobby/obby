@@ -217,7 +217,7 @@ obby::document::signal_delete_type obby::document::delete_event() const
 	return m_signal_delete;
 }
 
-std::string obby::document::get_line(unsigned int index) const
+const obby::line& obby::document::get_line(unsigned int index) const
 {
 	assert(index < m_lines.size() );
 	return m_lines[index];
