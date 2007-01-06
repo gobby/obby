@@ -268,8 +268,8 @@ basic_server_document_info<Document, Selector>::
 			child_it->get_required_attribute("author");
 
 		base_type::m_document->append(
-			content_attr.serialise::attribute::as<std::string>(),
-			author_attr.serialise::attribute::as<const user*>(
+			content_attr.obby::serialise::attribute::as<std::string>(),
+			author_attr.obby::serialise::attribute::as<const user*>(
 				::serialise::default_context_from<const user*>(
 					buffer.get_user_table()
 				)
