@@ -118,6 +118,18 @@ void obby::server_buffer::on_login(net6::server::peer& peer,
 
 void obby::server_buffer::on_part(net6::server::peer& peer)
 {
+	// Delete user from user list
+	std::list<user*>::iterator iter;
+	for(iter = m_userlist.begin(); iter != m_userlist.end(); ++ iter)
+	{
+		if( (*iter)->get_id() == peer.get_id() )
+		{
+			delete *iter;
+			m_userlist.erase(iter);
+			break;
+		}
+	}
+
 	m_signal_part.emit(peer);
 }
 

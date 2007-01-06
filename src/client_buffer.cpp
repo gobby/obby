@@ -145,7 +145,19 @@ void obby::client_buffer::on_join(net6::client::peer& peer,
 
 void obby::client_buffer::on_part(net6::client::peer& peer)
 {
-	m_signal_part.emit(*find(peer.get_id()) );
+	// Find user in user list and store iterator to it
+	std::list<user*>::iterator iter;
+	for(iter = m_userlist.begin(); iter != m_userlist.end(); ++ iter)
+		if( (*iter)->get_id() == peer.get_id() )
+			break;
+
+	// Emit part singal
+	assert(iter != m_userlist.end() );
+	m_signal_part.emit(**iter);
+
+	// Remove user from list
+	delete *iter;
+	m_userlist.erase(iter);
 }
 
 void obby::client_buffer::on_close()
