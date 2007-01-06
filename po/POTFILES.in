@@ -1,5 +1,6 @@
 # source files
 
+inc/server_buffer.hpp
 src/error.cpp
 src/user_table.cpp
 src/chat.cpp
