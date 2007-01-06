@@ -101,6 +101,8 @@ obby::line& obby::line::operator=(const line& other)
 {
 	m_line = other.m_line;
 	m_authors = other.m_authors;
+
+	return *this;
 }
 
 obby::line::operator const std::string&() const

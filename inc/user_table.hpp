@@ -65,11 +65,13 @@ public:
 		user_iterator& operator++() {
 			base_iterator::operator++ ();
 			inc_valid();
+			return *this;
 		}
 
 		user_iterator& operator--() {
 			base_iterator::operator--();
 			dec_valid();
+			return *this;
 		}
 
 		user_iterator operator++(int dummy) {
