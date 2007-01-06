@@ -1,0 +1,38 @@
+# obby l10n French Translation
+# Copyright (C) 2005 0x539 dev group
+# This file is distributed under the same license as the obby package.
+# Peer Janssen <peer@baden-online.de>, 2005.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: obby 0.2.0\n"
+"Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
+"POT-Creation-Date: 2005-07-27 19:33+0200\n"
+"PO-Revision-Date: 2005-07-27 19:36+0200\n"
+"Last-Translator: Peer Janssen <peer@baden-online.de>\n"
+"Language-Team: Peer Janssen <peer@baden-online.de>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/error.cpp:37
+msgid "Colour is already in use"
+msgstr "Cette couleur est déjà utilisée"
+
+#: src/error.cpp:39
+msgid "Wrong session password"
+msgstr "Mauvais mot de passe de séance"
+
+#: src/error.cpp:41
+msgid "Wrong user password"
+msgstr "Mauvais mot de passe d'utilisateur"
+
+#: src/error.cpp:43
+msgid "Protocol version mismatch"
+msgstr "Mauvaise version du protocole"
+
+#: src/client_buffer.cpp:63
+msgid "No server public key available, wait for the welcome packet"
+msgstr ""
+"La clé publique du serveur n'est pas disponible, attendez le paquet de "
+"« bonjour »"
