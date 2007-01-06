@@ -37,7 +37,7 @@ class basic_client_buffer;
  */
 template<typename selector_type>
 class basic_client_document_info
- : virtual public basic_local_document_info<selector_type>
+ : virtual public basic_local_document_info<obby::document, selector_type>
 {
 public:
 	/** Constructor which does not automatically create an underlaying
@@ -186,7 +186,7 @@ basic_client_document_info<selector_type>::basic_client_document_info(
 	const user* owner, unsigned int id,
 	const std::string& title
 ) : basic_document_info<obby::document, selector_type>(buffer, net, owner, id, title),
-    basic_local_document_info<selector_type>(buffer, net, owner, id, title)
+    basic_local_document_info<obby::document, selector_type>(buffer, net, owner, id, title)
 {
 	// If we created this document, the constructor with initial content
 	// should be called.
@@ -210,7 +210,7 @@ basic_client_document_info<selector_type>::basic_client_document_info(
 	const user* owner, unsigned int id,
 	const std::string& title, const std::string& content
 ) : basic_document_info<obby::document, selector_type>(buffer, net, owner, id, title),
-    basic_local_document_info<selector_type>(buffer, net, owner, id, title)
+    basic_local_document_info<obby::document, selector_type>(buffer, net, owner, id, title)
 {
 	// content is provided, so we should have created this document
 	if(owner != &buffer.get_self() )
@@ -241,7 +241,7 @@ basic_client_document_info<selector_type>::basic_client_document_info(
 		::serialise::hex_context<const user*>(buffer.get_user_table())
 	), init_pack.get_param(1).net6::parameter::as<unsigned int>(),
 	init_pack.get_param(2).net6::parameter::as<std::string>()
-   ), basic_local_document_info<selector_type>(
+   ), basic_local_document_info<obby::document, selector_type>(
 	buffer, net,
 	init_pack.get_param(0).net6::parameter::as<const user*>(
 		::serialise::hex_context<const user*>(buffer.get_user_table())

@@ -33,7 +33,7 @@ namespace obby
 /** Buffer to establish a connection to a basic_server_buffer.
  */
 template<typename selector_type>
-class basic_client_buffer : virtual public basic_local_buffer<selector_type>
+class basic_client_buffer : virtual public basic_local_buffer<obby::document, selector_type>
 {
 public:
 	struct connection_settings {
@@ -297,7 +297,7 @@ typedef basic_client_buffer<net6::selector> client_buffer;
 
 template<typename selector_type>
 basic_client_buffer<selector_type>::basic_client_buffer()
- : basic_local_buffer<selector_type>(), m_self(NULL)
+ : basic_local_buffer<obby::document, selector_type>(), m_self(NULL)
 {
 }
 
@@ -420,7 +420,7 @@ template<typename selector_type>
 const std::string& basic_client_buffer<selector_type>::get_name() const
 {
 	if(m_self == NULL) return m_settings.name;
-	return basic_local_buffer<selector_type>::get_name();
+	return basic_local_buffer<obby::document, selector_type>::get_name();
 }
 
 template<typename selector_type>
@@ -825,7 +825,7 @@ template<typename selector_type>
 void basic_client_buffer<selector_type>::
 	on_net_user_colour_failed(const net6::packet& pack)
 {
-	basic_local_buffer<selector_type>::m_signal_user_colour_failed.emit();
+	basic_local_buffer<obby::document, selector_type>::m_signal_user_colour_failed.emit();
 }
 
 template<typename selector_type>

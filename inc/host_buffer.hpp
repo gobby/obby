@@ -29,7 +29,7 @@ namespace obby
 {
 
 template<typename selector_type>
-class basic_host_buffer : virtual public basic_local_buffer<selector_type>,
+class basic_host_buffer : virtual public basic_local_buffer<obby::document, selector_type>,
                           virtual public basic_server_buffer<selector_type>
 {
 public:
@@ -165,7 +165,7 @@ basic_host_buffer<selector_type>::
 	basic_host_buffer(const std::string& username,
 	                  const colour& colour)
  : basic_buffer<obby::document, selector_type>(),
-   basic_local_buffer<selector_type>(),
+   basic_local_buffer<obby::document, selector_type>(),
    basic_server_buffer<selector_type>(),
    m_username(username), m_colour(colour), m_self(NULL)
 {
@@ -178,7 +178,7 @@ basic_host_buffer<selector_type>::
 	                  const RSA::Key& public_key,
 	                  const RSA::Key& private_key)
  : basic_buffer<obby::document, selector_type>(),
-   basic_local_buffer<selector_type>(),
+   basic_local_buffer<obby::document, selector_type>(),
    basic_server_buffer<selector_type>(public_key, private_key),
    m_username(username), m_colour(colour), m_self(NULL)
 {
@@ -275,7 +275,7 @@ void basic_host_buffer<selector_type>::set_colour(const colour& colour)
 	// TODO: user_colour_impl should check this
 	if(!basic_buffer<obby::document, selector_type>::check_colour(colour, m_self))
 	{
-		basic_local_buffer<selector_type>::
+		basic_local_buffer<obby::document, selector_type>::
 			m_signal_user_colour_failed.emit();
 	}
 	else

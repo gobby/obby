@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -27,11 +27,16 @@ namespace obby
 
 /** A local_buffer is a buffer object with a local user.
  */
-template<typename selector_type>
-class basic_local_buffer : virtual public basic_buffer<obby::document, selector_type>
+template<typename Document, typename Selector>
+class basic_local_buffer:
+	virtual public basic_buffer<Document, Selector>
 {
 public: 
-	typedef basic_local_document_info<selector_type> document_info;
+	typedef typename basic_buffer<Document, Selector>::
+		base_document_info_type base_document_info_type;
+
+	typedef basic_local_document_info<Document, Selector>
+		document_info_type;
 
 	typedef sigc::signal<void>
 		signal_user_colour_failed_type;
@@ -39,10 +44,6 @@ public:
 	/** Standard constructor.
 	 */
 	basic_local_buffer();
-
-	/** Returns the local user.
-	 */
-	//virtual user& get_self() = 0;
 
 	/** Returns the local user.
 	 */
@@ -59,8 +60,8 @@ public:
 	 * here because the ID is enough and one might not have a user object
 	 * to the corresponding ID. So a time-consuming lookup is obsolete.
 	 */
-	document_info* document_find(unsigned int owner_id,
-	                             unsigned int id) const;
+	document_info_type* document_find(unsigned int owner_id,
+	                                  unsigned int id) const;
 
 	/** Sets a new colour for the local user and propagates this change
 	 * to the others.
@@ -76,33 +77,33 @@ protected:
 	signal_user_colour_failed_type m_signal_user_colour_failed;
 };
 
-typedef basic_local_buffer<net6::selector> local_buffer;
+typedef basic_local_buffer<obby::document, net6::selector> local_buffer;
 
-template<typename selector_type>
-basic_local_buffer<selector_type>::basic_local_buffer()
- : basic_buffer<obby::document, selector_type>()
+template<typename Document, typename Selector>
+basic_local_buffer<Document, Selector>::basic_local_buffer():
+	basic_buffer<Document, Selector>()
 {
 }
 
-template<typename selector_type>
-const std::string& basic_local_buffer<selector_type>::get_name() const
+template<typename Document, typename Selector>
+const std::string& basic_local_buffer<Document, Selector>::get_name() const
 {
 	return get_self().get_name();
 }
 
-template<typename selector_type>
-typename basic_local_buffer<selector_type>::document_info*
-basic_local_buffer<selector_type>::document_find(unsigned int owner_id,
-                                                 unsigned int id) const
+template<typename Document, typename Selector>
+typename basic_local_buffer<Document, Selector>::document_info_type*
+basic_local_buffer<Document, Selector>::document_find(unsigned int owner_id,
+                                                      unsigned int id) const
 {
-	return dynamic_cast<document_info*>(
-		basic_buffer<obby::document, selector_type>::find_document(owner_id, id)
+	return dynamic_cast<document_info_type*>(
+		basic_buffer<Document, Selector>::find_document(owner_id, id)
 	);
 }
 
-template<typename selector_type>
-typename basic_local_buffer<selector_type>::signal_user_colour_failed_type
-basic_local_buffer<selector_type>::user_colour_failed_event() const
+template<typename Document, typename Selector>
+typename basic_local_buffer<Document, Selector>::signal_user_colour_failed_type
+basic_local_buffer<Document, Selector>::user_colour_failed_event() const
 {
 	return m_signal_user_colour_failed;
 }
@@ -110,4 +111,3 @@ basic_local_buffer<selector_type>::user_colour_failed_event() const
 } // namespace obby
 
 #endif // _OBBY_LOCAL_BUFFER_HPP_
-

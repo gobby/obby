@@ -1,5 +1,5 @@
 /* libobby - Network text editing library
- * Copyright (C) 2005 0x539 dev group
+ * Copyright (C) 2005, 2006 0x539 dev group
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -26,30 +26,30 @@
 namespace obby
 {
 
-template<typename selector_type>
+template<typename Document, typename Selector>
 class basic_local_buffer;
 
 /** Information about a document that is provided without being subscribed to
  * a document.
  */
 
-template<typename selector_type>
-class basic_local_document_info
- : virtual public basic_document_info<obby::document, selector_type>
+template<typename Document, typename Selector>
+class basic_local_document_info:
+	virtual public basic_document_info<Document, Selector>
 {
 public:
-	basic_local_document_info(
-		const basic_local_buffer<selector_type>& buffer,
-		net6::basic_local<selector_type>& net,
-		const user* owner, unsigned int id,
-		const std::string& title
-	);
+	typedef basic_local_buffer<Document, Selector> buffer_type;
+	typedef net6::basic_local<Selector> net_type;
 
-	basic_local_document_info(
-		const basic_local_buffer<selector_type>& buffer,
-		net6::basic_local<selector_type>& net,
-		const serialise::object& obj
-	);
+	basic_local_document_info(const buffer_type& buffer,
+	                          net_type& net,
+	                          const user* owner,
+	                          unsigned int id,
+	                          const std::string& title);
+
+	basic_local_document_info(const buffer_type& buffer,
+	                          net_type& net,
+	                          const serialise::object& obj);
 
 	/** Sends a subscribe request for the local user. If the subscribe
 	 * request succeeded, the subscribe_event will be emitted.
@@ -73,81 +73,80 @@ public:
 public:
 	/** Returns the buffer this document belongs to.
 	 */
-	const basic_local_buffer<selector_type>& get_buffer() const;
+	const buffer_type& get_buffer() const;
 
 private:
 	/** Returns the underlaying net6 object.
 	 */
-	net6::basic_local<selector_type>& get_net6();
+	net_type& get_net6();
 
 	/** Returns the underlaying net6 object.
 	 */
-	const net6::basic_local<selector_type>& get_net6() const;
+	const net_type& get_net6() const;
 };
 
-typedef basic_local_document_info<net6::selector> local_document_info;
-
-template<typename selector_type>
-basic_local_document_info<selector_type>::basic_local_document_info(
-	const basic_local_buffer<selector_type>& buffer,
-	net6::basic_local<selector_type>& net,
-	const user* owner, unsigned int id,
-	const std::string& title
-):
-	basic_document_info<obby::document, selector_type>(buffer, net, owner, id, title)
+template<typename Document, typename Selector>
+basic_local_document_info<Document, Selector>::
+	basic_local_document_info(const buffer_type& buffer,
+	                          net_type& net,
+	                          const user* owner,
+	                          unsigned int id,
+	                          const std::string& title):
+	basic_document_info<Document, Selector>(buffer, net, owner, id, title)
 {
 }
 
-template<typename selector_type>
-basic_local_document_info<selector_type>::basic_local_document_info(
-	const basic_local_buffer<selector_type>& buffer,
-	net6::basic_local<selector_type>& net,
-	const serialise::object& obj
-):
-	basic_document_info<obby::document, selector_type>(buffer, net, obj)
+template<typename Document, typename Selector>
+basic_local_document_info<Document, Selector>::
+	basic_local_document_info(const buffer_type& buffer,
+	                          net_type& net,
+	                          const serialise::object& obj):
+	basic_document_info<Document, Selector>(buffer, net, obj)
 {
 }
 
-template<typename selector_type>
-bool basic_local_document_info<selector_type>::is_subscribed() const
+template<typename Document, typename Selector>
+bool basic_local_document_info<Document, Selector>::is_subscribed() const
 {
-	return is_subscribed(get_buffer().get_self() );
+	return basic_document_info<Document, Selector>::is_subscribed(
+		get_buffer().get_self()
+	);
 }
 
-template<typename selector_type>
-bool basic_local_document_info<selector_type>::
+template<typename Document, typename Selector>
+bool basic_local_document_info<Document, Selector>::
 	is_subscribed(const user& user) const
 {
-	return basic_document_info<obby::document, selector_type>::is_subscribed(user);
+	return basic_document_info<Document, Selector>::is_subscribed(user);
 }
 
-template<typename selector_type>
-const basic_local_buffer<selector_type>&
-basic_local_document_info<selector_type>::get_buffer() const
+template<typename Document, typename Selector>
+const typename basic_local_document_info<Document, Selector>::buffer_type&
+basic_local_document_info<Document, Selector>::get_buffer() const
 {
-	return dynamic_cast<const basic_local_buffer<selector_type>&>(
-		basic_document_info<obby::document, selector_type>::m_buffer
+	return dynamic_cast<const buffer_type&>(
+		basic_document_info<Document, Selector>::get_buffer()
 	);
 }
 
-template<typename selector_type>
-net6::basic_local<selector_type>&
-basic_local_document_info<selector_type>::get_net6()
+template<typename Document, typename Selector>
+typename basic_local_document_info<Document, Selector>::net_type&
+basic_local_document_info<Document, Selector>::get_net6()
 {
-	return dynamic_cast<net6::basic_local<selector_type>&>(
-		basic_document_info<obby::document, selector_type>::m_net
+	return dynamic_cast<net_type&>(
+		basic_document_info<Document, Selector>::get_net6()
 	);
 }
 
-template<typename selector_type>
-const net6::basic_local<selector_type>&
-basic_local_document_info<selector_type>::get_net6() const
+template<typename Document, typename Selector>
+const typename basic_local_document_info<Document, Selector>::net_type&
+basic_local_document_info<Document, Selector>::get_net6() const
 {
-	return dynamic_cast<const net6::basic_local<selector_type>&>(
-		basic_document_info<obby::document, selector_type>::m_net
+	return dynamic_cast<const net_type&>(
+		basic_document_info<Document, Selector>::get_net6()
 	);
 }
 
 } // namespace obby
 
-#endif // _OBBY_DOCUMENT_INFO_HPP_
+#endif // _OBBY_LOCAL_DOCUMENT_INFO_HPP_

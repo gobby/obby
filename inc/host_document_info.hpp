@@ -34,7 +34,7 @@ class basic_host_buffer;
  */
 template<typename selector_type>
 class basic_host_document_info :
-	virtual public basic_local_document_info<selector_type>,
+	virtual public basic_local_document_info<obby::document, selector_type>,
 	virtual public basic_server_document_info<selector_type>
 {
 public:
@@ -107,7 +107,7 @@ basic_host_document_info<selector_type>::basic_host_document_info(
 	const std::string& title, const std::string& content
 ):
 	basic_document_info<obby::document, selector_type>(buffer, net, owner, id, title),
-	basic_local_document_info<selector_type>(buffer, net, owner, id, title),
+	basic_local_document_info<obby::document, selector_type>(buffer, net, owner, id, title),
  	basic_server_document_info<selector_type>(
 		buffer, net, owner, id, title, content
 	)
@@ -130,7 +130,7 @@ basic_host_document_info<selector_type>::basic_host_document_info(
 	const serialise::object& obj
 ):
 	basic_document_info<obby::document, selector_type>(buffer, net, obj),
-	basic_local_document_info<selector_type>(buffer, net, obj),
+	basic_local_document_info<obby::document, selector_type>(buffer, net, obj),
 	basic_server_document_info<selector_type>(buffer, net, obj)
 {
 }
