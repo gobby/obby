@@ -56,11 +56,23 @@ public:
 	                          const user* owner,
 	                          unsigned int id,
 	                          const std::string& title,
+	                          unsigned int suffix,
+	                          const std::string& encoding);
+
+	basic_local_document_info(const buffer_type& buffer,
+	                          net_type& net,
+	                          const user* owner,
+	                          unsigned int id,
+	                          const std::string& title,
 	                          const std::string& encoding);
 
 	basic_local_document_info(const buffer_type& buffer,
 	                          net_type& net,
 	                          const serialise::object& obj);
+
+	basic_local_document_info(const buffer_type& buffer,
+	                          net_type& net,
+	                          const net6::packet& init_pack);
 
 	/** Sends a subscribe request for the local user. If the subscribe
 	 * request succeeded, the subscribe_event will be emitted.
@@ -118,6 +130,19 @@ basic_local_document_info<Document, Selector>::
 	                          const user* owner,
 	                          unsigned int id,
 	                          const std::string& title,
+	                          unsigned int suffix,
+	                          const std::string& encoding):
+	base_type(buffer, net, owner, id, title, suffix, encoding)
+{
+}
+
+template<typename Document, typename Selector>
+basic_local_document_info<Document, Selector>::
+	basic_local_document_info(const buffer_type& buffer,
+	                          net_type& net,
+	                          const user* owner,
+	                          unsigned int id,
+	                          const std::string& title,
 	                          const std::string& encoding):
 	base_type(buffer, net, owner, id, title, encoding)
 {
@@ -129,6 +154,15 @@ basic_local_document_info<Document, Selector>::
 	                          net_type& net,
 	                          const serialise::object& obj):
 	base_type(buffer, net, obj)
+{
+}
+
+template<typename Document, typename Selector>
+basic_local_document_info<Document, Selector>::
+	basic_local_document_info(const buffer_type& buffer,
+	                          net_type& net,
+	                          const net6::packet& init_pack):
+	base_type(buffer, net, init_pack)
 {
 }
 

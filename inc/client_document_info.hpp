@@ -63,11 +63,16 @@ public:
 	                           const user* owner,
 	                           unsigned int id,
 	                           const std::string& title,
+	                           unsigned int suffix,
 	                           const std::string& encoding);
 
 	/** Constructor which allows to give initial content and as such creates
 	 * an underlaying document assuming the local client just created the
 	 * document.
+	 *
+	 * This constructor automatically chooses a suffix for the document.
+	 * This suffix is just an initial one that the server might change
+	 * if it conflicts.
 	 */
 	basic_client_document_info(const buffer_type& buffer,
 	                           net_type& net,
@@ -193,9 +198,10 @@ basic_client_document_info<Document, Selector>::
 	                           const user* owner,
 	                           unsigned int id,
 	                           const std::string& title,
+	                           unsigned int suffix,
 	                           const std::string& encoding):
-	base_type(buffer, net, owner, id, title, encoding),
-	base_local_type(buffer, net, owner, id, title, encoding),
+	base_type(buffer, net, owner, id, title, suffix, encoding),
+	base_local_type(buffer, net, owner, id, title, suffix, encoding),
 	m_subscription_state(base_local_type::UNSUBSCRIBED)
 {
 	// If we created this document, the constructor with initial content
@@ -223,8 +229,22 @@ basic_client_document_info<Document, Selector>::
 	                           const std::string& title,
 	                           const std::string& encoding,
 	                           const std::string& content):
-	base_type(buffer, net, owner, id, title, encoding),
-	base_local_type(buffer, net, owner, id, title, encoding),
+	base_type(
+		buffer,
+		net,
+		owner,
+		id,
+		title,
+		encoding
+	),
+	base_local_type(
+		buffer,
+		net,
+		owner,
+		id,
+		title,
+		encoding
+	),
 	m_subscription_state(base_local_type::SUBSCRIBED)
 {
 	// content is provided, so we should have created this document
@@ -252,34 +272,12 @@ basic_client_document_info<Document, Selector>::
 	                           net_type& net,
 	                           const net6::packet& init_pack):
 	// TODO: Find a way to only extract the data once out of the packet
-	base_type(
-		buffer,
-		net,
-		init_pack.get_param(0).net6::parameter::as<const user*>(
-			::serialise::hex_context<const user*>(
-				buffer.get_user_table()
-			)
-		),
-		init_pack.get_param(1).net6::parameter::as<unsigned int>(),
-		init_pack.get_param(2).net6::parameter::as<std::string>(),
-		init_pack.get_param(3).net6::parameter::as<std::string>()
-	),
-	base_local_type(
-		buffer,
-		net,
-		init_pack.get_param(0).net6::parameter::as<const user*>(
-			::serialise::hex_context<const user*>(
-				buffer.get_user_table()
-			)
-		),
-		init_pack.get_param(1).net6::parameter::as<unsigned int>(),
-		init_pack.get_param(2).net6::parameter::as<std::string>(),
-		init_pack.get_param(3).net6::parameter::as<std::string>()
-	),
+	base_type(buffer, net, init_pack),
+	base_local_type(buffer, net, init_pack),
 	m_subscription_state(base_local_type::UNSUBSCRIBED)
 {
 	// Load initially subscribed users
-	for(unsigned int i = 4; i < init_pack.get_param_count(); ++ i)
+	for(unsigned int i = 5; i < init_pack.get_param_count(); ++ i)
 	{
 		// Get user
 		const user* cur_user =
@@ -365,13 +363,17 @@ void basic_client_document_info<Document, Selector>::
 {
 	if(base_type::m_net != NULL)
 	{
+		// Server chooses new suffix
 		document_packet pack(*this, "rename");
 		pack << new_title;
 		get_net6().send(pack);
 	}
 	else
 	{
-		base_type::document_rename(new_title);
+		base_type::document_rename(
+			new_title,
+			base_type::m_buffer.find_free_suffix(new_title, this)
+		);
 	}
 }
 
@@ -571,9 +573,11 @@ void basic_client_document_info<Document, Selector>::
 	// First parameter is the user who changed the title
 	const std::string& new_title =
 		pack.get_param(1).net6::parameter::as<std::string>();
+	unsigned int new_suffix =
+		pack.get_param(2).net6::parameter::as<unsigned int>();
 
 	// Rename document
-	base_type::document_rename(new_title);
+	base_type::document_rename(new_title, new_suffix);
 }
 
 template<typename Document, typename Selector>

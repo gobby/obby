@@ -512,16 +512,23 @@ void basic_server_buffer<Document, Selector>::
 		);
 	}
 
+	// No need to ignore since the document is not yet in
+	// the document list
+	unsigned int suffix =
+		basic_buffer<Document, Selector>::find_free_suffix(title, NULL);
+
 	// Create new document
 	base_document_info_type* info =
 		new_document_info(owner, id, title, encoding, content);
+
 	// Add to buffer
 	basic_buffer<Document, Selector>::document_add(*info);
+
 	// Publish the new document to the users. Note that we do not have
 	// to send the document's initial content because no user is currently
 	// subscribed, and the content is synced with the subscription.
 	net6::packet pack("obby_document_create");
-	pack << owner << id << title << encoding;
+	pack << owner << id << title << suffix << encoding;
 
 	// TODO: send_to_all_except function or something
 	// or, better: user_table.send() with given flags.
@@ -660,7 +667,8 @@ void basic_server_buffer<Document, Selector>::on_join(const net6::user& user6)
 		// TODO: Creation of this packet should be a method of
 		// server_document_info
 		document_pack << iter->get_owner() << iter->get_id()
-		              << iter->get_title() << iter->get_encoding();
+		              << iter->get_title() << iter->get_suffix()
+		              << iter->get_encoding();
 
 		// Add users that are subscribed
 		for(typename document_info_type::user_iterator user_iter =

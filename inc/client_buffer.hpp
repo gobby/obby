@@ -229,6 +229,7 @@ protected:
 	new_document_info(const user* owner,
 	                  unsigned int id,
 	                  const std::string& title,
+	                  unsigned int suffix,
 	                  const std::string& encoding);
 
         /** Creates a new document info object according to the type of buffer.
@@ -852,8 +853,10 @@ void basic_client_buffer<Document, Selector>::
 		pack.get_param(1).net6::parameter::as<unsigned int>();
 	const std::string& title =
 		pack.get_param(2).net6::parameter::as<std::string>();
+	unsigned int suffix =
+		pack.get_param(3).net6::parameter::as<unsigned int>();
 	const std::string& encoding =
-		pack.get_param(3).net6::parameter::as<std::string>();
+		pack.get_param(4).net6::parameter::as<std::string>();
 
 	// Get owner ID
 	unsigned int owner_id = (owner == NULL ? 0 : owner->get_id() );
@@ -877,231 +880,232 @@ void basic_client_buffer<Document, Selector>::
 
 	// Add new document
 	base_document_info_type* info =
-		new_document_info(owner, id, title, encoding);
+		new_document_info(owner, id, title, suffix, encoding);
 
-	basic_buffer<Document, Selector>::document_add(*info);
-}
-
-template<typename Document, typename Selector>
-void basic_client_buffer<Document, Selector>::
-	on_net_document_remove(const net6::packet& pack)
-{
-	// Get document to remove
-	document_info_type& doc = dynamic_cast<document_info_type&>(
-		*pack.get_param(0).net6::parameter::as<
-			base_document_info_type*
-		>(::serialise::hex_context<base_document_info_type*>(*this))
-	);
-
-	// Emit unsubscribe singal for users who were subscribed to this doc
-	// TODO: Do this is in document_delete!
-	for(typename document_info_type::user_iterator user_iter =
-		doc.user_begin();
-	    user_iter != doc.user_end();
-	    ++ user_iter)
-	{
-		doc.unsubscribe_event().emit(*user_iter);
+		basic_buffer<Document, Selector>::document_add(*info);
 	}
 
-	// Delete document
-	basic_buffer<Document, Selector>::document_delete(doc);
-}
-
-template<typename Document, typename Selector>
-void basic_client_buffer<Document, Selector>::
-	on_net_message(const net6::packet& pack)
-{
-	const user* writer = pack.get_param(0).net6::parameter::as<const user*>(
-		::serialise::hex_context<const user*>(
-			basic_buffer<Document, Selector>::get_user_table()
-		)
-	);
-
-	const std::string& message =
-		pack.get_param(1).net6::parameter::as<std::string>();
-
-	// Valid user id indicates that the message comes from a user, otherwise
-	// the server sent the message directly
-	if(writer != NULL)
+	template<typename Document, typename Selector>
+	void basic_client_buffer<Document, Selector>::
+		on_net_document_remove(const net6::packet& pack)
 	{
-		basic_buffer<Document, Selector>::m_chat.add_user_message(
-			message,
-			*writer
+		// Get document to remove
+		document_info_type& doc = dynamic_cast<document_info_type&>(
+			*pack.get_param(0).net6::parameter::as<
+				base_document_info_type*
+			>(::serialise::hex_context<base_document_info_type*>(*this))
+		);
+
+		// Emit unsubscribe singal for users who were subscribed to this doc
+		// TODO: Do this is in document_delete!
+		for(typename document_info_type::user_iterator user_iter =
+			doc.user_begin();
+		    user_iter != doc.user_end();
+		    ++ user_iter)
+		{
+			doc.unsubscribe_event().emit(*user_iter);
+		}
+
+		// Delete document
+		basic_buffer<Document, Selector>::document_delete(doc);
+	}
+
+	template<typename Document, typename Selector>
+	void basic_client_buffer<Document, Selector>::
+		on_net_message(const net6::packet& pack)
+	{
+		const user* writer = pack.get_param(0).net6::parameter::as<const user*>(
+			::serialise::hex_context<const user*>(
+				basic_buffer<Document, Selector>::get_user_table()
+			)
+		);
+
+		const std::string& message =
+			pack.get_param(1).net6::parameter::as<std::string>();
+
+		// Valid user id indicates that the message comes from a user, otherwise
+		// the server sent the message directly
+		if(writer != NULL)
+		{
+			basic_buffer<Document, Selector>::m_chat.add_user_message(
+				message,
+				*writer
+			);
+		}
+		else
+		{
+			basic_buffer<Document, Selector>::m_chat.add_server_message(
+				message
+			);
+		}
+	}
+
+	template<typename Document, typename Selector>
+	void basic_client_buffer<Document, Selector>::
+		on_net_user_colour(const net6::packet& pack)
+	{
+		const user* from = pack.get_param(0).net6::parameter::as<const user*>(
+			::serialise::hex_context<const user*>(
+				basic_buffer<Document, Selector>::get_user_table()
+			)
+		);
+
+		basic_buffer<Document, Selector>::m_user_table.set_user_colour(
+			*from,
+			pack.get_param(1).net6::parameter::as<obby::colour>()
+		);
+
+		// TODO: user::set_colour should emit the signal
+		basic_buffer<Document, Selector>::m_signal_user_colour.emit(*from);
+	}
+
+	template<typename Document, typename Selector>
+	void basic_client_buffer<Document, Selector>::
+		on_net_user_colour_failed(const net6::packet& pack)
+	{
+		basic_local_buffer<Document, Selector>::
+			m_signal_user_colour_failed.emit();
+	}
+
+	template<typename Document, typename Selector>
+	void basic_client_buffer<Document, Selector>::
+		on_net_sync_init(const net6::packet& pack)
+	{
+		// Login was successful, synchronisation begins. Clear users and
+		// documents from old session that have been kept to be able to still
+		// access them while being disconnected.
+		basic_buffer<Document, Selector>::m_user_table.clear();
+		basic_buffer<Document, Selector>::document_clear();
+		m_self = NULL;
+
+		basic_buffer<Document, Selector>::m_signal_sync_init.emit(
+			pack.get_param(0).net6::parameter::as<unsigned int>()
 		);
 	}
-	else
+
+	template<typename Document, typename Selector>
+	void basic_client_buffer<Document, Selector>::
+		on_net_sync_usertable_user(const net6::packet& pack)
 	{
-		basic_buffer<Document, Selector>::m_chat.add_server_message(
-			message
+		// User that was already in the obby session, but isn't anymore.
+
+		// Extract data from packet
+		unsigned int id =
+			pack.get_param(0).net6::parameter::as<unsigned int>();
+		const std::string& name =
+			pack.get_param(1).net6::parameter::as<std::string>();
+		colour colour =
+			pack.get_param(2).net6::parameter::as<obby::colour>();
+
+		// Add user into user table
+		basic_buffer<Document, Selector>::m_user_table.add_user(
+			id, name, colour
 		);
+
+		// TODO: Emit user_join_signal. Should be done automatically by the
+		// function call above
 	}
-}
 
-template<typename Document, typename Selector>
-void basic_client_buffer<Document, Selector>::
-	on_net_user_colour(const net6::packet& pack)
-{
-	const user* from = pack.get_param(0).net6::parameter::as<const user*>(
-		::serialise::hex_context<const user*>(
-			basic_buffer<Document, Selector>::get_user_table()
-		)
-	);
-
-	basic_buffer<Document, Selector>::m_user_table.set_user_colour(
-		*from,
-		pack.get_param(1).net6::parameter::as<obby::colour>()
-	);
-
-	// TODO: user::set_colour should emit the signal
-	basic_buffer<Document, Selector>::m_signal_user_colour.emit(*from);
-}
-
-template<typename Document, typename Selector>
-void basic_client_buffer<Document, Selector>::
-	on_net_user_colour_failed(const net6::packet& pack)
-{
-	basic_local_buffer<Document, Selector>::
-		m_signal_user_colour_failed.emit();
-}
-
-template<typename Document, typename Selector>
-void basic_client_buffer<Document, Selector>::
-	on_net_sync_init(const net6::packet& pack)
-{
-	// Login was successful, synchronisation begins. Clear users and
-	// documents from old session that have been kept to be able to still
-	// access them while being disconnected.
-	basic_buffer<Document, Selector>::m_user_table.clear();
-	basic_buffer<Document, Selector>::document_clear();
-	m_self = NULL;
-
-	basic_buffer<Document, Selector>::m_signal_sync_init.emit(
-		pack.get_param(0).net6::parameter::as<unsigned int>()
-	);
-}
-
-template<typename Document, typename Selector>
-void basic_client_buffer<Document, Selector>::
-	on_net_sync_usertable_user(const net6::packet& pack)
-{
-	// User that was already in the obby session, but isn't anymore.
-
-	// Extract data from packet
-	unsigned int id =
-		pack.get_param(0).net6::parameter::as<unsigned int>();
-	const std::string& name =
-		pack.get_param(1).net6::parameter::as<std::string>();
-	colour colour =
-		pack.get_param(2).net6::parameter::as<obby::colour>();
-
-	// Add user into user table
-	basic_buffer<Document, Selector>::m_user_table.add_user(
-		id, name, colour
-	);
-
-	// TODO: Emit user_join_signal. Should be done automatically by the
-	// function call above
-}
-
-template<typename Document, typename Selector>
-void basic_client_buffer<Document, Selector>::
-	on_net_sync_doclist_document(const net6::packet& pack)
-{
-	// Get data from packet
-	const user* owner = pack.get_param(0).net6::parameter::as<const user*>(
-		::serialise::hex_context<const user*>(
-			basic_buffer<Document, Selector>::get_user_table()
-		)
-	);
-
-	unsigned int id =
-		pack.get_param(1).net6::parameter::as<unsigned int>();
-
-	// Get document owner ID
-	unsigned int owner_id = (owner == NULL ? 0 : owner->get_id() );
-
-	// Check for duplicates, should not happen
-	if(document_find(owner_id, id) != NULL)
+	template<typename Document, typename Selector>
+	void basic_client_buffer<Document, Selector>::
+		on_net_sync_doclist_document(const net6::packet& pack)
 	{
-		format_string str("Document %0%/%1% exists already");
-		str << owner_id << id;
-		throw net6::bad_value(str.str() );
+		// Get data from packet
+		const user* owner = pack.get_param(0).net6::parameter::as<const user*>(
+			::serialise::hex_context<const user*>(
+				basic_buffer<Document, Selector>::get_user_table()
+			)
+		);
+
+		unsigned int id =
+			pack.get_param(1).net6::parameter::as<unsigned int>();
+
+		// Get document owner ID
+		unsigned int owner_id = (owner == NULL ? 0 : owner->get_id() );
+
+		// Check for duplicates, should not happen
+		if(document_find(owner_id, id) != NULL)
+		{
+			format_string str("Document %0%/%1% exists already");
+			str << owner_id << id;
+			throw net6::bad_value(str.str() );
+		}
+
+		// Create document_info from packet
+		base_document_info_type* info = new_document_info(pack);
+		// Add to buffer
+		basic_buffer<Document, Selector>::document_add(*info);
 	}
 
-	// Create document_info from packet
-	base_document_info_type* info = new_document_info(pack);
-	// Add to buffer
-	basic_buffer<Document, Selector>::document_add(*info);
-}
+	template<typename Document, typename Selector>
+	void basic_client_buffer<Document, Selector>::
+		on_net_sync_final(const net6::packet& pack)
+	{
+		basic_buffer<Document, Selector>::m_signal_sync_final.emit();
+	}
 
-template<typename Document, typename Selector>
-void basic_client_buffer<Document, Selector>::
-	on_net_sync_final(const net6::packet& pack)
-{
-	basic_buffer<Document, Selector>::m_signal_sync_final.emit();
-}
+	template<typename Document, typename Selector>
+	void basic_client_buffer<Document, Selector>::
+		on_net_document(const net6::packet& pack)
+	{
+		// Get document, forward packet
+		document_info_type& info = dynamic_cast<document_info_type&>(
+			*pack.get_param(0).net6::parameter::as<
+				base_document_info_type*
+			>(::serialise::hex_context<base_document_info_type*>(*this))
+		);
 
-template<typename Document, typename Selector>
-void basic_client_buffer<Document, Selector>::
-	on_net_document(const net6::packet& pack)
-{
-	// Get document, forward packet
-	document_info_type& info = dynamic_cast<document_info_type&>(
-		*pack.get_param(0).net6::parameter::as<
-			base_document_info_type*
-		>(::serialise::hex_context<base_document_info_type*>(*this))
-	);
+		// TODO: Rename this function. Think about providing a signal that may
+		// be emitted.
+		info.on_net_packet(document_packet(pack) );
+	}
 
-	// TODO: Rename this function. Think about providing a signal that may
-	// be emitted.
-	info.on_net_packet(document_packet(pack) );
-}
+	template<typename Document, typename Selector>
+	void basic_client_buffer<Document, Selector>::session_close()
+	{
+		session_close_impl();
+		basic_local_buffer<Document, Selector>::session_close_impl();
+		basic_buffer<Document, Selector>::session_close_impl();
+	}
 
-template<typename Document, typename Selector>
-void basic_client_buffer<Document, Selector>::session_close()
-{
-	session_close_impl();
-	basic_local_buffer<Document, Selector>::session_close_impl();
-	basic_buffer<Document, Selector>::session_close_impl();
-}
+	template<typename Document, typename Selector>
+	void basic_client_buffer<Document, Selector>::session_close_impl()
+	{
+		// Reset passwords to prevent using them for the next connection
+		m_settings.global_password = m_settings.user_password = "";
+	}
 
-template<typename Document, typename Selector>
-void basic_client_buffer<Document, Selector>::session_close_impl()
-{
-	// Reset passwords to prevent using them for the next connection
-	m_settings.global_password = m_settings.user_password = "";
-}
+	template<typename Document, typename Selector>
+	void basic_client_buffer<Document, Selector>::register_signal_handlers()
+	{
+		net6_client().join_event().connect(
+			sigc::mem_fun(*this, &basic_client_buffer::on_join) );
+		net6_client().part_event().connect(
+			sigc::mem_fun(*this, &basic_client_buffer::on_part) );
+		net6_client().close_event().connect(
+			sigc::mem_fun(*this, &basic_client_buffer::on_close) );
+		//net6_client().encrypted_event().connect(
+		//	sigc::mem_fun(*this, &basic_client_buffer::on_encrypted) );
+		net6_client().data_event().connect(
+			sigc::mem_fun(*this, &basic_client_buffer::on_data) );
+		net6_client().login_failed_event().connect(
+			sigc::mem_fun(*this, &basic_client_buffer::on_login_failed) );
+		net6_client().login_extend_event().connect(
+			sigc::mem_fun(*this, &basic_client_buffer::on_login_extend) );
+	}
 
-template<typename Document, typename Selector>
-void basic_client_buffer<Document, Selector>::register_signal_handlers()
-{
-	net6_client().join_event().connect(
-		sigc::mem_fun(*this, &basic_client_buffer::on_join) );
-	net6_client().part_event().connect(
-		sigc::mem_fun(*this, &basic_client_buffer::on_part) );
-	net6_client().close_event().connect(
-		sigc::mem_fun(*this, &basic_client_buffer::on_close) );
-	//net6_client().encrypted_event().connect(
-	//	sigc::mem_fun(*this, &basic_client_buffer::on_encrypted) );
-	net6_client().data_event().connect(
-		sigc::mem_fun(*this, &basic_client_buffer::on_data) );
-	net6_client().login_failed_event().connect(
-		sigc::mem_fun(*this, &basic_client_buffer::on_login_failed) );
-	net6_client().login_extend_event().connect(
-		sigc::mem_fun(*this, &basic_client_buffer::on_login_extend) );
-}
-
-template<typename Document, typename Selector>
-typename basic_client_buffer<Document, Selector>::base_document_info_type*
-basic_client_buffer<Document, Selector>::
-	new_document_info(const user* owner,
-	                  unsigned int id,
-	                  const std::string& title,
-	                  const std::string& encoding)
-{
-	// Create client_document_info, according to client_buffer
-	return new document_info_type(
-		*this, net6_client(), owner, id, title, encoding
+	template<typename Document, typename Selector>
+	typename basic_client_buffer<Document, Selector>::base_document_info_type*
+	basic_client_buffer<Document, Selector>::
+		new_document_info(const user* owner,
+				  unsigned int id,
+				  const std::string& title,
+				  unsigned int suffix,
+				  const std::string& encoding)
+	{
+		// Create client_document_info, according to client_buffer
+		return new document_info_type(
+			*this, net6_client(), owner, id, title, suffix, encoding
 	);
 }
 

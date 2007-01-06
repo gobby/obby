@@ -19,10 +19,13 @@
 #ifndef _OBBY_BUFFER_HPP_
 #define _OBBY_BUFFER_HPP_
 
+#include <set>
 #include <list>
+
 #include <gmpxx.h>
 #include <net6/main.hpp>
 #include <net6/object.hpp>
+
 #include "serialise/parser.hpp"
 #include "common.hpp"
 #include "format_string.hpp"
@@ -165,6 +168,11 @@ public:
 	 */
 	void set_document_template(const document_template_type& tmpl);
 
+	/** @brief Looks for a free suffix in the buffer.
+	 */
+	unsigned int find_free_suffix(const std::string& for_title,
+	                              const document_info_type* ignore) const;
+
 	/** Signal which will be emitted when the initial syncrhonisation
 	 * begins, thus if the client has logged in successfully.
 	 */
@@ -244,7 +252,7 @@ protected:
 	signal_user_colour_type m_signal_user_colour;
 
 	signal_document_insert_type m_signal_document_insert;
-	signal_document_rename_type m_signal_document_rename;
+	//signal_document_rename_type m_signal_document_rename;
 	signal_document_remove_type m_signal_document_remove;
 
 	net6::main m_netkit;
@@ -265,7 +273,7 @@ protected:
 typedef basic_buffer<obby::document, net6::selector> buffer;
 
 template<typename Document, typename Selector>
-const unsigned long basic_buffer<Document, Selector>::PROTOCOL_VERSION = 7ul;
+const unsigned long basic_buffer<Document, Selector>::PROTOCOL_VERSION = 8ul;
 
 template<typename Document, typename Selector>
 basic_buffer<Document, Selector>::basic_buffer():
@@ -445,6 +453,39 @@ void basic_buffer<Document, Selector>::
 }
 
 template<typename Document, typename Selector>
+unsigned int basic_buffer<Document, Selector>::
+	find_free_suffix(const std::string& for_title,
+	                 const document_info_type* ignore) const
+{
+	// Set that sorts suffixes in ascending order
+	std::set<unsigned int> suffixes;
+
+	// Put all suffixes into the set
+	for(document_iterator it = m_docs.begin(); it != m_docs.end(); ++ it)
+	{
+		if(ignore == &(*it) )
+			continue;
+
+		if(it->get_title() == for_title)
+			suffixes.insert(it->get_suffix() );
+	}
+
+	// Choose the lowest free one
+	unsigned int prev_suffix = 0;
+	for(std::set<unsigned int>::const_iterator iter = suffixes.begin();
+	    iter != suffixes.end();
+	    ++ iter)
+	{
+		if(*iter > prev_suffix + 1)
+			break;
+		else
+			prev_suffix = *iter;
+	}
+
+	return prev_suffix + 1;
+}
+
+template<typename Document, typename Selector>
 typename basic_buffer<Document, Selector>::signal_sync_init_type
 basic_buffer<Document, Selector>::sync_init_event() const
 {
@@ -486,12 +527,12 @@ basic_buffer<Document, Selector>::document_insert_event() const
 	return m_signal_document_insert;
 }
 
-template<typename Document, typename Selector>
+/*template<typename Document, typename Selector>
 typename basic_buffer<Document, Selector>::signal_document_rename_type
 basic_buffer<Document, Selector>::document_rename_event() const
 {
 	return m_signal_document_rename;
-}
+}*/
 
 template<typename Document, typename Selector>
 typename basic_buffer<Document, Selector>::signal_document_remove_type

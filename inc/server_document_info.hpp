@@ -203,7 +203,14 @@ basic_server_document_info<Document, Selector>::
 	                           const std::string& title,
 	                           const std::string& encoding,
 	                           const std::string& content):
-	base_type(buffer, net, owner, id, title, encoding)
+	base_type(
+		buffer,
+		net,
+		owner,
+		id,
+		title,
+		encoding
+	)
 {
 	base_type::assign_document();
 	base_type::m_document->insert(0, content, NULL);
@@ -215,7 +222,15 @@ basic_server_document_info<Document, Selector>::
 
 	// Owner is subscribed implicitely
 	if(owner != NULL)
+	{
 		user_subscribe(*owner);
+
+		// Send resulting suffix to owner
+		document_packet pack(*this, "rename");
+		pack << static_cast<const obby::user*>(NULL)
+		     << base_type::m_title << base_type::m_suffix;
+		get_net6().send(pack, owner->get_net6());
+	}
 
 	// Connect to signals
 	m_jupiter->record_event().connect(
@@ -234,6 +249,8 @@ basic_server_document_info<Document, Selector>::
 	base_type(buffer, net, obj)
 {
 	// TODO: Avoid code duplication somehow
+	// What code duplication? :( -- armin, Fri Mar 10
+
 	// Assign document content
 	base_type::assign_document();
 
@@ -448,13 +465,16 @@ void basic_server_document_info<Document, Selector>::
 	            const user* from)
 {
 	// Rename document
-	basic_document_info<Document, Selector>::document_rename(new_title);
+	base_type::document_rename(
+		new_title,
+		base_type::m_buffer.find_free_suffix(new_title, this)
+	);
 
 	if(base_type::m_net != NULL)
 	{
 		// Forward to clients
 		document_packet pack(*this, "rename");
-		pack << from << new_title;
+		pack << from << new_title << base_type::m_suffix;
 		get_net6().send(pack);
 	}
 }

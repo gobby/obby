@@ -132,11 +132,22 @@ public:
 	                    net_type& net,
 	                    const user* owner, unsigned int id,
 	                    const std::string& title,
+	                    unsigned int suffix,
+	                    const std::string& encoding);
+
+	basic_document_info(const buffer_type& buffer,
+	                    net_type& net,
+	                    const user* owner, unsigned int id,
+	                    const std::string& title,
 	                    const std::string& encoding);
 
 	basic_document_info(const buffer_type& buffer,
 	                    net_type& net,
 	                    const serialise::object& obj);
+
+	basic_document_info(const buffer_type& buffer,
+	                    net_type& net,
+	                    const net6::packet& init_pack);
 
 	/** Serialises the document into the given serialisation object.
 	 */
@@ -159,6 +170,19 @@ public:
 	/** Returns the title set for this document.
 	 */
 	const std::string& get_title() const;
+
+	/** @brief Returns the suffix for this document.
+	 *
+	 * The suffix is a number that is normally just 1. However, if two
+	 * documents with the exact same titles are in the same session, one
+	 * of them is assigned the suffix 2.
+	 */
+	unsigned int get_suffix() const;
+
+	/** @brief Returns the suffixed title for the document that is
+	 * unique in the whole session.
+	 */
+	std::string get_suffixed_title() const;
 
 	/** @brief Returns the character set in which the document is encoded.
 	 */
@@ -236,7 +260,8 @@ protected:
 
 	/** Internally renames the document.
 	 */
-	void document_rename(const std::string& title);
+	void document_rename(const std::string& title,
+	                     unsigned int suffix);
 
 	/** Internal function to create the underlaying document.
 	 */
@@ -257,6 +282,7 @@ protected:
 	const user* m_owner;
 	unsigned int m_id;
 	std::string m_title;
+	unsigned int m_suffix;
 	std::string m_encoding;
 
 	std::auto_ptr<privileges_table> m_priv_table;
@@ -571,8 +597,26 @@ basic_document_info<Document, Selector>::
 	                    net_type& net,
 	                    const user* owner, unsigned int id,
 	                    const std::string& title,
+	                    unsigned int suffix,
 	                    const std::string& encoding):
-	m_buffer(buffer), m_net(&net), m_owner(owner), m_id(id), m_title(title),
+	m_buffer(buffer), m_net(&net), m_owner(owner), m_id(id),
+	m_title(title), m_suffix(suffix),
+	m_encoding(encoding),
+	m_priv_table(
+		new privileges_table(privileges::SUBSCRIBE | privileges::MODIFY)
+	)
+{
+}
+
+template<typename Document, typename Selector>
+basic_document_info<Document, Selector>::
+	basic_document_info(const buffer_type& buffer,
+	                    net_type& net,
+	                    const user* owner, unsigned int id,
+	                    const std::string& title,
+	                    const std::string& encoding):
+	m_buffer(buffer), m_net(&net), m_owner(owner), m_id(id),
+	m_title(title), m_suffix(buffer.find_free_suffix(title, this)),
 	m_encoding(encoding),
 	m_priv_table(
 		new privileges_table(privileges::SUBSCRIBE | privileges::MODIFY)
@@ -602,10 +646,37 @@ basic_document_info<Document, Selector>::
 		obj.get_required_attribute("title").
 			obby::serialise::attribute::as<std::string>()
 	),
+	m_suffix(
+		obj.get_required_attribute("suffix").
+			obby::serialise::attribute::as<unsigned int>()
+	),
 	m_encoding(
 		obj.get_required_attribute("encoding").
 			obby::serialise::attribute::as<std::string>()
 	),
+	m_priv_table(
+		new privileges_table(privileges::SUBSCRIBE | privileges::MODIFY)
+	)
+{
+}
+
+template<typename Document, typename Selector>
+basic_document_info<Document, Selector>::
+	basic_document_info(const buffer_type& buffer,
+	                    net_type& net,
+	                    const net6::packet& init_pack):
+	m_buffer(buffer), m_net(&net),
+	m_owner(
+		init_pack.get_param(0).net6::parameter::as<const user*>(
+			::serialise::hex_context<const user*>(
+				buffer.get_user_table()
+			)
+		)
+	),
+	m_id(init_pack.get_param(1).net6::parameter::as<unsigned int>() ),
+	m_title(init_pack.get_param(2).net6::parameter::as<std::string>() ),
+	m_suffix(init_pack.get_param(3).net6::parameter::as<unsigned int>() ),
+	m_encoding(init_pack.get_param(4).net6::parameter::as<std::string>() ),
 	m_priv_table(
 		new privileges_table(privileges::SUBSCRIBE | privileges::MODIFY)
 	)
@@ -628,6 +699,7 @@ void basic_document_info<Document, Selector>::
 	obj.add_attribute("owner").set_value(m_owner);
 	obj.add_attribute("id").set_value(m_id);
 	obj.add_attribute("title").set_value(m_title);
+	obj.add_attribute("suffix").set_value(m_suffix);
 	obj.add_attribute("encoding").set_value(m_encoding);
 
 	for(typename document_type::chunk_iterator chunk_it =
@@ -667,6 +739,25 @@ unsigned int basic_document_info<Document, Selector>::get_id() const
 template<typename Document, typename Selector>
 const std::string& basic_document_info<Document, Selector>::get_title() const
 {
+	return m_title;
+}
+
+template<typename Document, typename Selector>
+unsigned int basic_document_info<Document, Selector>::get_suffix() const
+{
+	return m_suffix;
+}
+
+template<typename Document, typename Selector>
+std::string basic_document_info<Document, Selector>::get_suffixed_title() const
+{
+	if(m_suffix != 1)
+	{
+		format_string str("%0% (%1%)");
+		str << m_title << m_suffix;
+		return str.str();
+	}
+
 	return m_title;
 }
 
@@ -806,9 +897,12 @@ void basic_document_info<Document, Selector>::user_unsubscribe(const user& user)
 
 template<typename Document, typename Selector>
 void basic_document_info<Document, Selector>::
-	document_rename(const std::string& title)
+	document_rename(const std::string& title,
+	                unsigned int suffix)
 {
 	m_title = title;
+	m_suffix = suffix;
+
 	m_signal_rename.emit(title);
 }
 
