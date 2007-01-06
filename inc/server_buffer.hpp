@@ -30,12 +30,11 @@ namespace obby
  * connections from client_buffers and synchronises their changes.
  */
 
-class server_buffer : virtual public buffer,
-                      public sigc::trackable
+class server_buffer : virtual public buffer
 {
 public: 
-	typedef sigc::signal<void, net6::server::peer&> signal_connect_type;
-	typedef sigc::signal<void, net6::server::peer&> signal_disconnect_type;
+	typedef sigc::signal<void, const net6::user&> signal_connect_type;
+	typedef sigc::signal<void, const net6::user&> signal_disconnect_type;
 
 	/** Creates a new server buffer listening on port <em>port</em>.
 	 */
@@ -132,16 +131,16 @@ protected:
 
 	/** net6 signal handlers.
 	 */
-	void on_connect(net6::server::peer& peer);
-	void on_disconnect(net6::server::peer& peer);
-	void on_join(net6::server::peer& peer);
-	void on_part(net6::server::peer& peer);
-	bool on_auth(net6::server::peer& peer, const net6::packet& pack,
+	void on_connect(const net6::user& user6);
+	void on_disconnect(const net6::user& user6);
+	void on_join(const net6::user& user6);
+	void on_part(const net6::user& user6);
+	bool on_auth(const net6::user& user6, const net6::packet& pack,
 	             net6::login::error& error);
-	unsigned int on_login(net6::server::peer& peer,
+	unsigned int on_login(const net6::user& user6,
 	                      const net6::packet& pack);
-	void on_extend(net6::server::peer& peer, net6::packet& pack);
-	void on_data(net6::server::peer& from, const net6::packet& pack);
+	void on_extend(const net6::user& user6, net6::packet& pack);
+	void on_data(const net6::user& from, const net6::packet& pack);
 
 	/** Executes a network packet.
 	 */
@@ -175,7 +174,7 @@ protected:
 	 * clients, they get removed as soon as they are copied into the
 	 * corresponding user object.
 	 */
-	std::map<net6::peer*, std::string> m_tokens;
+	std::map<const net6::user*, std::string> m_tokens;
 
 	/** RSA keys to enable secure authentication.
 	 */

@@ -31,8 +31,7 @@ namespace obby
 /** Abstract base class for obby buffers. A buffer contains multiple documents
  * that are synchronised through many users and a user list.
  */
-
-class buffer : private net6::non_copyable
+class buffer : private net6::non_copyable, public sigc::trackable
 {
 public:
 	// Document iterator typedef

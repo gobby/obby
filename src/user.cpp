@@ -21,38 +21,35 @@
 #include "user.hpp"
 #include "document_info.hpp"
 
-obby::user::user(net6::peer& peer, int red, int green, int blue)
- : m_peer(&peer), m_id(peer.get_id() ), m_name(peer.get_name() ), m_red(red),
-   m_green(green), m_blue(blue), m_flags(CONNECTED)
+obby::user::user(const net6::user& user6, int red, int green, int blue)
+ : m_user6(&user6), m_id(user6.get_id() ), m_name(user6.get_name() ),
+   m_red(red), m_green(green), m_blue(blue), m_flags(CONNECTED)
 {
 }
 
 obby::user::user(unsigned int id, const std::string& name, int red, int green,
                  int blue)
- : m_peer(NULL), m_id(id), m_name(name), m_red(red), m_green(green),
+ : m_user6(NULL), m_id(id), m_name(name), m_red(red), m_green(green),
    m_blue(blue), m_flags(NONE)
 {
 }
 
-obby::user::~user()
+void obby::user::release_net6()
 {
-}
-
-void obby::user::release_peer()
-{
-	m_peer = NULL;
+	m_user6 = NULL;
 	remove_flags(CONNECTED);
 }
 
-void obby::user::assign_peer(net6::peer& peer, int red, int green, int blue)
+void obby::user::assign_net6(const net6::user& user6, int red, int green,
+                             int blue)
 {
 	// User must not be already connected
 	assert(~get_flags() & CONNECTED);
 
 	// Name must be the same
-	assert(m_name == peer.get_name() );
+	assert(m_name == user6.get_name() );
 
-	m_peer = &peer;
+	m_user6 = &user6;
 	m_red = red;
 	m_green = green;
 	m_blue = blue;
@@ -60,9 +57,13 @@ void obby::user::assign_peer(net6::peer& peer, int red, int green, int blue)
 	add_flags(CONNECTED);
 }
 
-net6::peer* obby::user::get_peer() const
+const net6::user& obby::user::get_net6() const
 {
-	return m_peer;
+	if(m_user6 == NULL)
+		// TODO: Own error class?
+		throw std::logic_error("obby::user::get_net6");
+
+	return *m_user6;
 }
 
 const std::string& obby::user::get_name() const
@@ -72,7 +73,11 @@ const std::string& obby::user::get_name() const
 
 const net6::address& obby::user::get_address() const
 {
-	return static_cast<const net6::server::peer*>(m_peer)->get_address();
+	if(m_user6 == NULL)
+		// TODO: Own error class?
+		throw std::logic_error("obby::user::get_address");
+
+	return m_user6->get_connection().get_remote_address();
 }
 
 unsigned int obby::user::get_id() const
@@ -136,42 +141,4 @@ void obby::user::remove_flags(flags old_flags)
 {
 	m_flags &= ~old_flags;
 }
-
-#if 0
-void obby::user::subscribe(document_info& document)
-{
-	m_documents.push_back(&document);
-}
-
-void obby::user::unsubscribe(document_info& document)
-{
-	m_documents.erase(
-		std::remove(m_documents.begin(), m_documents.end(), &document),
-		m_documents.end()
-	);
-}
-
-obby::document_info* obby::user::find_document(unsigned int id) const
-{
-	for(document_iterator i = document_begin(); i != document_end(); ++ i)
-		if(i->get_id() == id)
-			return &(*i);
-	return NULL;
-}
-
-bool obby::user::is_subscribed(const document_info& document) const
-{
-	return find_document(document.get_id() ) != NULL;
-}
-
-obby::user::document_iterator obby::user::document_begin() const
-{
-	return m_documents.begin();
-}
-
-obby::user::document_iterator obby::user::document_end() const
-{
-	return m_documents.end();
-}
-#endif
 

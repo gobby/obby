@@ -135,12 +135,12 @@ const std::string& obby::client_buffer::get_name() const
 
 void obby::client_buffer::select()
 {
-	m_client->select();
+	m_client->get_selector().select();
 }
 
 void obby::client_buffer::select(unsigned int timeout)
 {
-	m_client->select(timeout);
+	m_client->get_selector().select(timeout);
 }
 
 void obby::client_buffer::send_message(const std::string& message)
@@ -209,7 +209,7 @@ obby::client_buffer::signal_close_type obby::client_buffer::close_event() const
 	return m_signal_close;
 }
 
-void obby::client_buffer::on_join(net6::client::peer& peer,
+void obby::client_buffer::on_join(const net6::user& user6,
                                   const net6::packet& pack)
 {
 	int red = pack.get_param(2).as<int>();
@@ -217,7 +217,7 @@ void obby::client_buffer::on_join(net6::client::peer& peer,
 	int blue = pack.get_param(4).as<int>();
 
 	// Add user into user table
-	user* new_user = m_usertable.add_user(peer, red, green, blue);
+	user* new_user = m_usertable.add_user(user6, red, green, blue);
 
 	// The first joining user is the local one
 	if(!m_self) m_self = new_user;
@@ -229,17 +229,17 @@ void obby::client_buffer::on_join(net6::client::peer& peer,
 	m_signal_user_join.emit(*new_user);
 }
 
-void obby::client_buffer::on_part(net6::client::peer& peer,
+void obby::client_buffer::on_part(const net6::user& user6,
                                   const net6::packet& pack)
 {
 	// Find user
-	user* cur_user = m_usertable.find_user<user::CONNECTED>(peer);
+	user* cur_user = m_usertable.find_user<user::CONNECTED>(user6);
 	
 	// Make sure that the user we are removing was connected
 	if(cur_user == NULL)
 	{
 		std::cerr << "obby::client_buffer::on_part: User "
-		          << peer.get_id() << " is not connected" << std::endl;
+		          << user6.get_id() << " is not connected" << std::endl;
 		return;
 	}
 

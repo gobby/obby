@@ -19,8 +19,8 @@
 #ifndef _OBBY_CLIENT_DOCUMENT_HPP_
 #define _OBBY_CLIENT_DOCUMENT_HPP_
 
-#include <net6/client.hpp>
 #include "local_document.hpp"
+#include <net6/client.hpp>
 
 namespace obby
 {

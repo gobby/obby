@@ -30,31 +30,26 @@ obby::user_table::~user_table()
 		delete *iter;
 }
 
-obby::user* obby::user_table::add_user(net6::peer& peer, int red, int green,
-                                       int blue)
+obby::user* obby::user_table::add_user(const net6::user& user6, int red,
+                                       int green, int blue)
 {
 	// Find already exiting user with the given name
-	user* existing_user = find_user(peer.get_name() );
-	if(existing_user)
+	user* existing_user = find_user(user6.get_name() );
+	if(existing_user != NULL)
 	{
 		// If this user would be connected, net6 should have denied
 		// the login process with the "Name is already in use" error
 		if(existing_user->get_flags() & user::CONNECTED)
-		{
-			std::cerr << "obby::user_table::add_user: " 
-			          << "User " << peer.get_id() << " exists "
-				  << "already " << std::endl;
-			return NULL;
-		}
+			throw std::logic_error("obby::user_table::add_user");
 
-		// Assign new peer to existing user.
-		existing_user->assign_peer(peer, red, green, blue);
+		// Assign new net6::user to existing obby::user.
+		existing_user->assign_net6(user6, red, green, blue);
 		return existing_user;
 	}
 	else
 	{
 		// User seems to be here for his first time: Create a new user.
-		user* new_user = new user(peer, red, green, blue);
+		user* new_user = new user(user6, red, green, blue);
 
 		// Insert user into user list
 		m_userlist.push_back(new_user);
@@ -68,14 +63,11 @@ obby::user* obby::user_table::add_user(unsigned int id, const std::string& name,
 {
 	// Look for an existing user with this name.
 	user* existing_user = find_user(name);
-	if(existing_user)
-	{
-		// We can not assign the new user to this one, because the user
-		// we are currently adding is not connected to the obby session.
-		std::cerr << "obby::user_table::add_user: "
-		          << "User " << id << " exists already!" << std::endl;
-		return NULL;
-	}
+
+	// We can not assign the new user to this one, because the user
+	// we are currently adding is not connected to the obby session.
+	if(existing_user != NULL)
+		throw std::logic_error("obby::user_table::add_user");
 
 	user* new_user = new user(id, name, red, green, blue);
 	m_userlist.push_back(new_user);
@@ -85,7 +77,7 @@ obby::user* obby::user_table::add_user(unsigned int id, const std::string& name,
 
 void obby::user_table::remove_user(user* user_to_remove)
 {
-	// Release underlaying peer object, this disables the connected flag,
-	// too. Keep the user in the list to recognize him if he rejoins.
-	user_to_remove->release_peer();
+	// Release underlaying net6::user object, this disables the connected
+	// flag, too. Keep the user in the list to recognize him if he rejoins.
+	user_to_remove->release_net6();
 }

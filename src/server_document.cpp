@@ -144,18 +144,17 @@ void obby::server_document::erase_impl(position from, position to,
 
 void obby::server_document::synchronise(const user& to)
 {
-	net6::server::peer& peer =
-		*static_cast<net6::server::peer*>(to.get_peer() );
+	const net6::user& user6 = to.get_net6();
 
 	// Send doc initial sync packet with document revision
 	net6::packet init_pack("obby_document");
 	init_pack << m_info << "sync_init" << m_revision;
-	m_server.send(init_pack, peer);
+	m_server.send(init_pack, user6);
 
 	// Send buffer
 	std::vector<line>::const_iterator iter;
 	for(iter = m_lines.begin(); iter != m_lines.end(); ++ iter)
-		m_server.send(iter->to_packet(*this), peer);
+		m_server.send(iter->to_packet(*this), user6);
 }
 
 void obby::server_document::forward_record(const record& rec) const
@@ -170,10 +169,7 @@ void obby::server_document::forward_record(const record& rec) const
 	    ++ iter)
 	{
 		// Send the packet to each subscribed user
-		m_server.send(
-			pack,
-			*static_cast<net6::server::peer*>(iter->get_peer())
-		);
+		m_server.send(pack, iter->get_net6() );
 	}
 }
 

@@ -58,8 +58,7 @@ void obby::host_buffer::init_impl(unsigned int port,
 	net6::host* host = new net6::host(port, username, false);
 	m_server = host;
 
-	assert(host->get_self() );
-	m_self = m_usertable.add_user(*host->get_self(), red, green, blue);
+	m_self = m_usertable.add_user(host->get_self(), red, green, blue);
 
 	register_signal_handlers();
 }

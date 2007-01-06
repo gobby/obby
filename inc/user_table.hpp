@@ -19,11 +19,11 @@
 #ifndef _OBBY_USER_TABLE_HPP_
 #define _OBBY_USER_TABLE_HPP_
 
-#include <list>
-#include <string>
-#include <net6/non_copyable.hpp>
-#include "ptr_iterator.hpp"
 #include "user.hpp"
+#include "ptr_iterator.hpp"
+#include <net6/non_copyable.hpp>
+#include <string>
+#include <list>
 
 namespace obby
 {
@@ -126,19 +126,18 @@ public:
 	virtual ~user_table();
 
 	/** Adds a new user to the user list. The name and ID is read from the
-	 * peer object. Because of the fact that a peer object exists, the new
-	 * user will be marked as connected. If a user with the same ID exists,
-	 * and is not connected, the peer will be assigned to this user, the
-	 * colour is updated. If a user with this ID is already connected, an
-	 * error is dropped on stderr.
-	 * TODO: Cincider the use of exceptions
+	 * net6::user object. Because of the fact that a net6::user object
+	 * exists, the new user will be marked as connected. If a user with the
+	 * same ID exists, and is not connected, the net6::user will be
+	 * assigned to this user, the colour is updated. If a user with this ID
+	 * is already connected, std::logic_error is thrown.
 	 */
-	obby::user* add_user(net6::peer& peer, int red, int green, int blue);
+	obby::user* add_user(const net6::user& user, int red, int green,
+	                     int blue);
 
-	/** Adds a new user to the user list. No peer exists, so the connected
-	 * flag will not be set. If a user with this ID exists already, an
-	 * error message is dropped on stderr.
-	 * TODO: Concider the use of exceptions
+	/** Adds a new user to the user list. No net6::user exists, so the
+	 * connected flag will not be set. If a user with this ID exists
+	 * already, std::logic_error will be thrown.
 	 */
 	obby::user* add_user(unsigned int id, const std::string& name, int red,
 	                     int green, int blue);
@@ -216,7 +215,7 @@ public:
 		bool inverse,
 		typename ret_type,
 		ret_type(user::*func)() const
-	> user* find_user(ret_type hint) const {
+	> user* find_user_val(ret_type hint) const {
 		for(user_iterator<matching_flags, inverse> iter =
 			user_begin<matching_flags, inverse>();
 		    iter != user_end<matching_flags, inverse>();
@@ -228,13 +227,36 @@ public:
 		}
 
 		return NULL;
-	}	
+	}
+
+	/** Finds a user whose flags match matching_flags (or don't match, if
+	 * inverse is true) and if the function <em>func</em> of obby::user
+	 * returns the same address as <em>hint</em>'s address. Of course,
+	 * ret_type has to be a reference for this to work. This is a helper
+	 * function for user_table::find_user(const net6::user&).
+	 */
+	template<
+		user::flags matching_flags,
+		bool inverse,
+		typename ret_type,
+		ret_type(user::*func)() const
+	> user* find_user_ref(ret_type hint) const {
+		for(user_iterator<matching_flags, inverse> iter =
+			user_begin<matching_flags, inverse>();
+		    iter != user_end<matching_flags, inverse>();
+		    ++ iter) {
+			user* cur_user = &(*iter);
+			if( &(cur_user->*func)() == &hint) {
+				return cur_user;
+			}
+		}
+	}
 
 	/** Searches a user with the given flags that has the given ID.
 	 */
 	template<user::flags matching_flags, bool inverse>
 	user* find_user(unsigned int id) const {
-		return find_user<matching_flags, inverse, unsigned int,
+		return find_user_val<matching_flags, inverse, unsigned int,
 			&user::get_id>(id);
 	}
 
@@ -247,29 +269,30 @@ public:
 		return find_user<user::NONE, false>(id);
 	}
 
-	/** Searches a user which represents the given underlaying peer.
+	/** Searches a user which represents the given underlaying net6::user
+	 * object.
 	 */
 	template<user::flags matching_flags, bool inverse>
-	user* find_user(net6::peer& peer) const {
-		return find_user<matching_flags, inverse,
-			net6::peer*, &user::get_peer>(&peer);
+	user* find_user(const net6::user& user) const {
+		return find_user_ref<matching_flags, inverse,
+			const net6::user&, &user::get_net6>(user);
 	}
 
 	template<user::flags matching_flags>
-	user* find_user(net6::peer& peer) const {
-		return find_user<matching_flags, false>(peer);
+	user* find_user(const net6::user& user) const {
+		return find_user<matching_flags, false>(user);
 	}
 
-	user* find_user(net6::peer& peer) const {
-		return find_user<user::NONE, false>(peer);
+	user* find_user(const net6::user& user) const {
+		return find_user<user::NONE, false>(user);
 	}
 
 	/** Searches for a user with the given name.
 	 */
 	template<user::flags matching_flags, bool inverse>
 	user* find_user(const std::string& name) const {
-		return find_user<matching_flags, inverse, const std::string&,
-			&user::get_name>(name);
+		return find_user_val<matching_flags, inverse,
+			const std::string&, &user::get_name>(name);
 	}
 
 	template<user::flags matching_flags>

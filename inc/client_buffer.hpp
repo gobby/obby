@@ -32,8 +32,7 @@ namespace obby
 /** Buffer for establish a connection to a server_buffer.
  */
 
-class client_buffer : public local_buffer,
-                      public sigc::trackable
+class client_buffer : public local_buffer
 {
 public:
 	typedef net6::default_accumulator<bool, false> password_accumulator;
@@ -178,8 +177,8 @@ protected:
 
 	/** net6 signal handlers.
 	 */
-	void on_join(net6::client::peer& peer, const net6::packet& pack);
-	void on_part(net6::client::peer& peer, const net6::packet& pack);
+	void on_join(const net6::user& user6, const net6::packet& pack);
+	void on_part(const net6::user& user6, const net6::packet& pack);
 	void on_close();
 	void on_data(const net6::packet& pack);
 	void on_login_failed(net6::login::error error);

@@ -75,12 +75,12 @@ void obby::server_buffer::init_impl(unsigned int port)
 
 void obby::server_buffer::select()
 {
-	m_server->select();
+	m_server->get_selector().select();
 }
 
 void obby::server_buffer::select(unsigned int timeout)
 {
-	m_server->select(timeout);
+	m_server->get_selector().select(timeout);
 }
 
 void obby::server_buffer::set_global_password(const std::string& password)
@@ -174,12 +174,7 @@ void obby::server_buffer::create_document_impl(const std::string& title,
 	    ++ iter)
 	{
 		if(&(*iter) != owner)
-		{
-			net6::server::peer& peer =
-				*static_cast<net6::server::peer*>(
-					iter->get_peer() );
-			m_server->send(pack, peer);
-		}
+			m_server->send(pack, iter->get_net6() );
 	}
 	// Insert the document's initial content.
 	insert_record rec(0, content, *doc.get_document(),
@@ -209,37 +204,37 @@ void obby::server_buffer::user_colour_impl(obby::user& user, int red,
 	m_server->send(pack);
 }
 
-void obby::server_buffer::on_connect(net6::server::peer& peer)
+void obby::server_buffer::on_connect(const net6::user& user6)
 {
 	// Create random token for this connection
 	mpz_class t = m_rclass.get_z_bits(48);
 	std::string token = t.get_str(36);
 
 	// Add the token for this peer into the token map
-	m_tokens[&peer] = token;
+	m_tokens[&user6] = token;
 
 	// Send token and the server's public key with the welcome packet
 	net6::packet pack("obby_welcome");
 	pack << PROTOCOL_VERSION << token << m_private.get_n().get_str(36)
 	     << m_public.get_k().get_str(36);
-	m_server->send(pack, peer);
+	m_server->send(pack, user6);
 
-	m_signal_connect.emit(peer);
+	m_signal_connect.emit(user6);
 }
 
-void obby::server_buffer::on_disconnect(net6::server::peer& peer)
+void obby::server_buffer::on_disconnect(const net6::user& user6)
 {
-	m_signal_disconnect.emit(peer);
+	m_signal_disconnect.emit(user6);
 }
 
-void obby::server_buffer::on_join(net6::server::peer& peer)
+void obby::server_buffer::on_join(const net6::user& user6)
 {
 	// Find user in user list
-	user* new_user = m_usertable.find_user<user::CONNECTED>(peer);
+	user* new_user = m_usertable.find_user<user::CONNECTED>(user6);
 	if(!new_user)
 	{
 		std::cerr << "obby::server_buffer::on_join: User "
-		          << peer.get_id() << " is not connected" << std::endl;
+		          << user6.get_id() << " is not connected" << std::endl;
 		return;
 	}
 
@@ -247,9 +242,9 @@ void obby::server_buffer::on_join(net6::server::peer& peer)
 	net6::packet init_pack("obby_sync_init");
 	init_pack << (m_usertable.user_count<user::CONNECTED, true>() +
 	             document_count() );
-	m_server->send(init_pack, peer);
+	m_server->send(init_pack, user6);
 
-	// Synchronise not-connected users.
+	// Synchronise non-connected users.
 	for(user_table::user_iterator<user::CONNECTED, true> iter =
 		m_usertable.user_begin<user::CONNECTED, true>();
 	    iter != m_usertable.user_end<user::CONNECTED, true>();
@@ -259,7 +254,7 @@ void obby::server_buffer::on_join(net6::server::peer& peer)
 		user_pack << iter->get_id() << iter->get_name()
 		          << iter->get_red() << iter->get_green()
 		          << iter->get_blue();
-		m_server->send(user_pack, peer);
+		m_server->send(user_pack, user6);
 	}
 
 	// Synchronise the document list
@@ -278,12 +273,12 @@ void obby::server_buffer::on_join(net6::server::peer& peer)
 		    ++ user_iter)
 			doc_pack << &(*user_iter);
 
-		m_server->send(doc_pack, peer);
+		m_server->send(doc_pack, user6);
 	}
 
 	// Done with synchronising
 	net6::packet final_sync("obby_sync_final");
-	m_server->send(final_sync, peer);
+	m_server->send(final_sync, user6);
 
 	// Forward join message to documents
 	for(document_iterator i = document_begin(); i != document_end(); ++ i)
@@ -293,16 +288,16 @@ void obby::server_buffer::on_join(net6::server::peer& peer)
 	m_signal_user_join.emit(*new_user);
 }
 
-void obby::server_buffer::on_part(net6::server::peer& peer)
+void obby::server_buffer::on_part(const net6::user& user6)
 {
 	// Find user object for given peer
-	user* cur_user = m_usertable.find_user<user::CONNECTED>(peer);
+	user* cur_user = m_usertable.find_user<user::CONNECTED>(user6);
 	if(!cur_user)
 	{
 		// Not found: Drop error message...
 		// TODO: Throw localised exceptions when we have format strings.
 		std::cerr << "obby::server_buffer::on_part: User "
-		          << peer.get_id() << " is not connected" << std::endl;
+		          << user6.get_id() << " is not connected" << std::endl;
 		return;
 	}
 
@@ -315,7 +310,7 @@ void obby::server_buffer::on_part(net6::server::peer& peer)
 	m_usertable.remove_user(cur_user);
 }
 
-bool obby::server_buffer::on_auth(net6::server::peer& peer,
+bool obby::server_buffer::on_auth(const net6::user& user6,
                                   const net6::packet& pack,
                                   net6::login::error& error)
 {
@@ -343,11 +338,11 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 	// Non-empty password?
 	if(!m_global_password.empty() )
 	{
-		assert(m_tokens.find(&peer) != m_tokens.end() );
+		assert(m_tokens.find(&user6) != m_tokens.end() );
 
 		// Compare passwords
 		if(global_password !=
-		   SHA1::hash(m_tokens[&peer] + m_global_password))
+		   SHA1::hash(m_tokens[&user6] + m_global_password))
 		{
 			error = login::ERROR_WRONG_GLOBAL_PASSWORD;
 			return false;
@@ -360,7 +355,7 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 	{
 		// Compare passwords
 		if(user_password !=
-		   SHA1::hash(m_tokens[&peer] + user->get_password() ))
+		   SHA1::hash(m_tokens[&user6] + user->get_password() ))
 		{
 			error = login::ERROR_WRONG_USER_PASSWORD;
 			return false;
@@ -370,7 +365,7 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 	return true;
 }
 
-unsigned int obby::server_buffer::on_login(net6::server::peer& peer,
+unsigned int obby::server_buffer::on_login(const net6::user& user6,
                                            const net6::packet& pack)
 {
 	// Get colour from packet
@@ -379,26 +374,27 @@ unsigned int obby::server_buffer::on_login(net6::server::peer& peer,
 	int blue = pack.get_param(3).as<int>();
 
 	// Insert user into list
-	user* new_user = m_usertable.add_user(peer, red, green, blue);
+	user* new_user = m_usertable.add_user(user6, red, green, blue);
 
-	std::map<net6::peer*, std::string>::iterator i = m_tokens.find(&peer);
-	assert(i != m_tokens.end() );
-	new_user->set_token(i->second);
-	m_tokens.erase(i);
+	std::map<const net6::user*, std::string>::iterator token_iter =
+		m_tokens.find(&user6);
+	assert(token_iter != m_tokens.end() );
+	new_user->set_token(token_iter->second);
+	m_tokens.erase(token_iter);
 
 	// Tell net6 to use already existing ID, if any
 	return new_user->get_id();
 }
 
-void obby::server_buffer::on_extend(net6::server::peer& peer,
+void obby::server_buffer::on_extend(const net6::user& user6,
                                     net6::packet& pack)
 {
 	// Find corresponding user in user list
-	user* ideq_user = m_usertable.find_user<user::CONNECTED>(peer);
+	user* ideq_user = m_usertable.find_user<user::CONNECTED>(user6);
 	if(!ideq_user)
 	{
 		std::cerr << "obby::server_buffer::on_extend: User "
-		          << peer.get_id() << " is not connected" << std::endl;
+		          << user6.get_id() << " is not connected" << std::endl;
 		return;
 	}
 
@@ -407,15 +403,15 @@ void obby::server_buffer::on_extend(net6::server::peer& peer,
 	     << ideq_user->get_blue();
 }
 
-void obby::server_buffer::on_data(net6::server::peer& peer,
+void obby::server_buffer::on_data(const net6::user& user6,
                                   const net6::packet& pack)
 {
-	// Find user from peer
-	user* from_user = m_usertable.find_user<user::CONNECTED>(peer);
+	// Get obby::user from net6::user
+	user* from_user = m_usertable.find_user<user::CONNECTED>(user6);
 	if(!from_user)
 	{
 		std::cerr << "obby::server_buffer::on_data: User "
-		          << peer.get_id() << " is not connected" << std::endl;
+		          << user6.get_id() << " is not connected" << std::endl;
 		return;
 	}
 
@@ -528,8 +524,7 @@ void obby::server_buffer::on_net_user_colour(const net6::packet& pack,
 	if(!check_colour(red, green, blue) )
 	{
 		net6::packet reply_pack("obby_user_colour_failed");
-		m_server->send(reply_pack,
-			*static_cast<net6::server::peer*>(from.get_peer() ));
+		m_server->send(reply_pack, from.get_net6() );
 		return;
 	}
 	user_colour_impl(from, red, green, blue);
