@@ -47,6 +47,11 @@ void obby::client_buffer::login(const std::string& name)
 	m_connection.login(name);
 }
 
+net6::client::peer* obby::client_buffer::get_self() const
+{
+	return m_connection.get_self();
+}
+
 void obby::client_buffer::select()
 {
 	m_connection.select();

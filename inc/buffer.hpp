@@ -42,7 +42,6 @@ public:
 
 	void insert_nosync(const position& pos, const std::string& text);
 	void erase_nosync(const position& from, const position& to);
-
 protected:
 	void insert_lines(unsigned int pos, unsigned int count);
 	void erase_lines(unsigned int pos, unsigned int count);

@@ -45,6 +45,7 @@ public:
 	~client_buffer();
 	
 	void login(const std::string& name);
+	net6::client::peer* get_self() const;
 
 	void select();
 	void select(unsigned int timeout);
