@@ -1,0 +1,700 @@
+Sat Jun  4 17:01:55 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Undone a patch which depends on net6-1.1.0
+
+Fri Jun  3 15:03:58 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Adjustment for a net6 API change
+
+Fri Jun  3 03:00:02 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Thu Jun  2 21:01:51 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Thu Jun  2 20:49:18 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Thu Jun  2 20:47:57 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Thu Jun  2 20:40:35 UTC 2005  Trac <trac@darcs.0x539.de>
+  * TODO updated
+
+Wed Jun  1 18:15:37 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Emit changed signal in server_document::insert and server_document::erase
+
+Wed Jun  1 18:08:45 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * get_revision for obby::document
+
+Wed Jun  1 16:30:57 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Change signal which is emitted before/after a change is performed [fixes #11]
+
+Wed Jun  1 16:30:14 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Renamed _size function to _count, unified such functions
+
+Tue May 31 16:03:02 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added a linking exception for howl [fixes #18]
+
+Sun May 29 19:36:05 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * local_buffer as common base class of client_buffer and host_buffer [fixes #9]
+
+Sun May 29 10:34:08 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * buffer provides access to the size of the document and user list
+
+Thu May 12 17:41:22 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Sum the colour differences and allow more subtle differences
+
+Tue May 10 07:53:04 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added README
+
+Mon May  9 17:24:36 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Changed API identifier from 0 to 1.0
+
+Sat May  7 18:58:56 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * user_table provides an iterator over the users
+
+Sat May  7 18:35:27 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed a segfault in line::substr
+
+Sat May  7 17:20:35 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Document provides access to the obby::line instead of just its contents
+
+Sat May  7 17:20:27 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Added line test
+
+Sat May  7 17:19:45 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed author storage in line
+
+Sat May  7 17:17:50 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Line provides author_iterator
+
+Sat May  7 14:28:02 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Host sends changes with its local user ID instead of 0
+
+Fri May  6 19:48:22 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed copy constructor of ptr_iterator, it behaved like the standard constructor
+
+Fri May  6 16:14:02 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * client_document provides access to the amount of unsynced changes
+
+Thu May  5 21:35:14 UTC 2005  Philipp Kern <phil@0x539.de>
+  * New TODO item about server-side commands
+
+Thu May  5 18:22:17 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Temporary objects need copy constructors to be passed to functions
+
+Thu May  5 18:17:25 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Set scripts executable and use a partial checkout in the ebuild
+
+Thu May  5 16:32:09 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * buffer provides user_iterator to iterator thorugh users
+
+Thu May  5 16:27:39 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Introduced ptr_iterator
+
+Thu May  5 13:59:03 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Removed two TODO entries
+
+Thu May  5 13:56:53 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * auto* seems to have updated some auto-generated files...
+
+Thu May  5 13:50:57 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * nosync operations emits duplex insert/delete signals and take records
+
+Thu May  5 13:44:39 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Renamed duplexsignal.hpp/cpp to duplex_signal.hpp/cpp
+
+Wed May  4 23:25:13 UTC 2005  Philipp Kern <phil@0x539.de>
+  * document::get_title() now returns const std::string&
+
+Wed May  4 22:55:50 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Introduced duplexsignal
+
+Wed May  4 08:11:06 UTC 2005  Philipp Kern <phil@0x539.de>
+  * User tables need to be forward declared
+
+Wed May  4 07:11:19 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Renamed Rendezvous to Zeroconf
+
+Tue May  3 22:56:10 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Pass buffers to the documents instead of usertables
+
+Tue May  3 22:06:04 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added get_user_table() to the buffers
+
+Sun Apr 17 20:31:31 UTC 2005  Philipp Kern <phil@philkern.de>
+  * Export obby_has_howl() to something outside the mangler
+
+Sun Apr 17 20:09:51 UTC 2005  Philipp Kern <phil@philkern.de>
+  * New WITH_HOWL define, obby_version(), obby_has_howl()
+
+Sun Apr 17 15:29:49 UTC 2005  Philipp Kern <phil@philkern.de>
+  * Gather host information correctly
+
+Sat Apr 16 20:13:11 UTC 2005  Philipp Kern <phil@philkern.de>
+  * Updated TODO, note about serialisation
+
+Fri Apr 15 21:04:45 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Replaced the custom_login by a login_extend signal handler
+
+Fri Apr 15 19:59:52 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Corrections for the new net6 API
+
+Thu Apr 14 17:37:55 UTC 2005  Philipp Kern <phil@0x539.de>
+  tagged stable 2005-04-14
+
+Thu Apr 14 16:48:57 UTC 2005  Philipp Kern <phil@philkern.de>
+  * Changed location of boringfile, added config.hpp
+
+Thu Apr 14 16:30:59 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Ignore Makefiles and Makefile.ins
+
+Thu Apr 14 15:54:46 UTC 2005  Philipp Kern <phil@philkern.de>
+  * Changed the package name to obby instead of libobby
+
+Thu Apr 14 15:14:57 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Renamed lobby-1.0.pc to obby-1.0.pc
+
+Thu Apr 14 15:08:39 UTC 2005  Philipp Kern <phil@0x539.de>
+  * The creator's id is now passed with the create packet
+
+Thu Apr 14 14:14:45 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Build inc/Makefile correctly
+
+Thu Apr 14 14:03:04 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Initial content is now passed with the create packet
+
+Thu Apr 14 14:02:37 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Moved include installation to inc/
+
+Sun Apr 10 20:28:02 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Changed the version number of the newly contributed ebuild
+
+Sun Apr 10 20:20:58 UTC 2005  Thomas Glatt <tom@0x539.de>
+  * Ebuild for libobby
+
+Sun Apr 10 13:39:24 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Removed obsolete TODO item
+
+Sun Apr 10 13:35:20 UTC 2005  Philipp Kern <phil@0x539.de>
+  * New configure option: --disable-tests
+
+Sun Apr 10 13:18:00 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Reworked the build system, uses subdirs now
+
+Sun Apr 10 11:54:28 UTC 2005  Philipp Kern <phil@0x539.de>
+  * The howl dependency is now at the user's choice
+
+Sun Apr 10 10:44:32 UTC 2005  Philipp Kern <phil@0x539.de>
+  * WIN32 build support
+
+Sat Apr  9 18:38:05 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Initialize net6 in obby::buffer
+
+Sat Apr  9 17:24:00 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Build fixes for WIN32
+
+Sat Apr  9 15:16:45 UTC 2005  Benjamin Herr <ben@0x539.de>
+  * curses client doubleplusungood: interpreted %-formatters, exitted on q
+
+Sat Apr  9 11:31:26 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Relicensed under the GPL
+  
+    Reasoning: There was never the intention to license libobby under the LGPL.
+    COPYING included the GPL but all the license headers referred to the LGPL.
+    This is now fixed in accordance with all the contributing authors.
+  
+    ACK:
+    - Armin Burgmeier <armin@0x539.de>
+    - Philipp Kern <phil@0x539.de>
+    - Benjamin Herr <ben@0x539.de>
+
+Fri Apr  8 16:02:43 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed history order in server_buffer
+
+Fri Apr  8 14:47:50 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed bufferd calls on main document
+
+Fri Apr  8 14:37:34 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * abstract document handling in buffer, implementations
+
+Fri Apr  8 14:37:17 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * TODO: Grep for TODOs in the code
+
+Fri Apr  8 08:06:13 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Debug output for gobby
+
+Fri Apr  8 06:37:28 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Link tests dynamically and self-contained
+
+Fri Apr  8 06:26:28 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Remove the last newline from document::get_whole_buffer()
+
+Thu Apr  7 23:04:17 UTC 2005  Philipp Kern <phil@0x539.de>
+  * bufferd now displays received user chat messages
+
+Thu Apr  7 22:58:19 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added missing newline to document::get_whole_buffer()
+
+Thu Apr  7 11:52:56 UTC 2005  Benjamin Herr <ben@0x539.de>
+  * Added accessor for newly added server message event
+
+Thu Apr  7 11:45:13 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Server message implemented, emit signals on own messages
+
+Thu Apr  7 11:21:05 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Ignore packets with invalid userid
+
+Thu Apr  7 10:53:27 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Use obby::user in on_message instead of numerical uid
+
+Thu Apr  7 10:52:56 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Fixed chat protocol
+
+Thu Apr  7 08:48:59 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Implemented send_message()
+
+Thu Apr  7 08:48:41 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Build fix to Makefile.am, one more TODO item
+
+Wed Apr  6 21:07:56 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Replace AE synchronize with BE synchronise
+
+Wed Apr  6 21:02:48 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Remove insert/remove debug code from bufferd
+
+Wed Apr  6 21:02:31 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Deactivate discover test for now
+
+Wed Apr  6 20:22:01 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Correct document title synchronisation
+
+Wed Apr  6 19:25:27 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Updated TODO
+
+Wed Apr  6 19:22:33 UTC 2005  Philipp Kern <phil@0x539.de>
+  * First try of a messaging system, not yet tested.
+
+Wed Apr  6 18:43:19 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added document titles to create, some more fixes
+
+Wed Apr  6 15:30:29 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Committed missing declaration
+
+Wed Apr  6 13:00:46 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Some fixes to document renaming
+
+Wed Apr  6 12:33:00 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * return true in server_buffer::on_auth when login was successful
+
+Wed Apr  6 12:32:46 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * TODO: utf-8
+
+Wed Apr  6 07:57:18 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added document titles
+
+Wed Apr  6 07:44:22 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Documentation fixes (ize -> ise)
+
+Tue Apr  5 19:47:29 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Actual TODO
+
+Mon Apr  4 21:42:33 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Add NEWS file
+
+Mon Apr  4 12:53:55 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Implemented forward delete, created key dispatcher
+
+Mon Apr  4 12:53:36 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Introduced document::position_eob() to get the end of buffer position
+
+Sun Apr  3 22:13:37 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Check NEWS on ``make dist'', versioned automake dependency
+
+Sun Apr  3 14:18:08 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Initialize m_usertable field
+
+Sun Apr  3 13:56:20 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Add host_buffer's local user to user table
+
+Sun Apr  3 13:55:09 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Adjusted to net6-pre/post login
+
+Wed Mar 30 16:36:57 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Compile fix, cast to int
+
+Thu Mar 24 22:12:07 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Made select available from the base class, obby::buffer
+
+Thu Mar 24 13:18:37 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed row/col -> position translation
+
+Thu Mar 24 13:14:32 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * obby::line - line content with user colourising
+
+Wed Mar 23 12:47:25 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * user_tables
+
+Mon Mar 21 22:13:36 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed yet another client synchonisation bug
+
+Mon Mar 21 22:09:15 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Documents store their data in an array of lines instead of one big string
+
+Sat Mar 19 17:50:20 UTC 2005  Philipp Kern <phil@0x539.de>
+  * bufferd: Catch exceptions in main
+
+Sat Mar 19 17:38:49 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Switch to automake within test/
+
+Sat Mar 19 17:38:22 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Run autoheader in autogen, default to maintainer mode
+
+Sat Mar 19 10:00:53 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * bufferd
+
+Sat Mar 19 10:00:09 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed curses client
+
+Sat Mar 19 09:59:33 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed two segfaults in server_buffer
+
+Sat Mar 19 09:58:43 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed the record's clone methods - they built wrong records
+
+Fri Mar 18 20:04:48 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Reorderd some signal stuff
+
+Fri Mar 18 13:41:54 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * MDI synchronization fixed.
+
+Thu Mar 17 21:04:26 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Randomise colour codes in curses client
+
+Thu Mar 17 22:01:52 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed compilation problems on x86_64
+
+Thu Mar 17 21:44:40 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Initial MDI interface - TODO: Syncing, Testing!
+
+Thu Mar 17 22:17:48 UTC 2005  Philipp Kern <phil@0x539.de>
+  tagged SDI version complete
+
+Thu Mar 17 21:59:02 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Removed docs/obby.hpp; it is no longer needed
+
+Thu Mar 17 21:06:47 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed vertical scrolling in curses client
+
+Thu Mar 17 20:18:01 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Some changes to boring
+
+Thu Mar 17 17:22:58 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * curses-client: run returns just a boolean value wether the execution was successful or not.
+
+Thu Mar 17 17:22:28 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed memleak in server_buffer and client_buffer
+
+Wed Mar 16 22:05:53 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added the possibility to display a reason on quit
+    I would even suspect a memory leak within my code. Is the destructor
+    called when I use operator= on a std::string instance to assign it a new
+    value?
+    At least we do get the server failure messages why the login is denied.
+
+Wed Mar 16 18:36:53 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * host_buffer implementation
+
+Wed Mar 16 15:07:24 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * user management
+
+Wed Mar 16 10:46:49 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Updated TODO list
+
+Sun Mar 13 17:53:02 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed synchronisation with delete_records
+
+Sun Mar 13 16:21:44 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * client_buffer syncing problem fixed
+
+Wed Mar  9 12:33:11 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Copied GPL license into empty COPYING
+
+Tue Mar  8 16:38:27 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Use net6::ipv4_address for rendezvous host information
+
+Mon Mar  7 20:41:45 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Non-functional Backspace implementation
+
+Mon Mar  7 19:55:26 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Cursor movement in curses frontend
+
+Mon Mar  7 19:17:26 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Scrolling in curses frontend
+
+Mon Mar  7 19:16:33 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed endless loop when syncing multiple lines
+
+Mon Mar  7 18:00:21 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Multiline text inserting actually works
+
+Sun Mar  6 18:52:46 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * include <cassert> - it seems not be included by other include files on all systems
+
+Sun Mar  6 18:33:43 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Beginning of simple curses editor using libobby
+
+Sun Mar  6 18:33:02 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * line count access
+
+Sun Mar  6 16:56:59 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * position<->coordinate translation
+
+Sun Mar  6 12:26:10 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Rewrote many parts of the library
+
+Sun Mar  6 09:01:52 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added libtool binary compatibility info
+
+Sat Mar  5 22:18:40 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Leave event, signal bugfix
+
+Sat Mar  5 21:43:15 UTC 2005  Philipp Kern <phil@0x539.de>
+  * More rendezvous documentation comments
+
+Sat Mar  5 21:42:28 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added rendezvous publishing to bufferd
+
+Sat Mar  5 21:06:16 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Buffer synchronisation test
+
+Sat Mar  5 21:01:53 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Buffer synchronisation on join
+
+Sat Mar  5 20:15:08 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added blocking and timed select to rendezvous
+
+Sat Mar  5 19:54:42 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added discover test code
+
+Sat Mar  5 19:35:36 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * get_whole_buffer to receive the whole buffer as string
+
+Sat Mar  5 19:25:10 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added more rendezvous more
+
+Sat Mar  5 18:41:36 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed server buffer synchronisation
+
+Sat Mar  5 18:41:12 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed client buffer synchronisation
+
+Sat Mar  5 18:40:04 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fixed buffer::insert_nosync implementation
+
+Sat Mar  5 16:00:15 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Removed compression item from the FAQ
+
+Sat Mar  5 15:59:54 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Implemented howl callback functions
+
+Sat Mar  5 14:46:03 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Add a C function which returns the library version
+
+Sat Mar  5 14:46:32 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Use correct project name in doxyfile
+
+Sat Mar  5 14:34:24 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Fix segfaults in client_buffer/server_buffer
+
+Sat Mar  5 14:10:21 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Rendezvous: One more callback, discover signal.
+
+Sat Mar  5 13:29:33 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Some more rendezvous stuff
+
+Sat Mar  5 13:28:35 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Tests do no longer depend on an installed libobby
+
+Sat Mar  5 13:18:40 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added howl to pkg-config dependencies
+
+Sat Mar  5 13:11:21 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * Link against howl to make the tests compiling
+
+Sat Mar  5 13:05:33 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * include <cassert> to use assert in record.cpp
+
+Sat Mar  5 13:04:48 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * buffer test
+
+Sat Mar  5 12:41:03 UTC 2005  Philipp Kern <phil@0x539.de>
+  * First template of howl API abstraction
+
+Sat Mar  5 12:28:04 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * access to net6::client::get_self() from client_buffer
+
+Sat Mar  5 11:45:31 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * client_buffer synced insert/delete operatiosn
+
+Sat Mar  5 11:33:13 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * client_buffer::login
+
+Sat Mar  5 11:01:51 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added dependencies to pkgconfig control file
+
+Sat Mar  5 10:56:05 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * dummy insert/erase records in buffers to make them instantiable
+
+Sat Mar  5 11:27:18 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * iteration fixes
+
+Sat Mar  5 11:06:53 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * client_record network event handling
+
+Sat Mar  5 00:38:18 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added GPL header to AUTHORS
+
+Sat Mar  5 00:32:28 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Depend on net6-1.0, link against the lib in ../.libs
+
+Sat Mar  5 00:10:47 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * client_buffer network event handling template
+
+Fri Mar  4 23:43:21 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * server network event handling
+
+Fri Mar  4 19:36:29 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * record<->packet translation, record reversion
+
+Fri Mar  4 19:09:05 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * server_buffer event handling routine prototypes
+
+Fri Mar  4 18:46:46 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * records use nosync-operations by default
+
+Fri Mar  4 18:33:31 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * first tests for record moving test
+
+Fri Mar  4 17:38:05 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * is_valid actually is in the base class
+
+Fri Mar  4 17:21:30 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * server_buffer implementation
+
+Fri Mar  4 07:45:17 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added server_buffer.cpp template.
+
+Thu Mar  3 20:53:46 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Put boring under version control.
+
+Thu Mar  3 18:40:09 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Removed autotools output, added autogen.sh
+
+Thu Mar  3 19:37:17 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * record member accessors
+
+Thu Mar  3 18:35:10 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added doxygen configuration files.
+
+Thu Mar  3 18:34:14 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Remove Makefile.in
+  It is generated by autogen.sh.
+
+Thu Mar  3 19:27:52 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * server_buffer implementation
+
+Thu Mar  3 19:08:07 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * client_buffer implementation
+
+Thu Mar  3 18:41:41 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * insert/erase 
+
+Thu Mar  3 15:11:42 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * buffer::get_sub_buffer
+
+Thu Mar  3 12:21:35 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Added dummy buffer source
+
+Thu Mar  3 14:49:13 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * assertions in position/records for debug purposes
+
+Thu Mar  3 14:42:59 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * delete_record::on_delete
+
+Thu Mar  3 13:49:35 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * sub_range in position
+
+Wed Mar  2 21:43:08 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * validness verification in record
+
+Wed Mar  2 21:42:09 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * delete_event compilation fixes
+
+Wed Mar  2 21:37:27 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * delete_record implementation
+
+Wed Mar  2 21:36:47 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * else -> else if
+
+Wed Mar  2 21:35:47 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * fixed on_insert in insert_record
+
+Wed Mar  2 21:27:33 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * avoid duplicate parameter names
+
+Wed Mar  2 20:57:44 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * position::operator+
+
+Wed Mar  2 20:29:51 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * insert_record using position::position(const std::string&)
+
+Wed Mar  2 20:28:24 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * std::string-constructor for position
+
+Wed Mar  2 20:05:49 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * insert_record 
+
+Wed Mar  2 15:57:43 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * compilation fixes
+
+Wed Mar  2 14:54:19 UTC 2005  Philipp Kern <phil@0x539.de>
+  * autotoolise part 2
+
+Wed Mar  2 14:03:28 UTC 2005  Philipp Kern <phil@0x539.de>
+  * autotoolise
+
+Wed Mar  2 14:50:26 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * indent/unindent
+
+Wed Mar  2 14:46:12 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * record implementation
+
+Wed Mar  2 14:37:37 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * position-implementation
+
+Wed Mar  2 14:28:24 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * inc files from docs/obby.hpp
+
+Wed Mar  2 14:27:28 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * inc/src directory
+
+Wed Mar  2 14:04:54 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * minor corrections
+
+Wed Mar  2 14:01:53 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * -boost+sigc
+
+Wed Mar  2 13:26:55 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * client/server
+
+Tue Mar  1 21:49:23 UTC 2005  Philipp Kern <phil@0x539.de>
+  * Some more documentation
+
+Tue Mar  1 20:25:38 UTC 2005  Armin Burgmeier <armin@0x539.de>
+  * on_insert/on_delete
+
+Tue Mar  1 19:15:31 UTC 2005  Philipp Kern <phil@0x539.de>
+  * First draft for a revision-based system
+
+Tue Mar  1 18:12:36 UTC 2005  Philipp Kern <phil@philkern.de>
+  * Added the AUTHORS information to the repository as a first commit.
