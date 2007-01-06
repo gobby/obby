@@ -17,6 +17,7 @@ Normal:
    - Load/save documents to/from file and/or memory while preserving history
    - Load/save complete obby session
    - Use XML to serialise a tree of objects
+ * Implement server-side commands to let the server act on the remote side
 
 Minor:
  * Implement indent_record and unindent_record to (un)indent lines of text
