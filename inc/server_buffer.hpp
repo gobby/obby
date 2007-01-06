@@ -35,6 +35,8 @@ template<typename selector_type>
 class basic_server_buffer : virtual public basic_buffer<selector_type>
 {
 public: 
+	typedef basic_server_document_info<selector_type> document_info;
+
 	typedef sigc::signal<void, const net6::user&> signal_connect_type;
 	typedef sigc::signal<void, const net6::user&> signal_disconnect_type;
 
@@ -69,8 +71,8 @@ public:
 	 * here because the ID is enough and one might not have a user object
 	 * to the corresponding ID. So a time-consuming lookup is obsolete.
 	 */
-	server_document_info* document_find(unsigned int owner_id,
-	                                    unsigned int id) const;
+	document_info* document_find(unsigned int owner_id,
+	                             unsigned int id) const;
 
 	/** Sends a global message to all users.
 	 */
@@ -104,9 +106,9 @@ protected:
 
         /** Creates a new document info object according to the type of buffer.
 	 */
-	virtual document_info* new_document_info(const user* owner,
-	                                         unsigned int id,
-	                                         const std::string& title);
+	virtual typename basic_buffer<selector_type>::document_info*
+	new_document_info(const user* owner, unsigned int id,
+	                  const std::string& title);
 
 	/** Internal function to create a document with the given owner.
 	 */
@@ -283,7 +285,7 @@ void basic_server_buffer<selector_type>::document_remove(document_info& info)
 	// Emit unsubscribe signal for all users that were
 	// subscribed to this document
 	// TODO: Do this in document_delete
-	for(document_info::user_iterator user_iter = info.user_begin();
+	for(typename document_info::user_iterator user_iter = info.user_begin();
 	    user_iter != info.user_end();
 	    ++ user_iter)
 		info.unsubscribe_event().emit(*user_iter);
@@ -302,10 +304,11 @@ void basic_server_buffer<selector_type>::document_remove(document_info& info)
 }
 
 template<typename selector_type>
-server_document_info* basic_server_buffer<selector_type>::
+typename basic_server_buffer<selector_type>::document_info*
+basic_server_buffer<selector_type>::
 	document_find(unsigned int owner_id, unsigned int id) const
 {
-	return dynamic_cast<server_document_info*>(
+	return dynamic_cast<document_info*>(
 		basic_buffer<selector_type>::document_find(owner_id, id)
 	);
 }
@@ -343,7 +346,7 @@ void basic_server_buffer<selector_type>::
 	                     unsigned int id, bool open_as_edited)
 {
 	// Create document
-	server_document_info& info = dynamic_cast<server_document_info&>(
+	document_info& info = dynamic_cast<document_info&>(
 		basic_buffer<selector_type>::document_add(owner, id, title)
 	);
 
@@ -368,15 +371,15 @@ void basic_server_buffer<selector_type>::
 
 	// Emit insertion signal (TODO: Should be done by document_add)
 	basic_buffer<selector_type>::m_signal_document_insert.emit(info);
-	// Insert the document's initial content
-	insert_record rec(
-		0, content, *info.get_document(),
-		(open_as_edited) ? owner : NULL, 0, 0
-	);
-	info.get_document()->insert_nosync(rec);
-	// TODO: Subscribe owner, if any.
+	// TODO: Call another document_info constructor because normally, this
+	// call would perform a sync to clients. Currently, no client is sub-
+	// scribed, but it should be cleaner the other way...
+	// Additionally, the host_document would not mark the new document
+	// as written by itself...
+	info.insert(0, content);
 	// Emit subscription signal for the owner.
-	// TODO: Do this elsewhere.
+	// TODO: Do this elsewhere. (Should already be done in infos ctor, but
+	// nobody can be connected at this point - is this necessary?)
 	if(owner != NULL) info.subscribe_event().emit(*owner);
 }
 
@@ -488,7 +491,8 @@ void basic_server_buffer<selector_type>::on_join(const net6::user& user6)
 		              << iter->get_title();
 
 		// Add users that are subscribed
-		for(document_info::user_iterator user_iter = iter->user_begin();
+		for(typename document_info::user_iterator user_iter =
+			iter->user_begin();
 		    user_iter != iter->user_end();
 		    ++ user_iter)
 			document_pack << &(*user_iter);
@@ -809,7 +813,7 @@ template<typename selector_type>
 void basic_server_buffer<selector_type>::
 	on_net_document(const net6::packet& pack, const user& from)
 {
-	server_document_info& info = dynamic_cast<server_document_info&>(
+	document_info& info = dynamic_cast<document_info&>(
 		*pack.get_param(0).net6::basic_parameter::as<
 			obby::document_info*
 		>()
@@ -817,7 +821,7 @@ void basic_server_buffer<selector_type>::
 
 	// TODO: Rename this function. Think about providing a signal that may
 	// be emitted.
-	info.obby_data(pack, from);
+	info.on_net_record(pack, from);
 }
 
 template<typename selector_type>
@@ -842,12 +846,13 @@ void basic_server_buffer<selector_type>::register_signal_handlers()
 }
 
 template<typename selector_type>
-document_info* basic_server_buffer<selector_type>::
+typename basic_buffer<selector_type>::document_info*
+basic_server_buffer<selector_type>::
 	new_document_info(const user* owner, unsigned int id,
                           const std::string& title)
 {
 	// Create server_document_info, according to server_buffer
-	return new server_document_info(*this, net6_server(), owner, id, title);
+	return new document_info(*this, net6_server(), owner, id, title);
 }
 
 template<typename selector_type>

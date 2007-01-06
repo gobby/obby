@@ -53,7 +53,8 @@ public:
 	 * will be emitted if the request has been accepted.
 	 */
 	virtual void unsubscribe() = 0;
-protected:
+
+private:
 	/** Returns the buffer this document belongs to.
 	 */
 	const basic_local_buffer<selector_type>& get_buffer() const;

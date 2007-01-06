@@ -36,7 +36,7 @@ class basic_buffer;
  * a document.
  */
 template<typename selector_type>
-class basic_document_info : private net6::non_copyable
+class basic_document_info : private net6::non_copyable, public sigc::trackable
 {
 public:
 	typedef sigc::signal<void, const std::string&> signal_rename_type;
@@ -154,15 +154,6 @@ protected:
 	 */
 	void release_document();
 
-	/** Returns the buffer to which this document_info belongs.
-	 */
-	const basic_buffer<selector_type>& get_buffer() const;
-
-	/** Returns the underlaying net6 object through which requests are
-	 * transmitted.
-	 */
-	const net6::basic_object<selector_type>& get_net6() const;
-
 	const basic_buffer<selector_type>& m_buffer;
 	const net6::basic_object<selector_type>& m_net;
 
@@ -176,6 +167,16 @@ protected:
 	signal_rename_type m_signal_rename;
 	signal_subscribe_type m_signal_subscribe;
 	signal_unsubscribe_type m_signal_unsubscribe;
+
+private:
+	/** Returns the buffer to which this document_info belongs.
+	 */
+	const basic_buffer<selector_type>& get_buffer() const;
+
+	/** Returns the underlaying net6 object through which requests are
+	 * transmitted.
+	 */
+	const net6::basic_object<selector_type>& get_net6() const;
 };
 
 } // namespace obby

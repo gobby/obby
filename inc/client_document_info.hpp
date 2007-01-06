@@ -135,17 +135,18 @@ protected:
 	/** Callback from jupiter implementation with record of local operation
 	 * that has to be sent to the server.
 	 */
-	virtual void on_jupiter_local(const record& rec);
+	virtual void on_jupiter_local(const record& rec, const user* from);
 
+	std::auto_ptr<jupiter_client> m_jupiter;
+
+private:
 	/** Returns the buffer to which this document_info belongs.
 	 */
 	const basic_client_buffer<selector_type>& get_buffer() const;
 
-	/** Returns the underlatying net6 obejct.
+	/** Returns the underlaying net6 obejct.
 	 */
 	const net6::basic_client<selector_type>& get_net6() const;
-
-	std::auto_ptr<jupiter_client> m_jupiter;
 };
 
 typedef basic_client_document_info<net6::selector> client_document_info;
@@ -389,7 +390,8 @@ void basic_client_document_info<selector_type>::
 	const user* author =
 		pack.get_param(0).net6::basic_parameter::as<user*>();
 
-	// Extract record from packet
+	// Extract record from packet (TODO: virtualness for document_packet,
+	// would allow to remove "+ 2" here)
 	unsigned int index = 1 + 2;
 	record rec(pack, index);
 
@@ -464,7 +466,7 @@ void basic_client_document_info<selector_type>::
 
 template<typename selector_type>
 void basic_client_document_info<selector_type>::
-	on_jupiter_local(const record& rec)
+	on_jupiter_local(const record& rec, const user* from)
 {
 	// Build packet with record
 	document_packet pack(*this, "record");

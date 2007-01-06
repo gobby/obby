@@ -30,7 +30,7 @@ void obby::jupiter_client::local_op(const operation& op, const user* from)
 	// Generate record
 	std::auto_ptr<record> rec(m_algorithm.local_op(op) );
 	// Emit local signal
-	m_signal_local.emit(*rec);
+	m_signal_local.emit(*rec, from);
 }
 
 void obby::jupiter_client::remote_op(const record& rec, const user* from)

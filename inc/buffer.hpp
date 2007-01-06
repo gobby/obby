@@ -38,12 +38,16 @@ template<typename selector_type>
 class basic_buffer : private net6::non_copyable, public sigc::trackable
 {
 public:
+	typedef basic_document_info<selector_type> document_info;
+
 	// Document iterator typedef
-	typedef std::list<document_info*>::size_type document_size_type;
+	typedef typename std::list<document_info*>::size_type
+		document_size_type;
+
 	typedef ptr_iterator<
 		document_info,
 		std::list<document_info*>,
-		std::list<document_info*>::const_iterator
+		typename std::list<document_info*>::const_iterator
 	> document_iterator;
 
 	// Signal types
@@ -283,8 +287,9 @@ const selector_type& basic_buffer<selector_type>::get_selector() const
 }
 
 template<typename selector_type>
-document_info* basic_buffer<selector_type>::document_find(unsigned int owner_id,
-                                                          unsigned int id) const
+typename basic_buffer<selector_type>::document_info*
+basic_buffer<selector_type>::document_find(unsigned int owner_id,
+                                           unsigned int id) const
 {
 	document_iterator iter;
 	for(iter = m_docs.begin(); iter != m_docs.end(); ++ iter)
@@ -469,7 +474,7 @@ basic_buffer<selector_type>::translate_document(const std::string& str) const
 }
 
 template<typename selector_type>
-document_info&
+typename basic_buffer<selector_type>::document_info&
 basic_buffer<selector_type>::document_add(const user* owner, unsigned int id,
                                           const std::string& title)
 {
@@ -499,7 +504,7 @@ template<typename selector_type>
 void basic_buffer<selector_type>::document_clear()
 {
 	// TODO: Emit document_remove signal for each document?
-	std::list<document_info*>::iterator iter;
+	typename std::list<document_info*>::iterator iter;
 	for(iter = m_docs.begin(); iter != m_docs.end(); ++ iter)
 		delete *iter;
 

@@ -32,9 +32,9 @@ namespace obby
 class jupiter_server : private net6::non_copyable
 {
 public:
-	typedef sigc::signal<void, const record&, const user*>
+	typedef sigc::signal<void, const record&, const user&, const user*>
 		signal_local_type;
-	typedef sigc::signal<void, const record&, const user*>
+	typedef sigc::signal<void, const record&, const user&, const user*>
 		signal_remote_type;
 
 	/** Creates a new jupiter_server which uses the given document.
@@ -45,11 +45,11 @@ public:
 
 	/** Adds a new client to the server.
 	 */
-	void client_add(const user* client);
+	void client_add(const user& client);
 
 	/** Removes a client from the server.
 	 */
-	void client_remove(const user* client);
+	void client_remove(const user& client);
 
 	/** Performs a local operation by the user <em>from</em>. local_event
 	 * will be emitted for each client with a corresponding

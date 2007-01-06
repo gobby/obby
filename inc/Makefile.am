@@ -24,7 +24,6 @@ pkginclude_HEADERS += document_packet.hpp
 pkginclude_HEADERS += document_info.hpp
 pkginclude_HEADERS += local_document_info.hpp
 pkginclude_HEADERS += client_document_info.hpp
-
 pkginclude_HEADERS += server_document_info.hpp
 pkginclude_HEADERS += host_document_info.hpp
 pkginclude_HEADERS += buffer.hpp

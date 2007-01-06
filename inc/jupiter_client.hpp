@@ -32,7 +32,7 @@ namespace obby
 class jupiter_client : private net6::non_copyable
 {
 public:
-	typedef sigc::signal<void, const record&>
+	typedef sigc::signal<void, const record&, const user*>
 		signal_local_type;
 
 	/** Creates a new jupiter_client which uses the given document.

@@ -16,10 +16,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <iostream>
 #include "server_document_info.hpp"
-#include "server_buffer.hpp"
 
+#if 0
 obby::server_document_info::server_document_info(const basic_server_buffer<net6::selector>& buf,
                                                  net6::server& server,
                                                  const user* owner,
@@ -237,4 +236,4 @@ void obby::server_document_info::on_net_unsubscribe(const net6::packet& pack,
 		unsubscribe_user(from);
 	}
 }
-
+#endif

@@ -33,6 +33,8 @@ class basic_host_buffer : virtual public basic_local_buffer<selector_type>,
                           virtual public basic_server_buffer<selector_type>
 {
 public: 
+	typedef basic_host_document_info<selector_type> document_info;
+
 	/** Creates a new host_buffer.
 	 * @param port Port to listen to for incoming connections.
 	 * @param username User name for the local user.
@@ -63,8 +65,8 @@ public:
 	 * here because the ID is enough and one might not have a user object
 	 * to the corresponding ID. So a time-consuming lookup is obsolete.
 	 */
-	host_document_info* document_find(unsigned int owner_id,
-	                                  unsigned int id) const;
+	document_info* document_find(unsigned int owner_id,
+	                             unsigned int id) const;
 
 	/** Returns the local user.
 	 */
@@ -97,9 +99,9 @@ protected:
 
 	/** Creates a new document info object according to the type of buffer.
 	 */
-	virtual document_info* new_document_info(const user* owner,
-	                                         unsigned int id,
-	                                         const std::string& title);
+	virtual typename basic_buffer<selector_type>::document_info*
+	new_document_info(const user* owner, unsigned int id,
+	                  const std::string& title);
 
 	user* m_self;
 private:
@@ -187,10 +189,11 @@ void basic_host_buffer<selector_type>::
 }
 
 template<typename selector_type>
-host_document_info* basic_host_buffer<selector_type>::
+typename basic_host_buffer<selector_type>::document_info*
+basic_host_buffer<selector_type>::
 	document_find(unsigned int owner_id, unsigned int id) const
 {
-	return dynamic_cast<host_document_info*>(
+	return dynamic_cast<document_info*>(
 		basic_buffer<selector_type>::document_find(owner_id, id)
 	);
 }
@@ -257,12 +260,13 @@ void basic_host_buffer<selector_type>::set_colour(int red, int green, int blue)
 }
 
 template<typename selector_type>
-document_info* basic_host_buffer<selector_type>::
+typename basic_buffer<selector_type>::document_info*
+basic_host_buffer<selector_type>::
 	new_document_info(const user* owner, unsigned int id,
 	                  const std::string& title)
 {
 	// Create host_document_info, according to host_buffer
-	return new host_document_info(*this, net6_host(), owner, id, title);
+	return new document_info(*this, net6_host(), owner, id, title);
 }
 
 template<typename selector_type>

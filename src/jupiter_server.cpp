@@ -33,17 +33,17 @@ obby::jupiter_server::~jupiter_server()
 	}
 }
 
-void obby::jupiter_server::client_add(const user* client)
+void obby::jupiter_server::client_add(const user& client)
 {
-	if(m_clients.find(client) != m_clients.end() )
+	if(m_clients.find(&client) != m_clients.end() )
 		throw std::logic_error("obby::jupiter_server::client_add");
 
-	m_clients[client] = new jupiter_algorithm;
+	m_clients[&client] = new jupiter_algorithm;
 }
 
-void obby::jupiter_server::client_remove(const user* client)
+void obby::jupiter_server::client_remove(const user& client)
 {
-	client_map::iterator iter = m_clients.find(client);
+	client_map::iterator iter = m_clients.find(&client);
 	if(iter == m_clients.end() )
 		throw std::logic_error("obby::jupiter_server::client_remove");
 
@@ -63,7 +63,7 @@ void obby::jupiter_server::local_op(const operation& op, const user* from)
 		// Get resulting record
 		std::auto_ptr<record> rec = iter->second->local_op(op);
 		// Emit corresponding signal
-		m_signal_local.emit(*rec, iter->first);
+		m_signal_local.emit(*rec, *iter->first, from);
 	}
 }
 
@@ -86,7 +86,7 @@ void obby::jupiter_server::remote_op(const record& rec, const user* from)
 			// Generate record for this client
 			std::auto_ptr<record> rec = iter->second->local_op(*op);
 			// Emit remote signal
-			m_signal_remote.emit(*rec, iter->first);
+			m_signal_remote.emit(*rec, *iter->first, from);
 		}
 	}
 }

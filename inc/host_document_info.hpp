@@ -20,7 +20,6 @@
 #define _OBBY_HOST_DOCUMENT_INFO_HPP_
 
 #include <net6/host.hpp>
-#include "host_document.hpp"
 #include "local_document_info.hpp"
 #include "server_document_info.hpp"
 
@@ -33,27 +32,26 @@ class basic_host_buffer;
 /** Information about a document that is provided without being subscribed to
  * a document.
  */
-
-class host_document_info : public local_document_info,
-                           public server_document_info
+template<typename selector_type>
+class basic_host_document_info :
+	virtual public basic_local_document_info<selector_type>,
+	virtual public basic_server_document_info<selector_type>
 {
 public:
-	host_document_info(const basic_host_buffer<net6::selector>& buf, net6::host& host,
-	                   const user* owner, unsigned int id,
-	                   const std::string& title);
-	~host_document_info();
+	basic_host_document_info(
+		const basic_host_buffer<selector_type>& buffer,
+		const net6::basic_host<selector_type>& net,
+		const user* owner, unsigned int id,
+		const std::string& title
+	);
 
-	/** Returns the buffer to which the document is assigned.
+	/** Inserts the given text at the given position into the document.
 	 */
-	const basic_host_buffer<net6::selector>& get_buffer() const;
+	virtual void insert(position pos, const std::string& text);
 
-	/** Returns the document for this info, if one is assigned.
+	/** Erases the given range from the document.
 	 */
-	host_document* get_document();
-
-	/** Returns the document for this info, if one is assigned.
-	 */
-	const host_document* get_document() const;
+	virtual void erase(position pos, position len);
 
 	/** Renames the current document.
 	 */
@@ -69,25 +67,91 @@ public:
 	 */
 	virtual void unsubscribe();
 
-protected:
-	/** Protected constructor that may be used by derived classes.
-	 * server_document_infos do always assign their document immediately
-	 * because they need it to share changes between clients. This
-	 * constructor does not assign such a document, so a derived class
-	 * is able to call this constructor and then its own assign_document
-	 * function to create its own document. For example, the
-	 * server_document_info creates a server_document in assign_document,
-	 * but the host_document_info needs to create a host_document.
+private:
+	/** Returns the buffer to which this document_info belongs.
 	 */
-	host_document_info(const basic_host_buffer<net6::selector>& buf, net6::host& host,
-	                   const user* owner, unsigned int id,
-			   const std::string& title, bool noassign);
+	const basic_host_buffer<selector_type>& get_buffer() const;
 
-	/** Assigns a document to the document info.
+	/** Returns the underlaying net6 object through which requests are
+	 * transmitted.
 	 */
-	virtual void assign_document();
+	const net6::basic_host<selector_type>& get_net6() const;
 };
 
+typedef basic_host_document_info<net6::selector> host_document_info;
+
+template<typename selector_type>
+basic_host_document_info<selector_type>::basic_host_document_info(
+	const basic_host_buffer<selector_type>& buffer,
+	const net6::basic_host<selector_type>& net,
+	const user* owner, unsigned int id,
+	const std::string& title
+) : basic_document_info<selector_type>(buffer, net, owner, id, title),
+    basic_local_document_info<selector_type>(buffer, net, owner, id, title),
+    basic_server_document_info<selector_type>(buffer, net, owner, id, title)
+{
 }
+
+template<typename selector_type>
+void basic_host_document_info<selector_type>::
+	insert(position pos, const std::string& text)
+{
+	basic_server_document_info<selector_type>::
+		insert_impl(pos, text, &get_buffer().get_self() );
+}
+
+template<typename selector_type>
+void basic_host_document_info<selector_type>::
+	erase(position pos, position len)
+{
+	basic_server_document_info<selector_type>::
+		erase_impl(pos, len, &get_buffer().get_self() );
+}
+
+template<typename selector_type>
+void basic_host_document_info<selector_type>::
+	rename(const std::string& new_title)
+{
+	basic_server_document_info<selector_type>::
+		rename_impl(new_title, &get_buffer().get_self() );
+}
+
+template<typename selector_type>
+void basic_host_document_info<selector_type>::
+	subscribe()
+{
+	// TODO: Call a base-class method that does not try to sync the document
+	// contents to the user, it is not senseful in our case.
+	basic_document_info<selector_type>::
+		subscribe_user(get_buffer().get_self() );
+}
+
+template<typename selector_type>
+void basic_host_document_info<selector_type>::
+	unsubscribe()
+{
+	basic_document_info<selector_type>::
+		unsubscribe_user(get_buffer().get_self() );
+}
+
+template<typename selector_type>
+const basic_host_buffer<selector_type>&
+basic_host_document_info<selector_type>::get_buffer() const
+{
+	return dynamic_cast<const basic_host_buffer<selector_type>&>(
+		basic_document_info<selector_type>::m_buffer
+	);
+}
+
+template<typename selector_type>
+const net6::basic_host<selector_type>&
+basic_host_document_info<selector_type>::get_net6() const
+{
+	return dynamic_cast<const net6::basic_host<selector_type>&>(
+		basic_document_info<selector_type>::m_net
+	);
+}
+
+} // namespace obby
 
 #endif // _OBBY_HOST_DOCUMENT_INFO_HPP_

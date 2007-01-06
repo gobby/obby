@@ -31,6 +31,8 @@ template<typename selector_type>
 class basic_local_buffer : virtual public basic_buffer<selector_type>
 {
 public: 
+	typedef basic_local_document_info<selector_type> document_info;
+
 	typedef sigc::signal<void>
 		signal_user_colour_failed_type;
 
@@ -57,8 +59,8 @@ public:
 	 * here because the ID is enough and one might not have a user object
 	 * to the corresponding ID. So a time-consuming lookup is obsolete.
 	 */
-	local_document_info* document_find(unsigned int owner_id,
-	                                   unsigned int id) const;
+	document_info* document_find(unsigned int owner_id,
+	                             unsigned int id) const;
 
 	/** Sets a new colour for the local user and propagates this change
 	 * to the others.
@@ -96,11 +98,11 @@ const std::string& basic_local_buffer<selector_type>::get_name() const
 }
 
 template<typename selector_type>
-local_document_info*
+typename basic_local_buffer<selector_type>::document_info*
 basic_local_buffer<selector_type>::document_find(unsigned int owner_id,
                                                  unsigned int id) const
 {
-	return dynamic_cast<local_document_info*>(
+	return dynamic_cast<document_info*>(
 		basic_buffer<selector_type>::find_document(owner_id, id)
 	);
 }

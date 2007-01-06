@@ -17,8 +17,8 @@
  */
 
 #include "host_document_info.hpp"
-#include "host_buffer.hpp"
 
+#if 0
 obby::host_document_info::host_document_info(const basic_host_buffer<net6::selector>& buf,
                                              net6::host& host,
                                              const user* owner,
@@ -87,4 +87,4 @@ void obby::host_document_info::assign_document()
 		*this, dynamic_cast<net6::host&>(m_server)
 	);
 }
-
+#endif

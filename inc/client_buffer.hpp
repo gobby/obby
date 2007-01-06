@@ -36,6 +36,8 @@ template<typename selector_type>
 class basic_client_buffer : virtual public basic_local_buffer<selector_type>
 {
 public:
+	typedef basic_client_document_info<selector_type> document_info;
+
 	typedef net6::default_accumulator<bool, false> password_accumulator;
 
 	typedef sigc::signal<void>
@@ -95,8 +97,8 @@ public:
 	 * here because the ID is enough and one might not have a user object
 	 * to the corresponding ID. So a time-consuming lookup is obsolete.
 	 */
-	client_document_info* document_find(unsigned int owner_id,
-	                                    unsigned int id) const;
+	document_info* document_find(unsigned int owner_id,
+	                             unsigned int id) const;
 
 	/** Returns the local user.
 	 */
@@ -174,9 +176,9 @@ protected:
 
         /** Creates a new document info object according to the type of buffer.
 	 */
-	virtual document_info* new_document_info(const user* owner,
-	                                         unsigned int id,
-	                                         const std::string& title);
+	virtual typename basic_buffer<selector_type>::document_info*
+	new_document_info(const user* owner, unsigned int id,
+	                  const std::string& title);
 
 	/** net6 signal handlers.
 	 */
@@ -306,7 +308,7 @@ void basic_client_buffer<selector_type>::
 	unsigned int id = ++ basic_buffer<selector_type>::m_doc_counter;
 
 	// Add document to list
-	client_document_info& info = dynamic_cast<client_document_info&>(
+	document_info& info = dynamic_cast<document_info&>(
 		basic_buffer<selector_type>::document_add(m_self, id, title)
 	);
 
@@ -336,10 +338,11 @@ void basic_client_buffer<selector_type>::
 }
 
 template<typename selector_type>
-client_document_info* basic_client_buffer<selector_type>::
+typename basic_client_buffer<selector_type>::document_info*
+basic_client_buffer<selector_type>::
 	document_find(unsigned int owner_id, unsigned int id) const
 {
-	return dynamic_cast<client_document_info*>(
+	return dynamic_cast<document_info*>(
 		basic_buffer<selector_type>::document_find(owner_id, id)
 	);
 }
@@ -683,7 +686,7 @@ void basic_client_buffer<selector_type>::
 
 	// Emit unsubscribe singal for users who were subscribed to this doc
 	// TODO: Do this is in document_delete!
-	for(document_info::user_iterator user_iter = doc->user_begin();
+	for(typename document_info::user_iterator user_iter = doc->user_begin();
 	    user_iter != doc->user_end();
 	    ++ user_iter)
 		doc->unsubscribe_event().emit(*user_iter);
@@ -806,7 +809,7 @@ void basic_client_buffer<selector_type>::
 
 	// TODO: Emit document_insert signal, should be done by
 	// document_add
-	client_document_info& info = dynamic_cast<client_document_info&>(
+	document_info& info = dynamic_cast<document_info&>(
 		basic_buffer<selector_type>::document_add(owner, id, title)
 	);
 
@@ -837,15 +840,15 @@ void basic_client_buffer<selector_type>::
 	on_net_document(const net6::packet& pack)
 {
 	// Get document, forward packet
-	client_document_info& info = dynamic_cast<client_document_info&>(
+	document_info& info = dynamic_cast<document_info&>(
 		*pack.get_param(0).net6::basic_parameter::as<
-			document_info*
+			obby::document_info*
 		>()
 	);
 
 	// TODO: Rename this function. Think about providing a signal that may
 	// be emitted.
-	info.obby_data(pack);
+	info.on_net_record(document_packet(pack) );
 }
 
 template<typename selector_type>
@@ -866,12 +869,13 @@ void basic_client_buffer<selector_type>::register_signal_handlers()
 }
 
 template<typename selector_type>
-document_info* basic_client_buffer<selector_type>::
+typename basic_buffer<selector_type>::document_info*
+basic_client_buffer<selector_type>::
 	new_document_info(const user* owner, unsigned int id,
 	                  const std::string& title)
 {
 	// Create client_document_info, according to client_buffer
-	return new client_document_info(*this, net6_client(), owner, id, title);
+	return new document_info(*this, net6_client(), owner, id, title);
 }
 
 template<typename selector_type>
