@@ -271,6 +271,8 @@ void obby::client_buffer::on_net_message(const net6::packet& pack)
 	const std::string& message = pack.get_param(1).as_string();
 
 	obby::user* user = find_user(uid);
+	if (!user)
+		return;
 	m_signal_message.emit(*user, message);
 }
 
