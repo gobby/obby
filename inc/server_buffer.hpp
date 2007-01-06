@@ -28,7 +28,7 @@
 namespace obby
 {
 
-class server_buffer : public buffer
+class server_buffer : public buffer, public sigc::trackable
 {
 public: 
 	typedef sigc::signal<void, const insert_record&> signal_insert_type;
@@ -50,6 +50,11 @@ public:
 	signal_part_type part_event() const;
 
 protected:
+	void on_join(net6::server::peer& peer);
+	void on_login(net6::server::peer& peer);
+	void on_part(net6::server::peer& peer);
+	void on_data(const net6::packet& pack, net6::server::peer& from);
+
 	unsigned int m_counter;
 	net6::server m_server;
 

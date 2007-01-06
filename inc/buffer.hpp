@@ -36,8 +36,8 @@ public:
 
 	std::string get_sub_buffer(const position& from, const position& to);
 
-	void insert(const position& pos, const std::string& text) = 0;
-	void erase(const position& from, const position& to) = 0;
+	virtual void insert(const position& pos, const std::string& text) = 0;
+	virtual void erase(const position& from, const position& to) = 0;
 
 	void insert_nosync(const position& pos, const std::string& text);
 	void erase_nosync(const position& from, const position& to);

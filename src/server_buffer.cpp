@@ -21,6 +21,14 @@
 obby::server_buffer::server_buffer(unsigned int port)
  : buffer(), m_counter(0), m_server(port)
 {
+	m_server.join_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_join) );
+	m_server.login_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_login) );
+	m_server.part_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_part) );
+	m_server.data_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_data) );
 }
 
 obby::server_buffer::~server_buffer()
@@ -62,5 +70,22 @@ obby::server_buffer::signal_login_type obby::server_buffer::login_event() const
 obby::server_buffer::signal_part_type obby::server_buffer::part_event() const
 {
 	return m_signal_part;
+}
+
+void obby::server_buffer::on_join(net6::server::peer& peer)
+{
+}
+
+void obby::server_buffer::on_login(net6::server::peer& peer)
+{
+}
+
+void obby::server_buffer::on_part(net6::server::peer& peer)
+{
+}
+
+void obby::server_buffer::on_data(const net6::packet& pack,
+                                  net6::server::peer& peer)
+{
 }
 
