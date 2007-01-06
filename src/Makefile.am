@@ -1,3 +1,5 @@
+SUBDIRS = serialise .
+
 lib_LTLIBRARIES = libobby.la
 
 #  current  : revision :      age
@@ -6,7 +8,7 @@ lib_LTLIBRARIES = libobby.la
 # interface :  changes : compatibility
 libobby_la_LDFLAGS = -version-info 0:0:0 -release 0.3
 
-libobby_la_LIBADD = $(libobby_LIBS) @extra_libraries@
+libobby_la_LIBADD = serialise/libserialise.a $(libobby_LIBS) @extra_libraries@
 
 if WIN32
 libobby_la_LDFLAGS += -no-undefined
@@ -23,11 +25,6 @@ libobby_la_SOURCES += error.cpp
 libobby_la_SOURCES += position.cpp
 libobby_la_SOURCES += duplex_signal.cpp
 libobby_la_SOURCES += ptr_iterator.cpp
-libobby_la_SOURCES += serialise/error.cpp
-libobby_la_SOURCES += serialise/token.cpp
-libobby_la_SOURCES += serialise/attribute.cpp
-libobby_la_SOURCES += serialise/object.cpp
-libobby_la_SOURCES += serialise/parser.cpp
 libobby_la_SOURCES += vector_time.cpp
 libobby_la_SOURCES += rsa.cpp
 libobby_la_SOURCES += sha1.cpp
