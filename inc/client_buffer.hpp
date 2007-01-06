@@ -819,8 +819,7 @@ void basic_client_buffer<Document, Selector>::
 	unsigned long server_version =
 		pack.get_param(0).net6::parameter::as<unsigned long>();
 
-	if(server_version !=
-	   basic_buffer<Document, Selector>::PROTOCOL_VERSION)
+	if(server_version != PROTOCOL_VERSION)
 	{
 		on_login_failed(login::ERROR_PROTOCOL_VERSION_MISMATCH);
 		return;

@@ -627,7 +627,7 @@ void basic_server_buffer<Document, Selector>::
 {
 	// Send our protocol version.
 	net6::packet welcome_pack("obby_welcome");
-	welcome_pack << basic_buffer<Document, Selector>::PROTOCOL_VERSION;
+	welcome_pack << PROTOCOL_VERSION;
 
 	net6_server().send(welcome_pack, user6);
 
