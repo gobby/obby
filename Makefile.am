@@ -4,11 +4,12 @@ lib_LTLIBRARIES = libobby.la
 #     ^     :     ^    :       ^
 #     |     :   minor  :       |
 # interface :  changes : compatibility
-libobby_la_LDFLAGS = -version-info 0:0:0 -release 0
+libobby_la_LDFLAGS = -no-undefined -version-info 0:0:0 -release 0
 
-INCLUDES = $(libobby_CFLAGS) -I../inc/
+INCLUDES = $(libobby_CFLAGS) -I../inc
 
 pkginclude_HEADERS = \
+	inc/common.hpp \
 	inc/position.hpp \
 	inc/user.hpp \
 	inc/record.hpp \

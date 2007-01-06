@@ -15,6 +15,7 @@ Normal:
  * Sync-On-Request
  * UTF-8 string handling (Well, do we care about encodings?)
  * Host sends record with user id 0 instead of local user
+ * Link to net6 and sigc on WIN32
 
 Minor:
  * Implement indent_record and unindent_record to (un)indent lines of text
