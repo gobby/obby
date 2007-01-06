@@ -41,7 +41,7 @@ obby::delete_record::~delete_record()
 
 void obby::delete_record::apply(buffer& buf)
 {
-	buf.erase(m_from, m_to);
+	buf.erase_nosync(m_from, m_to);
 }
 
 void obby::delete_record::on_insert(const position& pos,

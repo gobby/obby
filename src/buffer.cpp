@@ -55,7 +55,7 @@ std::string obby::buffer::get_sub_buffer(const position& from,
 	return buf;
 }
 
-void obby::buffer::insert(const position& pos, const std::string& text)
+void obby::buffer::insert_nosync(const position& pos, const std::string& text)
 {
 	assert(pos.get_line() < m_lines.size() );
 	assert(pos.get_col() <= m_lines[pos.get_line()].size() );
@@ -70,7 +70,7 @@ void obby::buffer::insert(const position& pos, const std::string& text)
 	m_lines[line].append(&text[prev], text.size() - prev);
 }
 
-void obby::buffer::erase(const position& from, const position& to)
+void obby::buffer::erase_nosync(const position& from, const position& to)
 {
 	assert(to >= from);
 	assert(to.get_line() < m_lines.size() );
@@ -86,7 +86,7 @@ void obby::buffer::erase(const position& from, const position& to)
 	}
 	else
 	{
-		// TODO: Replace the following to calls by one call to
+		// TODO: Replace the following two calls by one call to
 		// std::string::replace
 		m_lines[from.get_line()].erase(from.get_col() );
 

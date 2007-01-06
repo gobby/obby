@@ -39,7 +39,7 @@ obby::insert_record::~insert_record()
 
 void obby::insert_record::apply(buffer& buf)
 {
-	buf.insert(m_pos, m_text);
+	buf.insert_nosync(m_pos, m_text);
 }
 
 void obby::insert_record::on_insert(const position& pos,
