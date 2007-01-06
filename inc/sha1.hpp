@@ -24,22 +24,61 @@
 namespace obby
 {
 
+/** SHA1 hash algorithm according to RFC 3174.
+ */
+
 class SHA1 {
 public:
 	typedef size_t size_type;
 
+	/** Creates an empty SHA1 context.
+	 */
 	SHA1();
+
+	/** Create SHA1 context with initial content.
+	 */
 	SHA1(const uint8_t* data, size_type len);
+
+	/** Create SHA1 context with initial string context.
+	 */
 	SHA1(const std::string& input);
 	~SHA1();
 
-	void append(const unit8_t* data, size_type len);
+	/** Appends data to be hashed.
+	 */
+	void append(const uint8_t* data, size_type len);
+
+	/** Appends string data to be hashed.
+	 */
 	void append(const std::string& input);
 
+	/** Alias for append().
+	 */
 	void operator<<(const std::string& input);
+
+	/** Finalises this SHA1 context and returns the SHA1 digest string
+	 * of the data that has previousley added using append().
+	 */
 	std::string final();
 
+	/** Returns the SHA1 hash sum of the given string.
+	 */
 	static std::string hash(const std::string& input);
+
+	/** Returns the SHA1 hash sum of the given data.
+	 */
+	static std::string hash(const uint8_t* data, size_type len);
+private:
+	void init();
+
+	void process_message_block();
+	void pad_message_block();
+
+	uint32_t m_intermediate_hash[5];
+	uint32_t m_length_low, m_length_high;
+
+	int_least16_t m_message_block_index;
+	uint8_t m_message_block[64];
 };
 
 }
