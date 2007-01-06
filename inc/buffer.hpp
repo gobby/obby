@@ -270,9 +270,6 @@ protected:
 typedef basic_buffer<obby::document, net6::selector> buffer;
 
 template<typename Document, typename Selector>
-const unsigned long basic_buffer<Document, Selector>::PROTOCOL_VERSION = 8ul;
-
-template<typename Document, typename Selector>
 basic_buffer<Document, Selector>::basic_buffer():
 	m_chat(*this, 0xff),
 	m_doc_counter(0), m_package(obby_package(), obby_localedir())
