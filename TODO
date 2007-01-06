@@ -87,6 +87,7 @@ implemented:
  * Load/save documents to/from file and/or memory (while preserving 
 history)
  * Load/save complete obby session
+ * Load/save connection settings
 
 29: Implement server-side commands for remote actions
 -----------------------------------------------------
