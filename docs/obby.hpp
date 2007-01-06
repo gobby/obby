@@ -212,12 +212,12 @@ public:
 	void select();
 	void select(unsigned int timeout);
 
-	signal_insert_type& insert_event();
-	signal_delete_type& delete_event();
-	signal_join_type& join_event();
-	signal_part_type& part_event();
-	signal_close_type& close_event();
-	signal_login_failed_type& login_failed_event();
+	signal_insert_type insert_event() const;
+	signal_delete_type delete_event() const;
+	signal_join_type join_event() const;
+	signal_part_type part_event() const;
+	signal_close_type close_event() const;
+	signal_login_failed_type login_failed_event() const;
 
 protected:
 	// Unsynced changes
@@ -248,17 +248,17 @@ public:
 	void select();
 	void select(unsigned int timeout);
 
-	signal_insert_type& insert_event();
-	signal_delete_type& delete_event();
-	signal_join_type& join_event();
-	signal_login_type& login_event();
-	signal_part_type& part_event();
+	signal_insert_type insert_event() const;
+	signal_delete_type delete_event() const;
+	signal_join_type join_event() const;
+	signal_login_type login_event() const;
+	signal_part_type part_event() const;
 
 protected:
 	// Revision counter
 	unsigned int m_counter;
 	// Network server object
-	net6::server server;
+	net6::server m_server;
 
 	signal_insert_type m_signal_insert;
 	signal_delete_type m_signal_delete;
