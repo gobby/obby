@@ -3,7 +3,7 @@
 #       of the normal ones and they should link against the library build
 #       in the toplevel directory.
 
-APPS = record buffer bufferd
+APPS = record buffer bufferd discover
 
 CFLAGS = -I../inc `pkg-config --cflags ../lobby-1.0.pc`
 LIBS = -L../.libs `pkg-config --libs ../lobby-1.0.pc`
@@ -18,6 +18,9 @@ buffer: buffer.cpp
 
 bufferd: buffer.cpp
 	g++ buffer.cpp -o bufferd $(CFLAGS) $(LIBS) -DSERVER_TEST
+
+discover: discover.cpp
+	g++ discover.cpp -o discover $(CFLAGS) $(LIBS)
 
 clean:
 	rm -f $(APPS)
