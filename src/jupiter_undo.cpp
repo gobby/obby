@@ -76,6 +76,8 @@ void obby::jupiter_undo::transform_undo_ring(const operation& op)
 	    op_iter != m_opring.end();
 	    ++ op_iter)
 	{
+		operation* old_op = (*op_iter);
 		(*op_iter) = op.transform(**op_iter);
+		delete old_op;
 	}
 }
