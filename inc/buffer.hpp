@@ -120,6 +120,10 @@ public:
 	 */
 	document_iterator document_end() const;
 
+	/** Returns the size of the document list.
+	 */
+	std::list<document*>::size_type document_size() const;
+
 	/** Returns the begin of the user list.
 	 */
 	user_iterator user_begin() const;
@@ -127,6 +131,10 @@ public:
 	/** Returns the end of the user list.
 	 */
 	user_iterator user_end() const;
+
+	/** Returns the size of the user list.
+	 */
+	std::list<user*>::size_type user_size() const;
 
 	/** Sends a global chat message to all users.
 	 */
