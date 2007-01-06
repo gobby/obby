@@ -16,6 +16,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <cassert>
 #include "record.hpp"
 #include "insert_record.hpp"
 #include "delete_record.hpp"
