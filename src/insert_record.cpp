@@ -19,21 +19,6 @@
 #include "insert_record.hpp"
 #include "buffer.hpp"
 
-namespace
-{
-	// TODO: We need this function more than once, I guess. Maybe put
-	// it into obby::position?
-	obby::position string_size(const std::string& str)
-	{
-		unsigned int lines = 1;
-		std::string::size_type cur = 0, prev = 0;
-		while((cur = str.find('\n', cur)) != std::string::npos)
-			{ prev = ++cur; ++ lines; }
-		
-		return obby::position(lines, str.length() - prev);
-	}
-}
-
 obby::insert_record::insert_record(const position& pos, const std::string& text,
                                    unsigned int revision, unsigned int from)
  : record(revision, from), m_pos(pos), m_text(text)
@@ -66,7 +51,7 @@ void obby::insert_record::on_insert(const position& pos,
 {
 	if(pos <= m_pos)
 	{
-		position size = string_size(text);
+		position size(text);
 		m_pos.move_by(size.get_line() - 1, 0);
 		if(size.get_line() > 1)
 			m_pos.move_to(m_pos.get_line(), size.get_col() );
