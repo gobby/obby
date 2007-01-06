@@ -15,12 +15,18 @@ bool quit = false;
 void client_join(net6::client::peer& peer, obby::client_buffer& buffer)
 {
 	std::cout << peer.get_name() << " has joined." << std::endl;
-	if(peer.get_id() == buffer.get_self()->get_id() )
-	{
-		buffer.insert(obby::position(0, 0), "A");
-		buffer.insert(obby::position(0, 0), "B");
-		buffer.insert(obby::position(0, 0), "C");
-	}
+}
+
+void client_sync(obby::client_buffer& buffer)
+{
+	std::cout << "Buffer has been synced. Content:" << std::endl;
+	std::cout << "---" << std::endl;
+	std::cout << buffer.get_whole_buffer() << std::endl;
+	std::cout << "---" << std::endl;
+
+	buffer.insert(obby::position(0, 0), "A");
+	buffer.insert(obby::position(0, 0), "B");
+	buffer.insert(obby::position(0, 0), "C");
 }
 
 void client_part(net6::client::peer& peer)
@@ -40,14 +46,22 @@ void client_login_failed(const std::string& reason)
 	quit = true;
 }
 
-void client_insert(const obby::insert_record& record)
+void client_insert(const obby::insert_record& record,
+                   obby::client_buffer& buffer)
 {
 	std::cout << "Insert " << record.get_text() << " at " << record.get_position().get_line() << "/" << record.get_position().get_col() << std::endl;
+	std::cout << "---" << std::endl;
+	std::cout << buffer.get_whole_buffer() << std::endl;
+	std::cout << "---" << std::endl;
 }
 
-void client_delete(const obby::delete_record& record)
+void client_delete(const obby::delete_record& record,
+                   obby::client_buffer& buffer)
 {
 	std::cout << "Delete from " << record.get_begin().get_line() << "/" << record.get_begin().get_col() << " to " << record.get_end().get_line() << "/" << record.get_end().get_col() << std::endl;
+	std::cout << "---" << std::endl;
+	std::cout << buffer.get_whole_buffer() << std::endl;
+	std::cout << "---" << std::endl;
 }
 
 int client_main(int argc, char* argv[])
@@ -65,11 +79,12 @@ int client_main(int argc, char* argv[])
 	buffer.login(argv[1]);
 
 	buffer.join_event().connect(sigc::bind(sigc::ptr_fun(&client_join), sigc::ref(buffer)) );
+	buffer.sync_event().connect(sigc::bind(sigc::ptr_fun(&client_sync), sigc::ref(buffer)) );
 	buffer.part_event().connect(sigc::ptr_fun(&client_part) );
 	buffer.close_event().connect(sigc::ptr_fun(&client_close) );
 	buffer.login_failed_event().connect(sigc::ptr_fun(&client_login_failed));
-	buffer.insert_event().connect(sigc::ptr_fun(&client_insert) );
-	buffer.delete_event().connect(sigc::ptr_fun(&client_delete) );
+	buffer.insert_event().connect(sigc::bind(sigc::ptr_fun(&client_insert), sigc::ref(buffer)) );
+	buffer.delete_event().connect(sigc::bind(sigc::ptr_fun(&client_delete), sigc::ref(buffer)) );
 
 	while(!quit)
 		buffer.select();
@@ -96,14 +111,22 @@ void server_part(net6::server::peer& peer)
 		std::cout << peer.get_address().get_name() << " has quit." << std::endl;
 }
 
-void server_insert(const obby::insert_record& record)
+void server_insert(const obby::insert_record& record,
+                   obby::server_buffer& buffer)
 {
 	std::cout << "Insert " << record.get_text() << " at " << record.get_position().get_line() << "/" << record.get_position().get_col() << std::endl;
+	std::cout << "---" << std::endl;
+	std::cout << buffer.get_whole_buffer() << std::endl;
+	std::cout << "---" << std::endl;
 }
 
-void server_delete(const obby::delete_record& record)
+void server_delete(const obby::delete_record& record,
+                   obby::server_buffer& buffer)
 {
 	std::cout << "Delete from " << record.get_begin().get_line() << "/" << record.get_begin().get_col() << " to " << record.get_end().get_line() << "/" << record.get_end().get_col() << std::endl;
+	std::cout << "---" << std::endl;
+	std::cout << buffer.get_whole_buffer() << std::endl;
+	std::cout << "---" << std::endl;
 }
 
 int server_main(int argc, char* argv[])
@@ -116,8 +139,8 @@ int server_main(int argc, char* argv[])
 	buffer.join_event().connect(sigc::ptr_fun(&server_join) );
 	buffer.login_event().connect(sigc::ptr_fun(&server_login) );
 	buffer.part_event().connect(sigc::ptr_fun(&server_part) );
-	buffer.insert_event().connect(sigc::ptr_fun(&server_insert) );
-	buffer.delete_event().connect(sigc::ptr_fun(&server_delete) );
+	buffer.insert_event().connect(sigc::bind(sigc::ptr_fun(&server_insert), sigc::ref(buffer)) );
+	buffer.delete_event().connect(sigc::bind(sigc::ptr_fun(&server_delete), sigc::ref(buffer)) );
 	
 	while(!quit)
 		buffer.select();
