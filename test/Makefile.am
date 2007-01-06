@@ -14,21 +14,16 @@ LDADD       += $(libhowl_LIBS)
 AM_CPPFLAGS += $(libhowl_CFLAGS)
 endif
 
-noinst_PROGRAMS =  record
-noinst_PROGRAMS += line
-noinst_PROGRAMS += buffer
-noinst_PROGRAMS += bufferd
-noinst_PROGRAMS += 2buffer
-noinst_PROGRAMS += curses
+noinst_PROGRAMS = rsa
+#noinst_PROGRAMS += bufferd
+#noinst_PROGRAMS += curses
 
-record_SOURCES = record.cpp
-line_SOURCES = line.cpp
-buffer_SOURCES = buffer.cpp
-bufferd_SOURCES = bufferd.cpp
-2buffer_SOURCES = 2buffer.cpp
+#bufferd_SOURCES = bufferd.cpp
 
-curses_SOURCES = curses.cpp
-curses_LDADD = $(LDADD) -lncurses
+#curses_SOURCES = curses.cpp
+#curses_LDADD = $(LDADD) -lncurses
+
+rsa_SOURCES = rsa.cpp
 
 if WITH_HOWL
 noinst_PROGRAMS += discover
