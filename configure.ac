@@ -63,7 +63,7 @@ AC_CACHE_CHECK([whether to build the tests], [ac_cv_build_tests],
 AM_CONDITIONAL(BUILD_TESTS, test x$ac_cv_build_tests != xno)
 
 # Checks for libraries.
-PKG_CHECK_MODULES([libobby], [sigc++-2.0 net6-1.2 >= 1.2.1])
+PKG_CHECK_MODULES([libobby], [sigc++-2.0 net6-1.3])
 if test "x$ac_cv_use_howl" != "xno" ; then
 	PKG_CHECK_MODULES([libhowl], [howl])
 fi
@@ -73,6 +73,6 @@ AM_GNU_GETTEXT([external])
 AM_GNU_GETTEXT_VERSION
 
 AC_CONFIG_FILES([Makefile po/Makefile.in inc/Makefile src/Makefile
-                 src/serialise/Makefile test/Makefile obby-0.3.pc])
+                 src/serialise/Makefile test/Makefile obby-0.4.pc])
 AC_OUTPUT
 
