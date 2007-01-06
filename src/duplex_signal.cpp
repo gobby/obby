@@ -16,5 +16,5 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "duplexsignal.hpp"
+#include "duplex_signal.hpp"
 

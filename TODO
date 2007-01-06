@@ -8,10 +8,7 @@ Serious:
  * Test libobby under realtime conditions
 
 Important:
- * Call insert/erase signals in *_nosync.
- * Provide duplexsignal or somehting which may be called before and after a
-   certain operation took place (here: Before having inserted the text
-   and after).
+ * Call insert/erase signals in *_nosync
 
 Normal:
  * Implement automatic service announcement and discovery
