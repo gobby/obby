@@ -8,12 +8,10 @@ Serious:
  * Test libobby under realtime conditions
 
 Important:
- * Call insert/erase signals in *_nosync
 
 Normal:
  * Implement automatic service announcement and discovery
  * Sync-On-Request
- * UTF-8 string handling (Well, do we care about encodings?)
  * Host sends record with user id 0 instead of local user
  * Session serialisation:
    - Load/save documents to/from file and/or memory while preserving history
