@@ -66,6 +66,8 @@ public:
 		signal_login_failed_type;
 	typedef sigc::signal<void>
 		signal_close_type;
+	typedef sigc::signal<void>
+		signal_encrypted_type;
 
 	typedef typename sigc::signal<bool, connection_settings&>
 		::template accumulated<login_accumulator>
@@ -105,6 +107,10 @@ public:
 	/** Checks if we are currently connected to an obby session.
 	 */
 	bool is_connected() const;
+
+	/** Requests encryption of the connection.
+	 */
+	void request_encryption();
 
 	/** Sends a login request for this client. If either the login request
 	 * failed because of name or colour are already in use or a password
@@ -182,6 +188,11 @@ public:
 	 */
 	signal_close_type close_event() const;
 
+	/** Signal which will be emitted as soon as the connection is
+	 * guaranteed to be encrypted.
+	 */
+	signal_encrypted_type encrypted_event() const;
+
 	/** Signal which will be emitted if a login request did not succeed.
 	 */
 	signal_login_failed_type login_failed_event() const;
@@ -240,6 +251,7 @@ protected:
 	void on_join(const net6::user& user6, const net6::packet& pack);
 	void on_part(const net6::user& user6, const net6::packet& pack);
 	void on_close();
+	void on_encrypted();
 	void on_data(const net6::packet& pack);
 	void on_login_failed(net6::login::error error);
 	void on_login_extend(net6::packet& pack);
@@ -286,6 +298,7 @@ protected:
 
 	signal_welcome_type m_signal_welcome;
 	signal_close_type m_signal_close;
+	signal_encrypted_type m_signal_encrypted;
 	signal_login_failed_type m_signal_login_failed;
 
 	signal_prompt_name_type m_signal_prompt_name;
@@ -369,6 +382,13 @@ bool basic_client_buffer<Document, Selector>::is_connected() const
 {
 	return basic_buffer<Document, Selector>::m_net.get() != NULL;
 }
+
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::request_encryption()
+{
+	net6_client().request_encryption();
+}
+
 
 template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::login(const std::string& name,
@@ -545,6 +565,13 @@ basic_client_buffer<Document, Selector>::close_event() const
 }
 
 template<typename Document, typename Selector>
+typename basic_client_buffer<Document, Selector>::signal_encrypted_type
+basic_client_buffer<Document, Selector>::encrypted_event() const
+{
+	return m_signal_encrypted;
+}
+
+template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::on_join(const net6::user& user6,
                                                       const net6::packet& pack)
 {
@@ -618,6 +645,12 @@ void basic_client_buffer<Document, Selector>::on_close()
 	disconnect();
 	// TODO: Emit signal_close in the disconnect() function?
 	m_signal_close.emit();
+}
+
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::on_encrypted()
+{
+	m_signal_encrypted.emit();
 }
 
 template<typename Document, typename Selector>
@@ -973,6 +1006,8 @@ void basic_client_buffer<Document, Selector>::register_signal_handlers()
 		sigc::mem_fun(*this, &basic_client_buffer::on_part) );
 	net6_client().close_event().connect(
 		sigc::mem_fun(*this, &basic_client_buffer::on_close) );
+	net6_client().encrypted_event().connect(
+		sigc::mem_fun(*this, &basic_client_buffer::on_encrypted) );
 	net6_client().data_event().connect(
 		sigc::mem_fun(*this, &basic_client_buffer::on_data) );
 	net6_client().login_failed_event().connect(
