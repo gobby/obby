@@ -107,6 +107,7 @@ void obby::server_buffer::on_data(const net6::packet& pack,
 	if(pack.get_command() == "obby_record")
 	{
 		record* rec = record::from_packet(pack);
+//		std::cout << "Got record from packet: " << rec << std::endl;
 		// TODO: Ensure that rec exists
 
 		// Undo all changes until the revision of rec has been reached
@@ -131,7 +132,7 @@ void obby::server_buffer::on_data(const net6::packet& pack,
 		rec->apply(*this);
 
 		// Redo the changes to reach the current revision
-		do
+		while(iter != m_history.begin() )
 		{
 			-- iter;
 
@@ -140,7 +141,7 @@ void obby::server_buffer::on_data(const net6::packet& pack,
 
 			// Re-apply this revision to the buffer
 			(*iter)->apply(*this);
-		} while(iter != m_history.begin() );
+		} 
 
 		// Increment revision
 		rec->set_revision(++ m_revision);

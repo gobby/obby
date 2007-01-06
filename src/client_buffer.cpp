@@ -81,6 +81,7 @@ void obby::client_buffer::erase(const position& from, const position& to)
 	// Add to unsynced changes
 	record* rec = new delete_record(from, to, m_revision,
 	                                m_connection.get_self()->get_id() );
+	m_unsynced.push_front(rec);
 	// Send sync request to server
 	m_connection.send(rec->to_packet() );
 }
@@ -158,7 +159,7 @@ void obby::client_buffer::on_data(const net6::packet& pack)
 		record* sync_record = NULL;
 
 		// Redo all unsynced changes except the one that just came in
-		do
+		while(iter != m_unsynced.begin() )
 		{
 			-- iter;
 
@@ -186,7 +187,7 @@ void obby::client_buffer::on_data(const net6::packet& pack)
 
 			// Reapply revision to the buffer
 			(*iter)->apply(*this);
-		} while(iter != m_unsynced.begin() );
+		}
 
 		// Put the synced record into history
 		m_history.push_front(rec);

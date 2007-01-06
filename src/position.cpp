@@ -135,7 +135,9 @@ obby::position& obby::position::operator+=(const position& other)
 
 obby::position obby::position::operator+(const position& other) const
 {
-	return(position(*this) += other);
+	position self(*this);
+	self += other;
+	return self;
 }
 
 void obby::position::sub_range(const position& from, const position& to)

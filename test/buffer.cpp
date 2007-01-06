@@ -89,7 +89,7 @@ void server_part(net6::server::peer& peer)
 	if(peer.is_logined() )
 		std::cout << peer.get_name() << " has quit." << std::endl;
 	else
-		std::cout << peer.get_address().get_name() << "has quit." << std::endl;
+		std::cout << peer.get_address().get_name() << " has quit." << std::endl;
 }
 
 void server_insert(const obby::insert_record& record)
