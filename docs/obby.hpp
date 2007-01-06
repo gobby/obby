@@ -75,9 +75,10 @@ namespace obby
 // -> LHobby
 // Und siehe da: Alle 3 (Client a, Client b, Server) sind synchron. :-D
 
+#include <list>
 #include <string>
-#include <boost/signal.hpp>
-#include <boost/thread.hpp>
+#include <vector>
+#include <sigc++/signal.hpp>
 #include <net6/client.hpp>
 #include <net6/server.hpp>
 	
@@ -191,21 +192,25 @@ protected:
 	std::list<record*> m_history;
 	// Document revision
 	unsigned int m_revision;
+	// document data
+	std::vector<std::string> m_lines;
 };
 
 class client_buffer
 {
 public:
-	typedef boost::signal<void (const insert_record&)> signal_insert_type;
-	typedef boost::signal<void (const delete_record&)> signal_delete_type;
-	typedef boost::signal<void (net6::client::peer&)> signal_join_type;
-	typedef boost::signal<void (net6::client::peer&)> signal_part_type;
-	typedef boost::signal<void ()> signal_close_type;
-	typedef boost::signal<void (const std::string&)>
-		signal_login_failed_type;
+	typedef sigc::signal<void, const insert_record&> signal_insert_type;
+	typedef sigc::signal<void, const delete_record&> signal_delete_type;
+	typedef sigc::signal<void, net6::client::peer&> signal_join_type;
+	typedef sigc::signal<void, net6::client::peer&> signal_part_type;
+	typedef sigc::signal<void>                      signal_close_type;
+	typedef sigc::signal<void, const std::string&> signal_login_failed_type;
 	
 	client_buffer();
 	~client_bufer();
+
+	void select();
+	void select(unsigned int timeout);
 
 	signal_insert_type& insert_event();
 	signal_delete_type& delete_event();
@@ -219,8 +224,6 @@ protected:
 	std::list<record*> m_unsynced;
 	// Network connection
 	net6::client m_connection;
-	// Network thread
-	boost::thread m_netthread;
 
 	signal_insert_type m_signal_insert;
 	signal_delete_type m_signal_delete;
@@ -233,14 +236,17 @@ protected:
 class server_buffer
 {
 public: 
-	typedef boost::signal<void (const insert_record&)> signal_insert_type;
-	typedef boost::signal<void (const delete_record&)> signal_delete_type;
-	typedef boost::signal<void (net6::server::peer&)> signal_join_type;
-	typedef boost::signal<void (net6::server::peer&)> signal_login_type;
-	typedef boost::signal<void (net6::server::peer&)> signal_part_type;
+	typedef sigc::signal<void, const insert_record&> signal_insert_type;
+	typedef sigc::signal<void, const delete_record&> signal_delete_type;
+	typedef sigc::signal<void, net6::server::peer&> signal_join_type;
+	typedef sigc::signal<void, net6::server::peer&> signal_login_type;
+	typedef sigc::signal<void, net6::server::peer&> signal_part_type;
 
 	server_buffer();
 	~server_buffer();
+
+	void select();
+	void select(unsigned int timeout);
 
 	signal_insert_type& insert_event();
 	signal_delete_type& delete_event();
@@ -253,8 +259,6 @@ protected:
 	unsigned int m_counter;
 	// Network server object
 	net6::server server;
-	// Network thread
-	boost::thread netthread;
 
 	signal_insert_type m_signal_insert;
 	signal_delete_type m_signal_delete;
