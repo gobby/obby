@@ -96,14 +96,13 @@ public:
 
 	virtual void apply(document& doc) const
 	{
-		m_second->apply(doc);
 		m_first->apply(doc);
 
 		// Transform second operation with first because the first one
 		// has already been applied to the document.
-	//	operation* second = m_first->transform(*m_second, true);
-	//	second->apply(doc);
-	//	delete second;
+		operation* second = m_first->transform(*m_second, true);
+		second->apply(doc);
+		delete second;
 	}
 
 	virtual operation* transform(const operation& base_op, bool client) const
@@ -497,23 +496,23 @@ public:
 	 */
 	void add_ack_request(const operation& op)
 	{
-		const split_operation* split_op =
+/*		const split_operation* split_op =
 			dynamic_cast<const split_operation*>(&op);
 
 		if(split_op == NULL)
-		{
+		{*/
 			m_ack_list.push_back(
 				new operation_wrapper(
 					op,
 					m_time.get_local_count()
 				)
 			);
-		}
+/*		}
 		else
 		{
 			add_ack_request(*split_op->get_first() );
 			add_ack_request(*split_op->get_second() );
-		}
+		}*/
 	}
 
 	/** Discard from the other side acknowledged operations.
