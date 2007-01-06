@@ -265,7 +265,20 @@ namespace
 			++ iter1; ++ iter2;
 		}
 
-		return iter1 == txt1.chunk_end() && iter2 == txt2.chunk_end();
+		bool match =
+			(iter1 == txt1.chunk_end() &&
+			 iter2 == txt2.chunk_end());
+
+		if(match && (txt1 != txt2) )
+		{
+			throw std::logic_error(
+				"compare_text is equal, but txt1 == txt2 "
+				"not!\n" + make_desc_from_text(txt1) + " == " +
+				make_desc_from_text(txt2)
+			);
+		}
+
+		return match;
 	}
 
 	template<typename Test>

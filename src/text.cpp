@@ -931,7 +931,7 @@ obby::text::compare_result obby::text::compare(const text& other) const
 	while(it1 != m_chunks.end() && it2 != other.m_chunks.end() )
 	{
 		// Authors do not match: Remember this for later use. If
-		// the strings differ LESS or GREATER is returned, author
+		// the strings differ, LESS or GREATER is returned; author
 		// match does only play a role when the text content is equal
 		if( (*it1)->get_author() != (*it2)->get_author() )
 			author_match = false;
@@ -964,7 +964,7 @@ obby::text::compare_result obby::text::compare(const text& other) const
 	if(it1 != m_chunks.end() )
 		return GREATER;
 	// other has more length
-	else if(it2 != m_chunks.end() )
+	else if(it2 != other.m_chunks.end() )
 		return LESS;
 	// both text's content are equal
 	else
