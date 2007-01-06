@@ -226,9 +226,13 @@ obby::text obby::text::substr(size_type pos, size_type len)
 	while( (len == npos || len > 0) && (iter != m_chunks.end()) )
 	{
 		chunk* cur_chunk = *iter;
-
 		size_type count = cur_chunk->get_length() - pos;
-		if(len != npos) count = std::min(count, len);
+
+		if(len != npos)
+		{
+			count = std::min(count, len);
+			len -= count;
+		}
 
 		if(prev_chunk != NULL &&
 		   prev_chunk->get_author() == cur_chunk->get_author() &&
@@ -249,8 +253,8 @@ obby::text obby::text::substr(size_type pos, size_type len)
 			new_text.m_chunks.push_back(prev_chunk);
 		}
 
-		if(len != npos)
-			len -= count;
+//		if(len != npos)
+//			len -= count;
 
 		++ iter; pos = 0;
 	}
@@ -293,6 +297,111 @@ void obby::text::insert(size_type pos,
 
 void obby::text::erase(size_type pos, size_type len)
 {
+	list_type::iterator ers_pos = find_chunk(pos);
+	while( (len == npos || len > 0) && ers_pos != m_chunks.end() )
+	{
+		size_type count = (*ers_pos)->get_length() - pos;
+		if(len != npos)
+		{
+			count = std::min(count, len);
+			len -= count;
+		}
+
+		ers_pos = erase_chunk(ers_pos, pos, count);
+		pos = 0;
+	}
+
+	if(len != npos && len > 0)
+	{
+		throw std::logic_error(
+			"obby::text::erase:\n"
+			"len is out of range"
+		);
+	}
+}
+
+void obby::text::append(const string_type& str,
+                        const user* author)
+{
+	chunk* last_chunk = NULL;
+	if(!m_chunks.empty() ) last_chunk = *m_chunks.rbegin();
+	size_type pos = 0;
+
+	// Merge beginning of str with last chunk if possible
+	if(last_chunk != NULL &&
+	   last_chunk->get_author() == author &&
+	   last_chunk->get_length() < m_max_chunk)
+	{
+		pos = std::min(
+			m_max_chunk - last_chunk->get_length(),
+			str.length()
+		);
+
+		last_chunk->append(str.substr(0, pos) );
+	}
+
+	// Append rest of string
+	for(; pos < str.length(); pos += m_max_chunk)
+	{
+		size_type count = std::min(str.length() - pos, m_max_chunk);
+		m_chunks.push_back(new chunk(str.substr(pos, count), author) );
+	}
+}
+
+void obby::text::append(const text& str)
+{
+	// Simply append all chunks of str
+	for(list_type::const_iterator it = str.m_chunks.begin();
+	    it != str.m_chunks.end();
+	    ++ it)
+	{
+		append( (*it)->get_text(), (*it)->get_author() );
+	}
+}
+
+void obby::text::prepend(const string_type& str,
+                         const user* author)
+{
+	chunk* first_chunk = NULL;
+	if(!m_chunks.empty() ) first_chunk = *m_chunks.begin();
+
+	size_type len = str.length();
+
+	// Prepend end of str to first chunk if possible
+	if(first_chunk != NULL &&
+	   first_chunk->get_author() == author &&
+	   first_chunk->get_length() < m_max_chunk)
+	{
+		size_type count = std::min(
+			m_max_chunk - first_chunk->get_length(),
+			len
+		);
+
+		len -= count;
+		first_chunk->prepend(str.substr(len, count) );
+	}
+
+	// Insert chunks before for the rest of str
+	while(len > 0)
+	{
+		size_type count = std::min(
+			len,
+			m_max_chunk
+		);
+
+		len -= count;
+		m_chunks.push_front(new chunk(str.substr(len, count), author));
+	}
+}
+
+void obby::text::prepend(const text& str)
+{
+	for(list_type::const_reverse_iterator it = str.m_chunks.rbegin();
+	    it != str.m_chunks.rend();
+	    ++ it)
+	{
+		prepend( (*it)->get_text(), (*it)->get_author() );
+	}
 }
 
 obby::text::chunk_iterator obby::text::chunk_begin() const
@@ -462,336 +571,123 @@ obby::text::insert_chunk(list_type::iterator chunk_it,
 	}
 }
 
-#if 0
-#include <cassert>
-#include "common.hpp"
-#include "line.hpp"
-
-const obby::line::size_type obby::line::npos = obby::line::string_type::npos;
-
-obby::line::line()
- : m_line(), m_authors()
+obby::text::list_type::iterator
+obby::text::erase_chunk(list_type::iterator chunk_it,
+                        size_type pos,
+                        size_type len)
 {
-	/*user_pos pos = { NULL, 0 };
-	m_authors.push_back(pos);*/
-}
+	chunk* prev_chunk = NULL;
+	chunk* next_chunk = NULL;
 
-obby::line::line(const string_type& text, const user_type* author)
- : m_line(text), m_authors()
-{
-	// It is just _one_ line.
-	//assert(text.find('\n') == string_type::npos);
+	list_type::iterator prev_it = chunk_it;
+	if(prev_it != m_chunks.begin() ) { -- prev_it; prev_chunk = *prev_it; }
 
-	// Insert initial author
-	user_pos pos = { author, 0 };
-	m_authors.push_back(pos);
-}
+	list_type::iterator next_it = chunk_it;
+	++ next_it;
+	if(next_it != m_chunks.end() ) { next_chunk = *next_it; }
 
-obby::line::line(const net6::packet& pack,
-                 unsigned int& index,
-                 const user_table& user_table)
-{
-	// First there is the string
-	m_line = pack.get_param(index ++).as<std::string>();
+	chunk* cur_chunk = *chunk_it;
+	//if(len == npos) len = cur_chunk->get_length() - pos;
 
-	// Reserve space in author vector
-	m_authors.reserve( (pack.get_param_count() - index) / 2);
-	
-	// Add authors
-	while(index < pack.get_param_count() )
+	if(pos + len > cur_chunk->get_length() )
 	{
-		// Get position and author
-		unsigned int pos =
-			pack.get_param(index ++).as<unsigned int>();
-		const user* author = pack.get_param(index ++).as<const user*>(
-			::serialise::hex_context<const user*>(user_table));
-
-		// Add to vector
-		user_pos upos = { author, pos };
-		m_authors.push_back(upos);
-	}
-}
-
-obby::line::line(const serialise::object& obj,
-                 const user_table& user_table)
-{
-	for(serialise::object::child_iterator iter = obj.children_begin();
-	    iter != obj.children_end();
-	    ++ iter)
-	{
-		if(iter->get_name() == "part")
-		{
-			// Part of the line
-			user_pos pos = {
-				iter->get_required_attribute("author").
-					as<const user*>(
-						::serialise::context<
-							const user*
-						>(user_table)
-					),
-				m_line.length()
-			};
-
-			// Line content
-			m_line += iter->get_required_attribute("content").
-				as<std::string>();
-
-			m_authors.push_back(pos);
-		}
-		else
-		{
-			// Unexpected child
-			// TODO: unexpected_child_error
-			format_string str(_("Unexpected child node: '%0%'") );
-			str << iter->get_name();
-			throw serialise::error(str.str(), iter->get_line() );
-		}
-	}
-}
-
-void obby::line::serialise(serialise::object& obj) const
-{
-	for(author_iterator iter = author_begin();
-	    iter != author_end();
-	    ++ iter)
-	{
-		std::string::size_type to_pos = m_line.length();
-		author_iterator to_iter = iter; ++ to_iter;
-		if(to_iter != author_end() ) to_pos = to_iter->position;
-
-		serialise::object& part = obj.add_child();
-		part.set_name("part");
-
-		part.add_attribute("content").set_value(
-			m_line.substr(iter->position, to_pos - iter->position)
+		throw std::logic_error(
+			"obby::text::erase_chunk:\n"
+			"Chunk len exceeded"
 		);
-
-		part.add_attribute("author").set_value(iter->author);
-	}
-}
-
-obby::line::line(const line& other)
- : m_line(other.m_line), m_authors(other.m_authors)
-{
-}
-
-void obby::line::reserve(size_type len, size_type pos)
-{
-	m_line.reserve(len);
-	m_authors.reserve(pos);
-}
-
-obby::line& obby::line::operator=(const line& other)
-{
-	m_line = other.m_line;
-	m_authors = other.m_authors;
-
-	return *this;
-}
-
-void obby::line::append_packet(net6::packet& pack) const
-{
-	pack << m_line;
-	for(std::vector<user_pos>::size_type i = 0; i < m_authors.size(); ++ i)
-		pack << m_authors[i].position << m_authors[i].author;
-}
-
-obby::line::operator const std::string&() const
-{
-	return m_line;
-}
-
-obby::line::size_type obby::line::length() const
-{
-	return m_line.length();
-}
-
-void obby::line::insert(size_type pos, const line& text)
-{
-	// Build new author vector
-	// TODO: Compress directly 4 great performance, something like a
-	// private (anonymous namespace) function.
-	std::vector<user_pos> new_vec;
-	new_vec.reserve(m_authors.size() + text.m_authors.size() + 1);
-	std::vector<user_pos>::size_type i, j;
-
-	// Insert authors before the insertion point
-	for(i = 0; i < m_authors.size(); ++ i)
-	{
-		if(m_authors[i].position > pos)
-			break;
-		else
-			new_vec.push_back(m_authors[i]);
 	}
 
-	// Insert authors of the insertion text
-	for(j = 0; j < text.m_authors.size(); ++ j)
+	// Complete erasure
+	if(len == cur_chunk->get_length() )
 	{
-		std::vector<user_pos>::size_type new_pos = new_vec.size();
-		new_vec.push_back(text.m_authors[j]);
-		new_vec[new_pos].position += pos;
-	}
+		delete cur_chunk;
+		m_chunks.erase(chunk_it);
 
-	// Insert authors after the insertion point. Insert the last author
-	// before this point once again because he wrote the stuff up to
-	// the next author.
-	if(i > 0)
-	{
-		std::vector<user_pos>::size_type new_pos = new_vec.size();
-		new_vec.push_back(m_authors[i - 1]);
-		new_vec[new_pos].position = pos + text.length();
-		
-		for(; i < m_authors.size(); ++ i)
+		// Merge surrounding chunks if possible
+		if(next_chunk != NULL && prev_chunk != NULL &&
+		   next_chunk->get_author() == prev_chunk->get_author() &&
+		   next_chunk->get_length() + prev_chunk->get_length() <
+		   m_max_chunk)
 		{
-			std::vector<user_pos>::size_type j = new_vec.size();
-			new_vec.push_back(m_authors[i]);
-			new_vec[j].position += text.length();
+			prev_chunk->append(next_chunk->get_text() );
+
+			delete next_chunk;
+			next_it = m_chunks.erase(next_it);
 		}
+
+		return next_it;
 	}
 
-	// Use new vector
-	m_authors.swap(new_vec);
-
-	// Insert line content
-	m_line.insert(pos, text.m_line);
-
-	// Compress author list
-	compress_authors();
-}
-
-void obby::line::insert(size_type pos, const string_type& text,
-                        const user_type* author)
-{
-	insert(pos, line(text, author) );
-}
-
-void obby::line::append(const line& text)
-{
-	insert(m_line.length(), text);
-}
-
-void obby::line::append(const string_type& text, const user_type* author)
-{
-	append(line(text, author) );
-}
-
-void obby::line::erase(size_type from, size_type len)
-{
-	if(len == npos) len = m_line.length() - from;
-
-	std::vector<user_pos>::iterator iter;
-	for(iter = m_authors.begin(); iter != m_authors.end(); ++ iter)
+	// Merge with previous
+	if(prev_chunk != NULL &&
+	   prev_chunk->get_author() == cur_chunk->get_author() &&
+	   cur_chunk->get_length() - len + prev_chunk->get_length() <
+	   m_max_chunk)
 	{
-		// This position is in the range of deleted text: Move it to
-		// the beginning, so compress_authors() will remove them.
-		if(iter->position > from && iter->position <= from + len)
-			iter->position = from;
-		// Position after the text. Just move forward.
-		else if(iter->position > from + len)
-			iter->position -= len;
-	}
-
-	// Erase from line content.
-	m_line.erase(from, len);
-	compress_authors();
-}
-
-obby::line obby::line::substr(size_type from, size_type len) const
-{
-	// Set correct length for npos
-	if(len == npos) len = m_line.length() - from;
-	assert(from + len <= m_line.length() );
-
-	// Create new line
-	line new_line;
-	new_line.m_authors.reserve(m_authors.size() );
-
-	// Ignore authors before the given range
-	std::vector<user_pos>::size_type i;
-	for(i = 0; i < m_authors.size(); ++ i)
-		if(m_authors[i].position > from)
-			break;
-
-	// Insert first author
-	if(i > 0)
-	{
-		new_line.m_authors.push_back(m_authors[i - 1]);
-		new_line.m_authors[0].position = 0;
-
-		// Insert others
-		for(; i < m_authors.size(); ++ i)
+		if(pos > 0)
 		{
-			// After the given range? Forget them.
-			if(m_authors[i].position >= from + len)
-			{
-				break;
-			}
-			else
-			{
-				std::vector<user_pos>::size_type new_pos =
-					new_line.m_authors.size();
-
-				new_line.m_authors.push_back(m_authors[i]);
-				new_line.m_authors[new_pos].position -= from;
-			}
+			prev_chunk->append(
+				cur_chunk->get_text().substr(0, pos)
+			);
 		}
+
+		if(pos + len < cur_chunk->get_length() )
+		{
+			prev_chunk->append(
+				cur_chunk->get_text().substr(pos + len)
+			);
+		}
+
+		delete cur_chunk;
+		m_chunks.erase(chunk_it);
+
+		// Merge result with next if possible
+		if(next_chunk != NULL &&
+		   prev_chunk->get_author() == next_chunk->get_author() &&
+		   prev_chunk->get_length() + next_chunk->get_length() <=
+		   m_max_chunk)
+		{
+			prev_chunk->append(next_chunk->get_text() );
+
+			delete next_chunk;
+			next_it = m_chunks.erase(next_it);
+		}
+
+		return next_it;
 	}
 
-	// Set content
-	new_line.m_line = m_line.substr(from, len);
-	
-	// Compress author list
-	// TODO: Is this really necessary if the current line is compressed?
-	new_line.compress_authors();
-
-	return new_line;
-}
-
-obby::line::author_iterator obby::line::author_begin() const
-{
-	return m_authors.begin();
-}
-
-obby::line::author_iterator obby::line::author_end() const
-{
-	return m_authors.end();
-}
-
-bool obby::line::operator<(const std::string& other) const
-{
-	return m_line < other;
-}
-
-void obby::line::compress_authors()
-{
-	std::vector<user_pos> new_vec;
-	new_vec.reserve(m_authors.size() );
-
-	for(std::vector<user_pos>::size_type i = 0; i < m_authors.size(); ++ i)
+	// Merge with next
+	if(next_chunk != NULL &&
+	   next_chunk->get_author() == cur_chunk->get_author() &&
+	   cur_chunk->get_length() - len + next_chunk->get_length() <
+	   m_max_chunk)
 	{
-		// Whether to add this user_pos to the new vector
-		bool add = true;
+		if(pos + len < cur_chunk->get_length() )
+		{
+			next_chunk->prepend(
+				cur_chunk->get_text().substr(pos)
+			);
+		}
 
-		// Check for another user_pos at the same position
-		if(i < m_authors.size() - 1)
-			if(m_authors[i].position == m_authors[i + 1].position)
-				add = false;
-		if(!add) continue;
+		if(pos > 0)
+		{
+			next_chunk->prepend(
+				cur_chunk->get_text().substr(0, pos)
+			);
+		}
 
-		// Check for the same author
-		if(new_vec.size() > 0)
-			if(new_vec[new_vec.size()-1].author ==
-			   m_authors[i].author)
-				add = false;
-		if(!add) continue;
+		delete cur_chunk;
+		m_chunks.erase(chunk_it);
 
-		// Ignore positions at the end of the line
-		if(m_authors[i].position == m_line.length() ) break;
+		// No need to try to merge with previous since the check
+		// above would already have done it.
 
-		// Add into new vector
-		new_vec.push_back(m_authors[i]);
+		++ next_it;
+		return next_it;
 	}
 
-	m_authors.swap(new_vec);
+	// No merging possible...
+	cur_chunk->erase(pos, len);
+	return next_it;
 }
-#endif
+

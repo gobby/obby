@@ -26,6 +26,8 @@
 #include "user.hpp"
 
 /** @brief Obby text that stores which user wrote what.
+ *
+ * TODO: Doc me
  */
 namespace obby
 {
@@ -104,8 +106,14 @@ public:
 	            const text& str);
 	void erase(size_type pos,
 	           size_type len = npos);
-	void append(const string_type& str);
-	void prepend(const string_type& str);
+
+	void append(const string_type& str,
+	            const user* author);
+	void append(const text& str);
+
+	void prepend(const string_type& str,
+	             const user* author);
+	void prepend(const text& str);
 
 	size_type length() const;
 
@@ -130,12 +138,15 @@ protected:
 	list_type m_chunks;
 
 private:
+	list_type::iterator find_chunk(size_type& pos);
+
 	list_type::iterator insert_chunk(list_type::iterator chunk_it,
 	                                 size_type& chunk_pos,
 	                                 const string_type& str,
 	                                 const user* author);
-
-	list_type::iterator find_chunk(size_type& pos);
+	list_type::iterator erase_chunk(list_type::iterator chunk_it,
+	                                size_type pos,
+	                                size_type len);
 };
 
 #if 0
