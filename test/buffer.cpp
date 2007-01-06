@@ -16,7 +16,11 @@ void client_join(net6::client::peer& peer, obby::client_buffer& buffer)
 {
 	std::cout << peer.get_name() << " has joined." << std::endl;
 	if(peer.get_id() == buffer.get_self()->get_id() )
-		buffer.insert(obby::position(0, 0), "l");
+	{
+		buffer.insert(obby::position(0, 0), "A");
+		buffer.insert(obby::position(0, 0), "B");
+		buffer.insert(obby::position(0, 0), "C");
+	}
 }
 
 void client_part(net6::client::peer& peer)
