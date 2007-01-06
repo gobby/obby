@@ -20,14 +20,16 @@ AC_PROG_LIBTOOL
 AC_CACHE_SAVE
 
 # Let the user choose if he wants libhowl support or not (default to no).
+extra_requires=""
 AC_ARG_WITH([howl],
 	    AS_HELP_STRING([--with-howl],
 			   [support Zeroconf through libhowl [[default=no]]]),
 	    [ac_cv_use_howl=$withval], [ac_cv_use_howl=no])
 AC_CACHE_CHECK([whether to use howl], [ac_cv_use_howl], [ac_cv_use_howl=no])
 if test "x$ac_cv_use_howl" != "xno" ; then
-	extra_requires=howl
+	extra_requires="howl"
 fi
+AC_SUBST(extra_requires)
 AM_CONDITIONAL(WITH_HOWL, test x$ac_cv_use_howl != xno)
 
 # WIN32 build checks
@@ -51,5 +53,5 @@ fi
 AC_C_CONST
 
 AC_CONFIG_FILES([Makefile])
-AC_OUTPUT([test/Makefile lobby-1.0.pc])
+AC_OUTPUT([src/Makefile test/Makefile lobby-1.0.pc])
 
