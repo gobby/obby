@@ -19,24 +19,59 @@
 #include "common.hpp"
 #include "document.hpp"
 
-obby::document::document():
-	m_text(0x3fff)
+obby::document::chunk_iterator::chunk_iterator(const base_iterator& iter):
+	m_iter(iter)
 {
 }
 
-void obby::document::clear()
+obby::document::chunk_iterator& obby::document::chunk_iterator::operator++()
 {
-	m_text.clear();
+	++ m_iter;
+	return *this;
+}
+
+obby::document::chunk_iterator obby::document::chunk_iterator::operator++(int)
+{
+	chunk_iterator temp(*this);
+	++ *this;
+	return temp;
+}
+
+bool obby::document::chunk_iterator::
+	operator==(const chunk_iterator& other) const
+{
+	return m_iter == other.m_iter;
+}
+
+bool obby::document::chunk_iterator::
+	operator!=(const chunk_iterator& other) const
+{
+	return m_iter != other.m_iter;
+}
+
+const std::string& obby::document::chunk_iterator::get_text() const
+{
+	return m_iter->get_text();
+}
+
+const obby::user* obby::document::chunk_iterator::get_author() const
+{
+	return m_iter->get_author();
+}
+
+obby::document::document(const template_type& tmpl):
+	m_text() // (0x3fff) // TODO: Use chunk size limit, but make sure it works!
+{
+}
+
+bool obby::document::empty() const
+{
+	return m_text.empty();
 }
 
 obby::position obby::document::size() const
 {
 	return m_text.length();
-}
-
-std::string obby::document::get_text() const
-{
-	return m_text;
 }
 
 obby::text obby::document::get_slice(position pos,
@@ -45,20 +80,39 @@ obby::text obby::document::get_slice(position pos,
 	return m_text.substr(pos, len);
 }
 
+std::string obby::document::get_text() const
+{
+	return m_text;
+}
+
 void obby::document::insert(position pos,
                             const text& str)
 {
-	m_signal_insert.before().emit(pos, str, str.chunk_begin()->get_author() );
 	m_text.insert(pos, str);
-	m_signal_insert.after().emit(pos, str, str.chunk_begin()->get_author() );
+}
+
+void obby::document::insert(position pos,
+                            const std::string& str,
+                            const user* author)
+{
+	m_text.insert(pos, str, author);
 }
 
 void obby::document::erase(position pos,
                            position len)
 {
-	m_signal_erase.before().emit(pos, len, NULL);
 	m_text.erase(pos, len);
-	m_signal_erase.after().emit(pos, len, NULL);
+}
+
+void obby::document::append(const text& str)
+{
+	m_text.append(str);
+}
+
+void obby::document::append(const std::string& str,
+                            const user* author)
+{
+	m_text.append(str, author);
 }
 
 obby::document::chunk_iterator obby::document::chunk_begin() const
@@ -69,14 +123,4 @@ obby::document::chunk_iterator obby::document::chunk_begin() const
 obby::document::chunk_iterator obby::document::chunk_end() const
 {
 	return m_text.chunk_end();
-}
-
-obby::document::signal_insert_type obby::document::insert_event() const
-{
-	return m_signal_insert;
-}
-
-obby::document::signal_erase_type obby::document::erase_event() const
-{
-	return m_signal_erase;
 }

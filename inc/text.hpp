@@ -44,7 +44,7 @@ namespace obby
  * or deleting text. It ensures that the text does not consist of hundreds
  * of chunks but the algorithm is not optimal - meaning it does not find the
  * solution which needs the least number of chunks in any case. This would
- * require to much performance when text is inserted or deleted.
+ * require too much performance when text is inserted or deleted.
  */
 class text
 {

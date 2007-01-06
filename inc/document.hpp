@@ -31,46 +31,73 @@ namespace obby
 class document: private net6::non_copyable
 {
 public:
-	typedef duplex_signal<
-		sigc::signal<void, position, const std::string&, const user*>
-	> signal_insert_type;
+	class chunk_iterator: public text::chunk_iterator
+	{
+	public:
+		typedef text::chunk_iterator base_iterator;
 
-	typedef duplex_signal<
-		sigc::signal<void, position, position, const user*>
-	> signal_erase_type;
+		chunk_iterator(const base_iterator& iter);
 
-	typedef text::chunk_iterator chunk_iterator;
+		chunk_iterator& operator++();
+		chunk_iterator operator++(int);
+
+		bool operator==(const chunk_iterator& other) const;
+		bool operator!=(const chunk_iterator& other) const;
+
+		const std::string& get_text() const;
+		const user* get_author() const;
+	private:
+		base_iterator m_iter;
+	};
+
+	class template_type { };
 
 	/** @brief Default constructor, creates an empty document.
 	 */
-	document();
+	document(const template_type& tmpl);
 
-	/** @brief Clears the document content.
+	/** "brieg Returns TRUE when the document does not contain ony text.
 	 */
-	void clear();
+	bool empty() const;
 
 	/** @brief Returns the size (in bytes) of the document.
 	 */
 	position size() const;
-
-	/** @brief Returns the whole document as a string.
-	 */
-	std::string get_text() const;
 
 	/** @brief Extracts a part from the document.
 	 */
 	text get_slice(position pos,
 	               position len) const;
 
+	/** @brief Returns the contents of the document in a string.
+	 */
+	std::string get_text() const;
+
 	/** @brief Inserts text into the document.
 	 */
 	void insert(position pos,
 	            const text& str);
 
+	/** @brief Inserts text written by <em>author</em>.
+	 */
+	void insert(position pos,
+	            const std::string& str,
+	            const user* author);
+
 	/** @brief Erases text from the document.
 	 */
 	void erase(position pos,
 	           position len);
+
+	/** @brief Inserts the given text at the end of the document.
+	 */
+	void append(const text& str);
+
+	/** @brief Inserts text written by <em>author</em> at the end
+	 * of the document.
+	 */
+	void append(const std::string& str,
+	            const user* author);
 
 	/** @brief Returns the beginning of the chunk list.
 	 */
@@ -80,21 +107,8 @@ public:
 	 */
 	chunk_iterator chunk_end() const;
 
-	/** @brief Signal that is emitted when text has been inserted into
-	 * the document.
-	 */
-	signal_insert_type insert_event() const;
-
-	/** @brief Signal that is emitted when text has been erased from
-	 * the document.
-	 */
-	signal_erase_type erase_event() const;
-
 protected:
 	text m_text;
-
-	signal_insert_type m_signal_insert;
-	signal_erase_type m_signal_erase;
 };
 
 }
