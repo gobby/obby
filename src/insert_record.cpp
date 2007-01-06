@@ -67,3 +67,13 @@ void obby::insert_record::on_delete(const position& from, const position& to)
 	}
 }
 
+const obby::position& obby::insert_record::get_position() const
+{
+	return m_pos;
+}
+
+const std::string& obby::insert_record::get_text() const
+{
+	return m_text;
+}
+

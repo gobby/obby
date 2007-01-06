@@ -38,6 +38,7 @@ public:
 	virtual bool is_valid() const;
 
 	unsigned int get_id() const;
+	unsigned int get_from() const;
 	unsigned int get_revision() const;
 
 	virtual void on_insert(const position& pos,

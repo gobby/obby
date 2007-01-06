@@ -90,3 +90,14 @@ void obby::delete_record::on_delete(const position& from, const position& to)
 	if(m_to <= m_from)
 		invalidate();
 }
+
+const obby::position& obby::delete_record::get_begin() const
+{
+	return m_from;
+}
+
+const obby::position& obby::delete_record::get_end() const
+{
+	return m_to;
+}
+

@@ -44,6 +44,11 @@ unsigned int obby::record::get_id() const
 	return m_id;
 }
 
+unsigned int obby::record::get_from() const
+{
+	return m_from;
+}
+
 unsigned int obby::record::get_revision() const
 {
 	return m_revision;
