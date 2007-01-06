@@ -33,3 +33,14 @@ const obby::host_buffer& obby::host_document::get_buffer() const
 {
 	return static_cast<const host_buffer&>(m_buffer);
 }
+
+void obby::host_document::insert(position pos, const std::string& text)
+{
+	server_document::insert(pos, text, get_buffer().get_self().get_id() );
+}
+
+void obby::host_document::erase(position begin, position end)
+{
+	server_document::erase(begin, end, get_buffer().get_self().get_id() );
+}
+

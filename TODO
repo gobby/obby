@@ -12,7 +12,6 @@ Important:
 Normal:
  * Implement automatic service announcement and discovery
  * Sync-On-Request
- * Host sends record with user id 0 instead of local user
  * Session serialisation:
    - Load/save documents to/from file and/or memory while preserving history
    - Load/save complete obby session

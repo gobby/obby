@@ -24,8 +24,8 @@
 namespace obby
 {
 
-/* A duplex signal is a wrapper for two signals of the same type. It may be used
- * to emit a signal before _and_ after a certain operation took place.
+/** A duplex signal is a wrapper for two signals of the same type. It may be
+ * used to emit a signal before _and_ after a certain operation took place.
  */
 	
 template<class SignalType>

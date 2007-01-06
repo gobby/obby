@@ -22,9 +22,10 @@
 namespace obby
 {
 
-/* An iterator type to iterate through a container containing pointers of the
+/** An iterator type to iterate through a container containing pointers of the
  * given data type but retrieving references to them.
  */
+
 template<typename type, typename container, typename base_iterator>
 class ptr_iterator : public base_iterator
 {

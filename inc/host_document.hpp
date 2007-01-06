@@ -48,6 +48,15 @@ public:
 	 */
 	const host_buffer& get_buffer() const;
 
+	/** Inserts <em>text</em> at <em>pos</em> and synchronises it with
+	 * the clients.
+	 */
+	virtual void insert(position pos, const std::string& text);
+
+	/** Removes text from the given area and synchronises it with the
+	 * clients.
+	 */
+	virtual void erase(position begin, position end);
 protected:
 };
 

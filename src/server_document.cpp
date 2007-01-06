@@ -36,28 +36,12 @@ const obby::server_buffer& obby::server_document::get_buffer() const
 
 void obby::server_document::insert(position pos, const std::string& text)
 {
-	// Build record
-	record* rec = new insert_record(pos, text, m_id, ++ m_revision, 0);
-	// Apply on document
-	rec->apply(*this);
-	// Insert into history
-	m_history.push_front(rec);
-	// Synchronize to clients
-	m_server.send(rec->to_packet() );
+	insert(pos, text, 0);
 }
 
-void obby::server_document::erase(position from, position to)
+void obby::server_document::erase(position begin, position end)
 {
-	// Get erased text
-	std::string erased = get_sub_buffer(from, to);
-	// Create record
-	record* rec = new delete_record(from, erased, m_id, ++ m_revision, 0);
-	// Apply on document
-	rec->apply(*this);
-	// Insert into history
-	m_history.push_front(rec);
-	// Synchronize to clients
-	m_server.send(rec->to_packet() );
+	erase(begin, end, 0);
 }
 
 void obby::server_document::on_net_record(record& rec)
@@ -109,16 +93,40 @@ void obby::server_document::synchronise(net6::server::peer& peer)
 	std::vector<line>::const_iterator iter;
 	for(iter = m_lines.begin(); iter != m_lines.end(); ++ iter)
 		m_server.send(iter->to_packet(m_id), peer);
-//		iter->synchronise(peer, m_server, m_id);
-/*	{
-		net6::packet line_pack("obby_sync_doc_line");
-		line_pack << m_id << *iter;
-		m_server.send(line_pack, peer);
-	}*/
 
 	// Send final sync packet
 	net6::packet final_pack("obby_sync_doc_final");
 	final_pack << m_id;
 	m_server.send(final_pack, peer);
+}
+
+void obby::server_document::insert(position pos, const std::string& text,
+                                   unsigned int author_id)
+{
+	// Build record
+	record* rec =
+		new insert_record(pos, text, m_id, ++ m_revision, author_id);
+	// Apply on document
+	rec->apply(*this);
+	// Insert into history
+	m_history.push_front(rec);
+	// Synchronize to clients
+	m_server.send(rec->to_packet() );
+}
+
+void obby::server_document::erase(position from, position to,
+                                  unsigned int author_id)
+{
+	// Get erased text
+	std::string erased = get_sub_buffer(from, to);
+	// Create record
+	record* rec =
+		new delete_record(from, erased, m_id, ++ m_revision, author_id);
+	// Apply on document
+	rec->apply(*this);
+	// Insert into history
+	m_history.push_front(rec);
+	// Synchronize to clients
+	m_server.send(rec->to_packet() );
 }
 

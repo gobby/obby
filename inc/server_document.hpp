@@ -60,7 +60,7 @@ public:
 	/** Removes text from the given area and synchronises it with the
 	 * clients.
 	 */
-	virtual void erase(position from, position end);
+	virtual void erase(position begin, position end);
 
 	/** Call this function if a record from a client has arrived.
 	 */
@@ -71,6 +71,17 @@ public:
 	void synchronise(net6::server::peer& peer);
 
 protected:
+	/** Inserts <em>text</em> at the given position and marks it as
+	 * written by the user with the id <em>author_id</em>.
+	 */
+	void insert(position pos, const std::string& text,
+	            unsigned int author_id);
+
+	/** Erases text from <em>begin</em> to <em>end</em> and marks the
+	 * changes as performed by the user with the id <em>author_id</em>.
+	 */
+	void erase(position begin, position end, unsigned int author_id);
+
 	net6::server& m_server;
 };
 
