@@ -8,22 +8,22 @@ Critical:
 Major:
 
 Normal:
-  * Hide equivalent insert / change calls (#28)
-  * Implement records to (un)indent lines of text (#30)
-  * Undo/Redo (#39)
-  * Authentication: Database-based authentication using user/password (#57)
-  * Authentication: Access control lists (#58)
-  * Use precompiled headers (#61)
-  * UPNP support (#77)
+  * Hide equivalent insert / change calls (#28) [stub]
+  * Implement records to (un)indent lines of text (#30) [stub]
+  * Undo/Redo (#39) []
+  * Authentication: Database-based authentication using user/password (#57) []
+  * Authentication: Access control lists (#58) []
+  * Use precompiled headers (#61) []
+  * UPNP support (#77) []
 
 Minor:
 
 Trivial:
 
 Enhancement:
-  * Session serialisation (#20)
-  * Implement server-side commands for remote actions (#29)
-  * Servers should be elected (#86)
+  * Session serialisation (#20) []
+  * Implement server-side commands for remote actions (#29) [network]
+  * Servers should be elected (#86) []
 
 
 28: Hide equivalent insert / change calls
