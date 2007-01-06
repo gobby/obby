@@ -24,21 +24,24 @@ obby::user_table::user_table()
 
 obby::user_table::~user_table()
 {
-	for(std::list<user*>::iterator iter = m_userlist.begin();
-	    iter != m_userlist.end(); ++ iter)
-		delete *iter;
+	for(base_iterator iter = m_user_map.begin();
+	    iter != m_user_map.end();
+	    ++ iter)
+	{
+		delete iter->second;
+	}
 }
 
 obby::user* obby::user_table::add_user(const net6::user& user6, int red,
                                        int green, int blue)
 {
 	// Find already exiting user with the given name
-	user* existing_user = find_user(user6.get_name() );
+	user* existing_user = find_int(user6.get_name() );
 	if(existing_user != NULL)
 	{
 		// If this user would be connected, net6 should have denied
 		// the login process with the "Name is already in use" error
-		if(existing_user->get_flags() & user::CONNECTED)
+		if(existing_user->get_flags() & user::flags::CONNECTED)
 			throw std::logic_error("obby::user_table::add_user");
 
 		// Assign new net6::user to existing obby::user.
@@ -51,7 +54,7 @@ obby::user* obby::user_table::add_user(const net6::user& user6, int red,
 		user* new_user = new user(user6, red, green, blue);
 
 		// Insert user into user list
-		m_userlist.push_back(new_user);
+		m_user_map[new_user->get_id()] = new_user;
 
 		return new_user;
 	}
@@ -61,7 +64,7 @@ obby::user* obby::user_table::add_user(unsigned int id, const std::string& name,
                                        int red, int green, int blue)
 {
 	// Look for an existing user with this name.
-	user* existing_user = find_user(name);
+	user* existing_user = find_int(name);
 
 	// We can not assign the new user to this one, because the user
 	// we are currently adding is not connected to the obby session.
@@ -69,7 +72,7 @@ obby::user* obby::user_table::add_user(unsigned int id, const std::string& name,
 		throw std::logic_error("obby::user_table::add_user");
 
 	user* new_user = new user(id, name, red, green, blue);
-	m_userlist.push_back(new_user);
+	m_user_map[new_user->get_id()] = new_user;
 
 	return new_user;
 }
@@ -80,3 +83,78 @@ void obby::user_table::remove_user(user* user_to_remove)
 	// flag, too. Keep the user in the list to recognize him if he rejoins.
 	user_to_remove->release_net6();
 }
+
+obby::user_table::iterator obby::user_table::begin(user::flags flags,
+                                                   bool inverse) const
+{
+	return iterator(m_user_map, m_user_map.begin(), flags, inverse);
+}
+
+obby::user_table::iterator obby::user_table::end(user::flags flags,
+                                                 bool inverse) const
+{
+	return iterator(m_user_map, m_user_map.end(), flags, inverse);
+}
+
+const obby::user* obby::user_table::find(unsigned int id,
+                                         user::flags flags,
+                                         bool inverse) const
+{
+	base_iterator iter = m_user_map.find(id);
+	if(iter == m_user_map.end() ) return NULL;
+
+	// User does not match the criteria
+	if(iterator(m_user_map, iter, flags, inverse) != iter)
+		return NULL;
+
+	return iter->second;
+}
+
+const obby::user* obby::user_table::find(const net6::user& user,
+                                         user::flags flags,
+                                         bool inverse) const
+{
+	for(iterator iter = begin(); iter != end(); ++ iter)
+		if(iter->get_flags() & user::flags::CONNECTED)
+			if(&iter->get_net6() == &user)
+				return &(*iter);
+
+	return NULL;
+}
+
+const obby::user* obby::user_table::find(const std::string& name,
+                                         user::flags flags,
+                                         bool inverse) const
+{
+	for(iterator iter = begin(); iter != end(); ++ iter)
+		if(iter->get_name() == name)
+			return &(*iter);
+
+	return NULL;
+}
+
+unsigned int obby::user_table::count(user::flags flags, bool inverse) const
+{
+	if(flags == user::flags::NONE && inverse == false)
+		return m_user_map.size();
+
+	unsigned int c = 0;
+	for(iterator iter = begin(); iter != end(); ++ iter)
+		++ c;
+
+	return c;
+}
+
+obby::user* obby::user_table::find_int(const std::string& name)
+{
+	for(base_iterator iter = m_user_map.begin();
+	    iter != m_user_map.end();
+	    ++ iter)
+	{
+		if(iter->second->get_name() == name)
+			return iter->second;
+	}
+
+	return NULL;
+}
+

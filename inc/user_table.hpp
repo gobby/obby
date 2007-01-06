@@ -34,92 +34,114 @@ namespace obby
 class user_table : private net6::non_copyable
 {
 public:
-	// Basic user iterator typedef 
-	typedef ptr_iterator<
-		user,
-		std::list<user*>,
-		std::list<user*>::const_iterator
-	> basic_user_iterator;
+	typedef std::map<unsigned int, user*> user_map;
+	typedef user_map::const_iterator base_iterator;
 
-	// User iterator class. It iterates through all the users whose
-	// flags match (or don't match if inverse is true) the given flags.
-	template<user::flags matching_flags/* = user::NONE*/, bool inverse = false>
-	class user_iterator : public basic_user_iterator
+	class iterator : public base_iterator
 	{
 	public:
-		typedef basic_user_iterator base_iterator;
-		typedef std::list<user*> list_type;
+		typedef user_map map_type;
 
-		user_iterator(const list_type& list)
-		 : base_iterator(), m_list(list) {
-			// Increase to first valid value
+		iterator(const map_type& map, user::flags flags,
+		         bool inverse) :
+			base_iterator(), m_map(map), m_flags(flags),
+			m_inverse(inverse)
+		{
+		}
+
+		iterator(const map_type& map, const base_iterator& base,
+		         user::flags flags, bool inverse) :
+			base_iterator(base), m_map(map), m_flags(flags),
+			m_inverse(inverse)
+		{
 			inc_valid();
 		}
 
-		user_iterator(const list_type& list, const base_iterator& iter)
-		 : base_iterator(iter), m_list(list) {
-			// Increate to first valid value
-			inc_valid();
+		iterator(const iterator& other) :
+			base_iterator(other), m_map(other.m_map),
+			m_flags(other.m_flags), m_inverse(other.m_inverse)
+		{
 		}
 
-		user_iterator& operator++() {
-			base_iterator::operator++ ();
+		iterator& operator=(const iterator& other)
+		{
+			if(&m_map != &other.m_map)
+			{
+				throw std::logic_error(
+					"obby::user_table::iterator::"
+					"operator="
+				);
+			}
+
+			base_iterator::operator=(other);
+			return *this;
+		}
+
+		const user& operator*() const
+		{
+			return *base_iterator::operator->()->second;
+		}
+
+		const user* operator->() const
+		{
+			return base_iterator::operator->()->second;
+		}
+
+		iterator& operator++()
+		{
+			base_iterator::operator++();
 			inc_valid();
 			return *this;
 		}
 
-		user_iterator& operator--() {
+		iterator operator++(int)
+		{
+			iterator temp(*this);
+			operator++();
+			return temp;
+		}
+
+		iterator& operator--()
+		{
 			base_iterator::operator--();
 			dec_valid();
 			return *this;
 		}
 
-		user_iterator operator++(int dummy) {
-			user_iterator temp = *this;
-			operator++();
-			return temp;
-		}
-
-		user_iterator operator--(int dummy) {
-			user_iterator temp = *this;
+		iterator operator--(int)
+		{
+			iterator temp(*this);
 			operator--();
 			return temp;
 		}
 	protected:
-		/** If the current value is not a value according to
-		 * <em>matching_flags</em>, the iterator is increased until
-		 * a valid value has been found.
-		 */
-		void inc_valid() {
-			while( (*this != m_list.end()) && (inverse ? (
-				((*this)->get_flags() & matching_flags)
-					!= 0
-				) : ( ((*this)->get_flags() & matching_flags)
-					!= matching_flags
-				) )
-			) {
+		void inc_valid()
+		{
+//			if(m_inverse == false && m_flags == user::flags::NONE)
+//				return;
+
+			while( (*this != m_map.end()) && (m_inverse ? (
+				((*this)->get_flags() & m_flags) != 0) : (
+				((*this)->get_flags() & m_flags) != m_flags))
+			)
 				base_iterator::operator++();
-			}
 		}
 
-		/** Same as inc_valid(), but the iterator is decreaed until
-		 * such a value has been found.
-		 */
-		void dec_valid() {
-			while( (*this != m_list.begin()) && (inverse ? (
-				((*this)->get_flags() & matching_flags)
-					!= 0
-				) : ( ((*this)->get_flags() & matching_flags)
-					!= matching_flags
-				) )
-			) {
+		void dec_valid()
+		{
+//			if(m_inverse == false && m_flags == user::flags::NONE)
+//				return;
+
+			while( (*this != m_map.end()) && (m_inverse ? (
+				((*this)->get_flags() & m_flags) != 0) : (
+				((*this)->get_flags() & m_flags) != m_flags))
+			)
 				base_iterator::operator--();
-			}
 		}
 
-		/** Underlaying list.
-		 */
-		const list_type& m_list;
+		const map_type& m_map;
+		user::flags m_flags;
+		bool m_inverse;
 	};
 
 	user_table();
@@ -150,175 +172,56 @@ public:
 	
 	/** Returns the beginning of the user list.
 	 */
-	template<user::flags matching_flags, bool inverse>
-	user_iterator<matching_flags, inverse> user_begin() const {
-		return user_iterator<matching_flags, inverse>(
-			m_userlist, m_userlist.begin()
-		);
-	}
-
-	template<user::flags matching_flags>
-	user_iterator<matching_flags> user_begin() const {
-		return user_begin<matching_flags, false>();
-	}
-
-	user_iterator<user::NONE> user_begin() const {
-		return user_begin<user::NONE, false>();
-	}
+	iterator begin(user::flags flags = user::flags::NONE,
+	               bool inverse = false) const;
 
 	/** Returns the end of the user list.
 	 */
-	template<user::flags matching_flags, bool inverse>
-	user_iterator<matching_flags, inverse> user_end() const {
-		return user_iterator<matching_flags, inverse>(
-			m_userlist, m_userlist.end()
-		);
-	}
-
-	template<user::flags matching_flags>
-	user_iterator<matching_flags> user_end() const {
-		return user_end<matching_flags, false>();
-	}
-
-	user_iterator<user::NONE> user_end() const {
-		return user_end<user::NONE, false>();
-	}
-
-	/** Looks for a user whose flags match (or don't match, if inverse
-	 * is true) the given flags.
-	 */
-	template<user::flags matching_flags, bool inverse>
-	user* find_user() const {
-		user_iterator<matching_flags, inverse> iter =
-			user_begin<matching_flags, inverse>();
-		if(iter == user_end<matching_flags, inverse>() )
-			return NULL;
-		return &(*iter);
-	}
-
-	template<user::flags matching_flags>
-	user* find_user() const {
-		return find_user<matching_flags, false>();
-	}
-
-	user* find_user() const {
-		return find_user<user::NONE, false>();
-	}
-
-	/** Finds a user whose flags match matching_flags (or don't match, if
-	 * inverse is true) and if the function <em>func</em> of obby::user
-	 * returns the given <em>hint</em>. You may use the other find_user
-	 * functions that search a user with the given name, id or something.
-	 */
-	template<
-		user::flags matching_flags,
-		bool inverse,
-		typename ret_type,
-		ret_type(user::*func)() const
-	> user* find_user_val(ret_type hint) const {
-		for(user_iterator<matching_flags, inverse> iter =
-			user_begin<matching_flags, inverse>();
-		    iter != user_end<matching_flags, inverse>();
-		    ++ iter) {
-			user* cur_user = &(*iter);
-			if( (cur_user->*func)() == hint) {
-				return cur_user;
-			}
-		}
-
-		return NULL;
-	}
-
-	/** Finds a user whose flags match matching_flags (or don't match, if
-	 * inverse is true) and if the function <em>func</em> of obby::user
-	 * returns the same address as <em>hint</em>'s address. Of course,
-	 * ret_type has to be a reference for this to work. This is a helper
-	 * function for user_table::find_user(const net6::user&).
-	 */
-	template<
-		user::flags matching_flags,
-		bool inverse,
-		typename ret_type,
-		ret_type(user::*func)() const
-	> user* find_user_ref(ret_type hint) const {
-		for(user_iterator<matching_flags, inverse> iter =
-			user_begin<matching_flags, inverse>();
-		    iter != user_end<matching_flags, inverse>();
-		    ++ iter) {
-			user* cur_user = &(*iter);
-			if( &(cur_user->*func)() == &hint) {
-				return cur_user;
-			}
-		}
-	}
+	iterator end(user::flags flags = user::flags::NONE,
+	             bool inverse = false) const;
 
 	/** Searches a user with the given flags that has the given ID.
 	 */
-	template<user::flags matching_flags, bool inverse>
-	user* find_user(unsigned int id) const {
-		return find_user_val<matching_flags, inverse, unsigned int,
-			&user::get_id>(id);
-	}
+	const user* find(unsigned int id,
+	                 user::flags flags = user::flags::NONE,
+	                 bool inverse = false) const;
+#if 0
+	{
+		user_map::iterator iter = m_user_map.find(id);
+		if(iter == m_user_map.end() ) return NULL;
 
-	template<user::flags matching_flags>
-	user* find_user(unsigned int id) const {
-		return find_user<matching_flags, false>(id);
-	}
+		if(iterator(m_user_map, iter, flags, inverse) != iter)
+			return NULL;
 
-	user* find_user(unsigned int id) const {
-		return find_user<user::NONE, false>(id);
+		return iter->second;
 	}
+#endif
 
 	/** Searches a user which represents the given underlaying net6::user
 	 * object.
 	 */
-	template<user::flags matching_flags, bool inverse>
-	user* find_user(const net6::user& user) const {
-		return find_user_ref<matching_flags, inverse,
-			const net6::user&, &user::get_net6>(user);
-	}
-
-	template<user::flags matching_flags>
-	user* find_user(const net6::user& user) const {
-		return find_user<matching_flags, false>(user);
-	}
-
-	user* find_user(const net6::user& user) const {
-		return find_user<user::NONE, false>(user);
-	}
+	const user* find(const net6::user& user,
+	                 user::flags flags = user::flags::NONE,
+	                 bool inverse = false) const;
 
 	/** Searches for a user with the given name.
 	 */
-	template<user::flags matching_flags, bool inverse>
-	user* find_user(const std::string& name) const {
-		return find_user_val<matching_flags, inverse,
-			const std::string&, &user::get_name>(name);
-	}
-
-	template<user::flags matching_flags>
-	user* find_user(const std::string& name) const {
-		return find_user<matching_flags, false>(name);
-	}
-
-	user* find_user(const std::string& name) const {
-		return find_user<user::NONE, false>(name);
-	}
+	const user* find(const std::string& name,
+	                 user::flags flags = user::flags::NONE,
+	                 bool inverse = false) const;
 
 	/** Counts users.
 	 */
-	template<user::flags matching_flags, bool inverse>
-	unsigned int user_count() const {
-		unsigned int c = 0;
-		for(user_iterator<matching_flags, inverse> iter =
-			user_begin<matching_flags, inverse>();
-		    iter != user_end<matching_flags, inverse>();
-		    ++ iter, ++ c) ;
-		return c;
-	}
+	unsigned int count(user::flags flags = user::flags::NONE,
+	                   bool inverse = false) const;
 protected:
+	/** Internal function to find a non-const user with the given name.
+	 */
+	user* find_int(const std::string& name);
+
 	/** List holding the users.
 	 */
-	std::list<user*> m_userlist;
+	user_map m_user_map;
 };
 
 }

@@ -19,30 +19,37 @@
 #include <net6/server.hpp>
 #include "user.hpp"
 
+const obby::user::flags obby::user::flags::NONE = obby::user::flags(0x00000000);
+const obby::user::flags obby::user::flags::CONNECTED = obby::user::flags(0x00000001);
+
+const obby::user::privileges obby::user::privileges::NONE = obby::user::privileges(0x00000000);
+const obby::user::privileges obby::user::privileges::CREATE_DOCUMENT = obby::user::privileges(0x00000001);
+
 obby::user::user(const net6::user& user6, int red, int green, int blue)
  : m_user6(&user6), m_id(user6.get_id() ), m_name(user6.get_name() ),
-   m_red(red), m_green(green), m_blue(blue), m_flags(CONNECTED)
+   m_red(red), m_green(green), m_blue(blue), m_flags(flags::CONNECTED),
+   m_privs(privileges::NONE)
 {
 }
 
 obby::user::user(unsigned int id, const std::string& name, int red, int green,
                  int blue)
  : m_user6(NULL), m_id(id), m_name(name), m_red(red), m_green(green),
-   m_blue(blue), m_flags(NONE)
+   m_blue(blue), m_flags(flags::NONE), m_privs(privileges::NONE)
 {
 }
 
 void obby::user::release_net6()
 {
 	m_user6 = NULL;
-	remove_flags(CONNECTED);
+	remove_flags(flags::CONNECTED);
 }
 
 void obby::user::assign_net6(const net6::user& user6, int red, int green,
                              int blue)
 {
 	// User must not be already connected
-	if(get_flags() & CONNECTED)
+	if(get_flags() & flags::CONNECTED)
 		throw std::logic_error("obby::user::assign_net6");
 
 	// Name must be the same
@@ -54,7 +61,7 @@ void obby::user::assign_net6(const net6::user& user6, int red, int green,
 	m_green = green;
 	m_blue = blue;
 
-	add_flags(CONNECTED);
+	add_flags(flags::CONNECTED);
 }
 
 const net6::user& obby::user::get_net6() const

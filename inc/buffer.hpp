@@ -301,9 +301,9 @@ template<typename selector_type>
 bool basic_buffer<selector_type>::check_colour(int red, int green, int blue,
                                                const user* ignore) const
 {
-	for(user_table::user_iterator<user::CONNECTED> iter =
-		m_user_table.user_begin<user::CONNECTED>();
-	    iter != m_user_table.user_end<user::CONNECTED>();
+	for(user_table::iterator iter =
+		m_user_table.begin(user::flags::CONNECTED);
+	    iter != m_user_table.end(user::flags::CONNECTED);
 	    ++ iter)
 	{
 		// Ignore given user to ignore
@@ -420,7 +420,7 @@ basic_buffer<selector_type>::translate_user(const std::string& str) const
 	if(user_id == 0) return new net6::parameter<user*>(NULL);
 
 	// Find corresponding user in user table
-	user* found_user = m_user_table.find_user<user::NONE>(user_id);
+	user* found_user = m_user_table.find(user_id);
 	if(found_user == NULL)
 	{
 		// No such user

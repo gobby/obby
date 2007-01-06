@@ -23,7 +23,6 @@
 #include <net6/object.hpp>
 #include "ptr_iterator.hpp"
 #include "user.hpp"
-#include "user_table.hpp"
 #include "document.hpp"
 #include "document_packet.hpp"
 
@@ -40,12 +39,15 @@ template<typename selector_type>
 class basic_document_info : private net6::non_copyable, public sigc::trackable
 {
 public:
+	// TODO: auto-generate privileges class
 	enum privileges {
 		PRIV_NONE      = 0x00,
 		PRIV_SUBSCRIBE = 0x01, // User may subscribe to document
 		PRIV_MODIFY    = 0x02, // User may modify the document
 		PRIV_CLOSE     = 0x04, // User may close the document (completly)
-		PRIV_RENAME    = 0x08  // TODO: Implement rename in Gobby :)
+		PRIV_RENAME    = 0x08, // TODO: Implement rename in Gobby :)
+		PRIV_ADMIN     = 0x10, // User may change user's privileges
+		PRIV_ALL       = ~PRIV_NONE // All of the above
 	};
 
 	class privileges_table;
@@ -88,6 +90,10 @@ public:
 	 */
 	const document& get_content() const;
 
+	/** Returns the privileges table for this document.
+	 */
+	const privileges_table& get_privileges_table() const;
+
 	/** Inserts the given text at the given position into the document.
 	 */
 	virtual void insert(position pos, const std::string& text) = 0;
@@ -128,11 +134,6 @@ public:
 	/** Signal which is emitted if a user unsubscribed from this document.
 	 */
 	signal_unsubscribe_type unsubscribe_event() const;
-
-	/** Called by the buffer when a network packet concerning this document
-	 * was received.
-	 */
-//	virtual void on_net_packet(const document_packet& pack) = 0;
 
 	/** Called by the buffer when a user has joined.
 	 * TODO: Replace by a signal connection to the buffer.
@@ -197,6 +198,47 @@ private:
 	const net6::basic_object<selector_type>& get_net6() const;
 };
 
+/** Table that stores the privileges for multiple users.
+ */
+template<typename selector_type>
+class basic_document_info<selector_type>::privileges_table
+{
+public:
+	typedef sigc::signal<void, const user&, privileges>
+		signal_privileges_changed_type;
+
+	/** Creates a new privileges_table with the given default privileges.
+	 * The default privileges are used if there is no privileges entry for
+	 * a user.
+	 */
+	privileges_table(privileges default_privileges);
+
+	/** Returns the default privileges set for this table.
+	 */
+	privileges get_default_privileges() const;
+
+	/** Queries the privileges for the given user.
+	 */
+	privileges privileges_query(const user& user,
+	                            privileges privs = PRIV_ALL) const;
+
+	/** Changes the privileges of a user.
+	 */
+	void privileges_change(const user& user, privileges privs);
+
+	/** Signal which is emitted if the privileges for a given user have
+	 * changed (by a document administrator or the document owner).
+	 */
+	signal_privileges_changed_type privileges_changed_event() const;
+protected:
+	typedef std::map<const user*, privileges> priv_map;
+
+	privileges m_default_privs;
+	priv_map m_privs;
+
+	signal_privileges_changed_type m_signal_privileges_changed;
+};
+
 // typename basic_document_info<selector_type>::privileges combination operators
 template<typename selector_type>
 inline typename basic_document_info<selector_type>::privileges operator|(typename basic_document_info<selector_type>::privileges lhs, typename basic_document_info<selector_type>::privileges rhs) {
@@ -236,26 +278,8 @@ inline typename basic_document_info<selector_type>::privileges& operator^=(typen
 
 template<typename selector_type>
 inline typename basic_document_info<selector_type>::privileges operator~(typename basic_document_info<selector_type>::privileges rhs) {
-	return static_cast<typename basic_document_info<selector_type>::privileges>(static_cast<int>(rhs) );
+	return static_cast<typename basic_document_info<selector_type>::privileges>(~static_cast<int>(rhs) );
 }
-
-/** Table that stores the privileges for multiple users.
- */
-template<typename selector_type>
-class basic_document_info<selector_type>::privileges_table
-{
-public:
-	/** Adds a new user with the user's default privileges.
-	 */
-	void user_add(const user& user);
-
-	/** Queries the privileges for the given user.
-	 */
-	privileges user_privileges(const user& user) const;
-protected:
-	typedef std::map<const user*, privileges> priv_map;
-	priv_map m_privs;
-};
 
 } // namespace obby
 
@@ -319,17 +343,8 @@ basic_document_info<selector_type>::
 	                    const user* owner, unsigned int id,
 	                    const std::string& title)
  : m_buffer(buffer), m_net(net), m_owner(owner), m_id(id), m_title(title),
-   m_priv_table(new privileges_table)
+   m_priv_table(new privileges_table(PRIV_SUBSCRIBE/* | PRIV_MODIFY*/))
 {
-	// Add all initial users to the table, with default values
-	const user_table& user_table = buffer.get_user_table();
-	for(user_table::user_iterator<user::NONE> iter =
-		user_table.user_begin<user::NONE>();
-	    iter != user_table.user_end<user::NONE>();
-	    ++ iter)
-	{
-		m_priv_table->user_add(*iter);
-	}
 }
 
 template<typename selector_type>
@@ -366,6 +381,13 @@ const document& basic_document_info<selector_type>::get_content() const
 		throw std::logic_error("obby::document_info::get_content");
 
 	return *m_document;
+}
+
+template<typename selector_type>
+const typename basic_document_info<selector_type>::privileges_table&
+basic_document_info<selector_type>::get_privileges_table() const
+{
+	return *m_priv_table;
 }
 
 template<typename selector_type>
@@ -423,15 +445,14 @@ basic_document_info<selector_type>::unsubscribe_event() const
 template<typename selector_type>
 void basic_document_info<selector_type>::obby_user_join(const user& user)
 {
-	// Add new user into privileges table
-	m_priv_table->user_add(user);
 }
 
 template<typename selector_type>
 void basic_document_info<selector_type>::obby_user_part(const user& user)
 {
 	// User left the session: Unsubscribe from document
-	user_unsubscribe(user);
+	if(is_subscribed(user) )
+		user_unsubscribe(user);
 }
 
 template<typename selector_type>
@@ -501,31 +522,49 @@ basic_document_info<selector_type>::get_net6() const
 
 // privileges_table
 template<typename selector_type>
-void basic_document_info<selector_type>::privileges_table::
-	user_add(const user& user)
+basic_document_info<selector_type>::privileges_table::
+	privileges_table(privileges default_privileges)
+ : m_default_privs(default_privileges)
 {
-	// TODO: Initial privileges as parameter
-	m_privs[&user] = basic_document_info<selector_type>::PRIV_NONE;
 }
 
 template<typename selector_type>
 typename basic_document_info<selector_type>::privileges
 basic_document_info<selector_type>::privileges_table::
-	user_privileges(const user& user) const
+	get_default_privileges() const
+{
+	return m_default_privs;
+}
+
+template<typename selector_type>
+typename basic_document_info<selector_type>::privileges
+basic_document_info<selector_type>::privileges_table::
+	privileges_query(const user& user, privileges privs) const
 {
 	typename priv_map::const_iterator iter = m_privs.find(&user);
-	if(iter == m_privs.end() )
-	{
-		throw std::logic_error(
-			"obby::basic_document_info::privileges_table::"
-			"user_privileges"
-		);
-	}
+	if(iter == m_privs.end() ) return m_default_privs & privs;
+	return iter->second & privs;
+}
 
-	return iter->second;
+template<typename selector_type>
+void basic_document_info<selector_type>::privileges_table::
+	privileges_change(const user& user, privileges privs)
+{
+	m_privs[&user] = privs;
+	m_signal_privileges_changed.emit(user, privs);
+}
+
+template<typename selector_type>
+typename basic_document_info<selector_type>::privileges_table::
+	signal_privileges_changed_type
+basic_document_info<selector_type>::privileges_table::
+	privileges_changed_event() const
+{
+	return m_signal_privileges_changed;
 }
 
 } // namespace obby
 
 #endif // _OBBY_DOCUMENT_INFO_HPP_
+
 

@@ -353,39 +353,16 @@ void basic_server_buffer<selector_type>::
 	pack << owner << id << title;
 
 	// TODO: send_to_all_except function or something
-	for(user_table::user_iterator<user::CONNECTED> iter =
-		basic_buffer<selector_type>::
-		m_user_table.user_table::user_begin<user::CONNECTED>();
+	for(user_table::iterator iter = basic_buffer<selector_type>::
+		m_user_table.begin(user::flags::CONNECTED);
 	    iter != basic_buffer<selector_type>::
-		m_user_table.user_table::user_end<user::CONNECTED>();
+		m_user_table.end(user::flags::CONNECTED);
 	    ++ iter)
 	{
 		// The owner already knows about the document.
 		if(&(*iter) != owner)
 			net6_server().send(pack, iter->get_net6() );
 	}
-
-	// TODO: Call another document_info constructor because normally, this
-	// call would perform a sync to clients. Currently, no client except of
-	// the owner is subscribed (which causes problems on files with content
-	// because the owner gets the content twice), but it should be cleaner
-	// the other way...
-	// Additionally, the host_document would not mark the new document
-	// as written by itself...
-	//info.insert(0, content);
-	// Emit insertion signal (TODO: Should be done by document_add, but make
-	// sure that the content has been inserted before - like a ctor or
-	// something).
-	// TODO: Maybe use two document_info constructors - one with content
-	// for immediately implicit subscriptions and one for others... at least
-	// on client side. Server should always subscribe owner...)
-	// TODO: Make also sure that a subscribe_event for the owner is emitted
-	// _after_ the document_insert signal.
-	//basic_buffer<selector_type>::m_signal_document_insert.emit(info);
-	// Emit subscription signal for the owner.
-	// TODO: Do this elsewhere. (Should already be done in infos ctor, but
-	// nobody can be connected at this point - is this necessary?)
-	//if(owner != NULL) info.subscribe_event().emit(*owner);
 }
 
 template<typename selector_type>
@@ -447,7 +424,7 @@ void basic_server_buffer<selector_type>::on_join(const net6::user& user6)
 {
 	// Find user in list
 	user* new_user = basic_buffer<selector_type>::
-		m_user_table.user_table::find_user<user::CONNECTED>(user6);
+		m_user_table.find(user6);
 
 	// Should not happen
 	if(new_user == NULL)
@@ -460,7 +437,7 @@ void basic_server_buffer<selector_type>::on_join(const net6::user& user6)
 	// Calculate number of required sync packets (one for each
 	// non-connected user, one for each document in the list).
 	unsigned int sync_n = basic_buffer<selector_type>::
-		m_user_table.user_table::user_count<user::CONNECTED, true>();
+		m_user_table.count(user::flags::CONNECTED, true);
 	sync_n += basic_buffer<selector_type>::document_count();
 
 	// Send initial sync packet with this number, the client may then show
@@ -470,11 +447,10 @@ void basic_server_buffer<selector_type>::on_join(const net6::user& user6)
 	net6_server().send(init_pack, user6);
 
 	// Synchronise non-connected users.
-	for(user_table::user_iterator<user::CONNECTED, true> iter =
-		basic_buffer<selector_type>::
-		m_user_table.user_table::user_begin<user::CONNECTED, true>();
+	for(user_table::iterator iter = basic_buffer<selector_type>::
+		m_user_table.begin(user::flags::CONNECTED, true);
 	    iter != basic_buffer<selector_type>::
-		m_user_table.user_table::user_end<user::CONNECTED, true>();
+		m_user_table.end(user::flags::CONNECTED, true);
 	    ++ iter)
 	{
 		net6::packet user_pack("obby_sync_usertable_user");
@@ -527,7 +503,7 @@ void basic_server_buffer<selector_type>::on_part(const net6::user& user6)
 {
 	// Find obby::user object for given net6::user
 	user* cur_user = basic_buffer<selector_type>::
-		m_user_table.user_table::find_user<user::CONNECTED>(user6);
+		m_user_table.find_user(user6);
 
 	// Should not happen
 	if(cur_user == NULL)
@@ -605,7 +581,7 @@ bool basic_server_buffer<selector_type>::
 
 	// Search user in user table
 	const user_table& table = basic_buffer<selector_type>::m_user_table;
-	obby::user* user = table.find_user<user::CONNECTED, true>(name);
+	obby::user* user = table.find(name, user::flags::CONNECTED, true);
 
 	// Compare user password
 	if(user && !user->get_password().empty() )
@@ -667,7 +643,7 @@ void basic_server_buffer<selector_type>::
 {
 	// Find corresponding user in list
 	user* cur_user = basic_buffer<selector_type>::
-		m_user_table.user_table::find_user<user::CONNECTED>(user6);
+		m_user_table.find(user6);
 
 	// Should not happen
 	if(cur_user == NULL)
@@ -688,7 +664,7 @@ void basic_server_buffer<selector_type>::
 {
 	// Get obby::user from net6::user
 	user* from_user = basic_buffer<selector_type>::
-		m_user_table.user_table::find_user<user::CONNECTED>(user6);
+		m_user_table.find(user6);
 
 	// Should not happen
 	if(from_user == NULL)

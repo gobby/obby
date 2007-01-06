@@ -34,14 +34,62 @@ namespace obby
 class user : private net6::non_copyable
 {
 public:
-	enum flags {
-		NONE      = 0x00,
-		CONNECTED = 0x01
+	/** Flags that belong to a user.
+	 */
+	class flags
+	{
+	public:
+		static const flags NONE;
+		static const flags CONNECTED;
+
+	        flags operator|(flags other) const { return flags(m_value | other.m_value); }
+        	flags operator&(flags other) const { return flags(m_value & other.m_value); }
+	        flags operator^(flags other) const { return flags(m_value ^ other.m_value); }
+        	flags& operator|=(flags other) { m_value |= other.m_value; return *this; }
+	        flags& operator&=(flags other) { m_value &= other.m_value; return *this; }
+        	flags& operator^=(flags other) { m_value ^= other.m_value; return *this; }
+	        flags operator~() const { return flags(~m_value); }
+
+		operator bool() const { return m_value != NONE; }
+		bool operator!() const { return m_value == NONE; }
+	        bool operator==(flags other) { return m_value == other.m_value; }
+        	bool operator!=(flags other) { return m_value != other.m_value; }
+
+	        unsigned int get_value() const { return m_value; }
+
+	protected:
+        	explicit flags(unsigned int value) : m_value(value) { }
+
+	        unsigned int m_value;
 	};
 
-	enum privileges {
-		PRIV_NONE            = 0x00,
-		PRIV_CREATE_DOCUMENT = 0x01
+	/** User-wide privileges.
+	 */
+	class privileges
+	{
+	public:
+		static const privileges NONE;
+		static const privileges CREATE_DOCUMENT;
+
+	        privileges operator|(privileges other) const { return privileges(m_value | other.m_value); }
+        	privileges operator&(privileges other) const { return privileges(m_value & other.m_value); }
+	        privileges operator^(privileges other) const { return privileges(m_value ^ other.m_value); }
+        	privileges& operator|=(privileges other) { m_value |= other.m_value; return *this; }
+	        privileges& operator&=(privileges other) { m_value &= other.m_value; return *this; }
+        	privileges& operator^=(privileges other) { m_value ^= other.m_value; return *this; }
+	        privileges operator~() const { return privileges(~m_value); }
+
+		operator bool() const { return m_value != NONE; }
+		bool operator!() const { return m_value == NONE; }
+        	bool operator==(privileges other) { return m_value == other.m_value; }
+	        bool operator!=(privileges other) { return m_value != other.m_value; }
+
+	        unsigned int get_value() const { return m_value; }
+
+	protected:
+        	explicit privileges(unsigned int value) : m_value(value) { }
+
+	        unsigned int m_value;
 	};
 
 	/** Creates a new user from an existing net6::user.
@@ -157,6 +205,7 @@ protected:
 	privileges m_privs;
 };
 
+#if 0
 // Flag combination operations
 inline user::flags operator|(user::flags rhs, user::flags lhs) {
 	return static_cast<user::flags>(
@@ -226,8 +275,9 @@ inline user::privileges& operator^=(user::privileges& rhs, user::privileges lhs)
 inline user::privileges operator~(user::privileges rhs) {
 	return static_cast<user::privileges>(~static_cast<int>(rhs) );
 }
+#endif
 
-}
+} // namespace obby
 
 namespace net6
 {
@@ -270,7 +320,7 @@ public:
 	: parameter<obby::user*>(const_cast<obby::user*>(user) ) { }
 };
 
-}
+} // namespace net6
 
 #endif // _OBBY_USER_HPP_
 

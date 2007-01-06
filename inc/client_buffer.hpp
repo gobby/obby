@@ -470,7 +470,7 @@ void basic_client_buffer<selector_type>::
 {
 	// Find user
 	user* cur_user = basic_buffer<selector_type>::
-		m_user_table.user_table::find_user<user::CONNECTED>(user6);
+		m_user_table.find<user::flags::CONNECTED>(user6);
 
 	// Should never happen
 	if(cur_user == NULL)
