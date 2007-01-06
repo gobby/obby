@@ -20,7 +20,7 @@
 #include "buffer.hpp"
 
 obby::buffer::buffer()
- : m_history(), m_revision(0), m_lines(1, "")
+ : m_history(), m_revision(0)
 {
 }
 
@@ -31,111 +31,35 @@ obby::buffer::~buffer()
 		delete *iter;
 }
 
-std::string obby::buffer::get_whole_buffer() const
+const std::string& obby::buffer::get_whole_buffer() const
 {
-	unsigned int last_line = m_lines.size() - 1;
-	unsigned int last_col = m_lines[last_line].length();
-
-	return get_sub_buffer(position(0, 0), position(last_line, last_col) );
+	return m_buffer;
 }
 
-std::string obby::buffer::get_sub_buffer(const position& from,
-                                         const position& to) const
+std::string obby::buffer::get_sub_buffer(position from, position to) const
 {
 	assert(to >= from);
-	assert(to.get_line() < m_lines.size() );
-	assert(from.get_col() <= m_lines[from.get_line()].size() );
-	assert(to.get_col() <= m_lines[to.get_line()].size() );
-
-	std::string buf;
-	for(unsigned int i = from.get_line(); i <= to.get_line(); ++ i)
-	{
-		unsigned int begin = 0;
-		unsigned int end = m_lines[i].length();
-		
-		if(i == from.get_line() ) begin = from.get_col();
-		if(i == to.get_line() )  end = to.get_col();
-
-		//buf += m_lines[i].substr(begin, end - begin);
-		buf.append(&m_lines[i][begin], end - begin);
-	}
-
-	return buf;
+	return m_buffer.substr(from, to - from);
 }
 
-void obby::buffer::insert_nosync(const position& pos, const std::string& text)
+void obby::buffer::insert_nosync(position pos, const std::string& text)
 {
-	assert(pos.get_line() < m_lines.size() );
-	assert(pos.get_col() <= m_lines[pos.get_line()].size() );
-
-	unsigned int col = pos.get_col();
-	std::string add;
-
-	std::string::size_type cur = 0, prev = 0;
-	std::vector<std::string>::size_type line = pos.get_line();
-	while((cur = text.find('\n', cur)) != std::string::npos)
-	{
-		if(line == pos.get_line() )
-		{
-			add = m_lines[line].substr(col);
-			m_lines[line].erase(col);
-		}
-
-		m_lines[line].append(&text[prev], cur - prev);
-		insert_lines(++line, 1);
-		col = 0;
-	}
-
-	m_lines[line].insert(col, &text[prev], text.size() - prev);
-	m_lines[line].append(add);
+	m_buffer.insert(pos, text);
 }
 
-void obby::buffer::erase_nosync(const position& from, const position& to)
+void obby::buffer::erase_nosync(position from, position to)
 {
 	assert(to >= from);
-	assert(to.get_line() < m_lines.size() );
-	assert(from.get_col() <= m_lines[from.get_line()].size() );
-	assert(to.get_col() <= m_lines[to.get_line()].size() );
-
-	if(from.get_line() == to.get_line() )
-	{
-		m_lines[from.get_line()].erase(
-			from.get_col(),
-			to.get_col() - from.get_col()
-		);
-	}
-	else
-	{
-		// TODO: Replace the following two calls by one call to
-		// std::string::replace
-		m_lines[from.get_line()].erase(from.get_col() );
-
-		m_lines[from.get_line()].append(
-			&m_lines[to.get_line()][to.get_col()],
-			m_lines[to.get_line()].length() - to.get_col()
-		);
-
-		erase_lines(
-			from.get_line() + 1,
-			to.get_line() - from.get_line()
-		);
-	}
+	m_buffer.erase(from, to - from);
 }
 
-// TODO: Improve these functions. But how? :/
-void obby::buffer::insert_lines(unsigned int pos, unsigned int count)
+obby::buffer::signal_insert_type obby::buffer::insert_event() const
 {
-	std::vector<std::string>::iterator iter = m_lines.begin();
-	for(unsigned int i = 0; i < pos; ++ i) ++ iter;
-	m_lines.insert(iter, count, "");
+	return m_signal_insert;
 }
 
-void obby::buffer::erase_lines(unsigned int pos, unsigned int count)
+obby::buffer::signal_delete_type obby::buffer::delete_event() const
 {
-	std::vector<std::string>::iterator beg_iter = m_lines.begin();
-	for(unsigned int i = 0; i < pos; ++ i) ++ beg_iter;
-	std::vector<std::string>::iterator end_iter = beg_iter;
-	for(unsigned int i = 0; i < count; ++ i) ++ end_iter;
-	m_lines.erase(beg_iter, end_iter);
+	return m_signal_delete;
 }
 

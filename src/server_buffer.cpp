@@ -45,30 +45,18 @@ void obby::server_buffer::select(unsigned int timeout)
 	m_server.select(timeout);
 }
 
-void obby::server_buffer::insert(const position& pos, const std::string& text)
+void obby::server_buffer::insert(position pos, const std::string& text)
 {
 	// TODO: Insert to buffer
 	// TODO: Add to history
 	// TODO: Tell clients new revision
 }
 
-void obby::server_buffer::erase(const position& from, const position& to)
+void obby::server_buffer::erase(position from, position to)
 {
 	// TODO: Delete from buffer
 	// TODO: Add to history
 	// TODO: Tell clients new revision
-}
-
-obby::server_buffer::signal_insert_type
-obby::server_buffer::insert_event() const
-{
-	return m_signal_insert;
-}
-
-obby::server_buffer::signal_delete_type
-obby::server_buffer::delete_event() const
-{
-	return m_signal_delete;
 }
 
 obby::server_buffer::signal_join_type obby::server_buffer::join_event() const
@@ -100,12 +88,18 @@ void obby::server_buffer::on_login(net6::server::peer& peer)
 	init_sync << static_cast<int>(m_revision);
 	m_server.send(init_sync, peer);
 
-	for(unsigned int cur_line = 0; cur_line < m_lines.size(); ++ cur_line)
+	std::string::size_type pos = 0, prev = 0;
+	while( (pos = m_buffer.find('\n')) != std::string::npos)
 	{
 		net6::packet line_sync("obby_sync_line");
-		line_sync << m_lines[cur_line];
+		line_sync << m_buffer.substr(pos, prev - pos);
 		m_server.send(line_sync, peer);
+		prev = ++ pos;
 	}
+
+	net6::packet line_sync("obby_sync_line");
+	line_sync << m_buffer.substr(prev);
+	m_server.send(line_sync, peer);
 
 	net6::packet final_sync("obby_sync_final");
 	m_server.send(final_sync, peer);
@@ -123,47 +117,38 @@ void obby::server_buffer::on_data(const net6::packet& pack,
 {
 	if(pack.get_command() == "obby_record")
 	{
+		// Create record from packet
 		record* rec = record::from_packet(pack);
 		if(!rec) return;
 
-		// Undo all changes until the revision of rec has been reached
-		// TODO: Ensure that the wished revision exists.
+		// Look for wished revision
 		std::list<record*>::iterator iter;
 		for(iter = m_history.begin(); iter != m_history.end(); ++ iter)
-		{
-			// Break if wished revision has been reached
-			if((*iter)->get_revision() == rec->get_revision() )
+			if( (*iter)->get_revision() == rec->get_revision() )
 				break;
 
-			// Record is from the same client? ignore it!
-			if((*iter)->get_from() != rec->get_from() )
-			{
-				record* rev_iter = (*iter)->reverse(*this);
-				rev_iter->apply(*this);
-				delete rev_iter;
-			}
+		// Wished Revision does not exist
+		if(iter == m_history.end() && rec->get_revision() != 0)
+			return;
 
-			// Apply rec on the current record in history to put
-			// it to the right direction
-			rec->apply(**iter);
-		}
-
-		// Apply record.
-		rec->apply(*this);
-
-		// Redo the changes to reach the current revision
+		// Apply newer Revision on the new record
 		while(iter != m_history.begin() )
 		{
 			-- iter;
 
-			// Apply the current change to the new record
-//			(*iter)->apply(*rec);
+			if( (*iter)->get_from() != rec->get_from() )
+				(*iter)->apply(*rec);
+		}
 
-			// Record is from the same client? ignore it!
-			if((*iter)->get_from() != rec->get_from() )
-				// Re-apply this revision to the buffer
-				(*iter)->apply(*this);
-		} 
+		// Ignore record if it got invalid
+		if(!rec->is_valid() )
+		{
+			delete rec;
+			return;
+		}
+
+		// Apply record on buffer
+		rec->apply(*this);
 
 		// Increment revision
 		rec->set_revision(++ m_revision);
@@ -178,13 +163,7 @@ void obby::server_buffer::on_data(const net6::packet& pack,
 		m_server.send(rec->to_packet() );
 
 		// Emit changed signal
-		// HACKHACKHACK :D
-		if(pack.get_param(0).as_string() == "insert")
-			m_signal_insert.emit(
-				*static_cast<insert_record*>(rec) );
-		if(pack.get_param(0).as_string() == "delete")
-			m_signal_delete.emit(
-				*static_cast<delete_record*>(rec) );
+		rec->emit_buffer_signal(*this);
 	}
 }
 

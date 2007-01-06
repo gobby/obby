@@ -21,108 +21,111 @@
 #include "insert_record.hpp"
 #include "buffer.hpp"
 
-obby::delete_record::delete_record(const position& begin, const position& end,
+obby::delete_record::delete_record(position pos, const std::string& text,
                                    unsigned int revision, unsigned int from)
- : record(revision, from), m_from(begin), m_to(end)
+ : record(revision, from), m_pos(pos), m_text(text)
 {
-	assert(end > begin);
 }
 
-obby::delete_record::delete_record(const position& begin, const position& end,
+obby::delete_record::delete_record(position pos, const std::string& text,
                                    unsigned int revision, unsigned int from,
                                    unsigned int id)
- : record(revision, from, id), m_from(begin), m_to(end)
+ : record(revision, from, id), m_pos(pos), m_text(text)
 {
-	assert(end > begin);
 }
 
 obby::delete_record::~delete_record()
 {
 }
 
+obby::record* obby::delete_record::clone() const
+{
+	return new delete_record(m_pos, m_text, m_revision, m_from, m_id);
+}
+
 void obby::delete_record::apply(buffer& buf) const
 {
-	buf.erase_nosync(m_from, m_to);
+	assert(buf.get_sub_buffer(m_pos, m_pos + m_text.length()) == m_text);
+	buf.erase_nosync(m_pos, m_pos + m_text.length() );
 }
 
 void obby::delete_record::apply(record& rec) const
 {
-	rec.on_delete(m_from, m_to);
+	rec.on_delete(m_pos, m_pos + m_text.length() );
 }
 
 net6::packet obby::delete_record::to_packet()
 {
 	net6::packet pack("obby_record");
 	pack << "delete" << static_cast<int>(m_id)
-	     << static_cast<int>(m_revision) << static_cast<int>(record::m_from)
-	     << static_cast<int>(m_from.get_line() )
-	     << static_cast<int>(m_from.get_col() )
-	     << static_cast<int>(m_to.get_line() )
-	     << static_cast<int>(m_to.get_col() );
+	     << static_cast<int>(m_revision) << static_cast<int>(m_from)
+	     << static_cast<int>(m_pos) << m_text;
 	return pack;
 }
 
 obby::record* obby::delete_record::reverse(const buffer& buf)
 {
-	std::string sub_buf = buf.get_sub_buffer(m_from, m_to);
-	return new insert_record(m_from, sub_buf,
-	                         m_revision, record::m_from, m_id);
+	return new insert_record(m_pos, m_text, m_revision, m_from, m_id);
 }
 
-void obby::delete_record::on_insert(const position& pos,
-                                    const std::string& text)
+void obby::delete_record::on_insert(position pos, const std::string& text)
 {
-	position size(text);
-
-	if(pos < m_from)
-		{ m_from += size; m_to += size; }
-	else if(pos < m_to)
-		m_to += size;
+	if(pos <= m_pos)
+		m_pos += text.length();
+	else if(pos < m_pos + m_text.length() )
+		m_text.insert(pos - m_pos, text);
 }
 
-void obby::delete_record::on_delete(const position& from, const position& to)
+void obby::delete_record::on_delete(position from, position to)
 {
 	assert(to >= from);
 
 	// Deletion after the range
-	if(from >= m_to)
+	if(from >= m_pos + m_text.length() )
 	{
 		return;
 	}
 	// Delete before the range
-	else if(to <= m_from)
+	else if(to <= m_pos)
 	{
-		m_from.sub_range(from, to);
-		m_to.sub_range(from, to);
+		m_pos -= (to - from);
 	}
 	// Deletion of the first part of the range
-	else if(from <= m_from && to > m_from)
+	else if(from <= m_pos && to > m_pos)
 	{
-		m_from = from;
-		m_to.sub_range(from, to);
+		m_text.erase(0, to - m_pos);
+		m_pos = from;
 	}
 	// Deletion of the last part of the range
-	else if(from < m_to && to >= from)
+	else if(from < m_pos + m_text.length() && to >= m_pos + m_text.length())
 	{
-		m_to = from;
+		m_text.erase(m_pos + m_text.length() - from);
 	}
 	// Deletion in the range
 	else
 	{
-		m_to.sub_range(from, to);
+		// TODO: Check for invalidation
+		m_text.erase(from - m_pos, to - from);
 	}
-
-	if(m_to <= m_from)
-		invalidate();
 }
 
-const obby::position& obby::delete_record::get_begin() const
+obby::position obby::delete_record::get_begin() const
 {
-	return m_from;
+	return m_pos;
 }
 
-const obby::position& obby::delete_record::get_end() const
+obby::position obby::delete_record::get_end() const
 {
-	return m_to;
+	return m_pos + m_text.length();
+}
+
+const std::string& obby::delete_record::get_text() const
+{
+	return m_text;
+}
+
+void obby::delete_record::emit_buffer_signal(const buffer& buf) const
+{
+	buf.delete_event().emit(*this);
 }
 

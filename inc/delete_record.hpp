@@ -29,26 +29,31 @@ namespace obby
 class delete_record : public record
 {
 public:
-	delete_record(const position& begin, const position& end,
+	delete_record(position pos, const std::string& text,
 	              unsigned int revision, unsigned int from);
-	delete_record(const position& begin, const position& end,
+	delete_record(position pos, const std::string& text,
 	              unsigned int revision, unsigned int from,
 	              unsigned int id);
 	~delete_record();
+
+	virtual record* clone() const;
 
 	virtual void apply(buffer& buf) const;
 	virtual void apply(record& rec) const;
 	virtual net6::packet to_packet();
 	virtual record* reverse(const buffer& buf);
 
-	virtual void on_insert(const position& pos, const std::string& text);
-	virtual void on_delete(const position& from, const position& to);
+	virtual void on_insert(position pos, const std::string& text);
+	virtual void on_delete(position from, position to);
 
-	const position& get_begin() const;
-	const position& get_end() const;
+	virtual void emit_buffer_signal(const buffer& buf) const;
+
+	position get_begin() const;
+	position get_end() const;
+	const std::string& get_text() const;
 protected:
-	position m_from;
-	position m_to;
+	position m_pos;
+	std::string m_text;
 };
 
 }

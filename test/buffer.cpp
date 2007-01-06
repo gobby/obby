@@ -25,9 +25,8 @@ void client_sync(obby::client_buffer& buffer)
 	std::cout << buffer.get_whole_buffer() << std::endl;
 	std::cout << "---" << std::endl;
 
-	buffer.insert(obby::position(0, 0), "A");
-	buffer.insert(obby::position(0, 0), "B");
-	buffer.insert(obby::position(0, 0), "C");
+	buffer.insert(0, "A");
+	buffer.insert(0, "B");
 }
 
 void client_part(net6::client::peer& peer)
@@ -50,7 +49,7 @@ void client_login_failed(const std::string& reason)
 void client_insert(const obby::insert_record& record,
                    obby::client_buffer& buffer)
 {
-	std::cout << "Insert " << record.get_text() << " at " << record.get_position().get_line() << "/" << record.get_position().get_col() << std::endl;
+	std::cout << "Insert " << record.get_text() << " at " << record.get_position() << std::endl;
 	std::cout << "---" << std::endl;
 	std::cout << buffer.get_whole_buffer() << std::endl;
 	std::cout << "---" << std::endl;
@@ -59,7 +58,7 @@ void client_insert(const obby::insert_record& record,
 void client_delete(const obby::delete_record& record,
                    obby::client_buffer& buffer)
 {
-	std::cout << "Delete from " << record.get_begin().get_line() << "/" << record.get_begin().get_col() << " to " << record.get_end().get_line() << "/" << record.get_end().get_col() << std::endl;
+	std::cout << "Delete " << record.get_text() << " at " << record.get_begin() << std::endl;
 	std::cout << "---" << std::endl;
 	std::cout << buffer.get_whole_buffer() << std::endl;
 	std::cout << "---" << std::endl;
@@ -115,7 +114,7 @@ void server_part(net6::server::peer& peer)
 void server_insert(const obby::insert_record& record,
                    obby::server_buffer& buffer)
 {
-	std::cout << "Insert " << record.get_text() << " at " << record.get_position().get_line() << "/" << record.get_position().get_col() << std::endl;
+	std::cout << "Insert " << record.get_text() << " at " << record.get_position() << std::endl;
 	std::cout << "---" << std::endl;
 	std::cout << buffer.get_whole_buffer() << std::endl;
 	std::cout << "---" << std::endl;
@@ -124,7 +123,7 @@ void server_insert(const obby::insert_record& record,
 void server_delete(const obby::delete_record& record,
                    obby::server_buffer& buffer)
 {
-	std::cout << "Delete from " << record.get_begin().get_line() << "/" << record.get_begin().get_col() << " to " << record.get_end().get_line() << "/" << record.get_end().get_col() << std::endl;
+	std::cout << "Delete " << record.get_text() << " from " << record.get_begin() << std::endl;
 	std::cout << "---" << std::endl;
 	std::cout << buffer.get_whole_buffer() << std::endl;
 	std::cout << "---" << std::endl;

@@ -29,22 +29,26 @@ namespace obby
 class insert_record : public record
 {
 public:
-	insert_record(const position& pos, const std::string& text,
+	insert_record(position pos, const std::string& text,
 	              unsigned int revision, unsigned int from);
-	insert_record(const position& pos, const std::string& text,
+	insert_record(position pos, const std::string& text,
 	              unsigned int revision, unsigned int from,
 	              unsigned int id);
 	~insert_record();
+
+	virtual record* clone() const;
 
 	virtual void apply(buffer& buf) const;
 	virtual void apply(record& rec) const;
 	virtual net6::packet to_packet();
 	virtual record* reverse(const buffer& buf);
 
-	virtual void on_insert(const position& pos, const std::string& text);
-	virtual void on_delete(const position& from, const position& to);
+	virtual void on_insert(position pos, const std::string& text);
+	virtual void on_delete(position from, position to);
 
-	const position& get_position() const;
+	virtual void emit_buffer_signal(const buffer& buf) const;
+
+	position get_position() const;
 	const std::string& get_text() const;
 protected:
 	position m_pos;

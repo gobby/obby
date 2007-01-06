@@ -4,6 +4,7 @@
 
 using namespace std;
 using namespace obby;
+// ^ - kranker Troll :(
 
 void on_discover(const string& name, const string& ip,
 	unsigned int port)

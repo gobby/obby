@@ -21,13 +21,13 @@
 #include "delete_record.hpp"
 #include "buffer.hpp"
 
-obby::insert_record::insert_record(const position& pos, const std::string& text,
+obby::insert_record::insert_record(position pos, const std::string& text,
                                    unsigned int revision, unsigned int from)
  : record(revision, from), m_pos(pos), m_text(text)
 {
 }
 
-obby::insert_record::insert_record(const position& pos, const std::string& text,
+obby::insert_record::insert_record(position pos, const std::string& text,
                                    unsigned int revision, unsigned int from,
                                    unsigned int id)
  : record(revision, from, id), m_pos(pos), m_text(text)
@@ -36,6 +36,11 @@ obby::insert_record::insert_record(const position& pos, const std::string& text,
 
 obby::insert_record::~insert_record()
 {
+}
+
+obby::record* obby::insert_record::clone() const
+{
+	return new insert_record(m_pos, m_text, m_revision, m_from, m_id);
 }
 
 void obby::insert_record::apply(buffer& buf) const
@@ -53,45 +58,35 @@ net6::packet obby::insert_record::to_packet()
 	net6::packet pack("obby_record");
 	pack << "insert" << static_cast<int>(m_id)
 	     << static_cast<int>(m_revision) << static_cast<int>(m_from)
-	     << static_cast<int>(m_pos.get_line() )
-	     << static_cast<int>(m_pos.get_col() )
+	     << static_cast<int>(m_pos)
 	     << m_text;
 	return pack;
 }
 
 obby::record* obby::insert_record::reverse(const buffer& buf)
 {
-	position text_size(m_text);
-	return new delete_record(m_pos, m_pos + text_size, m_revision, 
-	                         m_from, m_id);
+	return new delete_record(m_pos, m_text, m_revision, m_from, m_id);
 }
 
-void obby::insert_record::on_insert(const position& pos,
+void obby::insert_record::on_insert(position pos,
                                     const std::string& text)
 {
 	if(pos <= m_pos)
-	{
-		position size(text);
-		m_pos += size;
-	}
+		m_pos += text.length();
 }
 
-void obby::insert_record::on_delete(const position& from, const position& to)
+void obby::insert_record::on_delete(position from, position to)
 {
 	assert(to >= from);
 
 	if(m_pos >= from && m_pos < to)
-	{
 		// The position where to insert text has been deleted
 		invalidate();
-	}
 	else if(m_pos >= to)
-	{
-		m_pos.sub_range(from, to);
-	}
+		m_pos -= (to - from);
 }
 
-const obby::position& obby::insert_record::get_position() const
+obby::position obby::insert_record::get_position() const
 {
 	return m_pos;
 }
@@ -99,5 +94,10 @@ const obby::position& obby::insert_record::get_position() const
 const std::string& obby::insert_record::get_text() const
 {
 	return m_text;
+}
+
+void obby::insert_record::emit_buffer_signal(const buffer& buf) const
+{
+	buf.insert_event().emit(*this);
 }
 

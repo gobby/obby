@@ -6,11 +6,6 @@
 
 unsigned int count = 0;
 
-std::ostream& operator<<(std::ostream& out, const obby::position& pos)
-{
-	out << pos.get_line() << "/" << pos.get_col();
-}
-
 std::ostream& operator<<(std::ostream& out, const obby::insert_record& record)
 {
 	out << record.get_text() << "@" << record.get_position();
@@ -52,27 +47,18 @@ int main()
 	unsigned int success = 0;
 	
 	if(ins_ins(
-		"single line in front of insert_record...",
-	        obby::position(0, 5), obby::position(0, 2),
-		"hallo", obby::position(0, 10)
-	)) ++ success;
-
-	if(ins_ins(
-		"multi line in front of insert_record...",
-		obby::position(0, 5), obby::position(0, 2),
-		"hallo\ntrala", obby::position(1, 5)
+		"text in front of insert_record...",
+	        5, 2, "hallo", 10
 	)) ++ success;
 
 	if(ins_ins(
 		"text at insert_record...",
-		obby::position(0, 5), obby::position(0, 5),
-		"moin", obby::position(0, 9)
+		5, 5, "moin", 9
 	)) ++ success;
 
 	if(ins_ins(
 		"text after insert_record...",
-		obby::position(0, 5), obby::position(0, 7),
-		"moin", obby::position(0, 5)
+		5, 7, "moin", 5
 	)) ++ success;
 
 	std::cout << success << " of " << count << " tests passed successfully" << std::endl;

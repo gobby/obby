@@ -91,45 +91,33 @@ obby::record* obby::record::from_packet(const net6::packet& pack)
 
 	if(operation == "insert")
 	{
-		if(pack.get_param_count() < 7) return NULL;
+		if(pack.get_param_count() < 6) return NULL;
 		if(pack.get_param(4).get_type() != net6::packet::param::INT)
-			return NULL;
-		if(pack.get_param(5).get_type() != net6::packet::param::INT)
-			return NULL;
-		if(pack.get_param(6).get_type() != net6::packet::param::STRING)
-			return NULL;
-
-		unsigned int line = pack.get_param(4).as_int();
-		unsigned int col = pack.get_param(5).as_int();
-		const std::string& text = pack.get_param(6).as_string();
-		
-		return new insert_record(position(line, col),
-		                         text, revision, from, id);
-	}
-	else if(operation == "delete")
-	{
-		if(pack.get_param_count() < 8) return NULL;
-		if(pack.get_param(4).get_type() != net6::packet::param::STRING)
 			return NULL;
 		if(pack.get_param(5).get_type() != net6::packet::param::STRING)
 			return NULL;
-		if(pack.get_param(6).get_type() != net6::packet::param::STRING)
+
+		unsigned int pos = pack.get_param(4).as_int();
+		const std::string& text = pack.get_param(5).as_string();
+		
+		return new insert_record(pos, text, revision, from, id);
+	}
+	else if(operation == "delete")
+	{
+		if(pack.get_param_count() < 6) return NULL;
+		if(pack.get_param(4).get_type() != net6::packet::param::INT)
 			return NULL;
-		if(pack.get_param(7).get_type() != net6::packet::param::STRING)
+		if(pack.get_param(5).get_type() != net6::packet::param::STRING)
 			return NULL;
 
-		unsigned int from_line = pack.get_param(4).as_int();
-		unsigned int from_col = pack.get_param(5).as_int();
-		unsigned int to_line = pack.get_param(6).as_int();
-		unsigned int to_col = pack.get_param(7).as_int();
+		unsigned int pos = pack.get_param(4).as_int();
+		const std::string& text = pack.get_param(5).as_string();
 
-		return new delete_record(position(from_line, from_col),
-		                         position(to_line, to_col),
-		                         revision, from, id);
+		return new delete_record(pos, text, revision, from, id);
 	}
 	else
 	{
-		assert(false);
+		return NULL;
 	}
 }
 

@@ -21,9 +21,11 @@
 
 #include <string>
 #include <list>
-#include <vector>
+#include <sigc++/signal.h>
 #include "position.hpp"
 #include "record.hpp"
+#include "insert_record.hpp"
+#include "delete_record.hpp"
 
 namespace obby
 {
@@ -31,25 +33,30 @@ namespace obby
 class buffer
 {
 public:
+	typedef sigc::signal<void, const insert_record&> signal_insert_type;
+	typedef sigc::signal<void, const delete_record&> signal_delete_type;
+
 	buffer();
 	~buffer();
 
-	std::string get_whole_buffer() const;
-	std::string get_sub_buffer(const position& from,
-	                           const position& to) const;
+	const std::string& get_whole_buffer() const;
+	std::string get_sub_buffer(position from, position to) const;
 
-	virtual void insert(const position& pos, const std::string& text) = 0;
-	virtual void erase(const position& from, const position& to) = 0;
+	virtual void insert(position pos, const std::string& text) = 0;
+	virtual void erase(position from, position to) = 0;
 
-	void insert_nosync(const position& pos, const std::string& text);
-	void erase_nosync(const position& from, const position& to);
+	void insert_nosync(position pos, const std::string& text);
+	void erase_nosync(position from, position to);
+
+	signal_insert_type insert_event() const;
+	signal_delete_type delete_event() const;
 protected:
-	void insert_lines(unsigned int pos, unsigned int count);
-	void erase_lines(unsigned int pos, unsigned int count);
-
 	std::list<record*> m_history;
 	unsigned int m_revision;
-	std::vector<std::string> m_lines;
+	std::string m_buffer;
+
+	signal_insert_type m_signal_insert;
+	signal_delete_type m_signal_delete;
 };
 
 }

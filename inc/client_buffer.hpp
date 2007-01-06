@@ -34,8 +34,6 @@ namespace obby
 class client_buffer : public buffer, public sigc::trackable
 {
 public:
-	typedef sigc::signal<void, const insert_record&> signal_insert_type;
-	typedef sigc::signal<void, const delete_record&> signal_delete_type;
 	typedef sigc::signal<void, net6::client::peer&> signal_join_type;
 	typedef sigc::signal<void> signal_sync_type;
 	typedef sigc::signal<void, net6::client::peer&> signal_part_type;
@@ -51,11 +49,9 @@ public:
 	void select();
 	void select(unsigned int timeout);
 
-	virtual void insert(const position& pos, const std::string& text);
-	virtual void erase(const position& from, const position& to);
+	virtual void insert(position pos, const std::string& text);
+	virtual void erase(position from, position to);
 
-	signal_insert_type insert_event() const;
-	signal_delete_type delete_event() const;
 	signal_join_type join_event() const;
 	signal_sync_type sync_event() const;
 	signal_part_type part_event() const;
@@ -77,8 +73,6 @@ protected:
 	std::list<record*> m_unsynced;
 	net6::client m_connection;
 
-	signal_insert_type m_signal_insert;
-	signal_delete_type m_signal_delete;
 	signal_join_type m_signal_join;
 	signal_sync_type m_signal_sync;
 	signal_part_type m_signal_part;

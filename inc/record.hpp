@@ -35,6 +35,8 @@ public:
 	record(unsigned int revision, unsigned int from, unsigned int id);
 	~record();
 
+	virtual record* clone() const = 0;
+	
 	virtual void apply(buffer& buf) const = 0;
 	virtual void apply(record& rec) const = 0;
 	virtual net6::packet to_packet() = 0;
@@ -49,10 +51,11 @@ public:
 	void set_from(unsigned int from);
 	void set_revision(unsigned int revision);
 
-	virtual void on_insert(const position& pos,
-	                       const std::string& text) = 0;
-	virtual void on_delete(const position& from, const position& to) = 0;
-	
+	virtual void on_insert(position pos, const std::string& text) = 0;
+	virtual void on_delete(position from, position to) = 0;
+
+	virtual void emit_buffer_signal(const buffer& buf) const = 0;
+
 	static record* from_packet(const net6::packet& pack);
 protected:
 	void invalidate();
@@ -61,6 +64,7 @@ protected:
 	unsigned int m_revision;
 	unsigned int m_from;
 	bool m_valid;
+
 	static unsigned int m_counter; // id counter to create unique ids
 };
 

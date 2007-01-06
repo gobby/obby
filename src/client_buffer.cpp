@@ -62,40 +62,62 @@ void obby::client_buffer::select(unsigned int timeout)
 	m_connection.select(timeout);
 }
 
-void obby::client_buffer::insert(const position& pos, const std::string& text)
+void obby::client_buffer::insert(position pos, const std::string& text)
 {
 	// Insert into buffer
 	insert_nosync(pos, text);
 	// Add to unsynced changes
 	record* rec = new insert_record(pos, text, m_revision,
 	                                m_connection.get_self()->get_id() );
+	// Apply new change to other unsynced changes
+	std::list<record*>::iterator iter;
+	for(iter = m_unsynced.begin(); iter != m_unsynced.end(); )
+	{
+		rec->apply(**iter);
+
+		// Remove this change if it gets invalid
+		if(!(*iter)->is_valid() )
+		{
+			delete *iter;
+			iter = m_unsynced.erase(iter);
+		}
+		else
+			++ iter;
+	}
+	// Put new change to unsynced changes
 	m_unsynced.push_front(rec);
 	// Send sync request to server
 	m_connection.send(rec->to_packet() );
 }
 
-void obby::client_buffer::erase(const position& from, const position& to)
+void obby::client_buffer::erase(position from, position to)
 {
+	// Get text that will be erased
+	std::string text = m_buffer.substr(from, to - from);
 	// Delete from buffer
 	erase_nosync(from, to);
 	// Add to unsynced changes
-	record* rec = new delete_record(from, to, m_revision,
-	                                m_connection.get_self()->get_id() );
+	record* rec = new delete_record(from, text, m_revision,
+	                               m_connection.get_self()->get_id() );
+	// Apply new change to other unsynced changes
+	std::list<record*>::iterator iter;
+	for(iter = m_unsynced.begin(); iter != m_unsynced.end(); )
+	{
+		rec->apply(**iter);
+
+		// Remove this change if it gets invalid
+		if(!(*iter)->is_valid() )
+		{
+			delete *iter;
+			iter = m_unsynced.erase(iter);
+		}
+		else
+			++ iter;
+	}
+	// Put the new change into the list of unsynced changes
 	m_unsynced.push_front(rec);
 	// Send sync request to server
 	m_connection.send(rec->to_packet() );
-}
-
-obby::client_buffer::signal_insert_type
-obby::client_buffer::insert_event() const
-{
-	return m_signal_insert;
-}
-
-obby::client_buffer::signal_delete_type
-obby::client_buffer::delete_event() const
-{
-	return m_signal_delete;
 }
 
 obby::client_buffer::signal_join_type obby::client_buffer::join_event() const
@@ -158,97 +180,87 @@ void obby::client_buffer::on_login_failed(const std::string& reason)
 
 void obby::client_buffer::on_net_record(const net6::packet& pack)
 {
+	// Convert network packet to record
 	record* rec = record::from_packet(pack);
 	if(!rec) return;
 
-	// Undo all non-synced changes
+	// Apply the record to the history
+	m_history.push_front(rec->clone() );
+
+	// Apply unsynced changes on new record
 	std::list<record*>::iterator iter;
-	for(iter = m_unsynced.begin(); iter != m_unsynced.end(); ++iter)
-	{
-		record* rev_iter = (*iter)->reverse(*this);
-		rev_iter->apply(*this);
-		delete rev_iter;
+	for(iter = m_unsynced.begin(); iter != m_unsynced.end(); ++ iter)
+		(*iter)->apply(*rec);
 
-		// TODO: Check if it behaves correct if we have
-		// more than one unsynced changes
-		if( (*iter)->get_from() != rec->get_from() ||
-		    (*iter)->get_id() != rec->get_id() )
-		{
-			rec->apply(**iter);
-		}
-	}
-
-	// Apply new record
-	rec->apply(*this);
+	// Is the record still valid?
+	if(!rec->is_valid() )
+		return;
 
 	// Record in unsynced changes that is synced with this packet
 	record* sync_record = NULL;
 
-	// Redo all unsynced changes except the one that just came in
+	// Apply record on unsynced changes
 	while(iter != m_unsynced.begin() )
 	{
 		-- iter;
+		rec->apply(**iter);
 
-		// Check if this record is the one we are syncing
 		if( (*iter)->get_from() == rec->get_from() )
-		{
 			if( (*iter)->get_id() == rec->get_id() )
-			{
-				// Delete unsynced record
-				sync_record = (*iter)->reverse(*this);
-				delete *iter;
+				sync_record = *iter;
 
-				// Record is synced - remove from list
+		// Did the new change invalidate an unsynced one?
+		if(!(*iter)->is_valid() )
+		{
+			assert( (*iter) != sync_record);
+
+			// Remove it from the list of unsynced changes
+			delete *iter;
+			iter = m_unsynced.erase(iter);
+		}
+	}
+
+	// Remove unsynced change in order to be synced now
+	if(sync_record)
+	{
+		// Reverse the sync_record to undo it.
+		record* rev_sync = sync_record->reverse(*this);
+
+		// Apply the undo operations on other unsynced changes
+		std::list<record*>::iterator iter;
+		for(iter = m_unsynced.begin(); iter != m_unsynced.end(); )
+		{
+			if(*iter == sync_record)
 				iter = m_unsynced.erase(iter);
-				continue;
+			else
+			{
+				rev_sync->apply(**iter);
+				++iter;
 			}
 		}
 
-		// TODO: Maybe switch these two statements, don't know :/
-		// Apply the current change to the new record
-		(*iter)->apply(*rec);
+		// The unsynced change itself is no longer needed
+		delete sync_record;
 
-		// Apply the current change to the syncing record
-		if(sync_record) (sync_record)->apply(**iter);
+		// Apply undo of the unsynced change
+		rev_sync->apply(*rec);
+		rev_sync->apply(*this);
 
-		// Reapply revision to the buffer
-		(*iter)->apply(*this);
+		rev_sync->emit_buffer_signal(*this);
+		delete rev_sync;
 	}
 
-	// Put the synced record into history
-	m_history.push_front(rec);
+	// Apply record
+	rec->apply(*this);
 
-	// Update revision
+	// Update revision number
 	m_revision = rec->get_revision();
 
-	// TODO: Check if sync_record record changes the document
-	// or if sync_record and rec result in the same document.
-	// Don't emit any signals in this case.
-
 	// Emit changed signal
-	// again, HACKHACKHACK :D
-	if(pack.get_param(0).as_string() == "insert")
-	{
-		if(sync_record)
-			m_signal_delete.emit(
-				*static_cast<delete_record*>(sync_record) );
+	rec->emit_buffer_signal(*this);
 
-		m_signal_insert.emit(
-			*static_cast<insert_record*>(rec) );
-	}
-		
-	if(pack.get_param(0).as_string() == "delete")
-	{
-		if(sync_record)
-			m_signal_insert.emit(
-				*static_cast<insert_record*>(sync_record) );
-
-		m_signal_delete.emit(
-			*static_cast<delete_record*>(rec) );
-	}
-
-	// sync_record is not needed any longer.
-	delete sync_record;
+	// rec is no longer needed, a copy has been put into the history
+	delete rec;
 }
 
 void obby::client_buffer::on_net_sync_init(const net6::packet& pack)
@@ -257,7 +269,7 @@ void obby::client_buffer::on_net_sync_init(const net6::packet& pack)
 	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
 
 	m_revision = pack.get_param(0).as_int();
-	m_lines.clear();
+	m_buffer = "";
 }
 
 void obby::client_buffer::on_net_sync_line(const net6::packet& pack)
@@ -265,7 +277,9 @@ void obby::client_buffer::on_net_sync_line(const net6::packet& pack)
 	if(pack.get_param_count() < 1) return;
 	if(pack.get_param(0).get_type() != net6::packet::param::STRING) return;
 
-	m_lines.push_back(pack.get_param(0).as_string() );
+	if(!m_buffer.empty() )
+		m_buffer += "\n";
+	m_buffer += pack.get_param(0).as_string();
 }
 
 void obby::client_buffer::on_net_sync_final(const net6::packet& pack)

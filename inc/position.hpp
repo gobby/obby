@@ -23,41 +23,9 @@
 
 namespace obby
 {
+
+typedef std::string::size_type position;
 	
-class position
-{
-public:
-	position();
-	position(unsigned int line, unsigned int col);
-	position(const std::string& str); // Create position at end of string
-	position(const position& other);
-	~position();
-	
-	position& operator=(const position& other);
-
-	unsigned int get_line() const;
-	unsigned int get_col() const;
-
-	void move_to(unsigned int line, unsigned int col);
-	void move_by(int lines, int cols);
-
-	int compare(const position& other) const;
-	bool operator==(const position& other) const;
-	bool operator!=(const position& other) const;
-	bool operator<(const position& other) const;
-	bool operator<=(const position& other) const;
-	bool operator>(const position& other) const;
-	bool operator>=(const position& other) const;
-
-	position& operator+=(const position& other);
-	position operator+(const position& other) const;
-
-	void sub_range(const position& from, const position& to);
-private:
-	unsigned int m_line;
-	unsigned int m_col;
-};
-
 }
 
 #endif // _OBBY_POSITION_HPP_
