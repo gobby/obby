@@ -15,7 +15,6 @@ Normal:
   * Authentication: Database-based authentication using user/password (#57)
   * Authentication: Access control lists (#58)
   * Use precompiled headers (#61)
-  * Encoding should be preserved (#65)
   * UPNP support (#77)
 
 Minor:
@@ -73,12 +72,6 @@ list protection.
 61: Use precompiled headers
 ---------------------------
 All projects should make use of precompiled headers.
-
-65: Encoding should be preserved
---------------------------------
-The incoming encoding from what it is converted should be saved internally 
-on the host which opened them, so that the save function results in a file 
-with the original one.
 
 77: UPNP support
 ----------------
