@@ -33,6 +33,9 @@ class basic_host_buffer : virtual public basic_local_buffer<selector_type>,
                           virtual public basic_server_buffer<selector_type>
 {
 public:
+	typedef net6::basic_server<selector_type> base_net_type;
+	typedef basic_server_document_info<selector_type> base_document_info;
+
 	typedef net6::basic_host<selector_type> net_type;
 	typedef basic_host_document_info<selector_type> document_info;
 
@@ -101,20 +104,22 @@ public:
 protected:
 	/** Creates a new document info object according to the type of buffer.
 	 */
-	virtual document_info* new_document_info(const user* owner,
-	                                         unsigned int id,
-	                                         const std::string& title,
-	                                         const std::string& content);
+	virtual base_document_info*
+	new_document_info(const user* owner,
+	                  unsigned int id,
+	                  const std::string& title,
+	                  const std::string& content);
 
 	/** Creates a new document info deserialised from a serialisation
 	 * object according to the type of buffer.
 	 */
-	virtual document_info* new_document_info(const serialise::object& obj);
+	virtual base_document_info*
+	new_document_info(const serialise::object& obj);
 
 	/** Creates the underlaying net6 network object corresponding to the
 	 * buffer's type.
 	 */
-	virtual net_type* new_net(unsigned int port);
+	virtual base_net_type* new_net(unsigned int port);
 
 	std::string m_username;
 	colour m_colour;
@@ -283,7 +288,7 @@ void basic_host_buffer<selector_type>::set_colour(const colour& colour)
 }
 
 template<typename selector_type>
-typename basic_host_buffer<selector_type>::document_info*
+typename basic_host_buffer<selector_type>::base_document_info*
 basic_host_buffer<selector_type>::
 	new_document_info(const user* owner, unsigned int id,
 	                  const std::string& title, const std::string& content)
@@ -293,7 +298,7 @@ basic_host_buffer<selector_type>::
 }
 
 template<typename selector_type>
-typename basic_host_buffer<selector_type>::document_info*
+typename basic_host_buffer<selector_type>::base_document_info*
 basic_host_buffer<selector_type>::
 	new_document_info(const serialise::object& obj)
 {
@@ -302,7 +307,7 @@ basic_host_buffer<selector_type>::
 }
 
 template<typename selector_type>
-typename basic_host_buffer<selector_type>::net_type*
+typename basic_host_buffer<selector_type>::base_net_type*
 basic_host_buffer<selector_type>::new_net(unsigned int port)
 {
 	return new net_type(port, m_username);
