@@ -17,6 +17,7 @@
  */
 
 #include <iostream>
+#include "gettext.hpp"
 #include "sha1.hpp"
 #include "client_document.hpp"
 #include "client_buffer.hpp"
@@ -56,6 +57,13 @@ void obby::client_buffer::login(const std::string& name, int red, int green,
                                 int blue, const std::string& global_password,
                                 const std::string& user_password)
 {
+	// No login without key
+	if(!m_public)
+		throw std::runtime_error(_(
+			"No server public key available, wait for "
+			"the welcome packet"
+		) );
+
 	m_name = name;
 	m_red = red;
 	m_green = green;
