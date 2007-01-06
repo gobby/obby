@@ -25,8 +25,9 @@ public:
 	screen(const obby::buffer& buffer);
 	~screen();
 
-	unsigned int get_cursor_x();
-	unsigned int get_cursor_y();
+	unsigned int get_cursor() const;
+	unsigned int get_cursor_x() const;
+	unsigned int get_cursor_y() const;
 
 	void set_cursor(unsigned int x, unsigned int y);
 	void move_cursor(int by_x, int by_y, bool priority_x);
@@ -59,14 +60,19 @@ screen::~screen()
 	endwin();
 }
 
-unsigned int screen::get_cursor_x()
+unsigned int screen::get_cursor() const
+{
+	return m_cursor;
+}
+
+unsigned int screen::get_cursor_x() const
 {
 	unsigned int cursor_x, cursor_y;
 	m_buffer.position_to_coord(m_cursor, cursor_x, cursor_y);
 	return cursor_x;
 }
 
-unsigned int screen::get_cursor_y()
+unsigned int screen::get_cursor_y() const
 {
 	unsigned int cursor_x, cursor_y;
 	m_buffer.position_to_coord(m_cursor, cursor_x, cursor_y);
@@ -145,7 +151,7 @@ void screen::on_insert(obby::position position, const std::string& text)
 
 void screen::on_erase(obby::position from, obby::position to)
 {
-	assert(to > from);
+	assert(to >= from);
 	if(m_cursor >= to)
 		m_cursor -= (to - from);
 	else if(m_cursor >= from && m_cursor < to)
@@ -266,21 +272,21 @@ void curses_editor::run()
 		if(c != ERR && m_synced)
 		{
 			// Get cursor position
-			unsigned int x = m_screen.get_cursor_x();
-			unsigned int y = m_screen.get_cursor_y();
+//			unsigned int x = m_screen.get_cursor_x();
+//			unsigned int y = m_screen.get_cursor_y();
 
 			// Check for printable characters
 			if(isprint(c) && c <= 0xff)
 			{
 				char string[2] = { c, '\0' };
-				m_buffer.insert(m_buffer.coord_to_position(x, y), string);
-				m_screen.on_insert(m_buffer.coord_to_position(x, y), string);
+				m_buffer.insert(m_screen.get_cursor(), string);
+				m_screen.on_insert(m_screen.get_cursor(), string);
 			}
 
 			if(c == '\r')
 			{
-				m_buffer.insert(m_buffer.coord_to_position(x, y), "\n");
-				m_screen.on_insert(m_buffer.coord_to_position(x, y), "\n");
+				m_buffer.insert(m_screen.get_cursor(), "\n");
+				m_screen.on_insert(m_screen.get_cursor(), "\n");
 			}
 
 			if(c == KEY_LEFT)
@@ -291,6 +297,11 @@ void curses_editor::run()
 				m_screen.move_cursor(0, -1, false);
 			if(c == KEY_DOWN)
 				m_screen.move_cursor(0, 1, false);
+			if(c == KEY_BACKSPACE)
+			{
+				m_buffer.erase(m_screen.get_cursor() - 1, m_screen.get_cursor() );
+				m_screen.on_erase(m_screen.get_cursor() - 1, m_screen.get_cursor() );
+			}
 
 			if(c == 'q')
 				quit();

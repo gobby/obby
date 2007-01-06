@@ -4,8 +4,9 @@ libobby
 This file lists prioritised items which need to be fixed or developed.
 
 Serious:
- * Draft an API which could manage and process changes from multiple clients.
- * Draft a network protocol to transmit those changes.
+ * Hide equivalent insert/delete change calls
+ * Check for valid records or something, however, deleting text does not work
+   correctly
 
 Important:
  * Implement automatic service announcement and discovery.
