@@ -684,9 +684,11 @@ bool basic_server_buffer<selector_type>::
 	}
 
 	// Search user in user table
-	const user_table& table = basic_buffer<selector_type>::m_user_table;
-	const obby::user* user =
-		 table.find(name, user::flags::NONE, user::flags::CONNECTED);
+	const obby::user* user = basic_buffer<selector_type>::m_user_table.find(
+		name,
+		user::flags::NONE,
+		user::flags::CONNECTED
+	);
 
 	// Compare user password
 	if(user && !user->get_password().empty() )
