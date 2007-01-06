@@ -14,9 +14,10 @@ Normal:
  * Sync-On-Request
  * UTF-8 string handling (Well, do we care about encodings?)
  * Host sends record with user id 0 instead of local user
- * Link to net6 and sigc on WIN32
- * Load/Save documents to/from file and/or memory
- * Load/Save complete obby session
+ * Session serialisation:
+   - Load/save documents to/from file and/or memory while preserving history
+   - Load/save complete obby session
+   - Use XML to serialise a tree of objects
 
 Minor:
  * Implement indent_record and unindent_record to (un)indent lines of text
