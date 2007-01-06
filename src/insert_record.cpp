@@ -52,11 +52,7 @@ void obby::insert_record::on_insert(const position& pos,
 	if(pos <= m_pos)
 	{
 		position size(text);
-		m_pos.move_by(size.get_line() - 1, 0);
-		if(size.get_line() > 1)
-			m_pos.move_to(m_pos.get_line(), size.get_col() );
-		else
-			m_pos.move_by(0, size.get_col() );
+		m_pos += size;
 	}
 }
 

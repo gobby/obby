@@ -28,7 +28,7 @@ obby::position::position(unsigned int line, unsigned int col)
 }
 
 obby::position::position(const std::string& str)
- : m_line(1)
+ : m_line(0)
 {
 	std::string::size_type cur = 0, prev = 0;
 	while((cur = str.find('\n', cur)) != std::string::npos)
@@ -122,3 +122,18 @@ bool obby::position::operator>=(const position& other) const
 {
 	return compare(other) != -1;
 }
+
+obby::position& obby::position::operator+=(const position& other)
+{
+	m_line += other.m_line;
+	if(other.m_line > 0)
+		m_col = other.m_col;
+	else
+		m_col += other.m_col;
+}
+
+obby::position obby::position::operator+(const position& other) const
+{
+	return(position(*this) += other);
+}
+

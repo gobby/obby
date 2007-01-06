@@ -48,6 +48,9 @@ public:
 	bool operator<=(const position& other) const;
 	bool operator>(const position& other) const;
 	bool operator>=(const position& other) const;
+
+	position& operator+=(const position& other);
+	position operator+(const position& other) const;
 private:
 	unsigned int m_line;
 	unsigned int m_col;
