@@ -99,7 +99,7 @@ namespace RSA
 	 * if the key matches.
 	 */
 	std::string decrypt(const Key& key, const std::string& msg);
-};
+}
 
 }
 
