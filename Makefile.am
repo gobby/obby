@@ -4,7 +4,7 @@ SUBDIRS += test
 endif
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = obby-1.0.pc
+pkgconfig_DATA = obby-0.2.pc
 
 # gettext
 EXTRA_DIST = config.rpath mkinstalldirs
