@@ -18,6 +18,7 @@
 
 #include "common.hpp"
 #include "config.hpp"
+#include "gettext.hpp"
 
 const char* obby_version()
 {
@@ -31,4 +32,13 @@ extern "C" void obby_has_howl()
 	return;
 }
 #endif
+
+void obby::init_gettext()
+{
+#ifdef ENABLE_NLS
+	// Gettext initialisation
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	bind_textdomain_codeset(PACKAGE, "UTF-8");
+#endif
+}
 

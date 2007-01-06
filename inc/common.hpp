@@ -25,5 +25,15 @@ const char* obby_version();
 
 }
 
+namespace obby
+{
+
+/** Initializes gettext for usage with libobby. The constructor of the main
+ * libobby objects (basic_buffer and derivates) call this function.
+ */
+void init_gettext();
+
+}
+
 #endif // _OBBY_COMMON_HPP_
 
