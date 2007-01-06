@@ -82,17 +82,11 @@ public:
 	 */
 	virtual void select(unsigned int timeout) = 0;
 
-	/* Creates a new document. signal_insert_document will be emitted if
-	 * it has been created.
-	 */
-	virtual void create_document(const std::string& title) = 0;
-
 	/* Creates a new document with predefined content.
 	 * signal_insert_document will be emitted if it has been created.
-	 * Additional signals will be emitted for the synced content.
 	 */
 	virtual void create_document(const std::string& title,
-	                             const std::string& content) = 0;
+	                             const std::string& content = "") = 0;
 
 	/** Renames an existing document. signal_rename_document will be
 	 * emitted if the document has been renamed.

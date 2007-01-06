@@ -15,6 +15,8 @@ Normal:
  * UTF-8 string handling (Well, do we care about encodings?)
  * Host sends record with user id 0 instead of local user
  * Link to net6 and sigc on WIN32
+ * Load/Save documents to/from file and/or memory
+ * Load/Save complete obby session
 
 Minor:
  * Implement indent_record and unindent_record to (un)indent lines of text

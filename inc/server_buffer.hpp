@@ -51,18 +51,12 @@ public:
 	 */
 	virtual void select(unsigned int timeout);
 	
-	/** Creates a new document. signal_insert_document will be emitted
-	 * and may be used to access the resulting obby::document.
-	 */
-	virtual void create_document(const std::string& title);
-
 	/** Creates a new document with predefined content.
 	 * signal_insert_document will be emitted and may be used to access
-	 * the resulting obby::document. Additional signals will be emitted
-	 * for the synced content.
+	 * the resulting obby::document.
 	 */
 	virtual void create_document(const std::string& title,
-	                             const std::string& content);
+	                             const std::string& content = "");
 
 	/** Renames an existing document.
 	 */
@@ -115,17 +109,17 @@ protected:
 	 */
 	void relay_message(unsigned int uid, const std::string& message);
 	
+	void on_connect(net6::server::peer& peer);
+	void on_disconnect(net6::server::peer& peer);
 	void on_join(net6::server::peer& peer);
-	void on_pre_login(net6::server::peer& peer, const net6::packet& pack);
-	void on_post_login(net6::server::peer& peer, const net6::packet& pack);
 	void on_part(net6::server::peer& peer);
-	void on_data(const net6::packet& pack, net6::server::peer& from);
 	bool on_auth(net6::server::peer& peer, const net6::packet& pack,
 	             std::string& reason);
+	void on_login(net6::server::peer& peer, const net6::packet& pack);
 	void on_extend(net6::server::peer& peer, net6::packet& pack);
+	void on_data(net6::server::peer& from, const net6::packet& pack);
 
 	void on_net_record(const net6::packet& pack, user& from);
-	void on_net_title(const net6::packet& pack, user& from);
 
 	void on_net_document_create(const net6::packet& pack, user& from);
 	void on_net_document_rename(const net6::packet& pack, user& from);

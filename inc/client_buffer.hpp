@@ -56,18 +56,12 @@ public:
 	 */
 	void login(const std::string& name, int red, int green, int blue);
 
-	/** Requests a new document at the server. signal_insert_document
-	 * will be emitted if the server authorised the creation process.
-	 */
-	virtual void create_document(const std::string& title);
-
 	/** Requests a new document at the server and sync its initial
 	 * contents. signal_insert_document will be emitted if the server
-	 * authorised the creation process. Additionals signals will be
-	 * emitted for the synced content.
+	 * authorised the creation process.
 	 */
 	virtual void create_document(const std::string& title,
-	                             const std::string& content);
+	                             const std::string& content = "");
 
 	/** Requests a new name for an existing document.
 	 */
@@ -125,13 +119,12 @@ protected:
 	 */
 	void register_signal_handlers();
 
-        /** Adds a new document with the given ID to the buffer. The internal
-	 * ID counter is set to the new given document ID.
+        /** Adds a new client_document with the given ID to the buffer.
 	 */
 	virtual document& add_document(unsigned int id);
 
 	void on_join(net6::client::peer& peer, const net6::packet& pack);
-	void on_part(net6::client::peer& peer);
+	void on_part(net6::client::peer& peer, const net6::packet& pack);
 	void on_close();
 	void on_data(const net6::packet& pack);
 	void on_login_failed(const std::string& reason);

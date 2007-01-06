@@ -63,17 +63,11 @@ void obby::client_buffer::login(const std::string& name, int red, int green,
 	m_client->custom_login(login_pack);
 }
 
-void obby::client_buffer::create_document(const std::string& title)
-{
-	create_document(title, "");
-}
-
 void obby::client_buffer::create_document(const std::string& title,
                                           const std::string& content)
 {
 	net6::packet request_pack("obby_document_create");
-	request_pack << title;
-	request_pack << content;
+	request_pack << title << content;
 	m_client->send(request_pack);
 }
 
@@ -152,7 +146,8 @@ void obby::client_buffer::on_join(net6::client::peer& peer,
 	m_signal_user_join.emit(*new_user);
 }
 
-void obby::client_buffer::on_part(net6::client::peer& peer)
+void obby::client_buffer::on_part(net6::client::peer& peer,
+                                  const net6::packet& pack)
 {
 	user* cur_user = find_user(peer.get_id() );
 	assert(cur_user != NULL);
