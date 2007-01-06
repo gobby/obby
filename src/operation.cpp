@@ -16,24 +16,36 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "record.hpp"
+#include "operation.hpp"
 
-obby::record::record(const vector_time& timestamp, const operation& op)
- : m_timestamp(timestamp), m_operation(op.clone() )
+obby::operation::operation()
+ : m_original(NULL)
 {
 }
 
-obby::record::record(const vector_time& timestamp, operation* op)
- : m_timestamp(timestamp), m_operation(op)
+obby::operation::operation(const operation& original)
+ : m_original(new original_operation)
 {
+	m_original->op.reset(original.clone() );
+	m_original->refcount = 1;
 }
 
-const obby::operation& obby::record::get_operation() const
+obby::operation::operation(original_operation* original)
+ : m_original(original)
 {
-	return *m_operation;
+	if(m_original != NULL)
+		++ m_original->refcount;
 }
 
-const obby::vector_time& obby::record::get_time() const
+obby::operation::~operation()
 {
-	return m_timestamp;
+	if(m_original != NULL)
+	{
+		-- m_original->refcount;
+		if(m_original->refcount == 0)
+		{
+			delete m_original;
+		}
+	}
 }
+

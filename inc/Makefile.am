@@ -9,10 +9,13 @@ pkginclude_HEADERS += user.hpp
 pkginclude_HEADERS += user_table.hpp
 pkginclude_HEADERS += line.hpp
 pkginclude_HEADERS += document.hpp
-
+pkginclude_HEADERS += operation.hpp
+pkginclude_HEADERS += no_operation.hpp
+pkginclude_HEADERS += split_operation.hpp
+pkginclude_HEADERS += insert_operation.hpp
+pkginclude_HEADERS += delete_operation.hpp
 pkginclude_HEADERS += record.hpp
-pkginclude_HEADERS += delete_record.hpp
-pkginclude_HEADERS += insert_record.hpp
+
 pkginclude_HEADERS += local_document.hpp
 pkginclude_HEADERS += client_document.hpp
 pkginclude_HEADERS += server_document.hpp
