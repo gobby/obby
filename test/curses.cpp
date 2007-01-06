@@ -19,9 +19,6 @@ const int CURSES_ERR = ERR;
 #undef ERR
 #define ERR CURSES_ERR
 
-#include <fstream>
-std::ofstream out("foo");
-
 class screen
 {
 public:
@@ -30,18 +27,17 @@ public:
 
 	unsigned int get_cursor_x();
 	unsigned int get_cursor_y();
-//	void set_cursor(unsigned int x, unsigned int y);
 
 	void on_insert(obby::position position, const std::string& text);
 	void on_erase(obby::position from, obby::position to);
 
 	void redraw();
+	void scroll_to_cursor();
 
 protected:
 	const obby::buffer& m_buffer;
 	unsigned int m_scroll_x, m_scroll_y;
 	unsigned int m_cursor;
-//	unsigned int m_cursor_x, m_cursor_y;
 };
 
 screen::screen(const obby::buffer& buffer)
@@ -76,26 +72,19 @@ unsigned int screen::get_cursor_y()
 
 void screen::on_insert(obby::position position, const std::string& text)
 {
-//	obby::position cursor;
-//	cursor = m_buffer.coord_to_position(m_cursor_x, m_cursor_y);
 	if(position <= m_cursor) m_cursor += text.length();
-//	m_buffer.position_to_coord(cursor, m_cursor_x, m_cursor_y);
-
+	scroll_to_cursor();
 	redraw();
 }
 
 void screen::on_erase(obby::position from, obby::position to)
 {
 	assert(to > from);
-
-//	obby::position cursor;
-//	cursor = m_buffer.coord_to_position(m_cursor_x, m_cursor_y);
 	if(m_cursor >= to)
 		m_cursor -= (to - from);
 	else if(m_cursor >= from && m_cursor < to)
 		m_cursor = from;
-//	m_buffer.position_to_coord(cursor, m_cursor_x, m_cursor_y);
-
+	scroll_to_cursor();
 	redraw();
 }
 
@@ -114,21 +103,37 @@ void screen::redraw()
 		std::string new_text = m_buffer.get_line(y);
 		if(new_text.length() <= m_scroll_x) continue;
 
+		
 		new_text = new_text.substr(m_scroll_x);
 		if(new_text.length() > COLS)
-			new_text = new_text.erase(0, COLS);
+			new_text = new_text.substr(0, COLS);
 
 		printw(new_text.c_str() );
 	}
 
 	unsigned int cursor_x, cursor_y;
 	m_buffer.position_to_coord(m_cursor, cursor_x, cursor_y);
-	out << cursor_x << ", " << cursor_y << std::endl;
 	int cx = cursor_x, cy = cursor_y;
 	cx -= m_scroll_x, cy -= m_scroll_y;
 
 	assert(cx >= 0 && cy >= 0 && cx < COLS && cy < LINES);
 	move(cy, cx);
+}
+
+void screen::scroll_to_cursor()
+{
+	unsigned int cursor_x, cursor_y;
+	m_buffer.position_to_coord(m_cursor, cursor_x, cursor_y);
+
+	if(m_scroll_x + COLS <= cursor_x)
+		m_scroll_x = cursor_x - COLS + 1;
+	if(cursor_x < m_scroll_x)
+		m_scroll_x = cursor_x;
+
+	if(m_scroll_y + LINES < cursor_y)
+		m_scroll_y = cursor_y - LINES;
+	if(cursor_y < m_scroll_y)
+		m_scroll_y = cursor_y;
 }
 
 class curses_editor : public sigc::trackable
