@@ -30,7 +30,7 @@ obby::server_user_table::~server_user_table()
 {
 }
 
-void obby::server_user_table::synchronize(net6::server::peer& peer)
+void obby::server_user_table::synchronise(net6::server::peer& peer)
 {
 	// Send init packet
 	net6::packet init_pack("obby_sync_usertable_init");

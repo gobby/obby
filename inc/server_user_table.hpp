@@ -39,7 +39,7 @@ public:
 
 	/** Synchronize a user table with a client.
 	 */
-	void synchronize(net6::server::peer& peer);
+	void synchronise(net6::server::peer& peer);
 protected:
 	net6::server& m_server;
 	const server_buffer& m_buffer;

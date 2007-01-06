@@ -62,7 +62,7 @@ public:
 
 	/** Synchronize document to a peer.
 	 */
-	void synchronize(net6::server::peer& peer);
+	void synchronise(net6::server::peer& peer);
 
 protected:
 	net6::server& m_server;

@@ -201,14 +201,14 @@ void obby::server_buffer::on_post_login(net6::server::peer& peer,
 	m_server->send(init_sync, peer);
 
 	// Synchronize user table first
-	static_cast<server_user_table*>(m_usertable)->synchronize(peer);
+	static_cast<server_user_table*>(m_usertable)->synchronise(peer);
 
 	// Synchronize the documents
 	std::list<document*>::iterator iter;
 	for(iter = m_doclist.begin(); iter != m_doclist.end(); ++ iter)
-		static_cast<server_document*>(*iter)->synchronize(peer);
+		static_cast<server_document*>(*iter)->synchronise(peer);
 
-	// Done with synchronizing
+	// Done with synchronising
 	net6::packet final_sync("obby_sync_final");
 	m_server->send(final_sync, peer);
 

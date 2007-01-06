@@ -95,7 +95,7 @@ void obby::server_document::on_net_record(record& rec)
 	rec.emit_document_signal(*this);
 }
 
-void obby::server_document::synchronize(net6::server::peer& peer)
+void obby::server_document::synchronise(net6::server::peer& peer)
 {
 	// Send doc initial sync packet with document revision
 	net6::packet init_pack("obby_sync_doc_init");
@@ -106,7 +106,7 @@ void obby::server_document::synchronize(net6::server::peer& peer)
 	std::vector<line>::const_iterator iter;
 	for(iter = m_lines.begin(); iter != m_lines.end(); ++ iter)
 		m_server.send(iter->to_packet(m_id), peer);
-//		iter->synchronize(peer, m_server, m_id);
+//		iter->synchronise(peer, m_server, m_id);
 /*	{
 		net6::packet line_pack("obby_sync_doc_line");
 		line_pack << m_id << *iter;
