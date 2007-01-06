@@ -27,7 +27,6 @@
 #include "ptr_iterator.hpp"
 #include "user.hpp"
 #include "document.hpp"
-#include "user_table.hpp"
 
 namespace obby
 {
@@ -45,13 +44,6 @@ public:
 		std::list<document*>,
 		std::list<document*>::const_iterator
 	> document_iterator;
-
-	// User iterator typedef 
-	typedef ptr_iterator<
-		user,
-		std::list<user*>,
-		std::list<user*>::const_iterator
-	> user_iterator;
 
 	// Signal types
 	typedef sigc::signal<void, user&> signal_user_join_type;
@@ -104,14 +96,6 @@ public:
 	 */
 	document* find_document(unsigned int id) const;
 
-	/** Looks for a user with the given ID.
-	 */
-	user* find_user(unsigned int id) const;
-
-	/** Looks for a user with the given user name.
-	 */
-	user* find_user(const std::string& name) const;
-
 	/** Returns the begin of the document list.
 	 */
 	document_iterator document_begin() const;
@@ -123,18 +107,6 @@ public:
 	/** Returns the size of the document list.
 	 */
 	std::list<document*>::size_type document_count() const;
-
-	/** Returns the begin of the user list.
-	 */
-	user_iterator user_begin() const;
-
-	/** Returns the end of the user list.
-	 */
-	user_iterator user_end() const;
-
-	/** Returns the size of the user list.
-	 */
-	std::list<user*>::size_type user_count() const;
 
 	/** Sends a global chat message to all users.
 	 */
@@ -175,14 +147,6 @@ public:
 	signal_server_message_type server_message_event() const;
 
 protected:
-	/** Internal function to add a new user to the user list.
-	 */
-	virtual user* add_user(net6::peer& peer, int red, int green, int blue);
-
-	/** Internal function to remove an existing user from the user list.
-	 */
-	virtual void remove_user(user* user_to_remove);
-
 	/** Adds a new document with the given ID to the buffer. The internal
 	 * ID counter is set to the new given document ID.
 	 */
@@ -192,17 +156,13 @@ protected:
 	 */
 	net6::main m_netkit;
 
-	/** User table to identify users through multiple obby sessions.
+	/** User table which stores all the users in the session.
 	 */
-	user_table* m_usertable;
+	user_table m_usertable;
 
 	/** List of documents.
 	 */
 	std::list<document*> m_doclist;
-
-	/** User list.
-	 */
-	std::list<user*> m_userlist;
 
 	signal_user_join_type m_signal_user_join;
 	signal_user_part_type m_signal_user_part;

@@ -17,7 +17,6 @@
  */
 
 #include <cassert>
-#include "host_user_table.hpp"
 #include "host_document.hpp"
 #include "host_buffer.hpp"
 
@@ -33,15 +32,9 @@ obby::host_buffer::host_buffer(unsigned int port, const std::string& username,
 	net6::host* host = new net6::host(port, username, false);
 	m_server = host;
 
-	m_usertable = new host_user_table(*host, *this);
-	
 	assert(host->get_self() );
-	m_self = add_user(*host->get_self(), red, green, blue);
-	/*
-	m_self = new user(*host->get_self(), red, green, blue);
-	m_userlist.push_back(m_self);
-	m_usertable->insert(*m_self);
-	*/
+	m_self = m_usertable.add_user(*host->get_self(), red, green, blue);
+
 	register_signal_handlers();
 }
 
@@ -52,17 +45,6 @@ obby::host_buffer::~host_buffer()
 		delete m_server;
 		m_server = NULL;
 	}
-
-	if(m_usertable)
-	{
-		delete m_usertable;
-		m_usertable = NULL;
-	}
-}
-
-const obby::host_user_table& obby::host_buffer::get_user_table() const
-{
-	return *static_cast<host_user_table*>(m_usertable);
 }
 
 obby::user& obby::host_buffer::get_self()

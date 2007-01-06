@@ -21,128 +21,269 @@
 
 #include <list>
 #include <string>
+#include <net6/non_copyable.hpp>
+#include "ptr_iterator.hpp"
 #include "user.hpp"
-	
+
 namespace obby
 {
 
-/** User table to store user information through multiple obby sessions or
- * to store user colourising even if a user has lost the connection.
+/** Table that contains all users.
  */
-	
+
 class user_table : private net6::non_copyable
 {
 public:
-	/** User in the user table. Be sure to make a difference between
-	 * obby::user and obby::user_table::user! obby::user is a user
-	 * that is currently participating at the obby session,
-	 * obby::user_table::user just holds some information to identify
-	 * a user through multiple obby sessions.
-	 */
-	class user
+	// Basic user iterator typedef 
+	typedef ptr_iterator<
+		user,
+		std::list<user*>,
+		std::list<user*>::const_iterator
+	> basic_user_iterator;
+
+	// User iterator class. It iterates through all the users whose
+	// flags match (or don't match if inverse is true) the given flags.
+	template<user::flags matching_flags/* = user::NONE*/, bool inverse = false>
+	class user_iterator : public basic_user_iterator
 	{
-		friend class user_table;
 	public:
-		/** Creates a new user for the user table. Usually the user
-		 * table creates its users and you do not have to use this
-		 * constructor manually.
-		 * @param id Unique ID for this user
-		 * @param obj obby::user object associated with this user.
-		 */
-		user(unsigned int id, obby::user& obj);
+		typedef basic_user_iterator base_iterator;
+		typedef std::list<user*> list_type;
 
-		/** Creates a new user for the user table. Usually the user
-		 * tables creates its users and you do not have to use this
-		 * constructor manually.
-		 * @param id Uniquie ID for this user
-		 * @param name Name of this uer
-		 * @param red Red color component of the user color
-		 * @param green Green color component of the user color
-		 * @param blue Blue color component of the user color
-		 */
-		user(unsigned int id, const std::string& name,
-		     unsigned int red, unsigned int green, unsigned int blue);
+		user_iterator(const list_type& list)
+		 : base_iterator(), m_list(list) {
+			// Increase to first valid value
+			inc_valid();
+		}
 
-		user(const user& other);
-		~user();
+		user_iterator(const list_type& list, const base_iterator& iter)
+		 : base_iterator(iter), m_list(list) {
+			// Increate to first valid value
+			inc_valid();
+		}
 
-		/** Returns the ID for this user.
-		 */
-		unsigned int get_id() const;
+		user_iterator& operator++() {
+			base_iterator::operator++ ();
+			inc_valid();
+		}
 
-		/** Returns the corresponding obby::user object. It may return
-		 * NULL if this user has already left the obby session.
-		 */
-		obby::user* get_user() const;
+		user_iterator& operator--() {
+			base_iterator::operator--();
+			dec_valid();
+		}
 
-		/** Returns the name of this user.
-		 */
-		const std::string& get_name() const;
+		user_iterator operator++(int dummy) {
+			user_iterator temp = *this;
+			operator++();
+			return temp;
+		}
 
-		/** Returns the red color component of this user.
-		 */
-		unsigned int get_red() const;
-
-		/** Returns the green color component of this user.
-		 */
-		unsigned int get_green() const;
-
-		/** Returns the blue color component of this user.
-		 */
-		unsigned int get_blue() const;
-
+		user_iterator operator--(int dummy) {
+			user_iterator temp = *this;
+			operator--();
+			return temp;
+		}
 	protected:
-		unsigned int m_id;
-		obby::user* m_obj;
-		std::string m_name;
-		unsigned int m_red, m_green, m_blue;
+		/** If the current value is not a value according to
+		 * <em>matching_flags</em>, the iterator is increased until
+		 * a valid value has been found.
+		 */
+		void inc_valid() {
+			while( (*this != m_list.end()) && (inverse ? (
+				((*this)->get_flags() & matching_flags)
+					!= 0
+				) : ( ((*this)->get_flags() & matching_flags)
+					!= matching_flags
+				) )
+			) {
+				base_iterator::operator++();
+			}
+		}
+
+		/** Same as inc_valid(), but the iterator is decreaed until
+		 * such a value has been found.
+		 */
+		void dec_valid() {
+			while( (*this != m_list.begin()) && (inverse ? (
+				((*this)->get_flags() & matching_flags)
+					!= 0
+				) : ( ((*this)->get_flags() & matching_flags)
+					!= matching_flags
+				) )
+			) {
+				base_iterator::operator--();
+			}
+		}
+
+		/** Underlaying list.
+		 */
+		const list_type& m_list;
 	};
 
-	typedef std::list<user>::const_iterator user_iterator;
-	
-	/** Creates a new user table.
-	 */
 	user_table();
-	~user_table();
+	virtual ~user_table();
 
-	/** Inserts a new user into the table. An old user is used if
-	 * he has the same name as the new one.
+	/** Adds a new user to the user list. The name and ID is read from the
+	 * peer object. Because of the fact that a peer object exists, the new
+	 * user will be marked as connected. If a user with the same ID exists,
+	 * and is not connected, the peer will be assigned to this user, the
+	 * colour is updated. If a user with this ID is already connected, an
+	 * error is dropped on stderr.
+	 * TODO: Cincider the use of exceptions
 	 */
-	void insert_user(obby::user& new_user);
+	obby::user* add_user(net6::peer& peer, int red, int green, int blue);
 
-	/** Removes a user from the user table. User information such as
-	 * name and color are stored further on to identify new users.
+	/** Adds a new user to the user list. No peer exists, so the connected
+	 * flag will not be set. If a user with this ID exists already, an
+	 * error message is dropped on stderr.
+	 * TODO: Concider the use of exceptions
 	 */
-	void delete_user(obby::user& old_user);
+	obby::user* add_user(unsigned int id, const std::string& name, int red,
+	                     int green, int blue);
 
-	/** Finds a user by its user id. Note that this is the user id of the
-	 * obby::user_table::user, not the one of the corresponding obby::user.
+	/** Removes a user from the user list. This means that this user gets
+	 * marked as non-connected and the reference to the underlaying peer
+	 * object is dropped.
 	 */
-	const user* find(unsigned int id) const;
-
-	/** Finds a user by its user id. Note that this is the user id of the
-	 * corresponding obby::user, not the one of the obby::user_table::user.
-	 */
-	const user* find_from_user_id(unsigned int id) const;
-
+	void remove_user(user* user_to_remove);
+	
 	/** Returns the beginning of the user list.
 	 */
-	user_iterator user_begin() const;
+	template<user::flags matching_flags, bool inverse>
+	user_iterator<matching_flags, inverse> user_begin() const {
+		return user_iterator<matching_flags, inverse>(
+			m_userlist, m_userlist.begin()
+		);
+	}
+
+	template<user::flags matching_flags>
+	user_iterator<matching_flags> user_begin() const {
+		return user_begin<matching_flags, false>();
+	}
+
+	user_iterator<user::NONE> user_begin() const {
+		return user_begin<user::NONE, false>();
+	}
 
 	/** Returns the end of the user list.
 	 */
-	user_iterator user_end() const;
-protected:
-	/** List of users that are registered in the user table.
-	 */
-	std::list<user> m_users;
+	template<user::flags matching_flags, bool inverse>
+	user_iterator<matching_flags, inverse> user_end() const {
+		return user_iterator<matching_flags, inverse>(
+			m_userlist, m_userlist.end()
+		);
+	}
 
-	/** ID counter to generate unique user IDs.
+	template<user::flags matching_flags>
+	user_iterator<matching_flags> user_end() const {
+		return user_end<matching_flags, false>();
+	}
+
+	user_iterator<user::NONE> user_end() const {
+		return user_end<user::NONE, false>();
+	}
+
+	/** Looks for a user whose flags match (or don't match, if inverse
+	 * is true) the given flags.
 	 */
-	unsigned int m_id_counter;
+	template<user::flags matching_flags, bool inverse>
+	user* find_user() const {
+		user_iterator<matching_flags, inverse> iter =
+			user_begin<matching_flags, inverse>();
+		if(iter == user_end<matching_flags, inverse>() )
+			return NULL;
+		return &(*iter);
+	}
+
+	template<user::flags matching_flags>
+	user* find_user() const {
+		return find_user<matching_flags, false>();
+	}
+
+	user* find_user() const {
+		return find_user<user::NONE, false>();
+	}
+
+	/** Finds a user whose flags match matching_flags (or don't match, if
+	 * inverse is true) and if the function <em>func</em> of obby::user
+	 * returns the given <em>hint</em>. You may use the other find_user
+	 * functions that search a user with the given name, id or something.
+	 */
+	template<
+		user::flags matching_flags,
+		bool inverse,
+		typename ret_type,
+		ret_type(user::*func)() const
+	> user* find_user(ret_type hint) const {
+		for(user_iterator<matching_flags, inverse> iter =
+			user_begin<matching_flags, inverse>();
+		    iter != user_end<matching_flags, inverse>();
+		    ++ iter) {
+			user* cur_user = &(*iter);
+			if( (cur_user->*func)() == hint) {
+				return cur_user;
+			}
+		}
+
+		return NULL;
+	}	
+
+	/** Searches a user with the given flags that has the given ID.
+	 */
+	template<user::flags matching_flags, bool inverse>
+	user* find_user(unsigned int id) const {
+		return find_user<matching_flags, inverse, unsigned int,
+			&user::get_id>(id);
+	}
+
+	template<user::flags matching_flags>
+	user* find_user(unsigned int id) const {
+		return find_user<matching_flags, false>(id);
+	}
+
+	user* find_user(unsigned int id) const {
+		return find_user<user::NONE, false>(id);
+	}
+
+	/** Searches a user which represents the given underlaying peer.
+	 */
+	template<user::flags matching_flags, bool inverse>
+	user* find_user(const net6::peer& peer) const {
+		return find_user<matching_flags, inverse,
+			const net6::peer*, &user::get_peer>(&peer);
+	}
+
+	template<user::flags matching_flags>
+	user* find_user(const net6::peer& peer) const {
+		return find_user<matching_flags, false>(peer);
+	}
+
+	user* find_user(const net6::peer& peer) const {
+		return find_user<user::NONE, false>(peer);
+	}
+
+	/** Searches for a user with the given name.
+	 */
+	template<user::flags matching_flags, bool inverse>
+	user* find_user(const std::string& name) const {
+		return find_user<matching_flags, inverse, const std::string&,
+			&user::get_name>(name);
+	}
+
+	template<user::flags matching_flags>
+	user* find_user(const std::string& name) const {
+		return find_user<matching_flags, false>(name);
+	}
+
+	user* find_user(const std::string& name) const {
+		return find_user<user::NONE, false>(name);
+	}
+protected:
+	/** List holding the users.
+	 */
+	std::list<user*> m_userlist;
 };
 
 }
 
 #endif // _OBBY_USER_TABLE_HPP_
-

@@ -17,6 +17,7 @@
  */
 
 #include <cassert>
+#include <iostream>
 #include "document.hpp"
 #include "buffer.hpp"
 
@@ -107,13 +108,28 @@ void obby::document::insert_nosync(const insert_record& record)
 	assert(pos_row < m_lines.size() );
 	assert(pos_col <= m_lines[pos_row].length() );
 
+	// Get user_table from the buffer
+	const user_table& user_table = get_buffer().get_user_table();
+
 	// Find author in user table
-	const user_table::user* author;
-	author = get_buffer().get_user_table().find_from_user_id(
-		record.get_from() );
-	assert(author != NULL);
+	// user::CONNECTED should be correct here: Only conncted users
+	// can edit this document.
+	const user* author =
+		user_table.find_user<user::CONNECTED>(record.get_from() );
+
+	// Author may be NULL if the user_id is 0, then a server_document,
+	// which has no user, has inserted something directly
+	if(author == NULL && record.get_from() != 0)
+	{
+		std::cerr << "obby::document::insert_nosync: User "
+		          << record.get_from() << " is not connected"
+		          << std::endl;
+		return;
+	}
 
 	// Move line iterator to the line where to insert text
+	// TODO: std::vector::iterator is a random access iterator, we can
+	// do things like +=
 	std::vector<line>::iterator iter = m_lines.begin();
 	for(unsigned int i = 0; i < pos_row; ++ i)
 		++ iter;
@@ -143,7 +159,7 @@ void obby::document::insert_nosync(const insert_record& record)
 		}
 
 		// Append the text to this newline onto this line
-		iter->append(text.substr(nl_prev, nl_pos - nl_prev), *author);
+		iter->append(text.substr(nl_prev, nl_pos - nl_prev), author);
 		// Insert next line
 		++ iter;
 		iter = m_lines.insert(iter, line());
@@ -154,7 +170,7 @@ void obby::document::insert_nosync(const insert_record& record)
 
 	// Insert first_line_carry (if any) and the text in the last line
 	iter->insert(ins_col, first_line_carry);
-	iter->insert(ins_col, text.substr(nl_prev), *author);
+	iter->insert(ins_col, text.substr(nl_prev), author);
 
 	// Notify signal handlers after changes have been performed
 	m_signal_insert.after().emit(record);
@@ -173,13 +189,28 @@ void obby::document::erase_nosync(const delete_record& record)
 	assert(to_row < m_lines.size() );
 	assert(to_col <= m_lines[to_row].length() );
 
-	// Find author in user_table
-	const user_table::user* author;
-	author = get_buffer().get_user_table().find_from_user_id(
-		record.get_from() );
-	assert(author != NULL);
+	// Get user_table from the buffer
+	const user_table& user_table = get_buffer().get_user_table();
+
+	// Find author in user table
+	// user::CONNECTED should be correct here: Only conncted users
+	// can edit this document.
+	const user* author =
+		user_table.find_user<user::CONNECTED>(record.get_from() );
+
+	// Author may be NULL if the user_id is 0, then a server_document,
+	// which has no user, has inserted something directly
+	if(author == NULL && record.get_from() != 0)
+	{
+		std::cerr << "obby::document::insert_nosync: User "
+		          << record.get_from() << " does not exist"
+		          << std::endl;
+		return;
+	}
 
 	// Find the iterator for the given row
+	// TODO: std::vector::iterator is a random access iterator, we can
+	// do things like +=
 	std::vector<line>::iterator iter = m_lines.begin();
 	for(unsigned int i = 0; i < from_row; ++ i)
 		++ iter;

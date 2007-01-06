@@ -17,6 +17,8 @@
  */
 
 #include <cassert>
+#include <iostream>
+#include "buffer.hpp"
 #include "line.hpp"
 
 const obby::line::size_type obby::line::npos = obby::line::string_type::npos;
@@ -28,18 +30,18 @@ obby::line::line()
 	m_authors.push_back(pos);*/
 }
 
-obby::line::line(const string_type& text, const user_type& author)
+obby::line::line(const string_type& text, const user_type* author)
  : m_line(text), m_authors()
 {
 	// It is just _one_ line.
 	assert(text.find('\n') == string_type::npos);
 
 	// Insert initial author
-	user_pos pos = { &author, 0 };
+	user_pos pos = { author, 0 };
 	m_authors.push_back(pos);
 }
 
-obby::line::line(const net6::packet& pack, const user_table& usertable)
+obby::line::line(const net6::packet& pack, const user_table& user_table)
 {
 	if(pack.get_param_count() < 2) return;
 	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
@@ -66,12 +68,23 @@ obby::line::line(const net6::packet& pack, const user_table& usertable)
 		// Get position and author id
 		unsigned int pos = pack.get_param(i).as_int();
 		unsigned int user_id = pack.get_param(i + 1).as_int();
-		const obby::user_table::user* author = usertable.find(user_id);
-		assert(author != NULL);
 
-		// Add to vector
-		user_pos upos = { author, pos };
-		m_authors.push_back(upos);
+		// Find author
+		const user* author = user_table.find_user(user_id);
+
+		// Author may be NULL if user is 0, this means that a server
+		// document has written something directly into a line.
+		if(author == NULL && user_id != 0)
+		{
+			std::cerr << "obby::line::line: User " << user_id << " "
+			          << "does not exist" << std::endl;
+		}
+		else
+		{
+			// Add to vector
+			user_pos upos = { author, pos };
+			m_authors.push_back(upos);
+		}
 	}
 }
 
@@ -152,7 +165,7 @@ void obby::line::insert(size_type pos, const line& text)
 }
 
 void obby::line::insert(size_type pos, const string_type& text,
-                        const user_type& author)
+                        const user_type* author)
 {
 	insert(pos, line(text, author) );
 }
@@ -162,7 +175,7 @@ void obby::line::append(const line& text)
 	insert(m_line.length(), text);
 }
 
-void obby::line::append(const string_type& text, const user_type& author)
+void obby::line::append(const string_type& text, const user_type* author)
 {
 	append(line(text, author) );
 }

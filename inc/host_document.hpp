@@ -21,7 +21,6 @@
 
 #include <sigc++/signal.h>
 #include <net6/host.hpp>
-#include "host_user_table.hpp"
 #include "server_document.hpp"
 
 namespace obby

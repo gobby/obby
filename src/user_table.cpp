@@ -16,159 +16,76 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <cassert>
-#include <net6/server.hpp>
+#include <iostream>
 #include "user_table.hpp"
 
-obby::user_table::user::user(unsigned int id, obby::user& obj)
- : m_id(id), m_obj(&obj), m_name(obj.get_name()),
-   m_red(obj.get_red()), m_green(obj.get_green()), m_blue(obj.get_blue())
-{
-}
-
-obby::user_table::user::user(unsigned int id, const std::string& name,
-                             unsigned int red, unsigned int green,
-                             unsigned int blue)
- : m_id(id), m_obj(NULL), m_name(name), m_red(red), m_green(green), m_blue(blue)
-{
-}
-
-obby::user_table::user::user(const user& other)
- : m_id(other.m_id), m_obj(other.m_obj), m_name(other.m_name),
-   m_red(other.m_red), m_green(other.m_green), m_blue(other.m_blue)
-{
-}
-
-obby::user_table::user::~user()
-{
-}
-
-unsigned int obby::user_table::user::get_id() const
-{
-	return m_id;
-}
-
-obby::user* obby::user_table::user::get_user() const
-{
-	return m_obj;
-}
-
-const std::string& obby::user_table::user::get_name() const
-{
-	return m_name;
-}
-
-unsigned int obby::user_table::user::get_red() const
-{
-	return m_red;
-}
-
-unsigned int obby::user_table::user::get_green() const
-{
-	return m_green;
-}
-
-unsigned int obby::user_table::user::get_blue() const
-{
-	return m_blue;
-}
-
 obby::user_table::user_table()
- : m_id_counter(0)
 {
 }
 
 obby::user_table::~user_table()
 {
+	for(std::list<user*>::iterator iter = m_userlist.begin();
+	    iter != m_userlist.end(); ++ iter)
+		delete *iter;
 }
 
-void obby::user_table::insert_user(obby::user& new_user)
+obby::user* obby::user_table::add_user(net6::peer& peer, int red, int green,
+                                       int blue)
 {
-	// Look for an existing user
-	std::list<user>::iterator iter;
-	for(iter = m_users.begin(); iter != m_users.end(); ++ iter)
+	// Find already exiting user with the given name
+	user* existing_user = find_user(peer.get_name() );
+	if(existing_user)
 	{
-		if(iter->m_name == new_user.get_name() )
+		// If this user would be connected, net6 should have denied
+		// the login process with the "Name is already in use" error
+		if(existing_user->get_flags() & user::CONNECTED)
 		{
-			// Found existing user
-			assert(iter->m_obj == NULL);
-			
-			// Update color and user object
-			iter->m_obj = &new_user;
-			iter->m_red = new_user.get_red();
-			iter->m_green = new_user.get_green();
-			iter->m_blue = new_user.get_blue();
-
-			return;
+			std::cerr << "obby::user_table::add_user: " 
+			          << "User " << peer.get_id() << " exists "
+				  << "already " << std::endl;
+			return NULL;
 		}
+
+		// Assign new peer to existing user.
+		existing_user->assign_peer(peer, red, green, blue);
+		return existing_user;
+	}
+	else
+	{
+		// User seems to be here for his first time: Create a new user.
+		user* new_user = new user(peer, red, green, blue);
+
+		// Insert user into user list
+		m_userlist.push_back(new_user);
+
+		return new_user;
+	}
+}
+
+obby::user* obby::user_table::add_user(unsigned int id, const std::string& name,
+                                       int red, int green, int blue)
+{
+	// Look for an existing user with this name.
+	user* existing_user = find_user(name);
+	if(existing_user)
+	{
+		// We can not assign the new user to this one, because the user
+		// we are currently adding is not connected to the obby session.
+		std::cerr << "obby::user_table::add_user: "
+		          << "User " << id << " exists already!" << std::endl;
+		return NULL;
 	}
 
-	// No one found: Create new user
-	m_users.push_back(user(++ m_id_counter, new_user) );
+	user* new_user = new user(id, name, red, green, blue);
+	m_userlist.push_back(new_user);
+
+	return new_user;
 }
 
-void obby::user_table::delete_user(obby::user& new_user)
+void obby::user_table::remove_user(user* user_to_remove)
 {
-	// Search for the user in the table
-	std::list<user>::iterator iter;
-	for(iter = m_users.begin(); iter != m_users.end(); ++ iter)
-	{
-		// Is it this one?
-		if(iter->m_obj == &new_user)
-		{
-			// Reset user object: The user has quit.
-			iter->m_obj = NULL;
-			return;
-		}
-	}
-
-	assert(iter != m_users.end() );
+	// Release underlaying peer object, this disables the connected flag,
+	// too. Keep the user in the list to recognize him if he rejoins.
+	user_to_remove->release_peer();
 }
-
-const obby::user_table::user* obby::user_table::find(unsigned int id) const
-{
-	std::list<user>::const_iterator iter;
-	for(iter = m_users.begin(); iter != m_users.end(); ++ iter)
-		if(id == iter->m_id)
-			return &(*iter);
-	return NULL;
-}
-
-const obby::user_table::user*
-obby::user_table::find_from_user_id(unsigned int id) const
-{
-	std::list<user>::const_iterator iter;
-	for(iter = m_users.begin(); iter != m_users.end(); ++ iter)
-	{
-		// Server user
-		if(id == 0)
-		{
-			if(iter->m_id == 0)
-			{
-				return &(*iter);
-			}
-		}
-
-		// Normal user
-		else if(iter->m_obj)
-		{
-			if(iter->m_obj->get_id() == id)
-			{
-				return &(*iter);
-			}
-		}
-	}
-
-	return NULL;
-}
-
-obby::user_table::user_iterator obby::user_table::user_begin() const
-{
-	return m_users.begin();
-}
-
-obby::user_table::user_iterator obby::user_table::user_end() const
-{
-	return m_users.end();
-}
-

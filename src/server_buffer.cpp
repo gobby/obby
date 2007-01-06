@@ -17,8 +17,8 @@
  */
 
 #include <cassert>
+#include <iostream>
 #include "error.hpp"
-#include "server_user_table.hpp"
 #include "server_document.hpp"
 #include "server_buffer.hpp"
 
@@ -31,7 +31,6 @@ obby::server_buffer::server_buffer(unsigned int port)
  : buffer(), m_doc_counter(0), m_server(NULL)
 {
 	m_server = new net6::server(port, false);
-	m_usertable = new server_user_table(*m_server, *this);
 
 	register_signal_handlers();
 }
@@ -43,17 +42,6 @@ obby::server_buffer::~server_buffer()
 		delete m_server;
 		m_server = NULL;
 	}
-
-	if(m_usertable)
-	{
-		delete m_usertable;
-		m_usertable = NULL;
-	}
-}
-
-const obby::server_user_table& obby::server_buffer::get_user_table() const
-{
-	return *static_cast<server_user_table*>(m_usertable);
 }
 
 void obby::server_buffer::select()
@@ -186,8 +174,13 @@ void obby::server_buffer::on_disconnect(net6::server::peer& peer)
 void obby::server_buffer::on_join(net6::server::peer& peer)
 {
 	// Find user in user list
-	user* new_user = find_user(peer.get_id() );
-	assert(new_user != NULL);
+	user* new_user = m_usertable.find_user<user::CONNECTED>(peer);
+	if(!new_user)
+	{
+		std::cerr << "obby::server_buffer::on_join: User "
+		          << peer.get_id() << " is not connected" << std::endl;
+		return;
+	}
 
 	// Client logged in. Synchronise the complete buffer, but
 	// seperate it into multiple packets to not block other high-priority
@@ -196,13 +189,26 @@ void obby::server_buffer::on_join(net6::server::peer& peer)
 	init_sync << static_cast<unsigned int>(m_doclist.size() );
 	m_server->send(init_sync, peer);
 
-	// Synchronise user table first
-	static_cast<server_user_table*>(m_usertable)->synchronise(peer);
+	// Synchronise not-connected users.
+	for(user_table::user_iterator<user::CONNECTED, true> iter =
+		m_usertable.user_begin<user::CONNECTED, true>();
+	    iter != m_usertable.user_end<user::CONNECTED, true>();
+	    ++ iter)
+	{
+		net6::packet user_pack("obby_sync_usertable_user");
+		user_pack << iter->get_id() << iter->get_name()
+		          << iter->get_red() << iter->get_green()
+		          << iter->get_blue();
+		m_server->send(user_pack, peer);
+	}
 
 	// Synchronise the documents
-	std::list<document*>::iterator iter;
-	for(iter = m_doclist.begin(); iter != m_doclist.end(); ++ iter)
-		static_cast<server_document*>(*iter)->synchronise(peer);
+	for(document_iterator iter = document_begin();
+	    iter != document_end();
+	    ++ iter)
+	{
+		static_cast<server_document&>(*iter).synchronise(peer);
+	}
 
 	// Done with synchronising
 	net6::packet final_sync("obby_sync_final");
@@ -213,11 +219,21 @@ void obby::server_buffer::on_join(net6::server::peer& peer)
 
 void obby::server_buffer::on_part(net6::server::peer& peer)
 {
-	user* cur_user = find_user(peer.get_id() );
-	assert(cur_user != NULL);
-
-	m_signal_user_part.emit(*cur_user);
-	remove_user(cur_user);
+	// Find user object for given peer
+	user* cur_user = m_usertable.find_user<user::CONNECTED>(peer);
+	if(!cur_user)
+	{
+		// Not found: Drop error message...
+		// TODO: Throw localied exceptions when we have format strings.
+		std::cerr << "obby::server_buffer::on_part: User "
+		          << peer.get_id() << " is not connected" << std::endl;
+	}
+	else
+	{
+		// Emit part signal, remove user from user list.
+		m_signal_user_part.emit(*cur_user);
+		m_usertable.remove_user(cur_user);
+	}
 }
 
 bool obby::server_buffer::on_auth(net6::server::peer& peer,
@@ -240,11 +256,14 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 
 	// Check for existing colors
 	std::list<user*>::iterator iter;
-	for(iter = m_userlist.begin(); iter != m_userlist.end(); ++ iter)
+	for(user_table::user_iterator<user::CONNECTED> iter =
+		m_usertable.user_begin<user::CONNECTED>();
+	    iter != m_usertable.user_end<user::CONNECTED>();
+	    ++ iter)
 	{
-		if((abs(red   - (*iter)->get_red()) +
-		    abs(green - (*iter)->get_green()) +
-		    abs(blue  - (*iter)->get_blue())) < 32)
+		if((abs(red   - iter->get_red()) +
+		    abs(green - iter->get_green()) +
+		    abs(blue  - iter->get_blue())) < 32)
 		{
 			error = login::ERROR_COLOR_IN_USE;
 			return false;
@@ -263,16 +282,23 @@ unsigned int obby::server_buffer::on_login(net6::server::peer& peer,
 	int blue = pack.get_param(3).as_int();
 
 	// Insert user into list
-	add_user(peer, red, green, blue);
-	return 0;
+	user* new_user = m_usertable.add_user(peer, red, green, blue);
+
+	// Tell net6 to use already existing ID, if any
+	return new_user->get_id();
 }
 
 void obby::server_buffer::on_extend(net6::server::peer& peer,
                                     net6::packet& pack)
 {
 	// Find corresponding user in user list
-	user* ideq_user = find_user(peer.get_id() );
-	assert(ideq_user != NULL);
+	user* ideq_user = m_usertable.find_user<user::CONNECTED>(peer);
+	if(!ideq_user)
+	{
+		std::cerr << "obby::server_buffer::on_extend: User "
+		          << peer.get_id() << " is not connected" << std::endl;
+		return;
+	}
 
 	// Extend user-join packet with user color
 	pack << ideq_user->get_red() << ideq_user->get_green()
@@ -282,8 +308,13 @@ void obby::server_buffer::on_extend(net6::server::peer& peer,
 void obby::server_buffer::on_data(net6::server::peer& peer,
                                   const net6::packet& pack)
 {
-	user* from_user = find_user(peer.get_id() );
-	assert(from_user != NULL);
+	user* from_user = m_usertable.find_user<user::CONNECTED>(peer);
+	if(!from_user)
+	{
+		std::cerr << "obby::server_buffer::on_data: User "
+		          << peer.get_id() << " is not connected" << std::endl;
+		return;
+	}
 
 	if(pack.get_command() == "obby_record")
 		on_net_record(pack, *from_user);
@@ -374,7 +405,15 @@ void obby::server_buffer::on_net_message(const net6::packet& pack, user& from)
 	unsigned int uid = from.get_id();
 	const std::string& message = pack.get_param(0).as_string();
 
-	obby::user* user = find_user(uid);
-	m_signal_message.emit(*user, message);
-	relay_message(uid, message);
+	obby::user* user = m_usertable.find_user<user::CONNECTED>(uid);
+	if(!user)
+	{
+		std::cerr << "obby::server_buffer::on_net_message: User "
+		          << uid << " is not connected" << std::endl;
+	}
+	else
+	{
+		m_signal_message.emit(*user, message);
+		relay_message(uid, message);
+	}
 }

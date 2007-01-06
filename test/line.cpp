@@ -20,21 +20,21 @@ void inspect(const obby::line& line)
 int main()
 {
 	// Three test users
-	obby::user_table::user user1(1, "foo", 0x00, 0x00, 0x00);
-	obby::user_table::user user2(2, "bar", 0x7f, 0x7f, 0x7f);
-	obby::user_table::user user3(3, "baz", 0xff, 0xff, 0xff);
+	obby::user user1(1, "foo", 0x00, 0x00, 0x00);
+	obby::user user2(2, "bar", 0x7f, 0x7f, 0x7f);
+	obby::user user3(3, "baz", 0xff, 0xff, 0xff);
 
 	obby::line line1;
 	obby::line line2;
 
 	// Expecting [1]foo
-	line1.insert(0, "foo", user1);
+	line1.insert(0, "foo", &user1);
 	assert(line1.m_authors.size() == 1);
 	assert(line1.m_authors[0].author == &user1);
 	assert(line1.m_authors[0].position == 0);
 
 	// Expecting [1]fo[2]bar[1]o
-	line1.insert(2, "bar", user2);
+	line1.insert(2, "bar", &user2);
 	assert(line1.m_authors.size() == 3);
 	assert(line1.m_authors[0].author == &user1);
 	assert(line1.m_authors[0].position == 0);
@@ -44,10 +44,10 @@ int main()
 	assert(line1.m_authors[2].position == 5);
 
 	// Expecting [3]foobar
-	line2.insert(0, "f", user3);
-	line2.insert(1, "oo", user3);
-	line2.insert(3, "b", user3);
-	line2.insert(4, "ar", user3);
+	line2.insert(0, "f", &user3);
+	line2.insert(1, "oo", &user3);
+	line2.insert(3, "b", &user3);
+	line2.insert(4, "ar", &user3);
 	assert(line2.m_authors.size() == 1);
 	assert(line2.m_authors[0].author == &user3);
 	assert(line2.m_authors[0].position == 0);

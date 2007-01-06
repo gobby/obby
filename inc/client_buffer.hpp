@@ -34,8 +34,6 @@
 namespace obby
 {
 
-class client_user_table;
-
 /** Buffer for establish a connection to a server_buffer.
  */
 
@@ -52,10 +50,6 @@ public:
 	 */
 	client_buffer(const std::string& hostname, unsigned int port);
 	virtual ~client_buffer();
-
-	/** Returns the user table associated with the buffer.
-	 */
-	const client_user_table& get_user_table() const;
 
 	/** Sends a login request for this client.
 	 * @param name User name for this client.
@@ -148,15 +142,13 @@ protected:
 	void on_net_message(const net6::packet& pack);
 	
 	void on_net_sync_init(const net6::packet& pack);
-	void on_net_sync_usertable_init(const net6::packet& pack);
-	void on_net_sync_usertable_record(const net6::packet& pack);
-	void on_net_sync_usertable_final(const net6::packet& pack);
+	void on_net_sync_usertable_user(const net6::packet& pack);
 	void on_net_sync_doc_init(const net6::packet& pack);
 	void on_net_sync_doc_line(const net6::packet& pack);
 	void on_net_sync_doc_final(const net6::packet& pack);
 	void on_net_sync_final(const net6::packet& pack);
 
-	std::list<record*> m_unsynced;
+//	std::list<record*> m_unsynced;
 	net6::client* m_client;
 	user* m_self;
 

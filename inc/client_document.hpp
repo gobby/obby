@@ -22,7 +22,6 @@
 #include <net6/client.hpp>
 #include "position.hpp"
 #include "record.hpp"
-#include "client_user_table.hpp"
 #include "document.hpp"
 
 namespace obby

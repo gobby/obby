@@ -28,7 +28,6 @@
 #include "record.hpp"
 #include "insert_record.hpp"
 #include "delete_record.hpp"
-#include "user_table.hpp"
 #include "line.hpp"
 
 namespace obby

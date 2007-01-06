@@ -20,7 +20,7 @@
 #include "buffer.hpp"
 
 obby::buffer::buffer()
- : m_netkit(), m_usertable(NULL)
+ : m_netkit()
 {
 }
 
@@ -29,15 +29,11 @@ obby::buffer::~buffer()
 	std::list<document*>::iterator doc_i;
 	for(doc_i = m_doclist.begin(); doc_i != m_doclist.end(); ++ doc_i)
 		delete *doc_i;
-
-	std::list<user*>::iterator user_i;
-	for(user_i = m_userlist.begin(); user_i != m_userlist.end(); ++ user_i)
-		delete *user_i;
 }
 
 const obby::user_table& obby::buffer::get_user_table() const
 {
-	return *m_usertable;
+	return m_usertable;
 }
 
 obby::document* obby::buffer::find_document(unsigned int id) const
@@ -49,6 +45,7 @@ obby::document* obby::buffer::find_document(unsigned int id) const
 	return NULL;
 }
 
+#if 0
 obby::user* obby::buffer::find_user(unsigned int id) const
 {
 	std::list<user*>::const_iterator iter;
@@ -66,6 +63,7 @@ obby::user* obby::buffer::find_user(const std::string& name) const
 			return *iter;
 	return NULL;
 }
+#endif
 
 obby::buffer::document_iterator obby::buffer::document_begin() const
 {
@@ -81,22 +79,12 @@ std::list<obby::document*>::size_type obby::buffer::document_count() const
 {
 	return m_doclist.size();
 }
-
-obby::buffer::user_iterator obby::buffer::user_begin() const
-{
-	return static_cast<user_iterator>(m_userlist.begin() );
-}
-
-obby::buffer::user_iterator obby::buffer::user_end() const
-{
-	return static_cast<user_iterator>(m_userlist.end() );
-}
-
+#if 0
 std::list<obby::user*>::size_type obby::buffer::user_count() const
 {
 	return m_userlist.size();
 }
-
+#endif
 obby::buffer::signal_user_join_type obby::buffer::user_join_event() const
 {
 	return m_signal_user_join;
@@ -130,27 +118,49 @@ obby::buffer::server_message_event() const
 	return m_signal_server_message;
 }
 
+#if 0
 obby::user* obby::buffer::add_user(net6::peer& peer, int red, int green,
                                    int blue)
 {
-	user* new_user = new user(peer, red, green, blue);
-	m_userlist.push_back(new_user);
-	m_usertable->insert_user(*new_user);
-	return new_user;
+	// Search for an existing user with this ID that rejoins currently.
+	user* existing_user = NULL;
+	for(user_iterator<user::NONE> iter = user_begin<user::NONE, false>();
+	    iter != user_end<user::NONE, false>();
+	    ++ iter)
+	{
+		if(iter->get_id() == peer.get_id() )
+		{
+			existing_user = &(*iter);
+			break;
+		}
+	}
+
+	if(existing_user)
+	{
+		// If this user would be connected, net6 should have denied
+		// the login process with the "Name is already in use" error
+		assert(~existing_user->get_flags() & user::CONNECTED);
+
+		// Assign new peer to existing user.
+		existing_user->assign_peer(peer, red, green, blue);
+
+		return existing_user;
+	}
+	else
+	{
+		// User seems to be here for his first time: Create a new user.
+		user* new_user = new user(peer, red, green, blue);
+
+		// Insert user into user list
+		m_userlist.push_back(new_user);
+
+		return new_user;
+	}
 }
 
 void obby::buffer::remove_user(user* user_to_remove)
 {
-	m_usertable->delete_user(*user_to_remove);
-	m_userlist.erase(
-		std::remove(
-			m_userlist.begin(),
-			m_userlist.end(),
-			user_to_remove
-		),
-		m_userlist.end()
-	);
-
-	delete user_to_remove;
+	// Release user object from underlaying peer
+	user_to_remove->release_peer();
 }
-
+#endif

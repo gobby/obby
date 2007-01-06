@@ -1,6 +1,11 @@
 libobby
 =======
 
+Version 0.2.0:
+ * Better win32 network handling
+ * Internal improvements
+ * NOT protocol compatible to 0.1.0!
+
 Version 0.1.0:
 
  * Initial release.
