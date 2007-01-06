@@ -54,7 +54,7 @@ public:
 
 	/** Returns the title set for this document.
 	 */
-	std::string get_title() const;
+	const std::string& get_title() const;
 
 	/** Sets a new title for this document.
 	 */

@@ -38,7 +38,7 @@ unsigned int obby::document::get_id() const
 	return m_id;
 }
 
-std::string obby::document::get_title() const
+const std::string& obby::document::get_title() const
 {
 	return m_title;
 }
