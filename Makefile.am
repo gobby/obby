@@ -1,9 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = po inc src .
-if BUILD_TESTS
-SUBDIRS += test
-endif
+SUBDIRS = po inc src test .
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = obby-0.4.pc
