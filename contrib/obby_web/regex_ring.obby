@@ -1,0 +1,1909 @@
+!obby
+session
+ user_table
+  user id="1" name="ben" colour="a3ffa6"
+  user id="2" name="ck" colour="befde2"
+ chat
+  system_message text="ben has joined" timestamp="1124241141"
+  system_message text="ck has joined" timestamp="1124241147"
+  user_message text="foobar!" user="1" timestamp="1124241150"
+ document id="1" owner="2" title="finddialog.cpp"
+  line
+   part author="0" content="#include \"finddialog.hpp\""
+  line
+   part author="0" content="#include <regex.h> "
+  line
+  line
+   part author="2" content="#include \"common.hpp\""
+  line
+  line
+   part author="0" content="namespace Gobby {"
+  line
+  line
+   part author="0" content="FindDialog::FindDialog(Window& parent)"
+  line
+   part author="0" content="\t\t: m_gobby(parent),"
+  line
+   part author="0" content="\t\t  m_label_find(_(\"Find what:\"), Gtk::ALIGN_LEFT),"
+  line
+   part author="0" content="\t\t  m_label_replace(_(\"Replace with:\"), Gtk::ALIGN_LEFT),"
+  line
+   part author="0" content="\t\t  m_check_whole_word(_(\"Match whole word only\")),"
+  line
+   part author="0" content="\t\t  m_check_case(_(\"Match case\")),"
+  line
+   part author="0" content="\t\t  m_check_regex(_(\"Match as regular expression\")),"
+  line
+   part author="0" content="\t\t  m_frame_direction(_(\"Direction\")),"
+  line
+   part author="0" content="\t\t  m_radio_up(m_group_direction, _(\"Up\")),"
+  line
+   part author="0" content="\t\t  m_radio_down(m_group_direction, _(\"Down\")),"
+  line
+   part author="0" content="\t\t  m_btn_find(Gtk::Stock::FIND),"
+  line
+   part author="0" content="\t\t  m_btn_replace(Gtk::Stock::FIND_AND_REPLACE),"
+  line
+   part author="0" content="\t\t  m_btn_replace_all(Gtk::Stock::FIND_AND_REPLACE),"
+  line
+   part author="0" content="\t\t  m_btn_close(Gtk::Stock::CLOSE)"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\tset_border_width(16);"
+  line
+  line
+   part author="0" content="\tm_box_main.set_spacing(12);"
+  line
+   part author="0" content="\tm_box_main.pack_start(m_box_left);"
+  line
+   part author="0" content="\tm_box_main.pack_start(m_separator, Gtk::PACK_SHRINK);"
+  line
+   part author="0" content="\tm_box_main.pack_start(m_box_btns, Gtk::PACK_SHRINK);"
+  line
+   part author="0" content="\tremove();"
+  line
+   part author="0" content="\tadd(m_box_main);"
+  line
+  line
+   part author="0" content="\tm_box_left.pack_start(m_table_entries);"
+  line
+   part author="0" content="\tm_box_left.pack_start(m_hbox);"
+  line
+  line
+   part author="0" content="\tm_table_entries.set_spacings(5);"
+  line
+   part author="0" content="\tm_table_entries.attach(m_label_find, 0, 1, 0, 1,"
+  line
+   part author="0" content="\t\tGtk::SHRINK | Gtk::FILL, Gtk::EXPAND);"
+  line
+   part author="0" content="\tm_table_entries.attach(m_label_replace, 0, 1, 1, 2,"
+  line
+   part author="0" content="\t\tGtk::SHRINK | Gtk::FILL, Gtk::EXPAND);"
+  line
+   part author="0" content="\tm_table_entries.attach(m_entry_find, 1, 2, 0, 1,"
+  line
+   part author="0" content="\t\tGtk::EXPAND | Gtk::FILL, Gtk::EXPAND);"
+  line
+   part author="0" content="\tm_table_entries.attach(m_entry_replace, 1, 2, 1, 2,"
+  line
+   part author="0" content="\t\tGtk::EXPAND | Gtk::FILL, Gtk::EXPAND);"
+  line
+  line
+   part author="0" content="\tm_hbox.pack_start(m_box_options);"
+  line
+   part author="0" content="\tm_hbox.pack_start(m_frame_direction, Gtk::PACK_SHRINK);"
+  line
+  line
+   part author="0" content="\tm_box_options.pack_start(m_check_whole_word, Gtk::PACK_EXPAND_WIDGET);"
+  line
+   part author="0" content="\tm_box_options.pack_start(m_check_case, Gtk::PACK_EXPAND_WIDGET);"
+  line
+   part author="0" content="\tm_box_options.pack_start(m_check_regex, Gtk::PACK_EXPAND_WIDGET);"
+  line
+  line
+   part author="0" content="\tm_frame_direction.add(m_box_direction);"
+  line
+   part author="0" content="\tm_box_direction.set_border_width(4);"
+  line
+   part author="0" content="\tm_box_direction.pack_start(m_radio_up, Gtk::PACK_EXPAND_WIDGET);"
+  line
+   part author="0" content="\tm_box_direction.pack_start(m_radio_down, Gtk::PACK_EXPAND_WIDGET);"
+  line
+  line
+   part author="0" content="\tm_box_btns.set_spacing(5);"
+  line
+   part author="0" content="\tm_box_btns.pack_start(m_btn_find, Gtk::PACK_EXPAND_PADDING);"
+  line
+   part author="0" content="\tm_box_btns.pack_start(m_btn_replace, Gtk::PACK_EXPAND_PADDING);"
+  line
+   part author="0" content="\tm_box_btns.pack_start(m_btn_replace_all, Gtk::PACK_EXPAND_PADDING);"
+  line
+   part author="0" content="\tm_box_btns.pack_start(m_btn_close, Gtk::PACK_EXPAND_PADDING);"
+  line
+  line
+   part author="0" content="\tsigc::slot<Glib::ustring> regex ="
+  line
+   part author="0" content="\t\tsigc::mem_fun(m_entry_find, &Gtk::Entry::get_text);"
+  line
+   part author="0" content="\tm_btn_find.signal_clicked().connect("
+  line
+   part author="0" content="\t\tsigc::compose("
+  line
+   part author="0" content="\t\t\tsigc::mem_fun(*this, &FindDialog::on_find),"
+  line
+   part author="0" content="\t\t\tregex"
+  line
+   part author="0" content="\t\t)"
+  line
+   part author="0" content="\t);"
+  line
+   part author="0" content="\t// TODO: copy&paste for other buttons"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="FindDialog::~FindDialog() {} // TODO: needed?"
+  line
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="void FindDialog::on_find(const Glib::ustring& find_str) {"
+  line
+   part author="0" content="\t// TODO: check if we even want a regex"
+  line
+   part author="0" content="\t"
+   part author="1" content="if (m_regex_changed) {"
+  line
+   part author="1" content="\t\ttry {"
+  line
+   part author="1" content="\t\t\tcompile_regex();"
+  line
+   part author="1" content="\t\t} catch "
+  line
+   part author="1" content="\t}"
+  line
+  line
+   part author="0" content="\tm_parent"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="void FindDialog::compile_regex() {"
+  line
+  line
+   part author="0" content="}"
+  line
+  line
+  line
+   part author="0" content="int main(int argc, char *argv[]) {"
+  line
+   part author="0" content="\tGtk::Main foo(argc, argv);"
+  line
+  line
+   part author="0" content="\tGobby::Window w;"
+  line
+   part author="0" content="\tw.show();"
+  line
+   part author="0" content="\tGobby::FindDialog d(w);"
+  line
+   part author="0" content="\td.show_all();"
+  line
+  line
+   part author="0" content="\tGtk::Main::run(w);"
+  line
+   part author="0" content="}"
+  line
+  line
+ document id="2" owner="2" title="finddialog.hpp"
+  line
+   part author="0" content="/* gobby - A GTKmm driven libobby client"
+  line
+   part author="0" content=" * Copyright (C) 2005 0x539 dev group"
+  line
+   part author="0" content=" *"
+  line
+   part author="0" content=" * This program is free software; you can redistribute it and/or"
+  line
+   part author="0" content=" * modify it under the terms of the GNU General Public"
+  line
+   part author="0" content=" * License as published by the Free Software Foundation; either"
+  line
+   part author="0" content=" * version 2 of the License, or (at your option) any later version."
+  line
+   part author="0" content=" *"
+  line
+   part author="0" content=" * This program is distributed in the hope that it will be useful,"
+  line
+   part author="0" content=" * but WITHOUT ANY WARRANTY; without even the implied warranty of"
+  line
+   part author="0" content=" * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU"
+  line
+   part author="0" content=" * General Public License for more details."
+  line
+   part author="0" content=" *"
+  line
+   part author="0" content=" * You should have received a copy of the GNU General Public"
+  line
+   part author="0" content=" * License along with this program; if not, write to the Free"
+  line
+   part author="0" content=" * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA."
+  line
+   part author="0" content=" */"
+  line
+  line
+   part author="0" content="#ifndef _GOBBY_FINDDIALOG_HPP_"
+  line
+   part author="0" content="#define _GOBBY_FINDDIALOG_HPP_"
+  line
+  line
+   part author="0" content="#include \"defaultdialog.hpp\""
+  line
+  line
+   part author="0" content="#include <gtkmm.h>"
+  line
+  line
+   part author="0" content="namespace Gobby"
+  line
+   part author="0" content="{"
+  line
+  line
+   part author="0" content="class Window : public Gtk::Window {};"
+  line
+  line
+   part author="0" content="class FindDialog : public Gtk::Dialog"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="public:"
+  line
+   part author="0" content="\tFindDialog(Window& parent);"
+  line
+  line
+   part author="0" content="\tvirtual ~FindDialog();"
+  line
+  line
+   part author="0" content="protected:"
+  line
+   part author="0" content="\t// virtual void on_response(int response_id);"
+  line
+   part author="0" content="\tvoid compile_regex();"
+  line
+   part author="0" content="\tvoid on_find(const Glib::ustring& regex);"
+  line
+  line
+   part author="0" content="\tWindow& m_gobby;"
+  line
+  line
+   part author="0" content="\tGtk::HBox m_box_main;"
+  line
+   part author="0" content="\tGtk::VBox m_box_left;"
+  line
+   part author="0" content="\tGtk::VSeparator m_separator;"
+  line
+   part author="0" content="\tGtk::VBox m_box_btns;"
+  line
+  line
+   part author="0" content="\tGtk::Table m_table_entries;"
+  line
+  line
+   part author="0" content="\tGtk::Label m_label_find;"
+  line
+   part author="0" content="\tGtk::Label m_label_replace;"
+  line
+  line
+   part author="0" content="\tGtk::Entry m_entry_find;"
+  line
+   part author="0" content="\tGtk::Entry m_entry_replace;"
+  line
+  line
+   part author="0" content="\tGtk::HBox m_hbox;"
+  line
+   part author="0" content="\tGtk::VBox m_box_options;"
+  line
+   part author="0" content="\tGtk::CheckButton m_check_whole_word;"
+  line
+   part author="0" content="\tGtk::CheckButton m_check_case;"
+  line
+   part author="0" content="\tGtk::CheckButton m_check_regex;"
+  line
+  line
+   part author="0" content="\tGtk::Frame m_frame_direction;"
+  line
+   part author="0" content="\tGtk::VBox m_box_direction;"
+  line
+   part author="0" content="\tGtk::RadioButtonGroup m_group_direction;"
+  line
+   part author="0" content="\tGtk::RadioButton m_radio_up;"
+  line
+   part author="0" content="\tGtk::RadioButton m_radio_down;"
+  line
+  line
+   part author="0" content="\tGtk::Button m_btn_find;"
+  line
+   part author="0" content="\tGtk::Button m_btn_replace;"
+  line
+   part author="0" content="\tGtk::Button m_btn_replace_all;"
+  line
+   part author="0" content="\tGtk::Button m_btn_close;"
+  line
+  line
+   part author="0" content="\tregex_t m_regex;"
+  line
+   part author="0" content="};"
+  line
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="#endif // _GOBBY_JOINDIALOG_HPP_"
+  line
+  line
+ document id="3" owner="2" title="ring.hpp"
+  line
+   part author="0" content="namespace obby"
+  line
+   part author="0" content="{"
+  line
+  line
+   part author="0" content="template<typename value_type>"
+  line
+   part author="0" content="class ring"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="public:"
+  line
+   part author="0" content="\ttypedef std::size_t size_type;"
+  line
+   part author="0" content="\ttypedef std::vector<value_type> container_type;"
+  line
+   part author="0" content="\ttypedef std::vector<value_type>::iterator base_iterator;"
+  line
+   part author="0" content="\ttypedef std::vector<value_type>::const_iterator const_base_iterator;"
+  line
+  line
+   part author="2" content="\tclass const_iterator"
+  line
+   part author="2" content="\t{"
+  line
+   part author="2" content="\tpublic:"
+  line
+   part author="2" content="\t\tconst_iterator(const ring& container,"
+  line
+   part author="2" content="\t\t               const const_base_iterator& base_iter);"
+  line
+  line
+   part author="2" content="\t\tconst_iterator& operator++();"
+  line
+   part author="2" content="\t\tconst_iterator operator++(int);"
+  line
+   part author="2" content="\t\t"
+  line
+   part author="2" content="\t\tconst_iterator& operator--();"
+  line
+   part author="2" content="\t\tconst_iterator operator--(int);"
+  line
+   part author="2" content="\t\t"
+  line
+   part author="2" content="\t\tconst value_type& operator*() const;"
+  line
+   part author="2" content="\t\tconst value_type* operator->() const;"
+  line
+   part author="2" content="\tprotected:"
+  line
+   part author="2" content="\t\tconst ring& m_ring;"
+  line
+   part author="2" content="\t\tbase_iterator m_iter;"
+  line
+   part author="2" content="\t};"
+  line
+  line
+   part author="0" content="\tclass iterator"
+   part author="2" content=": public const_iterator"
+  line
+   part author="0" content="\t{"
+  line
+   part author="0" content="\tpublic:"
+  line
+   part author="2" content="\t\titerator(const ring& container,"
+  line
+   part author="2" content="\t\t         base_iterator base_iter);"
+  line
+  line
+   part author="2" content="\t\tvalue_type& operator*();"
+  line
+   part author="2" content="\t\tvalue_type* operator->();"
+  line
+   part author="0" content="\t};"
+  line
+  line
+   part author="0" content="\tring(size_type n);"
+  line
+  line
+   part author="0" content="\tvoid push_back(const value_type& val);"
+  line
+   part author="0" content="\tvoid pop_back();"
+  line
+  line
+   part author="0" content="\tvalue_type front();"
+  line
+   part author="0" content="\tvalue_type back();"
+  line
+  line
+   part author="0" content="\titerator begin();"
+  line
+   part author="0" content="\titerator end();"
+  line
+  line
+   part author="0" content="\tconst_iterator begin();"
+  line
+   part author="0" content="\tconst_iterator end();"
+  line
+  line
+   part author="0" content="protected:"
+  line
+   part author="0" content="\tcontainer_type m_elems;"
+  line
+   part author="0" content="\tbase_iterator m_begin;"
+  line
+   part author="0" content="\tbase_iterator m_end;"
+  line
+   part author="0" content="};"
+  line
+  line
+   part author="2" content="template<typename value_type>"
+  line
+   part author="2" content="ring::const_iterator::const_iterator(const ring& container,"
+  line
+   part author="2" content="                                     const const_base_iterator& base_iter):"
+  line
+   part author="2" content="\tm_ring(container), m_iter(base_iter)"
+  line
+   part author="2" content="{"
+  line
+   part author="2" content="}"
+  line
+  line
+   part author="2" content="template<typename value_type>"
+  line
+   part author="2" content="ring::const_iterator& ring::const_iterator::operator++()"
+  line
+   part author="2" content="{"
+  line
+   part author="2" content="\tif(m_iter == m_ring.m_"
+  line
+  line
+   part author="2" content="\t++ m_iter;"
+  line
+   part author="2" content="\tif(m_iter == m_ring.m_elems.end() ) m_iter = m_ring.begin();"
+  line
+   part author="2" content="\tif(m_iter == m_ring.m_begin) m_iter = m_ring.m_elems.end();"
+  line
+   part author="2" content="\treturn *this;"
+  line
+   part author="2" content="}"
+  line
+  line
+   part author="2" content="template<typename value_type>"
+  line
+   part author="2" content="ring::const_iterator ring::const_iterator::operator++(int)"
+  line
+   part author="2" content="{"
+  line
+   part author="2" content="\tconst_iterator temp(*this);"
+  line
+   part author="2" content="\toperator++();"
+  line
+   part author="2" content="\treturn temp;"
+  line
+   part author="2" content="}"
+  line
+  line
+   part author="2" content="template<typename value_type>"
+  line
+   part author="2" content="ring::const_iterator::operator--()"
+  line
+   part author="2" content="{"
+  line
+   part author="2" content="\tif(m_iter == m_ring.m_elems.end() ) m_iter = m_ring.m_end;"
+  line
+   part author="2" content="}"
+  line
+  line
+   part author="0" content="}"
+   part author="2" content=" // namespace obby"
+  line
+ document id="2" owner="1" title="regex.hpp"
+  line
+   part author="1" content="class regex {"
+  line
+   part author="2" content="public:"
+  line
+   part author="1" content="\tclass compile_flags {"
+  line
+   part author="1" content="\tpublic:"
+  line
+   part author="1" content="\t\tstatic const compile_flags NONE;"
+  line
+   part author="1" content="\t\tstatic const compile_flags EXTENDED;"
+  line
+   part author="1" content="\t\tstatic const compile_flags IGNORE_CASE;"
+  line
+   part author="1" content="\t\tstatic const compile_flags NO_OFFSETS;"
+  line
+   part author="1" content="\t\tstatic const compile_flags NEWLINE;"
+  line
+  line
+   part author="1" content="\t\tcompile_flags operator|(compile_flags other) const {"
+  line
+   part author="1" content="\t\t\treturn compile_flags(m_value | other.m_value);"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="1" content="\t\tcompile_flags operator&(compile_flags other) const {"
+  line
+   part author="1" content="\t\t\treturn compile_flags(m_value & other.m_value);"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="1" content="\t\tcompile_flags operator^(compile_flags other) const {"
+  line
+   part author="1" content="\t\t\treturn compile_flags(m_value ^ other.m_value);"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="1" content="\t\tcompile_flags& operator|=(compile_flags other) {"
+  line
+   part author="1" content="\t\t\tm_value |= other.m_value; return *this;"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="1" content="\t\tcompile_flags& operator&=(compile_flags other) {"
+  line
+   part author="1" content="\t\t\tm_value &= other.m_value; return *this;"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="1" content="\t\tcompile_flags& operator^=(compile_flags other) {"
+  line
+   part author="1" content="\t\t\tm_value ^= other.m_value; return *this;"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="1" content="\t\tcompile_flags operator~() const {"
+  line
+   part author="1" content="\t\t\treturn compile_flags(~m_value);"
+  line
+   part author="1" content="\t\t}"
+  line
+  line
+   part author="2" content="\t\t"
+   part author="1" content="operator bool() const {"
+  line
+   part author="1" content="\t\t\treturn m_value != NONE.m_value;"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="2" content="\t\t"
+   part author="1" content="bool operator!() const {"
+  line
+   part author="1" content="\t\t\treturn m_value == NONE.m_value;"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="2" content="\t\t"
+   part author="1" content="bool operator==(compile_flags other) const {"
+  line
+   part author="1" content="\t\t\treturn m_value == other.m_value;"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="2" content="\t\t"
+   part author="1" content="bool operator!=(compile_flags other) const {"
+  line
+   part author="1" content="\t\t\treturn m_value != other.m_value;"
+  line
+   part author="1" content="\t\t}"
+  line
+  line
+   part author="2" content="\t\t"
+   part author="1" content="unsigned int get_value() const {"
+  line
+   part author="1" content="\t\t\treturn m_value;"
+  line
+   part author="1" content="\t\t}"
+  line
+  line
+   part author="1" content="\tprotected:"
+  line
+  line
+   part author="2" content="\t"
+   part author="1" content="\texplicit compile_flags(unsigned int value) : m_value(value) { }"
+  line
+  line
+   part author="1" content="\t"
+   part author="2" content="\t"
+   part author="1" content="unsigned int m_value;"
+  line
+   part author="1" content="\t};"
+  line
+   part author="1" content="\t"
+  line
+   part author="1" content="\tclass match_flags {"
+  line
+   part author="1" content="\tpublic:"
+  line
+   part author="1" content="\t\tstatic const match_flags NONE;"
+  line
+   part author="1" content="\t\tstatic const match_flags NOT_BOL;"
+  line
+   part author="1" content="\t\tstatic const match_flags NOT_EOL;"
+  line
+  line
+   part author="1" content="\t\tmatch_flags operator|(match_flags other) const {"
+  line
+   part author="1" content="\t\t\treturn match_flags(m_value | other.m_value);"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="1" content="\t\tmatch_flags operator&(match_flags other) const {"
+  line
+   part author="1" content="\t\t\treturn match_flags(m_value & other.m_value);"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="2" content="\t\t"
+   part author="1" content="match_flags operator^(match_flags other) const {"
+  line
+   part author="1" content="\t\t\treturn match_flags(m_value ^ other.m_value);"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="2" content="\t\t"
+   part author="1" content="match_flags& operator|=(match_flags other) {"
+  line
+   part author="1" content="\t\t\tm_value |= other.m_value; return *this;"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="2" content="\t\t"
+   part author="1" content="match_flags& operator&=(match_flags other) {"
+  line
+   part author="1" content="\t\t\tm_value &= other.m_value; return *this;"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="2" content="\t\t"
+   part author="1" content="match_flags& operator^=(match_flags other) {"
+  line
+   part author="1" content="\t\t\tm_value ^= other.m_value; return *this;"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="2" content="\t\t"
+   part author="1" content="match_flags operator~() const {"
+  line
+   part author="1" content="\t\t\treturn match_flags(~m_value);"
+  line
+   part author="1" content="\t\t}"
+  line
+  line
+   part author="2" content="\t\t"
+   part author="1" content="operator bool() const {"
+  line
+   part author="1" content="\t\t\treturn m_value != NONE.m_value;"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="2" content="\t\t"
+   part author="1" content="bool operator!() const {"
+  line
+   part author="1" content="\t\t\treturn m_value == NONE.m_value;"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="2" content="\t\t"
+   part author="1" content="bool operator==(match_flags other) const {"
+  line
+   part author="1" content="\t\t\treturn m_value == other.m_value;"
+  line
+   part author="1" content="\t\t}"
+  line
+   part author="2" content="\t\t"
+   part author="1" content="bool operator!=(match_flags other) const {"
+  line
+   part author="1" content="\t\t\treturn m_value != other.m_value;"
+  line
+   part author="1" content="\t\t}"
+  line
+  line
+   part author="2" content="\t\t"
+   part author="1" content="unsigned int get_value() const {"
+  line
+   part author="1" content="\t\t\treturn m_value;"
+  line
+   part author="1" content="\t\t}"
+  line
+  line
+   part author="1" content="protected:"
+  line
+   part author="2" content="\t\te"
+   part author="1" content="xplicit match_flags(unsigned int value) : m_value(value) { }"
+  line
+  line
+   part author="2" content="\t\tu"
+   part author="1" content="nsigned int m_value;"
+  line
+   part author="1" content="};"
+  line
+  line
+   part author="1" content="\tclass compile_error {"
+  line
+   part author="1" content="\tpublic:"
+  line
+   part author="1" content="\t\tstatic const compile_error BAD_BACKREF;"
+  line
+   part author="1" content="\t\tstatic const compile_error BAD_PATTERN;"
+  line
+   part author="1" content="\t\tstatic const compile_error BAD_REPEAT;"
+  line
+   part author="1" content="\t\tstatic const compile_error UNMATCHED_BRACE;"
+  line
+   part author="1" content="\t\tstatic const compile_error UNMATCHED_BRACKET;"
+  line
+   part author="1" content="\t\tstatic const compile_error INVALID_COLLATION;"
+  line
+   part author="1" content="\t\tstatic const compile_error BAD_CHARCLASS;"
+  line
+   part author="1" content="\t\tstatic const compile_error NON_SPECIFIC;"
+  line
+   part author="1" content="\t\tstatic const compile_error TRAILING_BACKSLASH;"
+  line
+   part author="1" content="\t\tstatic const compile_error UNMATCHED_PAREN;"
+  line
+   part author="1" content="\t\tstatic const compile_error INVALID_RANGE;"
+  line
+   part author="1" content="\t\tstatic const compile_error BUFFER_TOO_BIG;"
+  line
+   part author="1" content="\t\tstatic const compile_error OUT_OF_MEMORY;"
+  line
+   part author="1" content="\t\tstatic const compile_error INVALID_SUBEXP_REF;"
+  line
+  line
+   part author="1" content="\tprotected:"
+  line
+   part author="1" content="\t\texplicit compile_error(int value);"
+  line
+   part author="1" content="\t\t"
+  line
+   part author="1" content="\t\tunsigned int m_value;"
+  line
+   part author="1" content="\t};"
+  line
+  line
+   part author="1" content="\tregex(const char* regex_string,"
+  line
+   part author="1" content="\t"
+   part author="2" content="      "
+   part author="1" content="compile_flags cflags = compile_flags"
+   part author="2" content="::NONE"
+   part author="1" content=");"
+  line
+   part author="1" content="\t~regex();"
+  line
+   part author="1" content="\t"
+  line
+   part author="1" content="\tbool match(const char* string, match_flags eflags = match_flags::NONE);"
+  line
+   part author="1" content="\tstd::vector<std::pair<size_t, size_t> >"
+  line
+   part author="1" content="\t\tfind(const char* string, int nmatch = 1,"
+  line
+   part author="1" content="\t\t     match_flags eflags = match_flags::NONE);"
+  line
+   part author="1" content="private:"
+  line
+   part author="1" content="\tvoid* m_regex;"
+  line
+   part author="1" content="};"
+ document id="5" owner="2" title="mkenum.rb"
+  line
+   part author="0" content="#!/usr/bin/env ruby"
+  line
+  line
+   part author="0" content="BASE = <<EOT"
+  line
+   part author="0" content="class #NAME#"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="public:"
+  line
+   part author="0" content="#OPTIONLIST#"
+  line
+  line
+   part author="0" content="        #NAME# operator|(#NAME# other) const { return #NAME#(m_value | other.m_value); }"
+  line
+   part author="0" content="        #NAME# operator&(#NAME# other) const { return #NAME#(m_value & other.m_value); }"
+  line
+   part author="0" content="        #NAME# operator^(#NAME# other) const { return #NAME#(m_value ^ other.m_value); }"
+  line
+   part author="0" content="        #NAME#& operator|=(#NAME# other) { m_value |= other.m_value; return *this; }"
+  line
+   part author="0" content="        #NAME#& operator&=(#NAME# other) { m_value &= other.m_value; return *this; }"
+  line
+   part author="0" content="        #NAME#& operator^=(#NAME# other) { m_value ^= other.m_value; return *this; }"
+  line
+   part author="0" content="        #NAME# operator~() const { return #NAME#(~m_value); }"
+  line
+  line
+   part author="0" content="\toperator bool() const { return m_value != NONE.m_value; }"
+  line
+   part author="0" content="\tbool operator!() const { return m_value == NONE.m_value; }"
+  line
+   part author="0" content="        bool operator==(#NAME# other) const { return m_value == other.m_value; }"
+  line
+   part author="0" content="        bool operator!=(#NAME# other) const { return m_value != other.m_value; }"
+  line
+  line
+   part author="0" content="        unsigned int get_value() const { return m_value; }"
+  line
+  line
+   part author="0" content="protected:"
+  line
+   part author="0" content="        explicit #NAME#(unsigned int value) : m_value(value) { }"
+  line
+  line
+   part author="0" content="        unsigned int m_value;"
+  line
+   part author="0" content="};"
+  line
+  line
+   part author="0" content="#OPTIONASSIGNMENT#"
+  line
+   part author="0" content="EOT"
+  line
+  line
+   part author="0" content="raise Exception, \"Not enough parameters specified!\" unless ARGV.length > 0"
+  line
+   part author="0" content="name = ARGV[0]"
+  line
+  line
+   part author="0" content="optionlist = [['NONE', 0]]; cnt = 1/2.0"
+  line
+   part author="0" content="STDIN.each_line { |option| optionlist << [option.strip, (cnt *= 2).floor] }"
+  line
+  line
+   part author="0" content="puts BASE.gsub(/#(\\w+)#/) { |token| "
+  line
+   part author="0" content="  case token"
+  line
+   part author="0" content="    when '#NAME#': name"
+  line
+   part author="0" content="    when '#OPTIONLIST#': optionlist.map { |option|"
+  line
+   part author="0" content="        \"\\tstatic const #{name} #{option[0]};\""
+  line
+   part author="0" content="      }.join(\"\\n\")"
+  line
+   part author="0" content="    when '#OPTIONASSIGNMENT#': optionlist.map { |option|"
+  line
+   part author="0" content="        \"const %s %s::%s = %s(0x%.8x);\" % [name, name, option[0], name, option[1]]"
+  line
+   part author="0" content="      }.join(\"\\n\")"
+  line
+   part author="0" content="  end"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="# vim:set et ts=2:"
+  line
+ document id="6" owner="2" title="user.hpp"
+  line
+   part author="0" content="/* libobby - Network text editing library"
+  line
+   part author="0" content=" * Copyright (C) 2005 0x539 dev group"
+  line
+   part author="0" content=" *"
+  line
+   part author="0" content=" * This program is free software; you can redistribute it and/or"
+  line
+   part author="0" content=" * modify it under the terms of the GNU General Public"
+  line
+   part author="0" content=" * License as published by the Free Software Foundation; either"
+  line
+   part author="0" content=" * version 2 of the License, or (at your option) any later version."
+  line
+   part author="0" content=" *"
+  line
+   part author="0" content=" * This program is distributed in the hope that it will be useful,"
+  line
+   part author="0" content=" * but WITHOUT ANY WARRANTY; without even the implied warranty of"
+  line
+   part author="0" content=" * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU"
+  line
+   part author="0" content=" * General Public License for more details."
+  line
+   part author="0" content=" *"
+  line
+   part author="0" content=" * You should have received a copy of the GNU General Public"
+  line
+   part author="0" content=" * License along with this program; if not, write to the Free"
+  line
+   part author="0" content=" * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA."
+  line
+   part author="0" content=" */"
+  line
+  line
+   part author="0" content="#ifndef _OBBY_USER_HPP_"
+  line
+   part author="0" content="#define _OBBY_USER_HPP_"
+  line
+  line
+   part author="0" content="#include <net6/packet.hpp>"
+  line
+   part author="0" content="#include <net6/user.hpp>"
+  line
+   part author="0" content="#include <net6/address.hpp>"
+  line
+   part author="0" content="#include <net6/non_copyable.hpp>"
+  line
+   part author="0" content="#include <string>"
+  line
+   part author="0" content="#include \"serialise/object.hpp\""
+  line
+  line
+   part author="0" content="namespace obby"
+  line
+   part author="0" content="{"
+  line
+  line
+   part author="0" content="class user_table;"
+  line
+  line
+   part author="0" content="/** User in a obby session."
+  line
+   part author="0" content=" */"
+  line
+   part author="0" content="\t"
+  line
+   part author="0" content="class user : private net6::non_copyable"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="public:"
+  line
+   part author="0" content="\t/** Flags that belong to a user."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tclass flags"
+  line
+   part author="0" content="\t{"
+  line
+   part author="0" content="\tpublic:"
+  line
+   part author="0" content="\t\tstatic const flags NONE;"
+  line
+   part author="0" content="\t\tstatic const flags CONNECTED;"
+  line
+  line
+   part author="0" content="\t        flags operator|(flags other) const { return flags(m_value | other.m_value); }"
+  line
+   part author="0" content="        \tflags operator&(flags other) const { return flags(m_value & other.m_value); }"
+  line
+   part author="0" content="\t        flags operator^(flags other) const { return flags(m_value ^ other.m_value); }"
+  line
+   part author="0" content="        \tflags& operator|=(flags other) { m_value |= other.m_value; return *this; }"
+  line
+   part author="0" content="\t        flags& operator&=(flags other) { m_value &= other.m_value; return *this; }"
+  line
+   part author="0" content="        \tflags& operator^=(flags other) { m_value ^= other.m_value; return *this; }"
+  line
+   part author="0" content="\t        flags operator~() const { return flags(~m_value); }"
+  line
+  line
+   part author="0" content="\t\toperator bool() const { return m_value != NONE.m_value; }"
+  line
+   part author="0" content="\t\tbool operator!() const { return m_value == NONE.m_value; }"
+  line
+   part author="0" content="\t        bool operator==(flags other) const { return m_value == other.m_value; }"
+  line
+   part author="0" content="        \tbool operator!=(flags other) const { return m_value != other.m_value; }"
+  line
+  line
+   part author="0" content="\t        unsigned int get_value() const { return m_value; }"
+  line
+  line
+   part author="0" content="\tprotected:"
+  line
+   part author="0" content="        \texplicit flags(unsigned int value) : m_value(value) { }"
+  line
+  line
+   part author="0" content="\t        unsigned int m_value;"
+  line
+   part author="0" content="\t};"
+  line
+  line
+   part author="0" content="\t/** User-wide privileges."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tclass privileges"
+  line
+   part author="0" content="\t{"
+  line
+   part author="0" content="\tpublic:"
+  line
+   part author="0" content="\t\tstatic const privileges NONE;"
+  line
+   part author="0" content="\t\tstatic const privileges CREATE_DOCUMENT;"
+  line
+  line
+   part author="0" content="\t        privileges operator|(privileges other) const { return privileges(m_value | other.m_value); }"
+  line
+   part author="0" content="        \tprivileges operator&(privileges other) const { return privileges(m_value & other.m_value); }"
+  line
+   part author="0" content="\t        privileges operator^(privileges other) const { return privileges(m_value ^ other.m_value); }"
+  line
+   part author="0" content="        \tprivileges& operator|=(privileges other) { m_value |= other.m_value; return *this; }"
+  line
+   part author="0" content="\t        privileges& operator&=(privileges other) { m_value &= other.m_value; return *this; }"
+  line
+   part author="0" content="        \tprivileges& operator^=(privileges other) { m_value ^= other.m_value; return *this; }"
+  line
+   part author="0" content="\t        privileges operator~() const { return privileges(~m_value); }"
+  line
+  line
+   part author="0" content="\t\toperator bool() const { return m_value != NONE.m_value; }"
+  line
+   part author="0" content="\t\tbool operator!() const { return m_value == NONE.m_value; }"
+  line
+   part author="0" content="        \tbool operator==(privileges other) const { return m_value == other.m_value; }"
+  line
+   part author="0" content="\t        bool operator!=(privileges other) const { return m_value != other.m_value; }"
+  line
+  line
+   part author="0" content="\t        unsigned int get_value() const { return m_value; }"
+  line
+  line
+   part author="0" content="\tprotected:"
+  line
+   part author="0" content="        \texplicit privileges(unsigned int value) : m_value(value) { }"
+  line
+  line
+   part author="0" content="\t        unsigned int m_value;"
+  line
+   part author="0" content="\t};"
+  line
+  line
+   part author="0" content="\t/** Creates a new user from an existing net6::user."
+  line
+   part author="0" content="\t * @param id Unique obby ID for this user."
+  line
+   part author="0" content="\t * @param user6 Underlaying net6::user object."
+  line
+   part author="0" content="\t * @param red Red colour component of the user colour (0-255)"
+  line
+   part author="0" content="\t * @param green Green colour component of the user colour (0-255)"
+  line
+   part author="0" content="\t * @param blue Blue colour component of the user colour (0-255)"
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tuser(unsigned int id, const net6::user& user6,"
+  line
+   part author="0" content="\t     int red, int green, int blue);"
+  line
+  line
+   part author="0" content="\t/** Creates a new user that represents a client that has already left"
+  line
+   part author="0" content="\t * the obby session."
+  line
+   part author="0" content="\t * @param id Unique obby ID for this user."
+  line
+   part author="0" content="\t * @param name Name of the user."
+  line
+   part author="0" content="\t * @param red Red colour component of the user colour (0-255)"
+  line
+   part author="0" content="\t * @param green Green colour component of the user colour (0-255)"
+  line
+   part author="0" content="\t * @param blue Blue colour component of the user colour (0-255)"
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tuser(unsigned int id, const std::string& name, int red, int green,"
+  line
+   part author="0" content="\t     int blue);"
+  line
+  line
+   part author="0" content="\t/** Creates a user from a serialised user object."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tuser(const serialise::object& obj);"
+  line
+  line
+   part author="0" content="\t/** Serialises a user to a serialisation object."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tvoid serialise(serialise::object& obj) const;"
+  line
+  line
+   part author="0" content="\t/** Releases the underlaying net6::user object from this user."
+  line
+   part author="0" content="\t * This is useful if this object gets deleted because the"
+  line
+   part author="0" content="\t * corresponding client left the obby session. The obby::user object"
+  line
+   part author="0" content="\t * itself is stored furthur to identify the client if he rejoins."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tvoid release_net6();"
+  line
+  line
+   part author="0" content="\t/** Reassigns a new net6::user to this user. This happens if a user has"
+  line
+   part author="0" content="\t * left the obby session and rejoined (maybe with another colour, in"
+  line
+   part author="0" content="\t * this case the colour in all the documents gets updated)."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tvoid assign_net6(const net6::user& user6, int red, int green, int blue);"
+  line
+  line
+   part author="0" content="\t/** Returns the underlaying net6::user object."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tconst net6::user& get_net6() const;"
+  line
+  line
+   part author="0" content="\t/** Returns the user name of this user."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tconst std::string& get_name() const;"
+  line
+  line
+   part author="0" content="\t/** Returns the address of this user. Note that the address is not"
+  line
+   part author="0" content="\t * cached, so this function throws std::logic_error if the user is not"
+  line
+   part author="0" content="\t * connected to the session. net6::not_connected_error is thrown if the"
+  line
+   part author="0" content="\t * address of the user is not known, e.g. there is no direct connection"
+  line
+   part author="0" content="\t * to this user."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tconst net6::address& get_address() const;"
+  line
+  line
+   part author="0" content="\t/** Returns a unique ID for this user."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tunsigned int get_id() const;"
+  line
+  line
+   part author="0" content="\t/** Returns the red component of the user colour."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tint get_red() const;"
+  line
+  line
+   part author="0" content="\t/** Returns the green component of the user colour."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tint get_green() const;"
+  line
+  line
+   part author="0" content="\t/** Returns the blue component of the user colour."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tint get_blue() const;"
+  line
+  line
+   part author="0" content="\t/** Returns the random token set for this user."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tconst std::string& get_token() const;"
+  line
+  line
+   part author="0" content="\t/** Returns the password for this user (only available with server"
+  line
+   part author="0" content="\t * or host buffers)."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tconst std::string& get_password() const;"
+  line
+  line
+   part author="0" content="\t/** Returns the flags that are currently set for this user."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tflags get_flags() const;"
+  line
+  line
+   part author="0" content="\t/** Sets the three colour components of the user colour."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tvoid set_colour(int red, int green, int blue);"
+  line
+  line
+   part author="0" content="\t/** Changes the token to the one the server generated for this user."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tvoid set_token(const std::string& token);"
+  line
+  line
+   part author="0" content="\t/** Changes the password for this user"
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tvoid set_password(const std::string& password);"
+  line
+  line
+   part author="0" content="\t/** Adds the given flags to this user's flags."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tvoid add_flags(flags new_flags);"
+  line
+  line
+   part author="0" content="\t/** Removes the given flags from this user's flags."
+  line
+   part author="0" content="\t */"
+  line
+   part author="0" content="\tvoid remove_flags(flags old_flags);"
+  line
+  line
+   part author="0" content="protected:"
+  line
+   part author="0" content="\tconst net6::user* m_user6;"
+  line
+  line
+   part author="0" content="\tunsigned int m_id;"
+  line
+   part author="0" content="\tstd::string m_name;"
+  line
+   part author="0" content="\tint m_red;"
+  line
+   part author="0" content="\tint m_green;"
+  line
+   part author="0" content="\tint m_blue;"
+  line
+  line
+   part author="0" content="\tstd::string m_token;"
+  line
+   part author="0" content="\tstd::string m_password;"
+  line
+  line
+   part author="0" content="\tflags m_flags;"
+  line
+   part author="0" content="\tprivileges m_privs;"
+  line
+   part author="0" content="};"
+  line
+  line
+   part author="0" content="} // namespace obby"
+  line
+  line
+   part author="0" content="namespace serialise"
+  line
+   part author="0" content="{"
+  line
+  line
+   part author="0" content="template<>"
+  line
+   part author="0" content="class context<obby::user*>"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="public:"
+  line
+   part author="0" content="\tcontext();"
+  line
+   part author="0" content="\tcontext(const obby::user_table& user_table);"
+  line
+  line
+   part author="0" content="\tvirtual std::string to_string(const obby::user* from) const;"
+  line
+   part author="0" content="\tvirtual const obby::user* from_string(const std::string& string) const;"
+  line
+  line
+   part author="0" content="protected:"
+  line
+   part author="0" content="\tconst obby::user_table* m_user_table;"
+  line
+   part author="0" content="};"
+  line
+  line
+   part author="0" content="template<>"
+  line
+   part author="0" content="class context<const obby::user*>: public context<obby::user*>"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="public:"
+  line
+   part author="0" content="\tcontext():"
+  line
+   part author="0" content="\t\tcontext<obby::user*>() {}"
+  line
+   part author="0" content="\tcontext(const obby::user_table& user_table):"
+  line
+   part author="0" content="\t\tcontext<obby::user*>(user_table) {}"
+  line
+   part author="0" content="};"
+  line
+  line
+   part author="0" content="} // namespace serialise"
+  line
+  line
+   part author="0" content="#endif // _OBBY_USER_HPP_"
+  line
+  line
+  line
+  line
+ document id="7" owner="2" title="user.cpp"
+  line
+   part author="0" content="/* libobby - Network text editing library"
+  line
+   part author="0" content=" * Copyright (C) 2005 0x539 dev group"
+  line
+   part author="0" content=" *"
+  line
+   part author="0" content=" * This program is free software; you can redistribute it and/or"
+  line
+   part author="0" content=" * modify it under the terms of the GNU General Public"
+  line
+   part author="0" content=" * License as published by the Free Software Foundation; either"
+  line
+   part author="0" content=" * version 2 of the License, or (at your option) any later version."
+  line
+   part author="0" content=" *"
+  line
+   part author="0" content=" * This program is distributed in the hope that it will be useful,"
+  line
+   part author="0" content=" * but WITHOUT ANY WARRANTY; without even the implied warranty of"
+  line
+   part author="0" content=" * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU"
+  line
+   part author="0" content=" * General Public License for more details."
+  line
+   part author="0" content=" *"
+  line
+   part author="0" content=" * You should have received a copy of the GNU General Public"
+  line
+   part author="0" content=" * License along with this program; if not, write to the Free"
+  line
+   part author="0" content=" * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA."
+  line
+   part author="0" content=" */"
+  line
+  line
+   part author="0" content="#include \"format_string.hpp\""
+  line
+   part author="0" content="#include \"user.hpp\""
+  line
+   part author="0" content="#include \"user_table.hpp\""
+  line
+  line
+   part author="0" content="const obby::user::flags obby::user::flags::NONE = obby::user::flags(0x00000000);"
+  line
+   part author="0" content="const obby::user::flags obby::user::flags::CONNECTED = obby::user::flags(0x00000001);"
+  line
+  line
+   part author="0" content="const obby::user::privileges obby::user::privileges::NONE = obby::user::privileges(0x00000000);"
+  line
+   part author="0" content="const obby::user::privileges obby::user::privileges::CREATE_DOCUMENT = obby::user::privileges(0x00000001);"
+  line
+  line
+   part author="0" content="obby::user::user(unsigned int id, const net6::user& user6,"
+  line
+   part author="0" content="                 int red, int green, int blue):"
+  line
+   part author="0" content="\tm_user6(&user6), m_id(id), m_name(user6.get_name() ),"
+  line
+   part author="0" content="\tm_red(red), m_green(green), m_blue(blue), m_flags(flags::CONNECTED),"
+  line
+   part author="0" content="\tm_privs(privileges::NONE)"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="obby::user::user(unsigned int id, const std::string& name, int red, int green,"
+  line
+   part author="0" content="                 int blue)"
+  line
+   part author="0" content=" : m_user6(NULL), m_id(id), m_name(name), m_red(red), m_green(green),"
+  line
+   part author="0" content="   m_blue(blue), m_flags(flags::NONE), m_privs(privileges::NONE)"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="obby::user::user(const serialise::object& obj):"
+  line
+   part author="0" content="\tm_flags(flags::NONE), m_privs(privileges::NONE)"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\tconst serialise::attribute& id_attr ="
+  line
+   part author="0" content="\t\tobj.get_required_attribute(\"id\");"
+  line
+   part author="0" content="\tconst serialise::attribute& name_attr ="
+  line
+   part author="0" content="\t\tobj.get_required_attribute(\"name\");"
+  line
+  line
+   part author="0" content="\t// TODO: Replace this by a obby::colour class before releasing 0.3.0!"
+  line
+   part author="0" content="\tconst serialise::attribute& red_attr ="
+  line
+   part author="0" content="\t\tobj.get_required_attribute(\"red\");"
+  line
+   part author="0" content="\tconst serialise::attribute& green_attr ="
+  line
+   part author="0" content="\t\tobj.get_required_attribute(\"green\");"
+  line
+   part author="0" content="\tconst serialise::attribute& blue_attr ="
+  line
+   part author="0" content="\t\tobj.get_required_attribute(\"blue\");"
+  line
+  line
+   part author="0" content="\tm_user6 = NULL;"
+  line
+   part author="0" content="\tm_id = id_attr.as<unsigned int>();"
+  line
+   part author="0" content="\tm_name = name_attr.as<std::string>();"
+  line
+   part author="0" content="\tm_red = red_attr.as<unsigned int>();"
+  line
+   part author="0" content="\tm_green = green_attr.as<unsigned int>();"
+  line
+   part author="0" content="\tm_blue = blue_attr.as<unsigned int>();"
+  line
+  line
+   part author="0" content="\tm_privs = privileges::NONE;"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="void obby::user::serialise(serialise::object& obj) const"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\tobj.add_attribute(\"id\").set_value(m_id);"
+  line
+   part author="0" content="\tobj.add_attribute(\"name\").set_value(m_name);"
+  line
+   part author="0" content="\tobj.add_attribute(\"red\").set_value(m_red);"
+  line
+   part author="0" content="\tobj.add_attribute(\"green\").set_value(m_green);"
+  line
+   part author="0" content="\tobj.add_attribute(\"blue\").set_value(m_blue);"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="void obby::user::release_net6()"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\t// User must be already connected"
+  line
+   part author="0" content="\tif(~get_flags() & flags::CONNECTED)"
+  line
+   part author="0" content="\t\tthrow std::logic_error(\"obby::user::release_net6\");"
+  line
+  line
+   part author="0" content="\tm_user6 = NULL;"
+  line
+   part author="0" content="\tremove_flags(flags::CONNECTED);"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="void obby::user::assign_net6(const net6::user& user6, int red, int green,"
+  line
+   part author="0" content="                             int blue)"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\t// User must not be already connected"
+  line
+   part author="0" content="\tif(get_flags() & flags::CONNECTED)"
+  line
+   part author="0" content="\t\tthrow std::logic_error(\"obby::user::assign_net6\");"
+  line
+  line
+   part author="0" content="\t// Name must be the same"
+  line
+   part author="0" content="\tif(m_name != user6.get_name() )"
+  line
+   part author="0" content="\t\tthrow std::logic_error(\"obby::user::assign_net6\");"
+  line
+  line
+   part author="0" content="\tm_user6 = &user6;"
+  line
+   part author="0" content="\tm_red = red;"
+  line
+   part author="0" content="\tm_green = green;"
+  line
+   part author="0" content="\tm_blue = blue;"
+  line
+  line
+   part author="0" content="\tadd_flags(flags::CONNECTED);"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="const net6::user& obby::user::get_net6() const"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\tif(m_user6 == NULL)"
+  line
+   part author="0" content="\t\t// TODO: Own error class?"
+  line
+   part author="0" content="\t\tthrow std::logic_error(\"obby::user::get_net6\");"
+  line
+  line
+   part author="0" content="\treturn *m_user6;"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="const std::string& obby::user::get_name() const"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\treturn m_name;"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="const net6::address& obby::user::get_address() const"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\tif(m_user6 == NULL)"
+  line
+   part author="0" content="\t\t// TODO: Own error class?"
+  line
+   part author="0" content="\t\tthrow std::logic_error(\"obby::user::get_address\");"
+  line
+  line
+   part author="0" content="\treturn m_user6->get_connection().get_remote_address();"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="unsigned int obby::user::get_id() const"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\treturn m_id;"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="int obby::user::get_red() const"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\treturn m_red;"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="int obby::user::get_green() const"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\treturn m_green;"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="int obby::user::get_blue() const"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\treturn m_blue;"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="const std::string& obby::user::get_token() const"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\treturn m_token;"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="const std::string& obby::user::get_password() const"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\treturn m_password;"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="obby::user::flags obby::user::get_flags() const"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\treturn m_flags;"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="void obby::user::set_colour(int red, int green, int blue)"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\tm_red = red;"
+  line
+   part author="0" content="\tm_green = green;"
+  line
+   part author="0" content="\tm_blue = blue;"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="void obby::user::set_token(const std::string& token)"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\tm_token = token;"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="void obby::user::set_password(const std::string& password)"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\tm_password = password;"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="void obby::user::add_flags(flags new_flags)"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\tm_flags |= new_flags;"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="void obby::user::remove_flags(flags old_flags)"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\tm_flags &= ~old_flags;"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="serialise::context<obby::user*>::context():"
+  line
+   part author="0" content="\tm_user_table(NULL)"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="serialise::context<obby::user*>::context(const obby::user_table& user_table):"
+  line
+   part author="0" content="\tm_user_table(&user_table)"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="std::string"
+  line
+   part author="0" content="serialise::context<obby::user*>::to_string(const obby::user* from) const"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\tstd::stringstream stream;"
+  line
+   part author="0" content="\tstream << ( (from != NULL) ? (from->get_id()) : (0) );"
+  line
+   part author="0" content="\treturn stream.str();"
+  line
+   part author="0" content="}"
+  line
+  line
+   part author="0" content="const obby::user*"
+  line
+   part author="0" content="serialise::context<obby::user*>::from_string(const std::string& string) const"
+  line
+   part author="0" content="{"
+  line
+   part author="0" content="\t// We need a user table to lookup the user ID"
+  line
+   part author="0" content="\tif(m_user_table == NULL)"
+  line
+   part author="0" content="\t\tthrow conversion_error(\"User table required\");"
+  line
+  line
+   part author="0" content="\t// Extract user ID from stream"
+  line
+   part author="0" content="\tunsigned int user_id;"
+  line
+   part author="0" content="\tstd::stringstream stream(string);"
+  line
+   part author="0" content="\tstream >> user_id;"
+  line
+  line
+   part author="0" content="\t// Not a valid ID?"
+  line
+   part author="0" content="\tif(stream.bad() )"
+  line
+   part author="0" content="\t\tthrow conversion_error(\"User ID must be an integer\");"
+  line
+  line
+   part author="0" content="\t// \"No user\""
+  line
+   part author="0" content="\tif(user_id == 0) return NULL;"
+  line
+  line
+   part author="0" content="\t// Find user"
+  line
+   part author="0" content="\tconst obby::user* user = m_user_table->find(user_id);"
+  line
+   part author="0" content="\tif(user == NULL)"
+  line
+   part author="0" content="\t{"
+  line
+   part author="0" content="\t\t// Not in user table"
+  line
+   part author="0" content="\t\tobby::format_string str(\"User ID %0% does not exist\");"
+  line
+   part author="0" content="\t\tstr << user_id;"
+  line
+   part author="0" content="\t\tthrow conversion_error(str.str() );"
+  line
+   part author="0" content="\t}"
+  line
+  line
+   part author="0" content="\t// Deserialisation successful"
+  line
+   part author="0" content="\treturn user;"
+  line
+   part author="0" content="}"
+  line
+ document id="3" owner="1" title="regex.cpp"
+  line
+   part author="1" content="#include <regex.h>"
+  line
+   part author="1" content="#include \"regex.hpp\""
+  line
+  line
+   part author="1" content="const compile_flags compile_flags::NONE        = compile_flags(0);"
+  line
+   part author="1" content="const compile_flags compile_flags::EXTENDED    = compile_flags(REG_EXTENDED);"
+  line
+   part author="1" content="const compile_flags compile_flags::IGNORE_CASE = compile_flags(REG_ICASE);"
+  line
+   part author="1" content="const compile_flags compile_flags::NO_OFFSETS  = compile_flags(REG_NOSUB);"
+  line
+   part author="1" content="const compile_flags compile_flags::NEWLINE     = compile_flags(REG_NEWLINE);"
+  line
+  line
+   part author="1" content="const match_flags match_flags::NONE    = match_flags(0);"
+  line
+   part author="1" content="const match_flags match_flags::NOT_BOL = match_flags(REG_NOTBOL);"
+  line
+   part author="1" content="const match_flags match_flags::NOT_EOL = match_flags(REG_NOTEOL);"
+  line
+  line
+   part author="1" content="const compile_error BAD_BACKREF        = compile_error(REG_BADBR);"
+  line
+   part author="1" content="const compile_error BAD_PATTERN        = compile_error(REG_BADPAT);"
+  line
+   part author="1" content="const compile_error BAD_REPEAT         = compile_error(REG_BADRPT);"
+  line
+   part author="1" content="const compile_error UNMATCHED_BRACE    = compile_error(REG_EBRACE);"
+  line
+   part author="1" content="const compile_error UNMATCHED_BRACKET  = compile_error(REG_EBRACKET);"
+  line
+   part author="1" content="const compile_error INVALID_COLLATION  = compile_error(REG_ECOLLATE);"
+  line
+   part author="1" content="const compile_error BAD_CHARCLASS      = compile_error(REG_ECTYPE);"
+  line
+   part author="1" content="const compile_error NON_SPECIFIC       = compile_error(REG_EEND);"
+  line
+   part author="1" content="const compile_error TRAILING_BACKSLASH = compile_error(REG_EESCAPE);"
+  line
+   part author="1" content="const compile_error UNMATCHED_PAREN    = compile_error(REG_EPAREN);"
+  line
+   part author="1" content="const compile_error INVALID_RANGE      = compile_error(REG_ERANGE);"
+  line
+   part author="1" content="const compile_error BUFFER_TOO_BIG     = compile_error(REG_ESIZE);"
+  line
+   part author="1" content="const compile_error OUT_OF_MEMORY      = compile_error(REG_ESPACE);"
+  line
+   part author="1" content="const compile_error INVALID_SUBEXP_REF = compile_error(REG_ESUBREG);"
+  line
+  line
+   part author="1" content="regex::regex(const char* regex_string, compile_flags cflags) {"
+  line
+   part author="1" content="\tm_regex = new regex_t;"
+  line
+   part author="1" content="\tint errcode = regcomp(m_regex, regex_string, cflags.get_value());"
+  line
+   part author="1" content="\tif (errcode != 0) {"
+  line
+   part author="1" content="\t\t~regex();"
+  line
+   part author="1" content="\t\tthrow error(errcode);"
+  line
+   part author="1" content="\t}"
+  line
+   part author="1" content="}"
+  line
+   part author="1" content="regex::~regex() {"
+  line
+   part author="1" content="\tregfree(m_regex);"
+  line
+   part author="1" content="\tdelete m_regex;"
+  line
+   part author="1" content="}"
+  line
+  line
+   part author="1" content="bool regex::match(const char* string, match_flags eflags) {"
+  line
+   part author="1" content="\treturn regexec(m_regex, string, 0, 0, eflags);"
+  line
+   part author="1" content="}"
+  line
+  line
+   part author="1" content="std::vector<std::pair<size_t, size_t> >"
+  line
+   part author="1" content="\tregex::find(const char* string, int nmatch, match_flags eflags) {"
+  line
+   part author="1" content="\tstd::vector<regmatch_t> pmatch(nmatch);"
+  line
+   part author="1" content="\tif (regexec(regex, string, nmatch, &pmatch[0], eflags) != 0)"
+  line
+   part author="1" content="\t\treturn std::vector<std::pair<size_t, size_t> >();"
+  line
+   part author="1" content="\tstd::vector<std::pair<size_t, size_t> > matches(nmatch);"
+  line
+   part author="1" content="\tfor ("
+  line
+   part author="1" content="}"
+
