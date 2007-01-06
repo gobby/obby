@@ -74,6 +74,12 @@ namespace obby
 // wieder ein. Dadurch erhaelt auch er
 // -> LHobby
 // Und siehe da: Alle 3 (Client a, Client b, Server) sind synchron. :-D
+
+#include <string>
+#include <boost/signal.hpp>
+#include <boost/thread.hpp>
+#include <net6/client.hpp>
+#include <net6/server.hpp>
 	
 class buffer; // text buffer
 
@@ -181,19 +187,80 @@ public:
 	void erase(const position& from, const position& to);
 
 protected:
-	// Unsynced changes (only necessary for client buffers)
-	std::list<record*> m_unsynced;
-	// Last changes to undo thingies
+	// Changes to the document
 	std::list<record*> m_history;
 	// Document revision
 	unsigned int m_revision;
-	// Counter to generate unique revision numbers (only used by server)
-	static unsigned int m_counter;
 };
 
-// TODO: client_buffer / server_buffer? client_buffer has to remember unsynced
-// changes, server_buffer has to have a list with all clients and their ids
-// (Each client has a unique id, the from member of record is the id of
-// the client which made the corresponding record)
+class client_buffer
+{
+public:
+	typedef boost::signal<void (const insert_record&)> signal_insert_type;
+	typedef boost::signal<void (const delete_record&)> signal_delete_type;
+	typedef boost::signal<void (net6::client::peer&)> signal_join_type;
+	typedef boost::signal<void (net6::client::peer&)> signal_part_type;
+	typedef boost::signal<void ()> signal_close_type;
+	typedef boost::signal<void (const std::string&)>
+		signal_login_failed_type;
+	
+	client_buffer();
+	~client_bufer();
+
+	signal_insert_type& insert_event();
+	signal_delete_type& delete_event();
+	signal_join_type& join_event();
+	signal_part_type& part_event();
+	signal_close_type& close_event();
+	signal_login_failed_type& login_failed_event();
+
+protected:
+	// Unsynced changes
+	std::list<record*> m_unsynced;
+	// Network connection
+	net6::client m_connection;
+	// Network thread
+	boost::thread m_netthread;
+
+	signal_insert_type m_signal_insert;
+	signal_delete_type m_signal_delete;
+	signal_join_type m_signal_join;
+	signal_part_type m_signal_part;
+	signal_close_type m_signal_close;
+	signal_login_failed_type m_login_failed_event;
+};
+
+class server_buffer
+{
+public: 
+	typedef boost::signal<void (const insert_record&)> signal_insert_type;
+	typedef boost::signal<void (const delete_record&)> signal_delete_type;
+	typedef boost::signal<void (net6::server::peer&)> signal_join_type;
+	typedef boost::signal<void (net6::server::peer&)> signal_login_type;
+	typedef boost::signal<void (net6::server::peer&)> signal_part_type;
+
+	server_buffer();
+	~server_buffer();
+
+	signal_insert_type& insert_event();
+	signal_delete_type& delete_event();
+	signal_join_type& join_event();
+	signal_login_type& login_event();
+	signal_part_type& part_event();
+
+protected:
+	// Revision counter
+	unsigned int m_counter;
+	// Network server object
+	net6::server server;
+	// Network thread
+	boost::thread netthread;
+
+	signal_insert_type m_signal_insert;
+	signal_delete_type m_signal_delete;
+	signal_join_type m_signal_join;
+	signal_login_type m_signal_login;
+	signal_part_type m_signal_part;
+};
 
 }
