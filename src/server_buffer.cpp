@@ -146,6 +146,8 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 			return false;
 		}
 	}
+
+	return true;
 }
 
 void obby::server_buffer::on_pre_login(net6::server::peer& peer,
