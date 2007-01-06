@@ -61,7 +61,8 @@ public:
 	 * the resulting obby::document_info.
 	 */
 	virtual void create_document(const std::string& title,
-	                             const std::string& content = "");
+	                             const std::string& content = "",
+	                             bool open_as_edited = false);
 
 	/** Removes an existing document.
 	 */
@@ -115,7 +116,8 @@ protected:
 	virtual void create_document_impl(const std::string& title,
 	                                  const std::string& content,
 				          const obby::user* owner,
-	                                  unsigned int id);
+	                                  unsigned int id,
+	                                  bool open_as_edited = false);
 
 	/** Relays a message to the other users. The message is originally
 	 * sent by the user <em>writer</em>.

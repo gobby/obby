@@ -72,7 +72,8 @@ public:
 	 * for the synced content.
 	 */
 	virtual void create_document(const std::string& title,
-	                             const std::string& content);
+	                             const std::string& content,
+	                             bool open_as_edited = false);
 
 	/** Sets a new colour for the current user.
 	 */

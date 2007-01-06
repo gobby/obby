@@ -89,11 +89,13 @@ void obby::server_buffer::set_global_password(const std::string& password)
 }
 
 void obby::server_buffer::create_document(const std::string& title,
-                                          const std::string& content)
+                                          const std::string& content,
+                                          bool open_as_edited)
 {
 	// Create the document with the special owner NULL,
 	// which means that this document is created by the server.
-	create_document_impl(title, content, NULL, ++ m_doc_counter);
+	create_document_impl(title, content, NULL, ++ m_doc_counter,
+		open_as_edited);
 }
 
 void obby::server_buffer::remove_document(document_info& doc)
@@ -156,7 +158,8 @@ obby::server_buffer::disconnect_event() const
 void obby::server_buffer::create_document_impl(const std::string& title,
                                                const std::string& content,
                                                const user* owner,
-                                               unsigned int id)
+                                               unsigned int id,
+                                               bool open_as_edited)
 {
 	// Internally create the document
 	document_info& doc = add_document_info(owner, id, title);
@@ -179,7 +182,8 @@ void obby::server_buffer::create_document_impl(const std::string& title,
 		}
 	}
 	// Insert the document's initial content.
-	insert_record rec(0, content, *doc.get_document(), owner, 0, 0);
+	insert_record rec(0, content, *doc.get_document(),
+		(open_as_edited) ? owner : NULL, 0, 0);
 	doc.get_document()->insert_nosync(rec);
 	// Emit the signal
 	m_signal_document_insert.emit(doc);
@@ -480,8 +484,9 @@ void obby::server_buffer::on_net_document_create(const net6::packet& pack,
 	unsigned int id = pack.get_param(0).as<int>();
 	const std::string& title = pack.get_param(1).as<std::string>();
 	const std::string& content = pack.get_param(2).as<std::string>();
+	const bool open_as_edited = pack.get_param(3).as<int>();
 
-	create_document_impl(title, content, &from, id);
+	create_document_impl(title, content, &from, id, open_as_edited);
 }
 
 void obby::server_buffer::on_net_document_remove(const net6::packet& pack,

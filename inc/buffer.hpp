@@ -74,7 +74,8 @@ public:
 	 * signal_document_insert will be emitted if it has been created.
 	 */
 	virtual void create_document(const std::string& title,
-	                             const std::string& content = "") = 0;
+	                             const std::string& content = "",
+	                             bool open_as_edited = false) = 0;
 
 	/** Removes an existing document. signal_document_remove will be
 	 * emitted if the document has been removed.

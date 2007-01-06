@@ -119,13 +119,16 @@ void obby::client_document_info::obby_sync_subscribe(const user& user)
 }
 
 void
-obby::client_document_info::obby_local_init(const std::string& initial_content)
+obby::client_document_info::obby_local_init(const std::string& initial_content,
+                                            bool open_as_edited)
 {
 	// Assign a document to the function
 	assign_document();
 	// Create initial content
 	insert_record rec(
-		0, initial_content, *m_document, &get_buffer().get_self(), 0, 0
+		0, initial_content, *m_document,
+		(open_as_edited) ? &get_buffer().get_self() : NULL,
+		0, 0
 	);
 	get_document()->insert_nosync(rec);
 }

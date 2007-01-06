@@ -89,7 +89,8 @@ public:
 	 * the clients does not wait for server acknowledgement to show the
 	 * new document without delay.
 	 */
-	virtual void obby_local_init(const std::string& initial_content);
+	virtual void obby_local_init(const std::string& initial_content,
+	                             bool open_as_edited = false);
 
 protected:
 	/** Assigns a document to the document info.

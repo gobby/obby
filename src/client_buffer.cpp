@@ -75,7 +75,8 @@ void obby::client_buffer::login(const std::string& name, int red, int green,
 }
 
 void obby::client_buffer::create_document(const std::string& title,
-                                          const std::string& content)
+                                          const std::string& content,
+                                          bool open_as_edited)
 {
 	// TODO: Authentication
 	// Choose new ID for the document
@@ -87,14 +88,14 @@ void obby::client_buffer::create_document(const std::string& title,
 	// Document has been created: Emit corresponding signal
 	m_signal_document_insert.emit(info);
 	// Assign a new document to the info
-	client_info.obby_local_init(content);
+	client_info.obby_local_init(content, open_as_edited);
 	// Subscribe the local user to the new document
 	client_info.obby_sync_subscribe(*m_self);
 	// Emit subscription signal
 	client_info.subscribe_event().emit(*m_self);
 	// Tell others
 	net6::packet request_pack("obby_document_create");
-	request_pack << id << title << content;
+	request_pack << id << title << content << open_as_edited;
 	m_client->send(request_pack);
 }
 

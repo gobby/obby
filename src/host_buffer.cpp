@@ -99,10 +99,12 @@ void obby::host_buffer::send_message(const std::string& message)
 }
 
 void obby::host_buffer::create_document(const std::string& title,
-                                        const std::string& content)
+                                        const std::string& content,
+                                        bool open_as_edited)
 {
 	// Create message from local peer object instead of the server.
-	create_document_impl(title, content, m_self, ++ m_doc_counter);
+	create_document_impl(title, content, m_self, ++ m_doc_counter,
+		open_as_edited);
 }
 
 void obby::host_buffer::set_colour(int red, int green, int blue)
