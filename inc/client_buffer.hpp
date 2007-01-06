@@ -36,6 +36,13 @@ template<typename selector_type>
 class basic_client_buffer : virtual public basic_local_buffer<selector_type>
 {
 public:
+	struct connection_settings {
+		std::string name;
+		obby::colour colour;
+		std::string global_password;
+		std::string user_password;
+	};
+
 	typedef net6::basic_client<selector_type> net_type;
 
 	typedef typename basic_buffer<selector_type>::base_document_info
@@ -43,7 +50,7 @@ public:
 	typedef basic_client_document_info<selector_type>
 		document_info;
 
-	typedef net6::default_accumulator<bool, false> password_accumulator;
+	typedef net6::default_accumulator<bool, false> login_accumulator;
 
 	typedef sigc::signal<void>
 		signal_welcome_type;
@@ -56,12 +63,18 @@ public:
 	typedef sigc::signal<void>
 		signal_close_type;
 
-	typedef typename sigc::signal<bool, std::string&>
-		::template accumulated<password_accumulator>
-		signal_global_password_type;
-	typedef typename sigc::signal<bool, std::string&>
-		::template accumulated<password_accumulator>
-		signal_user_password_type;
+	typedef typename sigc::signal<bool, connection_settings&>
+		::template accumulated<login_accumulator>
+		signal_prompt_name_type;
+	typedef typename sigc::signal<bool, connection_settings&>
+		::template accumulated<login_accumulator>
+		signal_prompt_colour_type;
+	typedef typename sigc::signal<bool, connection_settings&>
+		::template accumulated<login_accumulator>
+		signal_prompt_global_password_type;
+	typedef typename sigc::signal<bool, connection_settings&>
+		::template accumulated<login_accumulator>
+		signal_prompt_user_password_type;
 
 	/** Creates a new client_buffer that is not connected to anywhere.
 	 */
@@ -89,19 +102,19 @@ public:
 	 */
 	bool is_connected() const;
 
-	/** Sends a login request for this client.
+	/** Sends a login request for this client. If either the login request
+	 * failed because of name or colour are already in use or a password
+	 * is required, prompt_*_event() will be emitted. It may be used to
+	 * choose another name/colour or password. Returning false from those
+	 * signal handlers tell obby to abort the login process,
+	 * signal_login_failed will _not_ be emitted in this case.
+	 *
+	 * TODO: Take connection_settings?
 	 * @param name User name for this client.
 	 * @param colour User colour.
-	 * @param global_password Password that is used as a global session
-	 * password. If it is not provided, signal_global_password will be
-	 * emitted to prompt for a session password.
-	 * @param user_password Same as global password, but is used as
-	 * user password.
 	 */
 	void login(const std::string& name,
-	           const obby::colour& colour,
-	           const std::string& global_password = "",
-	           const std::string& user_password = "");
+	           const obby::colour& colour);
 
 	/** Returns TRUE if the client is already logged in.
 	 */
@@ -179,13 +192,21 @@ public:
 	 */
 	signal_login_failed_type login_failed_event() const;
 
+	/** Signal which will be emitted if the name is already in use.
+	 */
+	signal_prompt_name_type prompt_name_event() const;
+
+	/** Signal which will be emitted if the colour is already in use.
+	 */
+	signal_prompt_colour_type prompt_colour_event() const;
+
 	/** Signal which will be emitted if a global password is required.
 	 */
-	signal_global_password_type global_password_event() const;
+	signal_prompt_global_password_type prompt_global_password_event() const;
 
 	/** Signal which will be emitted if a user password is required.
 	 */
-	signal_user_password_type user_password_event() const;
+	signal_prompt_user_password_type prompt_user_password_event() const;
 
 protected:
 	/** Registers the signal handlers for the net6::client object. It may
@@ -261,21 +282,21 @@ protected:
 
 	user* m_self;
 
-	std::string m_name;
-	colour m_colour;
-	std::string m_global_password;
-	std::string m_user_password;
-
 	std::string m_token;
 	RSA::Key m_public;
+
+	connection_settings m_settings;
 
 	signal_welcome_type m_signal_welcome;
 	signal_sync_init_type m_signal_sync_init;
 	signal_sync_final_type m_signal_sync_final;
 	signal_close_type m_signal_close;
 	signal_login_failed_type m_signal_login_failed;
-	signal_global_password_type m_signal_global_password;
-	signal_user_password_type m_signal_user_password;
+
+	signal_prompt_name_type m_signal_prompt_name;
+	signal_prompt_colour_type m_signal_prompt_colour;
+	signal_prompt_global_password_type m_signal_prompt_global_password;
+	signal_prompt_user_password_type m_signal_prompt_user_password;
 private:
 	/** This function provides access to the underlaying net6::basic_client
 	 * object.
@@ -332,6 +353,9 @@ void basic_client_buffer<selector_type>::disconnect()
 	basic_buffer<selector_type>::m_user_table.clear();
 	basic_buffer<selector_type>::m_net.reset(NULL);
 	m_self = NULL;
+
+	// Empty passwords
+	m_settings.global_password = m_settings.user_password = "";
 }
 
 template<typename selector_type>
@@ -343,18 +367,14 @@ bool basic_client_buffer<selector_type>::is_connected() const
 template<typename selector_type>
 void basic_client_buffer<selector_type>::
 	login(const std::string& name,
-	      const colour& colour,
-              const std::string& global_password,
-	      const std::string& user_password)
+	      const colour& colour)
 {
 	// Need public key (which comes with welcome packet) before login
 	if(!m_public)
 		throw std::logic_error("obby::basic_client_buffer::login");
 
-	m_name = name;
-	m_colour = colour;
-	m_global_password = global_password;
-	m_user_password = user_password;
+	m_settings.name = name;
+	m_settings.colour = colour;
 
 	net6_client().login(name);
 }
@@ -415,7 +435,7 @@ const obby::user& basic_client_buffer<selector_type>::get_self() const
 template<typename selector_type>
 const std::string& basic_client_buffer<selector_type>::get_name() const
 {
-	if(m_self == NULL) return m_name;
+	if(m_self == NULL) return m_settings.name;
 	return basic_local_buffer<selector_type>::get_name();
 }
 
@@ -480,17 +500,31 @@ basic_client_buffer<selector_type>::login_failed_event() const
 }
 
 template<typename selector_type>
-typename basic_client_buffer<selector_type>::signal_global_password_type
-basic_client_buffer<selector_type>::global_password_event() const
+typename basic_client_buffer<selector_type>::signal_prompt_name_type
+basic_client_buffer<selector_type>::prompt_name_event() const
 {
-	return m_signal_global_password;
+	return m_signal_prompt_name;
 }
 
 template<typename selector_type>
-typename basic_client_buffer<selector_type>::signal_user_password_type
-basic_client_buffer<selector_type>::user_password_event() const
+typename basic_client_buffer<selector_type>::signal_prompt_colour_type
+basic_client_buffer<selector_type>::prompt_colour_event() const
 {
-	return m_signal_user_password;
+	return m_signal_prompt_colour;
+}
+
+template<typename selector_type>
+typename basic_client_buffer<selector_type>::signal_prompt_global_password_type
+basic_client_buffer<selector_type>::prompt_global_password_event() const
+{
+	return m_signal_prompt_global_password;
+}
+
+template<typename selector_type>
+typename basic_client_buffer<selector_type>::signal_prompt_user_password_type
+basic_client_buffer<selector_type>::prompt_user_password_event() const
+{
+	return m_signal_prompt_user_password;
 }
 
 template<typename selector_type>
@@ -584,29 +618,25 @@ template<typename selector_type>
 void basic_client_buffer<selector_type>::
 	on_login_failed(net6::login::error error)
 {
-	if(error == login::ERROR_WRONG_GLOBAL_PASSWORD)
+	if(error == net6::login::ERROR_NAME_IN_USE)
 	{
-		// Wrong global password; prompt for new one
-		std::string global_password;
-		if(m_signal_global_password.emit(global_password) )
-		{
-			login(
-				m_name, m_colour,
-				global_password, m_user_password
-			);
-		}
+		if(m_signal_prompt_name.emit(m_settings) )
+			login(m_settings.name, m_settings.colour);
+	}
+	else if(error == login::ERROR_COLOUR_IN_USE)
+	{
+		if(m_signal_prompt_colour.emit(m_settings) )
+			login(m_settings.name, m_settings.colour);
+	}
+	else if(error == login::ERROR_WRONG_GLOBAL_PASSWORD)
+	{
+		if(m_signal_prompt_global_password.emit(m_settings) )
+			login(m_settings.name, m_settings.colour);
 	}
 	else if(error == login::ERROR_WRONG_USER_PASSWORD)
 	{
-		// Wrong user password; prompt for new one
-		std::string user_password;
-		if(m_signal_user_password.emit(user_password) )
-		{
-			login(
-				m_name, m_colour,
-				m_global_password, user_password
-			);
-		}
+		if(m_signal_prompt_user_password.emit(m_settings) )
+			login(m_settings.name, m_settings.colour);
 	}
 	else
 	{
@@ -617,10 +647,14 @@ void basic_client_buffer<selector_type>::
 template<typename selector_type>
 void basic_client_buffer<selector_type>::on_login_extend(net6::packet& pack)
 {
-	// Add user colour and (hashed) passwords
-	pack << m_colour
-	     << SHA1::hash(m_token + m_global_password)
-	     << SHA1::hash(m_token + m_user_password);
+	// Add user colour and, if given, (hashed) passwords.
+	pack << m_settings.colour;
+	if(!m_settings.global_password.empty() )
+	{
+		pack << SHA1::hash(m_token + m_settings.global_password);
+		if(!m_settings.user_password.empty() )
+			pack << SHA1::hash(m_token + m_settings.user_password);
+	}
 }
 
 template<typename selector_type>

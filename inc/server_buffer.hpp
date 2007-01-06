@@ -644,7 +644,7 @@ bool basic_server_buffer<selector_type>::
 	// Check colour
 	if(!basic_buffer<selector_type>::check_colour(colour) )
 	{
-		error = login::ERROR_COLOR_IN_USE;
+		error = login::ERROR_COLOUR_IN_USE;
 		return false;
 	}
 

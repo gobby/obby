@@ -20,7 +20,7 @@
 #include "gettext.hpp"
 
 // Login error codes
-const obby::login::error obby::login::ERROR_COLOR_IN_USE =
+const obby::login::error obby::login::ERROR_COLOUR_IN_USE =
 	net6::login::ERROR_MAX + 1;
 const obby::login::error obby::login::ERROR_WRONG_GLOBAL_PASSWORD =
 	net6::login::ERROR_MAX + 2;
@@ -33,7 +33,7 @@ const obby::login::error obby::login::ERROR_MAX =
 
 std::string obby::login::errstring(error err)
 {
-	if(err == ERROR_COLOR_IN_USE)
+	if(err == ERROR_COLOUR_IN_USE)
 		return _("Colour is already in use");
 	if(err == ERROR_WRONG_GLOBAL_PASSWORD)
 		return _("Wrong session password");
