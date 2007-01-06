@@ -59,16 +59,25 @@ void obby::client_buffer::select(unsigned int timeout)
 
 void obby::client_buffer::insert(const position& pos, const std::string& text)
 {
-	// TODO: Insert to buffer
-	// TODO: Add to unsynced changes
-	// TODO: Send sync request to server
+	// Insert into buffer
+	insert_nosync(pos, text);
+	// Add to unsynced changes
+	record* rec = new insert_record(pos, text, m_revision,
+	                                m_connection.get_self()->get_id() );
+	m_unsynced.push_front(rec);
+	// Send sync request to server
+	m_connection.send(rec->to_packet() );
 }
 
 void obby::client_buffer::erase(const position& from, const position& to)
 {
-	// TODO: Delete from buffer
-	// TODO: Add to unsynced changes
-	// TODO: Send sync request to server
+	// Delete from buffer
+	erase_nosync(from, to);
+	// Add to unsynced changes
+	record* rec = new delete_record(from, to, m_revision,
+	                                m_connection.get_self()->get_id() );
+	// Send sync request to server
+	m_connection.send(rec->to_packet() );
 }
 
 obby::client_buffer::signal_insert_type
