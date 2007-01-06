@@ -15,7 +15,6 @@ const int CURSES_ERR = ERR;
 #include "buffer.hpp"
 #include "client_buffer.hpp"
 #include "server_buffer.hpp"
-#include "rendezvous.hpp"
 
 #undef ERR
 #define ERR CURSES_ERR

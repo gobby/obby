@@ -1,4 +1,7 @@
-SUBDIRS = src . test
+SUBDIRS = src .
+if BUILD_TESTS
+SUBDIRS += test
+endif
 
 pkginclude_HEADERS =  inc/common.hpp
 pkginclude_HEADERS += inc/position.hpp
