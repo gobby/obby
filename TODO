@@ -13,7 +13,7 @@ Important:
 Normal:
  * Implement automatic service announcement and discovery
  * Sync-On-Request
- * UTF-8 string handling
+ * UTF-8 string handling (Well, do we care about encodings?)
 
 Minor:
  * Implement indent_record and unindent_record to (un)indent lines of text

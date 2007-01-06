@@ -40,8 +40,6 @@ protected:
 bufferd::bufferd(int argc, char* argv[])
  : m_buffer(argc > 1 ? strtol(argv[1], NULL, 10) : 6522), m_quit(false)
 {
-	/*obby::document& doc =*/ m_buffer.create_document("main");
-
 	/* We need to issue this manually the first time, as create_document()
 	 * does not emit any signal.
 	 */
@@ -63,6 +61,8 @@ bufferd::bufferd(int argc, char* argv[])
 		sigc::mem_fun(*this, &bufferd::on_connect) );
 	m_buffer.disconnect_event().connect(
 		sigc::mem_fun(*this, &bufferd::on_disconnect));
+
+	m_buffer.create_document("main");
 }
 
 bufferd::~bufferd()
