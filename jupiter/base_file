@@ -63,3 +63,6 @@ abc|1->ins(2@1),2->ins(1@0)|1a2bc
 
 # Server (1) should be preferred
 abc|1->ins(1@0),2->ins(2@0)|12abc
+
+# concurrent insertion and deletion
+abc|1->del(0-3),2->ins(1@2)|1

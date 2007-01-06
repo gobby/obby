@@ -34,6 +34,7 @@ public:
 protected:
 	operation* clone_original() const
 	{
+		// TODO: refcount m_original
 		//if(m_original == NULL) // TODO: Enable this if required
 			return NULL;
 		return m_original->clone();
@@ -96,7 +97,12 @@ public:
 	virtual void apply(document& doc) const
 	{
 		m_first->apply(doc);
-		m_second->apply(doc);
+
+		// Transform second operation with first because the first one
+		// has already been applied to the document.
+		operation* second = m_first->transform(*m_second, true);
+		second->apply(doc);
+		delete second;
 	}
 
 	virtual operation* transform(const operation& base_op, bool client) const
@@ -565,7 +571,7 @@ public:
 			throw std::logic_error("algorithm::check_preconditions (#3)");
 	}
 protected:
-	std::string& m_document;
+	document& m_document;
 	inclusion_transformation m_it;
 	vector_time m_time;
 	unsigned int m_id;
