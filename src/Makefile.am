@@ -34,6 +34,7 @@ libobby_la_SOURCES += split_operation.cpp
 libobby_la_SOURCES += insert_operation.cpp
 libobby_la_SOURCES += delete_operation.cpp
 libobby_la_SOURCES += record.cpp
+libobby_la_SOURCES += jupiter_algorithm.cpp
 
 libobby_la_SOURCES += local_document.cpp
 libobby_la_SOURCES += client_document.cpp
