@@ -24,6 +24,8 @@ const obby::line::size_type obby::line::npos = obby::line::string_type::npos;
 obby::line::line()
  : m_line(), m_authors()
 {
+	/*user_pos pos = { NULL, 0 };
+	m_authors.push_back(pos);*/
 }
 
 obby::line::line(const string_type& text, const user_type& author)
@@ -100,27 +102,53 @@ obby::line::size_type obby::line::length() const
 
 void obby::line::insert(size_type pos, const line& text)
 {
-	// Search the correct position where to insert the new authors
-	std::vector<user_pos>::iterator iter;
-	// Count steps
-	std::vector<user_pos>::size_type count = 0;
-	for(iter = m_authors.begin(); iter != m_authors.end(); ++iter, ++count)
-		if(iter->position >= pos)
+	// Build new author vector
+	std::vector<user_pos> new_vec;
+	new_vec.reserve(m_authors.size() + text.m_authors.size() + 1);
+	std::vector<user_pos>::size_type i, j;
+
+	// Insert authors before the insertion point
+	for(i = 0; i < m_authors.size(); ++ i)
+	{
+		if(m_authors[i].position > pos)
 			break;
+		else
+			new_vec.push_back(m_authors[i]);
+	}
 
-	// Insert them
-	m_authors.insert(iter, text.m_authors.begin(), text.m_authors.end() );
+	// Insert authors of the insertion text
+	for(j = 0; j < text.m_authors.size(); ++ j)
+	{
+		std::vector<user_pos>::size_type new_pos = new_vec.size();
+		new_vec.push_back(text.m_authors[j]);
+		new_vec[new_pos].position += pos;
+	}
 
-	// Adjust positions at the inserted position. std::vector<>::insert
-	// does not return an iterator, so we need to find the position where
-	// the new user_pos have been inserted
-	std::vector<user_pos>::size_type i = 0;
-	for(iter = m_authors.begin(); iter != m_authors.end(); ++ iter, ++ i)
-		if(i >= count)
-			iter->position += text.length();
+	// Insert authors after the insertion point. Insert the last author
+	// before this point once again because he wrote the stuff up to
+	// the next author.
+	if(i > 0)
+	{
+		std::vector<user_pos>::size_type new_pos = new_vec.size();
+		new_vec.push_back(m_authors[i - 1]);
+		new_vec[new_pos].position = pos + text.length();
+		
+		for(; i < m_authors.size(); ++ i)
+		{
+			std::vector<user_pos>::size_type j = new_vec.size();
+			new_vec.push_back(m_authors[i]);
+			new_vec[j].position += text.length();
+		}
+	}
+
+	// Use new vector
+	m_authors.swap(new_vec);
 
 	// Insert line content
 	m_line.insert(pos, text.m_line);
+
+	// Compress author list
+	compress_authors();
 }
 
 void obby::line::insert(size_type pos, const string_type& text,
@@ -165,25 +193,42 @@ obby::line obby::line::substr(size_type from, size_type len) const
 	// Set correct length for npos
 	if(len == npos) len = m_line.length() - from;
 
-	// New line
+	// Create new line
 	line new_line;
+
+	// Ignore authors before the given range
+	std::vector<user_pos>::size_type i;
+	for(i = 0; i < m_authors.size(); ++ i)
+		if(m_authors[i].position > from)
+			break;
+
+	// Insert first author
+	new_line.m_authors.push_back(m_authors[i - 1]);
+	new_line.m_authors[m_authors.size()].position = 0;
+
+	// Insert others
+	for(; i < m_authors.size(); ++ i)
+	{
+		// After the given range? Forget them.
+		if(m_authors[i].position >= from + len)
+		{
+			break;
+		}
+		else
+		{
+			std::vector<user_pos>::size_type new_pos =
+				new_line.m_authors.size();
+
+			new_line.m_authors.push_back(m_authors[i]);
+			new_line.m_authors[new_pos].position -= from;
+		}
+	}
+			
 	// Set content
 	new_line.m_line = m_line.substr(from, len);
 	
-	// Set authors
-	std::vector<user_pos>::const_iterator iter;
-	for(iter = m_authors.begin(); iter != m_authors.end(); ++ iter)
-	{
-		// Take only authors from within the given range
-		if(iter->position >= from && iter->position < from + len)
-		{
-			// Adjust position
-			user_pos new_pos = *iter;
-			new_pos.position -= len;
-			// Put into new line's authors list
-			new_line.m_authors.push_back(new_pos);
-		}
-	}
+	// Compress author list
+	new_line.compress_authors();
 
 	return new_line;
 }
@@ -200,56 +245,35 @@ obby::line::author_iterator obby::line::author_end() const
 
 void obby::line::compress_authors()
 {
-	std::vector<user_pos>::iterator iter;
-	std::vector<user_pos>::iterator prev_iter = m_authors.end();
-	std::vector<user_pos>::iterator old_iter = m_authors.end();
+	std::vector<user_pos> new_vec;
+	new_vec.reserve(m_authors.size() );
 
-	// Filter mutliple positions at the same position in the text
-	for(iter = m_authors.begin(); iter != m_authors.end(); ++ iter)
+	for(std::vector<user_pos>::size_type i = 0; i < m_authors.size(); ++ i)
 	{
-		// Ignore the first entry.
-		if(prev_iter != m_authors.end() )
-		{
-			// Another position?
-			if(iter->position > old_iter->position)
-			{
-				// Delete the ones before
-				iter = m_authors.erase(old_iter, prev_iter);
-				++ iter;
-				old_iter = iter;
-			}
-		}
-		else
-		{
-			// Initialize old_iter
-			old_iter = iter;
-		}
+		// Whether to add this user_pos to the new vector
+		bool add = true;
 
-		prev_iter = iter;
+		// Check for another user_pos at the same position
+		if(i < m_authors.size() - 1)
+			if(m_authors[i].position == m_authors[i + 1].position)
+				add = false;
+		if(!add) continue;
+
+		// Check for the same author
+		if(new_vec.size() > 0)
+			if(new_vec[new_vec.size()-1].author ==
+			   m_authors[i].author)
+				add = false;
+		if(!add) continue;
+
+		// Ignore positions at the end of the line
+		if(m_authors[i].position == m_line.length() ) break;
+
+		// Add into new vector
+		new_vec.push_back(m_authors[i]);
 	}
 
-	// Filter the same author
-	prev_iter = old_iter = m_authors.end();
-	for(iter = m_authors.begin(); iter != m_authors.end(); ++ iter)
-	{
-		// Ignore the first entry.
-		if(prev_iter != m_authors.end() )
-		{
-			// Another author?
-			if(iter->author != old_iter->author)
-			{
-				iter = m_authors.erase(old_iter, iter);
-				old_iter = iter;
-			}
-		}
-		else
-		{
-			// Initialize old_iter
-			old_iter = iter;
-		}
-
-		prev_iter = iter;
-	}
+	m_authors.swap(new_vec);
 }
 
 net6::packet obby::line::to_packet(unsigned int document_id) const
