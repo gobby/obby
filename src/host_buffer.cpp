@@ -106,8 +106,7 @@ void obby::host_buffer::create_document(const std::string& title,
 
 void obby::host_buffer::set_colour(int red, int green, int blue)
 {
-	get_self().set_colour(red, green, blue);
-	m_signal_user_colour.emit(get_self() );
+	user_colour_impl(get_self(), red, green, blue );
 }
 
 obby::document_info&

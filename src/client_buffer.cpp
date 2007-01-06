@@ -493,6 +493,11 @@ void obby::client_buffer::on_net_message(const net6::packet& pack)
 void obby::client_buffer::on_net_user_colour(const net6::packet& pack)
 {
 	user* from = pack.get_param(0).as<user*>();
+	from->set_colour(
+		pack.get_param(1).as<int>(),
+		pack.get_param(2).as<int>(),
+		pack.get_param(3).as<int>()
+		);
 	m_signal_user_colour.emit(*from);
 }
 

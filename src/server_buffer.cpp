@@ -511,6 +511,7 @@ void obby::server_buffer::on_net_user_colour(const net6::packet& pack,
 		net6::packet reply_pack("obby_user_colour_failed");
 		m_server->send(reply_pack,
 			*static_cast<net6::server::peer*>(from.get_peer() ));
+		return;
 	}
 	user_colour_impl(from, red, green, blue);
 }
