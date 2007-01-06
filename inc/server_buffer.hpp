@@ -49,6 +49,18 @@ public:
 	signal_part_type part_event() const;
 
 protected:
+	/** Private constuctor used by derived objects. It does not create
+	 * a net6::server object to allow derived object creating derived
+	 * classes from net6::server
+	 */
+	server_buffer();
+
+	/** Internal function that registers the signal handlers for the
+	 * net6::server signals. It may be used by derived classes after
+	 * having created their server object.
+	 */
+	void register_signal_handlers();
+
 	void on_join(net6::server::peer& peer);
 	void on_login(net6::server::peer& peer, const net6::packet& pack);
 	void on_part(net6::server::peer& peer);
@@ -57,7 +69,7 @@ protected:
 	             std::string& reason);
 	void on_extend(net6::server::peer& peer, net6::packet& pack);
 
-	net6::server m_server;
+	net6::server* m_server;
 
 	signal_join_type m_signal_join;
 	signal_login_type m_signal_login;

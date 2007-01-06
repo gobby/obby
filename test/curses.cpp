@@ -233,7 +233,7 @@ protected:
 };
 
 curses_editor::curses_editor(int argc, char* argv[])
- : m_port(argc > 3 ? strtol(argv[3], NULL, 10) : 6521), m_quit(true),
+ : m_port(argc > 3 ? strtol(argv[3], NULL, 10) : 6522), m_quit(true),
    m_synced(false), m_buffer(argv[2], m_port), m_screen(m_buffer)
 {
 	m_buffer.login(argv[1], 64, 0, 0);

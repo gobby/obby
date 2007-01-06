@@ -17,6 +17,7 @@ pkginclude_HEADERS = \
 	inc/buffer.hpp \
 	inc/client_buffer.hpp \
 	inc/server_buffer.hpp \
+	inc/host_buffer.hpp \
 	inc/rendezvous.hpp
 
 libobby_la_SOURCES = \
@@ -29,6 +30,7 @@ libobby_la_SOURCES = \
 	src/buffer.cpp \
 	src/client_buffer.cpp \
 	src/server_buffer.cpp \
+	src/host_buffer.cpp \
 	src/rendezvous.cpp
 
 pkgconfigdir = $(libdir)/pkgconfig

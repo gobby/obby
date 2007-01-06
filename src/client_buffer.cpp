@@ -22,7 +22,8 @@
 obby::client_buffer::client_buffer(const std::string& hostname,
                                    unsigned int port)
  : buffer(), m_unsynced(),
-   m_connection(net6::ipv4_address::create_from_hostname(hostname, port) )
+   m_connection(net6::ipv4_address::create_from_hostname(hostname, port) ),
+   m_self(NULL)
 {
 	m_connection.join_event().connect(
 		sigc::mem_fun(*this, &client_buffer::on_join) );
@@ -51,9 +52,14 @@ void obby::client_buffer::login(const std::string& name, int red, int green,
 	m_connection.custom_login(login_pack);
 }
 
-net6::client::peer* obby::client_buffer::get_self() const
+obby::user& obby::client_buffer::get_self()
 {
-	return m_connection.get_self();
+	return *find(m_connection.get_self()->get_id() );
+}
+
+const obby::user& obby::client_buffer::get_self() const
+{
+	return *find(m_connection.get_self()->get_id() );
 }
 
 void obby::client_buffer::select()
@@ -87,7 +93,7 @@ void obby::client_buffer::erase(position from, position to)
 	erase_nosync(from, to);
 	// Add to unsynced changes
 	record* rec = new delete_record(from, text, m_revision,
-	                               m_connection.get_self()->get_id() );
+	                                m_connection.get_self()->get_id() );
 	// Put the new change into the list of unsynced changes
 	m_unsynced.push_back(rec);
 	// Send sync request to server
@@ -133,6 +139,7 @@ void obby::client_buffer::on_join(net6::client::peer& peer,
 	int blue = pack.get_param(4).as_int();
 
 	user* new_user = add_user(peer, red, green, blue);
+	if(!m_self) m_self = new_user;
 	m_signal_join.emit(*new_user);
 }
 

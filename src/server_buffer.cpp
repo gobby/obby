@@ -18,35 +18,34 @@
 
 #include "server_buffer.hpp"
 
-obby::server_buffer::server_buffer(unsigned int port)
- : buffer(), m_server(port, false)
+obby::server_buffer::server_buffer()
+ : buffer(), m_server(NULL)
 {
-	m_server.join_event().connect(
-		sigc::mem_fun(*this, &server_buffer::on_join) );
-	m_server.login_event().connect(
-		sigc::mem_fun(*this, &server_buffer::on_login) );
-	m_server.login_auth_event().connect(
-		sigc::mem_fun(*this, &server_buffer::on_auth) );
-	m_server.login_extend_event().connect(
-		sigc::mem_fun(*this, &server_buffer::on_extend) );
-	m_server.part_event().connect(
-		sigc::mem_fun(*this, &server_buffer::on_part) );
-	m_server.data_event().connect(
-		sigc::mem_fun(*this, &server_buffer::on_data) );
+}
+
+obby::server_buffer::server_buffer(unsigned int port)
+ : buffer(), m_server(new net6::server(port, false) )
+{
+	register_signal_handlers();
 }
 
 obby::server_buffer::~server_buffer()
 {
+	if(m_server)
+	{
+		delete m_server;
+		m_server = NULL;
+	}
 }
 
 void obby::server_buffer::select()
 {
-	m_server.select();
+	m_server->select();
 }
 
 void obby::server_buffer::select(unsigned int timeout)
 {
-	m_server.select(timeout);
+	m_server->select(timeout);
 }
 
 void obby::server_buffer::insert(position pos, const std::string& text)
@@ -96,23 +95,23 @@ void obby::server_buffer::on_login(net6::server::peer& peer,
 	// network packets like chat packets.
 	net6::packet init_sync("obby_sync_init");
 	init_sync << static_cast<int>(m_revision);
-	m_server.send(init_sync, peer);
+	m_server->send(init_sync, peer);
 
 	std::string::size_type pos = 0, prev = 0;
 	while( (pos = m_buffer.find('\n', pos)) != std::string::npos)
 	{
 		net6::packet line_sync("obby_sync_line");
 		line_sync << m_buffer.substr(prev, pos - prev);
-		m_server.send(line_sync, peer);
+		m_server->send(line_sync, peer);
 		prev = ++ pos;
 	}
 
 	net6::packet line_sync("obby_sync_line");
 	line_sync << m_buffer.substr(prev);
-	m_server.send(line_sync, peer);
+	m_server->send(line_sync, peer);
 
 	net6::packet final_sync("obby_sync_final");
-	m_server.send(final_sync, peer);
+	m_server->send(final_sync, peer);
 
 	m_signal_login.emit(*new_user);
 }
@@ -170,14 +169,13 @@ void obby::server_buffer::on_data(const net6::packet& pack,
 		m_history.push_front(rec);
 
 		// Tell clients
-		m_server.send(rec->to_packet() );
+		m_server->send(rec->to_packet() );
 
 		// Emit changed signal
 		rec->emit_buffer_signal(*this);
 	}
 }
 
-#include <iostream>
 bool obby::server_buffer::on_auth(net6::server::peer& peer,
                                   const net6::packet& pack,
 				  std::string& reason)
@@ -199,16 +197,10 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 	std::list<user*>::iterator iter;
 	for(iter = m_userlist.begin(); iter != m_userlist.end(); ++ iter)
 	{
-		std::cout << "Checking color of " << (*iter)->get_name() << std::endl;
-
-		std::cout << red << " vs. " << (*iter)->get_red() << std::endl;
-		std::cout << green << " vs. " << (*iter)->get_green() << std::endl;
-		std::cout << blue << " vs. " << (*iter)->get_blue() << std::endl;
 		if(abs(red   - (*iter)->get_red()) < 32 &&
 		   abs(green - (*iter)->get_green()) < 32 &&
 		   abs(blue  - (*iter)->get_blue()) < 32)
 		{
-			std::cout << "Denied!" << std::endl;
 			reason = "Color is already in use";
 			return false;
 		}
@@ -225,5 +217,21 @@ void obby::server_buffer::on_extend(net6::server::peer& peer,
 
 	pack << ideq_user->get_red() << ideq_user->get_green()
 	     << ideq_user->get_blue();
+}
+
+void obby::server_buffer::register_signal_handlers()
+{
+	m_server->join_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_join) );
+	m_server->login_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_login) );
+	m_server->login_auth_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_auth) );
+	m_server->login_extend_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_extend) );
+	m_server->part_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_part) );
+	m_server->data_event().connect(
+		sigc::mem_fun(*this, &server_buffer::on_data) );
 }
 

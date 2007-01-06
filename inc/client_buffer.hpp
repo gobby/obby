@@ -45,7 +45,9 @@ public:
 	virtual ~client_buffer();
 	
 	void login(const std::string& name, int red, int green, int blue);
-	net6::client::peer* get_self() const;
+
+	user& get_self();
+	const user& get_self() const;
 
 	void select();
 	void select(unsigned int timeout);
@@ -73,6 +75,7 @@ protected:
 
 	std::list<record*> m_unsynced;
 	net6::client m_connection;
+	user* m_self;
 
 	signal_join_type m_signal_join;
 	signal_sync_type m_signal_sync;
