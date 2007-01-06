@@ -1,3 +1,18 @@
+Sun Sep 24 21:54:28 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Updated Autotools and gettext infrastructure
+
+Fri Sep 15 23:47:10 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Fix build issue caused by a comment
+
+Sat Aug 26 16:17:21 CEST 2006  Philipp Kern <phil@0x539.de>
+  tagged obby-0.4.1
+
+Sat Aug 26 16:17:05 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Include the jupiter test file in the tarball
+
+Sat Aug 26 15:28:54 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Updated ChangeLog for release
+
 Sat Aug 26 15:28:37 CEST 2006  Philipp Kern <phil@0x539.de>
   * Update to the Catalan translation, thanks to Jordi Mallach
 
@@ -40,17 +55,17 @@ Tue Aug 15 17:04:19 CEST 2006  Armin Burgmeier <armin@0x539.de>
 Tue Aug 15 13:23:52 CEST 2006  Philipp Kern <phil@0x539.de>
   * Update NEWS
 
-Fri Aug 11 23:51:35 CEST 2006  Armin Burgmeier <armin@0x539.de>
-  * Try IPv6 name resolution when IPv4 failed and USE_IPV6 is activated
-
-Fri Aug 11 17:04:56 CEST 2006  Armin Burgmeier <armin@0x539.de>
-  * Broadcast document removals
-
 Tue Aug 15 01:45:43 CEST 2006  Philipp Kern <phil@0x539.de>
   * Add chunk and suffix handling to obby-web
 
+Fri Aug 11 23:51:35 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * Try IPv6 name resolution when IPv4 failed and USE_IPV6 is activated
+
 Fri Aug 11 23:40:12 CEST 2006  Philipp Kern <phil@0x539.de>
   * Enable IPv6 defines
+
+Fri Aug 11 17:04:56 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * Broadcast document removals
 
 Mon Aug  7 17:41:44 CEST 2006  Philipp Kern <phil@0x539.de>
   tagged obby-0.4.0rc3
@@ -61,11 +76,11 @@ Mon Aug  7 17:36:17 CEST 2006  Philipp Kern <phil@0x539.de>
 Mon Aug  7 17:35:51 CEST 2006  Philipp Kern <phil@0x539.de>
   * Bumped version to 0.4.0rc3
 
-Mon Aug  7 17:13:45 CEST 2006  Armin Burgmeier <armin@0x539.de>
-  * m4 gettext macros
-
 Mon Aug  7 17:14:13 CEST 2006  Philipp Kern <phil@0x539.de>
   * Re-establish the local m4 storage
+
+Mon Aug  7 17:13:45 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * m4 gettext macros
 
 Mon Aug  7 16:18:39 CEST 2006  Armin Burgmeier <armin@0x539.de>
   * Fix insert/insert transformation, probably caused desync
