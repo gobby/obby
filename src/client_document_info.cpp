@@ -20,7 +20,7 @@
 #include "client_document_info.hpp"
 #include "client_buffer.hpp"
 
-obby::client_document_info::client_document_info(const client_buffer& buf,
+obby::client_document_info::client_document_info(const basic_client_buffer<net6::selector>& buf,
                                                  net6::client& client,
                                                  const user* owner,
                                                  unsigned int id,
@@ -35,9 +35,9 @@ obby::client_document_info::~client_document_info()
 {
 }
 
-const obby::client_buffer& obby::client_document_info::get_buffer() const
+const obby::basic_client_buffer<net6::selector>& obby::client_document_info::get_buffer() const
 {
-	return dynamic_cast<const obby::client_buffer&>(m_buffer);
+	return dynamic_cast<const basic_client_buffer<net6::selector>&>(m_buffer);
 }
 
 obby::client_document* obby::client_document_info::get_document()

@@ -34,7 +34,7 @@ const obby::local_document_info& obby::local_document::get_info() const
 	return dynamic_cast<const obby::local_document_info&>(m_info);
 }
 
-const obby::local_buffer& obby::local_document::get_buffer() const
+const obby::basic_local_buffer<net6::selector>& obby::local_document::get_buffer() const
 {
-	return dynamic_cast<const obby::local_buffer&>(m_info.get_buffer() );
+	return dynamic_cast<const obby::basic_local_buffer<net6::selector>&>(m_info.get_buffer() );
 }

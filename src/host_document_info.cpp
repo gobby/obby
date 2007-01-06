@@ -19,7 +19,7 @@
 #include "host_document_info.hpp"
 #include "host_buffer.hpp"
 
-obby::host_document_info::host_document_info(const host_buffer& buf,
+obby::host_document_info::host_document_info(const basic_host_buffer<net6::selector>& buf,
                                              net6::host& host,
                                              const user* owner,
                                              unsigned int id,
@@ -32,7 +32,7 @@ obby::host_document_info::host_document_info(const host_buffer& buf,
 	assign_document();
 }
 
-obby::host_document_info::host_document_info(const host_buffer& buf,
+obby::host_document_info::host_document_info(const basic_host_buffer<net6::selector>& buf,
                                              net6::host& host,
                                              const user* owner,
                                              unsigned int id,

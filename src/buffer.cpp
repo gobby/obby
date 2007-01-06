@@ -16,14 +16,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <cassert>
-#include <ctime>
-#include "common.hpp"
-#include "format_string.hpp"
 #include "buffer.hpp"
 
-const unsigned long obby::buffer::PROTOCOL_VERSION = 1;
-
+#if 0
 obby::buffer::buffer()
  : m_netkit(), m_rclass(GMP_RAND_ALG_LC, 16), m_doc_counter(0)
 {
@@ -236,4 +231,4 @@ obby::buffer::translate_document(const std::string& str) const
 
 	return new net6::parameter<obby::document_info*>(info);
 }
-
+#endif

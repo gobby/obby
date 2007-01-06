@@ -143,8 +143,8 @@ public:
 	                     int green, int blue);
 
 	/** Removes a user from the user list. This means that this user gets
-	 * marked as non-connected and the reference to the underlaying peer
-	 * object is dropped.
+	 * marked as non-connected and the reference to the underlaying
+	 * net6::user object is dropped.
 	 */
 	void remove_user(user* user_to_remove);
 	

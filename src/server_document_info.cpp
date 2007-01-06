@@ -20,7 +20,7 @@
 #include "server_document_info.hpp"
 #include "server_buffer.hpp"
 
-obby::server_document_info::server_document_info(const server_buffer& buf,
+obby::server_document_info::server_document_info(const basic_server_buffer<net6::selector>& buf,
                                                  net6::server& server,
                                                  const user* owner,
                                                  unsigned int id,
@@ -31,7 +31,7 @@ obby::server_document_info::server_document_info(const server_buffer& buf,
 	assign_document();
 }
 
-obby::server_document_info::server_document_info(const server_buffer& buf,
+obby::server_document_info::server_document_info(const basic_server_buffer<net6::selector>& buf,
                                                  net6::server& server,
                                                  const user* owner,
                                                  unsigned int id,
@@ -45,9 +45,9 @@ obby::server_document_info::~server_document_info()
 {
 }
 
-const obby::server_buffer& obby::server_document_info::get_buffer() const
+const obby::basic_server_buffer<net6::selector>& obby::server_document_info::get_buffer() const
 {
-	return dynamic_cast<const obby::server_buffer&>(m_buffer);
+	return dynamic_cast<const basic_server_buffer<net6::selector>&>(m_buffer);
 }
 
 obby::server_document* obby::server_document_info::get_document()
@@ -100,7 +100,7 @@ void obby::server_document_info::unsubscribe_user(const user& user)
 	pack << static_cast<document_info*>(this) << "unsubscribe" << &user;
 }
 
-void obby::server_document_info::obby_data(const net6::packet& pack, user& from)
+void obby::server_document_info::obby_data(const net6::packet& pack, const user& from)
 {
 	// Parameters 0 and 1 have been checked by the buffer
 	if(!execute_packet(pack, from) )
@@ -133,7 +133,7 @@ void obby::server_document_info::rename_impl(const std::string& new_title,
 }
 
 bool obby::server_document_info::execute_packet(const net6::packet& pack,
-                                                user& from)
+                                                const user& from)
 {
 	const std::string& command = pack.get_param(1).as<std::string>();
 	if(command == "rename")
@@ -168,7 +168,7 @@ bool obby::server_document_info::execute_packet(const net6::packet& pack,
 }
 
 void obby::server_document_info::on_net_rename(const net6::packet& pack,
-                                               user& from)
+                                               const user& from)
 {
 	// TODO: Authentication
 
@@ -177,7 +177,7 @@ void obby::server_document_info::on_net_rename(const net6::packet& pack,
 }
 
 void obby::server_document_info::on_net_record(const net6::packet& pack,
-                                               user& from)
+                                               const user& from)
 {
 	record* rec = record::from_packet(pack);
 	if(!rec)
@@ -205,7 +205,7 @@ void obby::server_document_info::on_net_record(const net6::packet& pack,
 }
 
 void obby::server_document_info::on_net_subscribe(const net6::packet& pack,
-                                                  user& from)
+                                                  const user& from)
 {
 	// Users can't subscribe twice
 	if(is_subscribed(from) )
@@ -222,7 +222,7 @@ void obby::server_document_info::on_net_subscribe(const net6::packet& pack,
 }
 
 void obby::server_document_info::on_net_unsubscribe(const net6::packet& pack,
-                                                    user& from)
+                                                    const user& from)
 {
 	// Users can't unsubscribe if they are already subscribed
 	if(!is_subscribed(from) )

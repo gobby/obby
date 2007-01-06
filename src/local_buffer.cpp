@@ -18,6 +18,7 @@
 
 #include "local_buffer.hpp"
 
+#if 0
 obby::local_buffer::local_buffer()
  : buffer()
 {
@@ -36,7 +37,7 @@ obby::local_document_info*
 obby::local_buffer::find_document(unsigned int owner_id, unsigned int id) const
 {
 	return dynamic_cast<obby::local_document_info*>(
-		buffer::find_document(owner_id, id)
+		buffer::document_find(owner_id, id)
 	);
 }
 
@@ -45,4 +46,4 @@ obby::local_buffer::user_colour_failed_event() const
 {
 	return m_signal_user_colour_failed;
 }
-
+#endif

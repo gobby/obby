@@ -35,9 +35,9 @@ const obby::host_document_info& obby::host_document::get_info() const
 	return dynamic_cast<const host_document_info&>(m_info);
 }
 
-const obby::host_buffer& obby::host_document::get_buffer() const
+const obby::basic_host_buffer<net6::selector>& obby::host_document::get_buffer() const
 {
-	return dynamic_cast<const host_buffer&>(m_info.get_buffer() );
+	return dynamic_cast<const basic_host_buffer<net6::selector>&>(m_info.get_buffer() );
 }
 
 void obby::host_document::insert(position pos, const std::string& text)

@@ -19,11 +19,14 @@
 #include "document_info.hpp"
 #include "buffer.hpp"
 
-obby::document_info::document_info(const buffer& buf, const user* owner,
+obby::document_info::document_info(const basic_buffer<net6::selector>& buf, const user* owner,
                                    unsigned int id, const std::string& title)
  : m_buffer(buf), m_owner(owner), m_id(id), m_title(title), m_document(NULL)
 {
 	// Subscribe the owner to the document
+	// TODO: DO NOT DO THIS. If we create a document, the owner parts,
+	// another user joins and document list is synced, the original owner
+	// seems to be subscribed!
 	if(owner) m_userlist.push_back(owner);
 }
 
@@ -43,7 +46,7 @@ const std::string& obby::document_info::get_title() const
 	return m_title;
 }
 
-const obby::buffer& obby::document_info::get_buffer() const
+const obby::basic_buffer<net6::selector>& obby::document_info::get_buffer() const
 {
 	return m_buffer;
 }

@@ -27,7 +27,9 @@ namespace obby
 {
 
 class host_document_info;
-class host_buffer;
+
+template<typename selector_type>
+class basic_host_buffer;
 
 /** host_document used by host_buffer. Usually you do not have to create or
  * delete documents yourself, the buffers manage them.
@@ -48,7 +50,7 @@ public:
 
 	/** Returns the buffer to which the document is assigned.
 	 */
-	const host_buffer& get_buffer() const;
+	const basic_host_buffer<net6::selector>& get_buffer() const;
 
 	/** Inserts <em>text</em> at <em>pos</em> and synchronises it with
 	 * the clients.

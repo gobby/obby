@@ -16,6 +16,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "server_buffer.hpp"
+
+#if 0
 #include <cassert>
 #include <iostream>
 #include "gettext.hpp"
@@ -571,5 +574,4 @@ obby::server_buffer::add_document_info(const user* owner,
 	m_doclist.push_back(doc);
 	return *doc;
 }
-
-
+#endif

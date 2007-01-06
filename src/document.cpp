@@ -48,7 +48,7 @@ const obby::document_info& obby::document::get_info() const
 	return m_info;
 }
 
-const obby::buffer& obby::document::get_buffer() const
+const obby::basic_buffer<net6::selector>& obby::document::get_buffer() const
 {
 	return m_info.get_buffer();
 }

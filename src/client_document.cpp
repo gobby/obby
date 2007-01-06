@@ -38,9 +38,9 @@ const obby::client_document_info& obby::client_document::get_info() const
 	return dynamic_cast<const client_document_info&>(m_info);
 }
 
-const obby::client_buffer& obby::client_document::get_buffer() const
+const obby::basic_client_buffer<net6::selector>& obby::client_document::get_buffer() const
 {
-	return dynamic_cast<const client_buffer&>(m_info.get_buffer() );
+	return dynamic_cast<const basic_client_buffer<net6::selector>&>(m_info.get_buffer() );
 }
 
 void obby::client_document::insert(position pos, const std::string& text)

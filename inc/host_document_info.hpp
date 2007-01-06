@@ -27,7 +27,8 @@
 namespace obby
 {
 
-class host_buffer;
+template<typename selector_type>
+class basic_host_buffer;
 
 /** Information about a document that is provided without being subscribed to
  * a document.
@@ -37,14 +38,14 @@ class host_document_info : public local_document_info,
                            public server_document_info
 {
 public:
-	host_document_info(const host_buffer& buf, net6::host& host,
+	host_document_info(const basic_host_buffer<net6::selector>& buf, net6::host& host,
 	                   const user* owner, unsigned int id,
 	                   const std::string& title);
 	~host_document_info();
 
 	/** Returns the buffer to which the document is assigned.
 	 */
-	const host_buffer& get_buffer() const;
+	const basic_host_buffer<net6::selector>& get_buffer() const;
 
 	/** Returns the document for this info, if one is assigned.
 	 */
@@ -78,7 +79,7 @@ protected:
 	 * server_document_info creates a server_document in assign_document,
 	 * but the host_document_info needs to create a host_document.
 	 */
-	host_document_info(const host_buffer& buf, net6::host& host,
+	host_document_info(const basic_host_buffer<net6::selector>& buf, net6::host& host,
 	                   const user* owner, unsigned int id,
 			   const std::string& title, bool noassign);
 

@@ -26,7 +26,9 @@ namespace obby
 {
 
 class server_document_info;
-class server_buffer;
+
+template<typename selector_type>
+class basic_server_buffer;
 
 /** Document used by server_buffer. Usually you do not create or delete
  * documents yourself, the buffers manage them.
@@ -46,7 +48,7 @@ public:
 
 	/** Returns the buffer to which the document is assigned.
 	 */
-	const server_buffer& get_buffer() const;
+	const basic_server_buffer<net6::selector>& get_buffer() const;
 
 	/** Inserts <em>text</em> at <em>pos</em> and synchronises it with
 	 * the clients.

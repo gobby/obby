@@ -27,26 +27,28 @@ namespace obby
 
 /** A local_buffer is a buffer object with a local user.
  */
-	
-class local_buffer : virtual public buffer
+template<typename selector_type>
+class basic_local_buffer : virtual public basic_buffer<selector_type>
 {
 public: 
-	typedef sigc::signal<void>               signal_user_colour_failed_type;
+	typedef sigc::signal<void>
+		signal_user_colour_failed_type;
 
-	local_buffer();
-	virtual ~local_buffer();
+	/** Standard constructor.
+	 */
+	basic_local_buffer();
 
 	/** Returns the local user.
 	 */
-	virtual user& get_self() = 0;
+	//virtual user& get_self() = 0;
 
 	/** Returns the local user.
 	 */
 	virtual const user& get_self() const = 0;
 
 	/** Returns the name of the local user. This method is overwritten
-	 * by client_buffer to provide access to the user's name even if the
-	 * login process has not completed.
+	 * by basic_client_buffer to provide access to the user's name even if
+	 * the login process has not completed.
 	 */
 	virtual const std::string& get_name() const;
 
@@ -55,7 +57,7 @@ public:
 	 * here because the ID is enough and one might not have a user object
 	 * to the corresponding ID. So a time-consuming lookup is obsolete.
 	 */
-	local_document_info* find_document(unsigned int owner_id,
+	local_document_info* document_find(unsigned int owner_id,
 	                                   unsigned int id) const;
 
 	/** Sets a new colour for the local user and propagates this change
@@ -63,22 +65,54 @@ public:
 	 */
 	virtual void set_colour(int red, int green, int blue) = 0;
 
-	/** Signal which will be emitted if a user colour changed failed at
+	/** Signal which will be emitted if a user colour changecd failed at
 	 * the server.
 	 */
 	signal_user_colour_failed_type user_colour_failed_event() const;
 
 protected:
-        /** Adds a new document with the given title to the buffer.
+        /** Creates a new document info object according to the current type
+	 * of buffer.
 	 */
-	virtual document_info& add_document_info(const user* owner,
+	virtual document_info* new_document_info(const user* owner,
 	                                         unsigned int id,
 	                                         const std::string& title) = 0;
 
 	signal_user_colour_failed_type m_signal_user_colour_failed;
 };
 
+typedef basic_local_buffer<net6::selector> local_buffer;
+
+template<typename selector_type>
+basic_local_buffer<selector_type>::basic_local_buffer()
+ : basic_buffer<selector_type>()
+{
 }
+
+template<typename selector_type>
+const std::string& basic_local_buffer<selector_type>::get_name() const
+{
+	return get_self().get_name();
+}
+
+template<typename selector_type>
+local_document_info*
+basic_local_buffer<selector_type>::document_find(unsigned int owner_id,
+                                                 unsigned int id) const
+{
+	return dynamic_cast<local_document_info*>(
+		basic_buffer<selector_type>::find_document(owner_id, id)
+	);
+}
+
+template<typename selector_type>
+typename basic_local_buffer<selector_type>::signal_user_colour_failed_type
+basic_local_buffer<selector_type>::user_colour_failed_event() const
+{
+	return m_signal_user_colour_failed;
+}
+
+} // namespace obby
 
 #endif // _OBBY_LOCAL_BUFFER_HPP_
 

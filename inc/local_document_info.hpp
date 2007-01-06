@@ -25,7 +25,8 @@
 namespace obby
 {
 
-class local_buffer;
+template<typename selector_type>
+class basic_local_buffer;
 
 /** Information about a document that is provided without being subscribed to
  * a document.
@@ -34,13 +35,13 @@ class local_buffer;
 class local_document_info : virtual public document_info
 {
 public:
-	local_document_info(const local_buffer& buf, const user* owner,
+	local_document_info(const basic_local_buffer<net6::selector>& buf, const user* owner,
 	                    unsigned int id, const std::string& title);
 	~local_document_info();
 
 	/** Returns the buffer associated with the document.
 	 */
-	const local_buffer& get_buffer() const;
+	const basic_local_buffer<net6::selector>& get_buffer() const;
 
 	/** Returns the document for this info, if one is assigned.
 	 */

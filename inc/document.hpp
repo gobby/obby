@@ -28,7 +28,9 @@ namespace obby
 {
 
 class document_info;
-class buffer;
+
+template<typename selector_type>
+class basic_buffer;
 
 /** Abstract base class for obby documents. A document contains an amount of
  * text that is synchronised to all participants that are subscribed to this
@@ -62,7 +64,7 @@ public:
 
 	/** Returns the buffer that is associated to this document.
 	 */
-	const buffer& get_buffer() const;
+	const basic_buffer<net6::selector>& get_buffer() const;
 
 	/** Returns the current revision number for this document.
 	 */

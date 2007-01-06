@@ -22,6 +22,9 @@
 #include <list>
 #include <gmpxx.h>
 #include <net6/main.hpp>
+#include <net6/object.hpp>
+#include "common.hpp"
+#include "format_string.hpp"
 #include "document_info.hpp"
 #include "user_table.hpp"
 
@@ -31,7 +34,8 @@ namespace obby
 /** Abstract base class for obby buffers. A buffer contains multiple documents
  * that are synchronised through many users and a user list.
  */
-class buffer : private net6::non_copyable, public sigc::trackable
+template<typename selector_type>
+class basic_buffer : private net6::non_copyable, public sigc::trackable
 {
 public:
 	// Document iterator typedef
@@ -43,50 +47,56 @@ public:
 	> document_iterator;
 
 	// Signal types
-	typedef sigc::signal<void, user&> signal_user_join_type;
-	typedef sigc::signal<void, user&> signal_user_part_type;
-	typedef sigc::signal<void, user&> signal_user_colour_type;
-	typedef sigc::signal<void, document_info&> signal_document_insert_type;
-	typedef sigc::signal<void, document_info&> signal_document_rename_type;
-	typedef sigc::signal<void, document_info&> signal_document_remove_type;
-	typedef sigc::signal<void, obby::user&, const std::string&>
+	typedef sigc::signal<void, const user&>
+		signal_user_join_type;
+	typedef sigc::signal<void, const user&>
+		signal_user_part_type;
+	typedef sigc::signal<void, const user&>
+		signal_user_colour_type;
+	typedef sigc::signal<void, document_info&>
+		signal_document_insert_type;
+	typedef sigc::signal<void, document_info&>
+		signal_document_rename_type;
+	typedef sigc::signal<void, document_info&>
+		signal_document_remove_type;
+	typedef sigc::signal<void, const user&, const std::string&>
 		signal_message_type;
 	typedef sigc::signal<void, const std::string&>
 		signal_server_message_type;
 
-	buffer();
-	virtual ~buffer();
+	basic_buffer();
+	virtual ~basic_buffer();
 
 	/** Returns the user table associated with the buffer.
 	 */
 	const user_table& get_user_table() const;
 
-	/** Waits indefinitely for incoming events.
+	/** Returns the selector of the underlaying net6 network object.
 	 */
-	virtual void select() = 0;
+	selector_type& get_selector();
 
-	/** Waits for incoming events or until <em>timeout</em> expires.
+	/** Returns the selector of the underlaying net6 network object.
 	 */
-	virtual void select(unsigned int timeout) = 0;
+	const selector_type& get_selector() const;
 
 	/* Creates a new document with predefined content.
 	 * signal_document_insert will be emitted if it has been created.
 	 */
-	virtual void create_document(const std::string& title,
-	                             const std::string& content = "",
-	                             bool open_as_edited = false) = 0;
+	virtual void document_create(const std::string& title,
+	                             const std::string& content,
+	                             bool open_as_edited) = 0;
 
 	/** Removes an existing document. signal_document_remove will be
 	 * emitted if the document has been removed.
 	 */
-	virtual void remove_document(document_info& doc) = 0;
+	virtual void document_remove(document_info& doc) = 0;
 	
 	/** Looks for a document with the given ID which belongs to the user
 	 * with the given owner ID. Note that we do not take a real user object
 	 * here because the ID is enough and one might not have a user object
 	 * to the corresponding ID. So a time-consuming lookup is obsolete.
 	 */
-	document_info* find_document(unsigned int owner_id,
+	document_info* document_find(unsigned int owner_id,
 	                             unsigned int id) const;
 
 	/** Returns the begin of the document list.
@@ -107,6 +117,7 @@ public:
 
 	/** Checks if given colour components match an other
 	 * already present one too closely.
+	 * TODO: Move this function to user table?
 	 */
 	bool check_colour(int red, int green, int blue,
 	                  const user* ignore = NULL) const;
@@ -153,9 +164,23 @@ public:
 	 */
 	static const unsigned long PROTOCOL_VERSION;
 protected:
-        /** Adds a new document with the given title to the buffer.
+        /** Internal function to document with the given title to the buffer.
 	 */
-	virtual document_info& add_document_info(const user* owner,
+	document_info& document_add(const user* owner, unsigned int id,
+	                            const std::string& title);
+
+	/** Internal function to delete a document from the buffer.
+	 */
+	void document_delete(document_info& document);
+
+	/** Internal function to clear the whole document list.
+	 */
+	void document_clear();
+
+	/** Creates a new document info object according to the current
+	 * type of buffer.
+	 */
+	virtual document_info* new_document_info(const user* owner,
 	                                         unsigned int id,
 	                                         const std::string& title) = 0;
 
@@ -171,17 +196,21 @@ protected:
 	 */
 	net6::main m_netkit;
 
+	/** Net object.
+	 */
+	std::auto_ptr<net6::basic_object<selector_type> > m_net;
+
 	/** GMP random number generator.
 	 */
 	gmp_randclass m_rclass;
 
 	/** User table which stores all the users in the session.
 	 */
-	user_table m_usertable;
+	user_table m_user_table;
 
 	/** List of documents.
 	 */
-	std::list<document_info*> m_doclist;
+	std::list<document_info*> m_docs;
 
 	/** Counter for document IDs.
 	 */
@@ -199,6 +228,286 @@ protected:
 	signal_server_message_type m_signal_server_message;
 };
 
+typedef basic_buffer<net6::selector> buffer;
+
+template<typename selector_type>
+const unsigned long basic_buffer<selector_type>::PROTOCOL_VERSION = 1;
+
+template<typename selector_type>
+basic_buffer<selector_type>::basic_buffer()
+ : m_rclass(GMP_RAND_ALG_LC, 16), m_doc_counter(0)
+{
+	// Initialize gettext
+	init_gettext();
+
+	// Register user type
+	net6::packet::register_type(
+		net6::parameter<user*>::TYPE_ID,
+		sigc::mem_fun(*this, &basic_buffer::translate_user)
+	);
+
+	// Register document type
+	net6::packet::register_type(
+		net6::parameter<document_info*>::TYPE_ID,
+		sigc::mem_fun(*this, &basic_buffer::translate_document)
+	);
+
+	// Seed random number generator with system time
+	m_rclass.seed(std::time(NULL) );
 }
+
+template<typename selector_type>
+basic_buffer<selector_type>::~basic_buffer()
+{
+	document_clear();
+}
+
+template<typename selector_type>
+const user_table& basic_buffer<selector_type>::get_user_table() const
+{
+	return m_user_table;
+}
+
+template<typename selector_type>
+selector_type& basic_buffer<selector_type>::get_selector()
+{
+	if(!m_net) throw std::logic_error("obby::basic_buffer::get_selector");
+	return m_net->get_selector();
+}
+
+template<typename selector_type>
+const selector_type& basic_buffer<selector_type>::get_selector() const
+{
+	if(!m_net) throw std::logic_error("obby::basic_buffer::get_selector");
+	return m_net->get_selector();
+}
+
+template<typename selector_type>
+document_info* basic_buffer<selector_type>::document_find(unsigned int owner_id,
+                                                          unsigned int id) const
+{
+	document_iterator iter;
+	for(iter = m_docs.begin(); iter != m_docs.end(); ++ iter)
+	{
+		// Check document ID
+		if(iter->get_id() != id) continue;
+		// Get document's owner
+		const user* owner = iter->get_owner();
+		// No owner requested?
+		if(owner == NULL && id == 0) return &(*iter);
+		// Document has no owner, but owner was requested
+		if(owner == NULL) continue;
+		// Compare owner ID
+		if(owner->get_id() == owner_id) return &(*iter);
+	}
+
+	return NULL;
+}
+
+template<typename selector_type>
+bool basic_buffer<selector_type>::check_colour(int red, int green, int blue,
+                                               const user* ignore) const
+{
+	for(user_table::user_iterator<user::CONNECTED> iter =
+		m_user_table.user_begin<user::CONNECTED>();
+	    iter != m_user_table.user_end<user::CONNECTED>();
+	    ++ iter)
+	{
+		// Ignore given user to ignore
+		if(&(*iter) == ignore) continue;
+
+		// TODO: obby::colour class to perform this check
+		if( abs(red - iter->get_red()) +
+		    abs(green - iter->get_green()) +
+		    abs(blue - iter->get_blue()) < 32)
+		{
+			// Conflict
+			return false;
+		}
+	}
+
+	return true;
+}
+
+template<typename selector_type>
+typename basic_buffer<selector_type>::document_iterator
+basic_buffer<selector_type>::document_begin() const
+{
+	return static_cast<document_iterator>(m_docs.begin() );
+}
+
+template<typename selector_type>
+typename basic_buffer<selector_type>::document_iterator
+basic_buffer<selector_type>::document_end() const
+{
+	return static_cast<document_iterator>(m_docs.end() );
+}
+
+template<typename selector_type>
+typename basic_buffer<selector_type>::document_size_type
+basic_buffer<selector_type>::document_count() const
+{
+	return m_docs.size();
+}
+
+template<typename selector_type>
+typename basic_buffer<selector_type>::signal_user_join_type
+basic_buffer<selector_type>::user_join_event() const
+{
+	return m_signal_user_join;
+}
+
+template<typename selector_type>
+typename basic_buffer<selector_type>::signal_user_part_type
+basic_buffer<selector_type>::user_part_event() const
+{
+	return m_signal_user_part;
+}
+
+template<typename selector_type>
+typename basic_buffer<selector_type>::signal_user_colour_type
+basic_buffer<selector_type>::user_colour_event() const
+{
+	return m_signal_user_colour;
+}
+
+template<typename selector_type>
+typename basic_buffer<selector_type>::signal_document_insert_type
+basic_buffer<selector_type>::document_insert_event() const
+{
+	return m_signal_document_insert;
+}
+
+template<typename selector_type>
+typename basic_buffer<selector_type>::signal_document_rename_type
+basic_buffer<selector_type>::document_rename_event() const
+{
+	return m_signal_document_rename;
+}
+
+template<typename selector_type>
+typename basic_buffer<selector_type>::signal_document_remove_type
+basic_buffer<selector_type>::document_remove_event() const
+{
+	return m_signal_document_remove;
+}
+
+template<typename selector_type>
+typename basic_buffer<selector_type>::signal_message_type
+basic_buffer<selector_type>::message_event() const
+{
+	return m_signal_message;
+}
+
+template<typename selector_type>
+typename basic_buffer<selector_type>::signal_server_message_type
+basic_buffer<selector_type>::server_message_event() const
+{
+	return m_signal_server_message;
+}
+
+template<typename selector_type>
+net6::basic_parameter*
+basic_buffer<selector_type>::translate_user(const std::string& str) const
+{
+	// Read user ID
+	unsigned int user_id;
+	std::stringstream stream(str);
+	stream >> std::hex >> user_id;
+
+	// Check for success
+	if(stream.bad() )
+	{
+		throw net6::basic_parameter::bad_format(
+			"User ID ought to be a hexadecimal integer"
+		);
+	}
+
+	// No user
+	if(user_id == 0) return new net6::parameter<user*>(NULL);
+
+	// Find corresponding user in user table
+	user* found_user = m_user_table.find_user<user::NONE>(user_id);
+	if(found_user == NULL)
+	{
+		// No such user
+		format_string str("User ID %0% does not exist");
+		str << user_id;
+		throw net6::basic_parameter::bad_format(str.str() );
+	}
+
+	// Done
+	return new net6::parameter<user*>(found_user);
+}
+
+template<typename selector_type>
+net6::basic_parameter*
+basic_buffer<selector_type>::translate_document(const std::string& str) const
+{
+	// Read document and owner ID
+	unsigned int owner_id, document_id;
+	std::stringstream stream(str);
+	stream >> std::hex >> owner_id >> document_id;
+
+	// Check for success
+	if(stream.bad() )
+	{
+		throw net6::basic_parameter::bad_format(
+			"Document ID ought to be two hexadecimal integers"
+		);
+	}
+
+	// Lookup document
+	document_info* info = document_find(owner_id, document_id);
+	if(info == NULL)
+	{
+		// No such document
+		format_string str("Document ID %0%/%1% does not exist");
+		str << owner_id << document_id;
+		throw net6::basic_parameter::bad_format(str.str() );
+	}
+
+	return new net6::parameter<document_info*>(info);
+}
+
+template<typename selector_type>
+document_info&
+basic_buffer<selector_type>::document_add(const user* owner, unsigned int id,
+                                          const std::string& title)
+{
+	// TODO: Add initial content to parameter list
+	document_info* new_info = new_document_info(owner, id, title);
+	m_docs.push_back(new_info);
+	// TODO: Emit document_insert signal
+	return *new_info;
+}
+
+template<typename selector_type>
+void basic_buffer<selector_type>::document_delete(document_info& info)
+{
+	// TODO: Emit document_remove signal
+
+	// Delete from list
+	m_docs.erase(
+		std::remove(m_docs.begin(), m_docs.end(), &info),
+		m_docs.end()
+	);
+
+	// Delete document
+	delete &info;
+}
+
+template<typename selector_type>
+void basic_buffer<selector_type>::document_clear()
+{
+	// TODO: Emit document_remove signal for each document?
+	std::list<document_info*>::iterator iter;
+	for(iter = m_docs.begin(); iter != m_docs.end(); ++ iter)
+		delete *iter;
+
+	m_docs.clear();
+}
+
+} // namespace obby
 
 #endif // _OBBY_BUFFER_HPP_

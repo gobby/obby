@@ -42,7 +42,7 @@ public:
 		CONNECTED = 0x01
 	};
 
-	/** Creates a new user from an existing peer.
+	/** Creates a new user from an existing net6::user.
 	 * @param user6 Underlaying net6::user object.
 	 * @param red Red colour component of the user colour (0-255)
 	 * @param green Green colour component of the user colour (0-255)

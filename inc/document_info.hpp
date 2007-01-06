@@ -27,7 +27,8 @@
 namespace obby
 {
 
-class buffer;
+template<typename selector_type>
+class basic_buffer;
 
 /** Information about a document that is provided without being subscribed to
  * a document.
@@ -47,7 +48,7 @@ public:
 		std::list<const user*>::const_iterator
 	> user_iterator;
 
-	document_info(const buffer& buf, const user* owner, unsigned int id,
+	document_info(const basic_buffer<net6::selector>& buf, const user* owner, unsigned int id,
 	              const std::string& title);
 	~document_info();
 
@@ -61,7 +62,7 @@ public:
 
 	/** Returns the buffer to which the document is assigned.
 	 */
-	const buffer& get_buffer() const;
+	const basic_buffer<net6::selector>& get_buffer() const;
 
 	/** Returns the document for this info, if one is assigned.
 	 */
@@ -131,7 +132,7 @@ protected:
 	 */
 	void release_document();
 
-	const buffer& m_buffer;
+	const basic_buffer<net6::selector>& m_buffer;
 	const user* m_owner;
 	unsigned int m_id;
 	std::string m_title;

@@ -26,7 +26,9 @@ namespace obby
 {
 
 class client_document_info;
-class client_buffer;
+
+template<typename selector_type>
+class basic_client_buffer;
 
 /** Document used by client_buffer. Usually you do not have create or delete
  * document objects by youself, the equivalent buffers do this.
@@ -47,7 +49,7 @@ public:
 
 	/** Returns the buffer to which the document is assigned.
 	 */
-	const client_buffer& get_buffer() const;
+	const basic_client_buffer<net6::selector>& get_buffer() const;
 
 	/** Inserts <em>text</em> at <em>pos</em>.
 	 */

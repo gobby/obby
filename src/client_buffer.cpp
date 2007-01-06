@@ -16,12 +16,14 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "client_buffer.hpp"
+
+#if 0
 #include <iostream>
 #include "gettext.hpp"
 #include "sha1.hpp"
 #include "client_document.hpp"
 #include "client_buffer.hpp"
-
 obby::client_buffer::client_buffer()
  : buffer(), m_client(NULL), m_self(NULL)
 {
@@ -527,6 +529,7 @@ void obby::client_buffer::on_net_sync_usertable_user(const net6::packet& pack)
 
 	// Add user into user table
 	m_usertable.add_user(id, name, red, green, blue);
+	// TODO: Emit user_join signal
 }
 
 void obby::client_buffer::on_net_sync_doclist_document(const net6::packet& pack)
@@ -545,6 +548,7 @@ void obby::client_buffer::on_net_sync_doclist_document(const net6::packet& pack)
 		return;
 	}
 
+	// TODO: Emit document_insert signal
 	obby::document_info& info = add_document_info(owner, id, title);
 	obby::client_document_info& client_info =
 		dynamic_cast<client_document_info&>(info);
@@ -557,6 +561,8 @@ void obby::client_buffer::on_net_sync_doclist_document(const net6::packet& pack)
 		user* cur_user = pack.get_param(i).as<user*>();
 		// Synchronise this user's subscription.
 		client_info.obby_sync_subscribe(*cur_user);
+		// TODO: Emit subscription signal, should be done in
+		// obby_sync_subscribe.
 	}
 }
 
@@ -604,4 +610,4 @@ obby::client_buffer::add_document_info(const user* owner,
 	m_doclist.push_back(doc);
 	return *doc;
 }
-
+#endif

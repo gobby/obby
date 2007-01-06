@@ -26,7 +26,8 @@
 namespace obby
 {
 
-class client_buffer;
+template<typename selector_type>
+class basic_client_buffer;
 
 /** Information about a document that is provided without being subscribed to
  * a document.
@@ -35,14 +36,14 @@ class client_buffer;
 class client_document_info : public local_document_info
 {
 public:
-	client_document_info(const client_buffer& buf, net6::client& client,
+	client_document_info(const basic_client_buffer<net6::selector>& buf, net6::client& client,
 	                     const user* owner, unsigned int id,
 	                     const std::string& title);
 	~client_document_info();
 
 	/** Returns the buffer to which the document is assigned.
 	 */
-	const client_buffer& get_buffer() const;
+	const basic_client_buffer<net6::selector>& get_buffer() const;
 
 	/** Returns the document for this info, if one is assigned.
 	 */

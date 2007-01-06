@@ -25,7 +25,9 @@ namespace obby
 {
 
 class local_document_info;
-class local_buffer;
+
+template<typename selector_type>
+class basic_local_buffer;
 
 /** Abstract base class for obby documents that have a local user.
  */
@@ -42,7 +44,7 @@ public:
 
 	/** Returns the buffer that is associated to this document.
 	 */
-	const local_buffer& get_buffer() const;
+	const basic_local_buffer<net6::selector>& get_buffer() const;
 
 protected:
 };
