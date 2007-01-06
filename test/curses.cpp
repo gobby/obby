@@ -202,8 +202,8 @@ void screen::scroll_to_cursor()
 	if(cursor_x < m_scroll_x)
 		m_scroll_x = cursor_x;
 
-	if(m_scroll_y + LINES < cursor_y)
-		m_scroll_y = cursor_y - LINES;
+	if(m_scroll_y + LINES <= cursor_y)
+		m_scroll_y = cursor_y - LINES + 1;
 	if(cursor_y < m_scroll_y)
 		m_scroll_y = cursor_y;
 }
