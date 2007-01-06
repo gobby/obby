@@ -137,11 +137,12 @@ void obby::serialise::parser::serialise(const std::string& file) const
 	std::ofstream out(file.c_str() );
 	if(!out)
 	{
-		obby::format_string str(_(
-			"Could not open file '%0%' for writing"
-		) );
+		obby::format_string str(
+			_("Could not open file '%0%' for writing")
+		);
 
 		str << file;
+		throw std::runtime_error(str.str() );
 	}
 
 	serialise(out);
