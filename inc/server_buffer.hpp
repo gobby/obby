@@ -43,6 +43,9 @@ public:
 	void select();
 	void select(unsigned int timeout);
 
+	virtual void insert(const position& pos, const std::string& text);
+	virtual void erase(const position& from, const position& end);
+
 	signal_insert_type insert_event() const;
 	signal_delete_type delete_event() const;
 	signal_join_type join_event() const;

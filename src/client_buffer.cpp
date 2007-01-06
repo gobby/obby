@@ -52,6 +52,20 @@ void obby::client_buffer::select(unsigned int timeout)
 	m_connection.select(timeout);
 }
 
+void obby::client_buffer::insert(const position& pos, const std::string& text)
+{
+	// TODO: Insert to buffer
+	// TODO: Add to unsynced changes
+	// TODO: Send sync request to server
+}
+
+void obby::client_buffer::erase(const position& from, const position& to)
+{
+	// TODO: Delete from buffer
+	// TODO: Add to unsynced changes
+	// TODO: Send sync request to server
+}
+
 obby::client_buffer::signal_insert_type
 obby::client_buffer::insert_event() const
 {

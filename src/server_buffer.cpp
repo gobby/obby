@@ -45,6 +45,20 @@ void obby::server_buffer::select(unsigned int timeout)
 	m_server.select(timeout);
 }
 
+void obby::server_buffer::insert(const position& pos, const std::string& text)
+{
+	// TODO: Insert to buffer
+	// TODO: Add to history
+	// TODO: Tell clients new revision
+}
+
+void obby::server_buffer::erase(const position& from, const position& to)
+{
+	// TODO: Delete from buffer
+	// TODO: Add to history
+	// TODO: Tell clients new revision
+}
+
 obby::server_buffer::signal_insert_type
 obby::server_buffer::insert_event() const
 {
