@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
-"POT-Creation-Date: 2005-06-18 13:02+0200\n"
+"POT-Creation-Date: 2005-07-18 01:53+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,14 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/error.cpp:31
+#: src/error.cpp:35
 msgid "Colour is already in use"
+msgstr ""
+
+#: src/error.cpp:37
+msgid "Wrong session password"
+msgstr ""
+
+#: src/error.cpp:39
+msgid "Wrong user password"
 msgstr ""
