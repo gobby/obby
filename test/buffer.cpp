@@ -130,6 +130,26 @@ void server_delete(const obby::delete_record& record,
 
 int server_main(int argc, char* argv[])
 {
+/*	obby::server_buffer buffer(port);
+	buffer.insert_nosync(0, "A\nB");
+	buffer.insert_nosync(3, "\nC\n");
+	buffer.insert_nosync(1, "\n");
+	buffer.insert_nosync(2, "B");
+	buffer.insert_nosync(3, "\n");
+	buffer.insert_nosync(4, "C");
+	buffer.insert_nosync(5, "\n");
+
+	for(unsigned int i = 0; i < buffer.get_line_count() - 1; ++ i)
+		std::cout << "Line Access for line " << i << ": " << buffer.get_line_access(i) << std::endl;
+	
+	for(obby::position i = 0; i <= 6; ++ i)
+	{
+		unsigned int x, y;
+		buffer.position_to_coord(i, x, y);
+		std::cout << i << ": " << x << ", " << y << std::endl;
+	}*/
+		
+	
 	if(argc > 1)
 		port = strtol(argv[1], NULL, 10);
 

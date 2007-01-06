@@ -49,23 +49,23 @@ void obby::buffer::insert_nosync(position pos, const std::string& text)
 	std::vector<position>::iterator iter;
 	for(iter = m_lines.begin(); iter != m_lines.end(); ++ iter)
 	{
-		if(new_pos != std::string::npos && pos > *iter)
+		if(new_pos != std::string::npos && pos <= *iter)
 		{
 			while((new_pos = text.find('\n', new_pos)) !=
 			       std::string::npos)
 			{
-				iter = m_lines.insert(iter, pos + new_pos);
+				iter = m_lines.insert(iter, pos + (new_pos++) );
 				++ iter;
 			}
 		}
 
-		if(pos > *iter)
+		if(pos <= *iter)
 			*iter += text.length();
 	}
 
 	if(new_pos != std::string::npos)
 		while((new_pos = text.find('\n', new_pos)) != std::string::npos)
-			m_lines.push_back(pos + new_pos);
+			m_lines.push_back(pos + (new_pos++) );
 }
 
 void obby::buffer::erase_nosync(position from, position to)
@@ -113,10 +113,10 @@ unsigned int obby::buffer::get_line_count() const
 obby::position obby::buffer::coord_to_position(unsigned int x,
                                                unsigned int y) const
 {
-	assert(y < m_lines.size() - 1);
+	assert(y <= m_lines.size() );
 	if(y == 0) return x;
 
-	return m_lines[y - 1] + x;
+	return m_lines[y - 1] + x + 1;
 }
 
 void obby::buffer::position_to_coord(position pos, unsigned int& x,
@@ -138,6 +138,6 @@ void obby::buffer::position_to_coord(position pos, unsigned int& x,
 	if(iter == m_lines.begin() )
 		x = pos;
 	else
-		x = pos - (*(--iter) );
+		x = pos - (*(--iter) ) - 1;
 }
 
