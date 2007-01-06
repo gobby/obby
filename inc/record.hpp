@@ -41,6 +41,12 @@ public:
 	 */
 	record(const vector_time& timestamp, operation* op);
 
+	/** Reads the record from the given packet, beginning at the parameter
+	 * <em>index</em>. After the call, <em>index</em> points to the next
+	 * parameter in the packet.
+	 */
+	record(const net6::packet& pack, unsigned int& index);
+
 	/** Returns the operation of the record.
 	 */
 	const operation& get_operation() const;
@@ -48,6 +54,10 @@ public:
 	/** Returns the timestamp of this record.
 	 */
 	const vector_time& get_time() const;
+
+	/** Appends the record to a packet.
+	 */
+	void append_packet(net6::packet& pack) const;
 
 protected:
 	vector_time m_timestamp;

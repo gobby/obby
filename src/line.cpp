@@ -39,16 +39,16 @@ obby::line::line(const string_type& text, const user_type* author)
 	m_authors.push_back(pos);
 }
 
-obby::line::line(const net6::packet& pack)
+obby::line::line(const net6::packet& pack, unsigned int from)
 {
-	// Parameter 0 is the document ID which we do not need here.
-/*	m_line = pack.get_param(2).as<std::string>();
+	// First there is the string
+	m_line = pack.get_param(from).as<std::string>();
 
 	// Reserve space in author vector
-	m_authors.reserve( (pack.get_param_count() - 3) / 2);
+	m_authors.reserve( (pack.get_param_count() - from - 1) / 2);
 	
 	// Add authors
-	for(unsigned int i = 3; i < pack.get_param_count(); i += 2)
+	for(unsigned int i = from + 1; i < pack.get_param_count(); i += 2)
 	{
 		// Get position and author id
 		unsigned int pos = pack.get_param(i).as<int>();
@@ -57,15 +57,11 @@ obby::line::line(const net6::packet& pack)
 		// Add to vector
 		user_pos upos = { author, pos };
 		m_authors.push_back(upos);
-	}*/
+	}
 }
 
 obby::line::line(const line& other)
  : m_line(other.m_line), m_authors(other.m_authors)
-{
-}
-
-obby::line::~line()
 {
 }
 
@@ -75,6 +71,13 @@ obby::line& obby::line::operator=(const line& other)
 	m_authors = other.m_authors;
 
 	return *this;
+}
+
+void obby::line::append_packet(net6::packet& pack) const
+{
+	pack << m_line;
+	for(std::vector<user_pos>::size_type i = 0; i < m_authors.size(); ++ i)
+		pack << m_authors[i].position << m_authors[i].author;
 }
 
 obby::line::operator const std::string&() const

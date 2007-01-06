@@ -17,6 +17,10 @@
  */
 
 #include "operation.hpp"
+#include "no_operation.hpp"
+#include "split_operation.hpp"
+#include "insert_operation.hpp"
+#include "delete_operation.hpp"
 
 obby::operation::operation()
  : m_original(NULL)
@@ -47,5 +51,39 @@ obby::operation::~operation()
 			delete m_original;
 		}
 	}
+}
+
+std::auto_ptr<obby::operation>
+obby::operation::from_packet(const net6::packet& pack, unsigned int& index)
+{
+	// Get type
+	const std::string& type = pack.get_param(index ++).as<std::string>();
+	std::auto_ptr<operation> op;
+
+	// Generate operation according to type
+	if(type == "ins")
+	{
+		op.reset(new insert_operation(pack, index) );
+	}
+	else if(type == "del")
+	{
+		op.reset(new delete_operation(pack, index) );
+	}
+	else if(type == "split")
+	{
+		op.reset(new split_operation(pack, index) );
+	}
+	else if(type == "noop")
+	{
+		op.reset(new no_operation(pack, index) );
+	}
+	else
+	{
+		throw net6::basic_parameter::bad_value(
+			"Unexpected record type: " + type
+		);
+	}
+
+	return op;
 }
 

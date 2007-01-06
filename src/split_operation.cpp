@@ -55,6 +55,22 @@ obby::split_operation::split_operation(operation* first, operation* second,
 {
 }
 
+obby::split_operation::split_operation(const net6::packet& pack,
+                                       unsigned int& index)
+ : operation(),
+   m_first(operation::from_packet(pack, index).release() ),
+   m_second(operation::from_packet(pack, index).release() )
+{
+//	std::auto_ptr<operation> first = operation::from_packet(pack, index);
+//	std::auto_ptr<operation> second = operation::from_packet(pack, index);
+//
+//	m_first = first.get();
+//	m_second = second.get();
+//
+//	m_first.release();
+//	m_second.release();
+}
+
 obby::operation* obby::split_operation::clone() const
 {
 	return new split_operation(*m_first, *m_second, m_original);
@@ -98,5 +114,12 @@ obby::split_operation::transform_delete(position pos, position len) const
 		m_second->transform_delete(pos, len)
 		// TODO: What about original op?
 	);
+}
+
+void obby::split_operation::append_packet(net6::packet& pack) const
+{
+	pack << "split";
+	m_first->append_packet(pack);
+	m_second->append_packet(pack);
 }
 

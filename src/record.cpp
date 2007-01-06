@@ -28,6 +28,15 @@ obby::record::record(const vector_time& timestamp, operation* op)
 {
 }
 
+obby::record::record(const net6::packet& pack, unsigned int& index)
+ : m_timestamp(
+	pack.get_param(index ++).as<int>(),
+	pack.get_param(index ++).as<int>()
+   ),
+   m_operation(operation::from_packet(pack, index).release() )
+{
+}
+
 const obby::operation& obby::record::get_operation() const
 {
 	return *m_operation;
@@ -36,4 +45,10 @@ const obby::operation& obby::record::get_operation() const
 const obby::vector_time& obby::record::get_time() const
 {
 	return m_timestamp;
+}
+
+void obby::record::append_packet(net6::packet& pack) const
+{
+	pack << m_timestamp.get_local() << m_timestamp.get_remote();
+	m_operation->append_packet(pack);
 }

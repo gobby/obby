@@ -35,6 +35,14 @@ obby::insert_operation::insert_operation(position pos, const std::string& text,
 {
 }
 
+obby::insert_operation::insert_operation(const net6::packet& pack,
+                                         unsigned int& index)
+ : operation(),
+   m_pos(pack.get_param(index ++).as<int>() ),
+   m_text(pack.get_param(index ++).as<std::string>() )
+{
+}
+
 obby::operation* obby::insert_operation::clone() const
 {
 	return new insert_operation(m_pos, m_text, m_original);
@@ -106,5 +114,10 @@ obby::insert_operation::transform_delete(position pos, position len) const
 		// Case 5
 		return new insert_operation(pos, m_text, *this);
 	}
+}
+
+void obby::insert_operation::append_packet(net6::packet& pack) const
+{
+	pack << "ins" << m_pos << m_text;
 }
 

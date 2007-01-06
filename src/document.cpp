@@ -165,6 +165,16 @@ obby::document::signal_delete_type obby::document::delete_event() const
 	return m_signal_delete;
 }
 
+void obby::document::clear_lines()
+{
+	m_lines.clear();
+}
+
+void obby::document::add_line(const line& line)
+{
+	m_lines.push_back(line);
+}
+
 const obby::line& obby::document::get_line(unsigned int index) const
 {
 	if(index >= m_lines.size() )

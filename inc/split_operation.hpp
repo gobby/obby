@@ -51,6 +51,10 @@ public:
 	split_operation(operation* first, operation* second,
 	                const operation& original);
 
+	/** Reads a split_operation from the given network packet.
+	 */
+	split_operation(const net6::packet& pack, unsigned int& index);
+
 	/** Creates a copy of this operation.
 	 */
 	virtual operation* clone() const;
@@ -76,6 +80,10 @@ public:
 	 */
 	virtual operation* transform_delete(position pos,
 	                                    position len) const;
+
+	/** Appends the operation to the given packet.
+	 */
+	virtual void append_packet(net6::packet& pack) const;
 protected:
 	/** Constructor taking an original_operation struct.
 	 */

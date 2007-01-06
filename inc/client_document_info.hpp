@@ -372,7 +372,7 @@ void basic_client_document_info<selector_type>::
 	on_net_record(const document_packet& pack)
 {
 	// Not subscribed?
-	if(basic_document_info<selector_type>::m_document.get() == NULL)
+	if(m_jupiter.get() == NULL)
 	{
 		format_string str(
 			"Got record without being subscribed to document "
@@ -385,7 +385,16 @@ void basic_client_document_info<selector_type>::
 		throw net6::basic_parameter::bad_value(str.str() );
 	}
 
-	// TODO: Extract record, apply remote operation
+	// Get author of record
+	const user* author =
+		pack.get_param(0).net6::basic_parameter::as<user*>();
+
+	// Extract record from packet
+	unsigned int index = 1 + 2;
+	record rec(pack, index);
+
+	// Apply remote operation
+	m_jupiter->remote_op(rec, author);
 }
 
 template<typename selector_type>
@@ -407,6 +416,9 @@ void basic_client_document_info<selector_type>::
 
 	// Assign empty document
 	basic_document_info<selector_type>::assign_document();
+	// Clear all lines, the document will be synced line-wise
+	// TODO: Get at least rid of this function call
+	basic_document_info<selector_type>::m_document->clear_lines();
 }
 
 template<typename selector_type>
@@ -426,8 +438,8 @@ void basic_client_document_info<selector_type>::
 		throw net6::basic_parameter::bad_value(str.str() );
 	}
 
-	// TODO: Clear all lines in document if this was the first line
-	// TODO: Create line from packet, add to document
+	// Add line to document
+	basic_document_info<selector_type>::m_document->add_line(line(pack, 2));
 }
 
 template<typename selector_type>
@@ -454,7 +466,11 @@ template<typename selector_type>
 void basic_client_document_info<selector_type>::
 	on_jupiter_local(const record& rec)
 {
-	// TODO: Send record to server
+	// Build packet with record
+	document_packet pack(*this, "record");
+	rec.append_packet(pack);
+	// Send to server
+	get_net6().send(pack);
 }
 
 template<typename selector_type>

@@ -65,6 +65,17 @@ public:
 	 */
 	virtual operation* transform_delete(position pos,
 	                                    position len) const = 0;
+
+	/** Appends this operation to the given packet.
+	 */
+	virtual void append_packet(net6::packet& pack) const = 0;
+
+	/** Reads an operation from the given packet.
+	 * @param pack Packet to read from.
+	 * @param index From which parameter to read at.
+	 */
+	static std::auto_ptr<operation> from_packet(const net6::packet& pack,
+	                                            unsigned int& index);
 protected:
 	/** Struct containing an original operation with a reference counter
 	 * attached to it.

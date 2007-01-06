@@ -28,6 +28,12 @@ obby::no_operation::no_operation(const operation& original)
 {
 }
 
+obby::no_operation::no_operation(const net6::packet& pack, unsigned int& index)
+ : operation()
+{
+	// Nothing to read
+}
+
 obby::no_operation::no_operation(original_operation* original)
  : operation(original)
 {
@@ -61,5 +67,11 @@ obby::no_operation::transform_delete(position pos, position len) const
 {
 	// Nothing happens to no-op
 	return clone();
+}
+
+void obby::no_operation::append_packet(net6::packet& pack) const
+{
+	pack << "noop";
+	// Nothing to append
 }
 

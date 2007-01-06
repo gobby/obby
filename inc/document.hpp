@@ -74,6 +74,19 @@ public:
 	 */
 	signal_delete_type delete_event() const;
 
+	/** Clears all the lines in the document. Note that a document with no
+	 * lines is invalid and cannot be operated with insert() or erase().
+	 * Insert at least one line with add_line() after the call to this
+	 * function. Note that a call to this function does not emit
+	 * insert or erase signals.
+	 */
+	void clear_lines();
+
+	/** Adds a line to the document. Note that a call to this function does
+	 * not emit insert or erase signals.
+	 */
+	void add_line(const line& line);
+
 	/** Returns the given line of text.
 	 */
 	const line& get_line(unsigned int index) const;

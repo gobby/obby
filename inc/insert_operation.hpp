@@ -39,6 +39,10 @@ public:
 	insert_operation(position pos, const std::string& text,
 	                 const operation& original);
 
+	/** Reads an insert_operation from the given network packet.
+	 */
+	insert_operation(const net6::packet& pack, unsigned int& index);
+
 	/** Creates a copy of this operation.
 	 */
 	virtual operation* clone() const;
@@ -60,6 +64,10 @@ public:
 	 */
 	virtual operation* transform_delete(position pos,
 	                                    position len) const;
+
+	/** Appends the operation to the given packet.
+	 */
+	void append_packet(net6::packet& pack) const;
 protected:
 	/** Constructor taking an original_operation struct.
 	 */

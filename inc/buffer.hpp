@@ -231,7 +231,7 @@ protected:
 typedef basic_buffer<net6::selector> buffer;
 
 template<typename selector_type>
-const unsigned long basic_buffer<selector_type>::PROTOCOL_VERSION = 1;
+const unsigned long basic_buffer<selector_type>::PROTOCOL_VERSION = 2;
 
 template<typename selector_type>
 basic_buffer<selector_type>::basic_buffer()
@@ -248,7 +248,7 @@ basic_buffer<selector_type>::basic_buffer()
 
 	// Register document type
 	net6::packet::register_type(
-		net6::parameter<document_info*>::TYPE_ID,
+		net6::parameter<basic_document_info<selector_type>*>::TYPE_ID,
 		sigc::mem_fun(*this, &basic_buffer::translate_document)
 	);
 
@@ -454,7 +454,9 @@ basic_buffer<selector_type>::translate_document(const std::string& str) const
 	}
 
 	// Lookup document
-	document_info* info = document_find(owner_id, document_id);
+	basic_document_info<selector_type>* info =
+		document_find(owner_id, document_id);
+
 	if(info == NULL)
 	{
 		// No such document
@@ -463,7 +465,7 @@ basic_buffer<selector_type>::translate_document(const std::string& str) const
 		throw net6::basic_parameter::bad_format(str.str() );
 	}
 
-	return new net6::parameter<document_info*>(info);
+	return new net6::parameter<basic_document_info<selector_type>*>(info);
 }
 
 template<typename selector_type>

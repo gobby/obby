@@ -37,6 +37,15 @@ obby::delete_operation::delete_operation(position pos, const std::string& text,
 {
 }
 
+obby::delete_operation::delete_operation(const net6::packet& pack,
+                                         unsigned int& index)
+ : operation(),
+   m_pos(pack.get_param(index ++).as<int>() ),
+   m_text(pack.get_param(index ++).as<std::string>() )
+   // TODO: unreversible delete_operation with only len instead of m_text
+{
+}
+
 obby::operation* obby::delete_operation::clone() const
 {
 	return new delete_operation(m_pos, m_text, m_original);
@@ -141,5 +150,10 @@ obby::delete_operation::transform_delete(position pos, position len) const
 			*this
 		);
 	}
+}
+
+void obby::delete_operation::append_packet(net6::packet& pack) const
+{
+	pack << "del" << m_pos << m_text;
 }
 
