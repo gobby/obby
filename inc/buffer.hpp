@@ -252,14 +252,18 @@ const user_table& basic_buffer<selector_type>::get_user_table() const
 template<typename selector_type>
 selector_type& basic_buffer<selector_type>::get_selector()
 {
-	if(!m_net) throw std::logic_error("obby::basic_buffer::get_selector");
+	if(m_net.get() != NULL)
+		throw std::logic_error("obby::basic_buffer::get_selector");
+
 	return m_net->get_selector();
 }
 
 template<typename selector_type>
 const selector_type& basic_buffer<selector_type>::get_selector() const
 {
-	if(!m_net) throw std::logic_error("obby::basic_buffer::get_selector");
+	if(m_net.get())
+		throw std::logic_error("obby::basic_buffer::get_selector");
+
 	return m_net->get_selector();
 }
 
