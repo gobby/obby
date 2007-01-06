@@ -14,6 +14,7 @@ Normal:
   * Authentication: Database-based authentication using user/password (#57)
   * Authentication: Access control lists (#58)
   * Use precompiled headers (#61)
+  * UPNP support (#77)
 
 Minor:
 
@@ -59,6 +60,19 @@ list protection.
 61: Use precompiled headers
 ---------------------------
 All projects should make use of precompiled headers.
+
+77: UPNP support
+----------------
+''obby'' or ''Gobby'' should provide UPNP support to open a dynamic port 
+forwarding on the router. Universal Plug'n'play seems an invention of 
+Microsoft but neverless it is supported by many home routers. It is used 
+mainly by games to request a port forwarding for the hosting player from 
+the NAT box to the one on which the game runs.
+
+''Nattraverso'' is a Python library developed for the Google Summer of Code 
+which implements NAT traversal through UPNP. I don't know yet if we could 
+borrow some code there or integrate it. This would solve at least some 
+hosting problems of a centralised model.
 
 20: Session serialisation
 -------------------------
