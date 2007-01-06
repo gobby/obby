@@ -16,6 +16,7 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <cassert>
 #include <net6/server.hpp>
 #include "user.hpp"
 #include "document_info.hpp"
