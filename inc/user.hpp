@@ -144,18 +144,6 @@ public:
 	 */
 	void remove_flags(flags old_flags);
 
-	// WTF? Users can't be identical because the IDs are unique..?
-	//  - armin
-#if 0
-	/** Checks if both objects are identical by comparing their id.
-	 */
-	bool operator==(const user& other) { return m_id == other.m_id; }
-
-	/** Checks if both objects differ by comparing their id.
-	 */
-	bool operator!=(const user& other) { return m_id != other.m_id; }
-#endif
-
 #if 0
 	/** Adds this document to the user's list of subscribed documents.
 	 * Note that this function does not add the user to the subscribe
