@@ -21,105 +21,61 @@
 const unsigned int obby::jupiter_undo::MAX_UNDO = 0x7f;
 
 obby::jupiter_undo::jupiter_undo(const obby::document& doc):
-	m_doc(doc)
+	m_doc(doc), m_opring(MAX_UNDO)
 {
-	m_opmap[NULL] = new operation_ring(100);
 }
 
 obby::jupiter_undo::~jupiter_undo()
 {
-	for(operation_map::iterator map_iter = m_opmap.begin();
-	    map_iter != m_opmap.end();
-	    ++ map_iter)
+	for(operation_ring::iterator op_iter = m_opring.begin();
+	    op_iter != m_opring.end();
+	    ++ op_iter)
 	{
-		operation_ring* ring = map_iter->second;
-		for(operation_ring::iterator op_iter = ring->begin();
-		    op_iter != ring->end();
-		    ++ op_iter)
-		{
-			delete *op_iter;
-		}
-
-		delete ring;
+		delete *op_iter;
 	}
 }
 
 void obby::jupiter_undo::client_add(const user& client)
 {
-	m_opmap[&client] = new operation_ring(MAX_UNDO);
 }
 
 void obby::jupiter_undo::client_remove(const user& client)
 {
-	operation_map::iterator map_iter = m_opmap.find(&client);
-	if(map_iter == m_opmap.end() )
-		throw std::logic_error("obby::jupiter_undo::client_remove");
-
-	operation_ring* ring = map_iter->second;
-	for(operation_ring::iterator ring_iter = ring->begin();
-	    ring_iter != ring->end();
-	    ++ ring_iter)
-	{
-		delete *ring_iter;
-	}
-
-	m_opmap.erase(map_iter);
-	delete ring;
 }
 
-void obby::jupiter_undo::perform_op(const operation& op, const user* from)
+void obby::jupiter_undo::local_op(const operation& op, const user* from)
 {
-	operation_map::iterator map_iter = m_opmap.find(from);
-	if(map_iter == m_opmap.end() )
-		throw std::logic_error("obby::jupiter_undo::perform_op");
-
-	// Add reverse operation to undo ring
-	operation_ring* ring = map_iter->second;
-	ring->push_back(op.reverse(m_doc) );
-	transform_undo_map(op, from);
+	m_opring.push_back(op.reverse(m_doc) );
+	transform_undo_ring(op);
 }
 
-bool obby::jupiter_undo::can_undo(const user* user)
+void obby::jupiter_undo::remote_op(const operation& op, const user* from)
 {
-	operation_map::iterator map_iter = m_opmap.find(user);
-	if(map_iter == m_opmap.end() )
-		throw std::logic_error("obby::jupiter_undo::can_undo");
-
-	return !map_iter->second->empty();
+	// No need to check, transform in all cases
+	transform_undo_ring(op);
 }
 
-std::auto_ptr<obby::operation> obby::jupiter_undo::undo(const user* user)
+bool obby::jupiter_undo::can_undo()
 {
-	operation_map::iterator map_iter = m_opmap.find(user);
-	if(map_iter == m_opmap.end() )
-		throw std::logic_error("obby::jupiter_undo::undo");
+	return !m_opring.empty();
+}
 
+std::auto_ptr<obby::operation> obby::jupiter_undo::undo()
+{
 	// Get last operation from undo ring, transform others.
-	operation_ring* ring = map_iter->second;
-	std::auto_ptr<operation> op(ring->back() );
-	ring->pop_back();
-	transform_undo_map(*op, user);
+	std::auto_ptr<operation> op(m_opring.back() );
+	m_opring.pop_back();
+	transform_undo_ring(*op);
 
 	return op;
 }
 
-void obby::jupiter_undo::transform_undo_map(const operation& op,
-                                            const user* from)
+void obby::jupiter_undo::transform_undo_ring(const operation& op)
 {
-	// Transform new operation against operations of other clients
-	for(operation_map::iterator map_iter = m_opmap.begin();
-	    map_iter != m_opmap.end();
-	    ++ map_iter)
+	for(operation_ring::iterator op_iter = m_opring.begin();
+	    op_iter != m_opring.end();
+	    ++ op_iter)
 	{
-		// Ignore original author
-		if(map_iter->first == from) continue;
-
-		operation_ring* ring = map_iter->second;
-		for(operation_ring::iterator ring_iter = ring->begin();
-		    ring_iter != ring->end();
-		    ++ ring_iter)
-		{
-			(*ring_iter) = op.transform(**ring_iter);
-		}
+		(*op_iter) = op.transform(**op_iter);
 	}
 }

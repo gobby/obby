@@ -46,31 +46,34 @@ public:
 	 */
 	void client_remove(const user& client);
 
-        /** Operation op has been performed by <em>from</em>.
+        /** Operation <em>op</em> has been performed locally by <em>from</em>.
          */
-	void perform_op(const operation& op, const user* from);
+	void local_op(const operation& op, const user* from);
+
+	/** Operation <em>op</em> has been performed remotely by <em>from</em>.
+	 */
+	void remote_op(const operation& op, const user* from);
 
 	/** Returns TRUE if the user can undo its last operation.
 	 */
-	bool can_undo(const user* user);
+	bool can_undo();
 
 	/** Returns an operation that undoes the last operation of this user.
 	 */
-	std::auto_ptr<operation> undo(const user* user);
+	std::auto_ptr<operation> undo();
 protected:
 	typedef ring<operation*> operation_ring;
-	typedef std::map<const user*, operation_ring*> operation_map;
+	//typedef std::map<const user*, operation_ring*> operation_map;
 
-	/** Internal function to transform the complete undo map against a
-	 * single operation. TODO: Optimize this function!
+	/** Internal function to transform the complete undo ring against a
+	 * single operation.
 	 */
-	void transform_undo_map(const operation& op, const user* from);
+	void transform_undo_ring(const operation& op);
 
 	const document& m_doc;
-	operation_map m_opmap;
+	operation_ring m_opring;
 };
 
 } // namespace obby
 
 #endif // _OBBY_JUPITER_UNDO_HPP_
-
