@@ -1,5 +1,6 @@
 #include <cassert>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <sigc++/bind.h>
 #include <curses.h>
@@ -213,7 +214,7 @@ public:
 	curses_editor(int argc, char* argv[]);
 	~curses_editor();
 
-	void run();
+	std::string& run();
 	void quit();
 
 protected:
@@ -227,6 +228,7 @@ protected:
 
 	int m_port;
 	bool m_quit;
+	std::string m_reason;
 	bool m_synced;
 	obby::client_buffer m_buffer;
 	screen m_screen;
@@ -236,6 +238,8 @@ curses_editor::curses_editor(int argc, char* argv[])
  : m_port(argc > 3 ? strtol(argv[3], NULL, 10) : 6522), m_quit(true),
    m_synced(false), m_buffer(argv[2], m_port), m_screen(m_buffer)
 {
+	m_buffer.login_failed_event().connect(
+		sigc::mem_fun(*this, &curses_editor::on_login_failed) );
 	m_buffer.login(argv[1], 64, 0, 0);
 
 	m_buffer.join_event().connect(
@@ -246,8 +250,6 @@ curses_editor::curses_editor(int argc, char* argv[])
 		sigc::mem_fun(*this, &curses_editor::on_close) );
 	m_buffer.sync_event().connect(
 		sigc::mem_fun(*this, &curses_editor::on_sync) );
-	m_buffer.login_failed_event().connect(
-		sigc::mem_fun(*this, &curses_editor::on_login_failed) );
 	m_buffer.insert_event().connect(
 		sigc::mem_fun(*this, &curses_editor::on_insert) );
 	m_buffer.delete_event().connect(
@@ -260,7 +262,7 @@ curses_editor::~curses_editor()
 		quit();
 }
 
-void curses_editor::run()
+std::string& curses_editor::run()
 {
 	halfdelay(2);
 	m_quit = false;
@@ -308,6 +310,8 @@ void curses_editor::run()
 
 		m_buffer.select(0);
 	}
+
+	return m_reason;
 }
 
 void curses_editor::quit()
@@ -319,7 +323,7 @@ void curses_editor::on_join(obby::user& user)
 {
 }
 
-	void curses_editor::on_part(obby::user& user)
+void curses_editor::on_part(obby::user& user)
 {
 }
 
@@ -336,6 +340,9 @@ void curses_editor::on_sync()
 
 void curses_editor::on_login_failed(const std::string& reason)
 {
+	std::stringstream stream;
+	stream << "Login failed: " << reason << std::endl;
+	m_reason = stream.str();
 	quit();
 }
 
@@ -351,6 +358,8 @@ void curses_editor::on_delete(const obby::delete_record& record)
 
 int main(int argc, char* argv[]) try
 {
+	std::string reason;
+	
 	if(argc < 3)
 	{
 		std::cerr << "Usage: " << argv[0] << " user host [port]"
@@ -360,10 +369,12 @@ int main(int argc, char* argv[]) try
 	else
 	{
 		curses_editor editor(argc, argv);
-		editor.run();
-
-		return 0;
+		reason = editor.run();
 	}
+	// Here we are out of scope. The editor should already be destroyed,
+	// so we could put anything else on the screen.
+	std::cerr << reason;
+	return 0;
 }
 catch(std::runtime_error& e)
 {
