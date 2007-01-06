@@ -8,8 +8,8 @@ Version 0.3.0:
  * PHP-based script to parse and visualise saved sessions
  * MSVC8 build environment added
  * New translations:
-   - Catalan
-   - Swedish
+   - Catalan (partial)
+   - Swedish (partial)
 
 Version 0.2.0:
  * This version is *not* protocol compatible to 0.1.0!
