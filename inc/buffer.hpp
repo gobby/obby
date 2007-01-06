@@ -138,6 +138,9 @@ public:
 	 */
 	signal_server_message_type server_message_event() const;
 
+	/** Current obby protocol version.
+	 */
+	static const unsigned long PROTOCOL_VERSION;
 protected:
         /** Adds a new document with the given title to the buffer.
 	 */

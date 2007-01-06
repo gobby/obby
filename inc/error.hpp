@@ -31,6 +31,7 @@ namespace login
 	extern const error ERROR_COLOR_IN_USE;
 	extern const error ERROR_WRONG_GLOBAL_PASSWORD;
 	extern const error ERROR_WRONG_USER_PASSWORD;
+	extern const error ERROR_PROTOCOL_VERSION_MISMATCH;
 
 	extern const error ERROR_MAX;
 

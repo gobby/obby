@@ -382,6 +382,13 @@ void obby::client_buffer::on_net_welcome(const net6::packet& pack)
 	// Get token and the public key of the server out of the
 	// welcome packet.
 
+	unsigned long server_version = pack.get_param(0).as<int>();
+	if(server_version != PROTOCOL_VERSION)
+	{
+		on_login_failed(login::ERROR_PROTOCOL_VERSION_MISMATCH);
+		return;
+	}
+
 	// The token creates some randomness within the hashed result
 	// we send over the line.
 	m_token = pack.get_param(0).as<std::string>();

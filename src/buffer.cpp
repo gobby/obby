@@ -21,6 +21,8 @@
 #include "format_string.hpp"
 #include "buffer.hpp"
 
+const unsigned long obby::buffer::PROTOCOL_VERSION = 1;
+
 obby::buffer::buffer()
  : m_netkit(), m_rclass(GMP_RAND_ALG_LC, 16), m_doc_counter(0)
 {
