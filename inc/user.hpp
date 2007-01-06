@@ -50,10 +50,10 @@ public:
         	flags& operator^=(flags other) { m_value ^= other.m_value; return *this; }
 	        flags operator~() const { return flags(~m_value); }
 
-		operator bool() const { return m_value != NONE; }
-		bool operator!() const { return m_value == NONE; }
-	        bool operator==(flags other) { return m_value == other.m_value; }
-        	bool operator!=(flags other) { return m_value != other.m_value; }
+		operator bool() const { return m_value != NONE.m_value; }
+		bool operator!() const { return m_value == NONE.m_value; }
+	        bool operator==(flags other) const { return m_value == other.m_value; }
+        	bool operator!=(flags other) const { return m_value != other.m_value; }
 
 	        unsigned int get_value() const { return m_value; }
 
@@ -79,10 +79,10 @@ public:
         	privileges& operator^=(privileges other) { m_value ^= other.m_value; return *this; }
 	        privileges operator~() const { return privileges(~m_value); }
 
-		operator bool() const { return m_value != NONE; }
-		bool operator!() const { return m_value == NONE; }
-        	bool operator==(privileges other) { return m_value == other.m_value; }
-	        bool operator!=(privileges other) { return m_value != other.m_value; }
+		operator bool() const { return m_value != NONE.m_value; }
+		bool operator!() const { return m_value == NONE.m_value; }
+        	bool operator==(privileges other) const { return m_value == other.m_value; }
+	        bool operator!=(privileges other) const { return m_value != other.m_value; }
 
 	        unsigned int get_value() const { return m_value; }
 
