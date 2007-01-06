@@ -35,6 +35,8 @@ template<typename selector_type>
 class basic_server_buffer : virtual public basic_buffer<selector_type>
 {
 public: 
+	typedef net6::basic_server<selector_type> net_type;
+
 	typedef typename basic_buffer<selector_type>::base_document_info
 		base_document_info;
 	typedef basic_server_document_info<selector_type>
@@ -43,15 +45,31 @@ public:
 	typedef sigc::signal<void, const net6::user&> signal_connect_type;
 	typedef sigc::signal<void, const net6::user&> signal_disconnect_type;
 
-	/** Creates a new server buffer listening on port <em>port</em>.
-	 * This constructor will automatically generate a RSA key pair.
+	/** Default constructor that automatically generates a RSA key pair.
 	 */
-	basic_server_buffer(unsigned int port);
+	basic_server_buffer();
 
-	/** Creates a new server buffer listening on port <em>port</em>.
+	/** Constructor taking a given RSA key pair.
 	 */
-	basic_server_buffer(unsigned int port, const RSA::Key& public_key,
+	basic_server_buffer(const RSA::Key& public_key,
 	                    const RSA::Key& private_key);
+
+	/** Opens the server on the given port.
+	 */
+	virtual void open(unsigned int port);
+
+	/** Opens the server on the given port and resumes the obby session
+	 * stored in the given file.
+	 */
+	virtual void open(const std::string& session, unsigned int port);
+
+	/** Closes the obby session.
+	 */
+	virtual void close();
+
+	/** Returns true if the obby session has been opened.
+	 */
+	bool is_open() const;
 
 	/** Changes the global password for this session.
 	 */
@@ -89,18 +107,6 @@ public:
 	signal_disconnect_type disconnect_event() const;
 
 protected:
-	/** Private constuctor used by derived objects. It does not create
-	 * a net6::server object to allow derived object creating derived
-	 * classes from net6::server.
-	 */
-	basic_server_buffer();
-
-	/** Private constrctor which may be used by derived buffers to create
-	 * their own derivates of net6::server.
-	 */
-	basic_server_buffer(const RSA::Key& public_key,
-	                    const RSA::Key& private_key);
-
 	/** Registers net6 signal handlers. May be used by derived classes
 	 * which override the server_buffer constructor.
 	 */
@@ -112,6 +118,11 @@ protected:
 	                                         unsigned int id,
 	                                         const std::string& title,
 	                                         const std::string& content);
+
+	/** Creates the underlaying net6 network object corresponding to the
+	 * buffer's type.
+	 */
+	virtual net_type* new_net(unsigned int port);
 
 	/** Internal function to create a document with the given owner.
 	 */
@@ -189,20 +200,15 @@ protected:
 	signal_connect_type m_signal_connect;
 	signal_disconnect_type m_signal_disconnect;
 private:
-	/** Private function which executes the constructor code, called by
-	 * both public constructors.
+	/** This function provides access to the underlaying net6::basic_server
+	 * object.
 	 */
-	void init_impl(unsigned int port);
+	net_type& net6_server();
 
 	/** This fucntion provides access to the underlaying net6::basic_server
 	 * object.
 	 */
-	net6::basic_server<selector_type>& net6_server();
-
-	/** This fucntion provides access to the underlaying net6::basic_server
-	 * object.
-	 */
-	const net6::basic_server<selector_type>& net6_server() const;
+	const net_type& net6_server() const;
 };
 
 typedef basic_server_buffer<net6::selector> server_buffer;
@@ -227,7 +233,7 @@ basic_server_buffer<selector_type>::
 {
 }
 
-template<typename selector_type>
+/*template<typename selector_type>
 basic_server_buffer<selector_type>::basic_server_buffer(unsigned int port)
  : basic_buffer<selector_type>()
 {
@@ -248,15 +254,46 @@ basic_server_buffer<selector_type>::
  : basic_buffer<selector_type>(), m_public(public_key), m_private(private_key)
 {
 	init_impl(port);
+}*/
+
+template<typename selector_type>
+void basic_server_buffer<selector_type>::open(unsigned int port)
+{
+	if(is_open() )
+		throw std::logic_error("obby::basic_server_buffer::open");
+
+	basic_buffer<selector_type>::m_net.reset(new_net(port) );
+	register_signal_handlers();
 }
 
 template<typename selector_type>
-void basic_server_buffer<selector_type>::init_impl(unsigned int port)
+void basic_server_buffer<selector_type>::open(const std::string& session,
+                                              unsigned int port)
 {
-	basic_buffer<selector_type>::m_net =
-		new net6::basic_server<selector_type>(port);
+	if(is_open() )
+		throw std::logic_error("obby::basic_server_buffer::open");
 
-	register_signal_handlers();
+	// TODO: Restore session
+	open(port);
+}
+
+template<typename selector_type>
+void basic_server_buffer<selector_type>::close()
+{
+	if(!is_open() )
+		throw std::logic_error("obby::basic_server_buffer::close");
+
+	// Reset documents, users and network object
+	// TODO: Keep documents and users until reconnection
+	basic_buffer<selector_type>::document_clear();
+	basic_buffer<selector_type>::m_user_table.clear();
+	basic_buffer<selector_type>::m_net.reset(NULL);
+}
+
+template<typename selector_type>
+bool basic_server_buffer<selector_type>::is_open() const
+{
+	return basic_buffer<selector_type>::m_net.get() != NULL;
 }
 
 template<typename selector_type>
@@ -353,6 +390,7 @@ void basic_server_buffer<selector_type>::
 	pack << owner << id << title;
 
 	// TODO: send_to_all_except function or something
+	// or, better: user_table.send() with given flags.
 	for(user_table::iterator iter = basic_buffer<selector_type>::
 		m_user_table.begin(user::flags::CONNECTED);
 	    iter != basic_buffer<selector_type>::
@@ -837,19 +875,26 @@ basic_server_buffer<selector_type>::
 }
 
 template<typename selector_type>
-net6::basic_server<selector_type>& basic_server_buffer<selector_type>::
-	net6_server()
+typename basic_server_buffer<selector_type>::net_type*
+basic_server_buffer<selector_type>::new_net(unsigned int port)
 {
-	return dynamic_cast<net6::basic_server<selector_type>&>(
+	return new net_type(port);
+}
+
+template<typename selector_type>
+typename basic_server_buffer<selector_type>::net_type&
+basic_server_buffer<selector_type>::net6_server()
+{
+	return dynamic_cast<net_type&>(
 		*basic_buffer<selector_type>::m_net
 	);
 }
 
 template<typename selector_type>
-const net6::basic_server<selector_type>& basic_server_buffer<selector_type>::
-	net6_server() const
+const typename basic_server_buffer<selector_type>::net_type&
+basic_server_buffer<selector_type>::net6_server() const
 {
-	return dynamic_cast<net6::basic_server<selector_type>&>(
+	return dynamic_cast<const net_type&>(
 		*basic_buffer<selector_type>::m_net
 	);
 }

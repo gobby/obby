@@ -36,6 +36,8 @@ template<typename selector_type>
 class basic_client_buffer : virtual public basic_local_buffer<selector_type>
 {
 public:
+	typedef net6::basic_client<selector_type> net_type;
+
 	typedef typename basic_buffer<selector_type>::base_document_info
 		base_document_info;
 	typedef basic_client_document_info<selector_type>
@@ -61,10 +63,31 @@ public:
 		::template accumulated<password_accumulator>
 		signal_user_password_type;
 
-	/** Creates a new client_buffer and connects to <em>hostname</em>
-	 * at <em>port</em>
+	/** Creates a new client_buffer that is not connected to anywhere.
 	 */
-	basic_client_buffer(const std::string& hostname, unsigned int port);
+	basic_client_buffer();
+
+	/** Connects to the given host where a obby server is assumed to be
+	 * running. After the connection has been established, signal_welcome
+	 * will be emitted after the server sent us some initial data (like its
+	 * public RSA key). At this point the login function may be used to
+	 * login as a user with a given colour.
+	 * TODO: Ask username and colour parameters already here and login
+	 * implicitly after having called connect().
+	 *
+	 * @param hostname Host name to connect to. If hostname is not an IP
+	 * address, a DNS lookup will be performed.
+	 * @param port Port to connect to. 6522 is the default obby port.
+	 */
+	void connect(const std::string& hostname, unsigned int port = 6522);
+
+	/** Disconnects from a server.
+	 */
+	void disconnect();
+
+	/** Checks if we are currently connected to an obby session.
+	 */
+	bool is_connected() const;
 
 	/** Sends a login request for this client.
 	 * @param name User name for this client.
@@ -80,6 +103,10 @@ public:
 	void login(const std::string& name, int red, int green, int blue,
 	           const std::string& global_password = "",
 	           const std::string& user_password = "");
+
+	/** Returns TRUE if the client is already logged in.
+	 */
+	bool is_logged_in() const;
 
 	/** Requests a new document at the server and sync its initial
 	 * contents. signal_document_insert will be emitted if the server
@@ -162,11 +189,6 @@ public:
 	signal_user_password_type user_password_event() const;
 
 protected:
-	/** Private constructor which may be used by derived objects from
-	 * client_buffer to create a derived version of net6::client.
-	 */
-	basic_client_buffer();
-
 	/** Registers the signal handlers for the net6::client object. It may
 	 * be used by derived classed to register these signal handlers.
 	 */
@@ -188,6 +210,11 @@ protected:
         /** Creates a new document info object according to the type of buffer.
 	 */
 	virtual document_info* new_document_info(const net6::packet& pack);
+
+	/** Creates the underlaying net6 network object corresponding to the
+	 * buffer's type.
+	 */
+	virtual net_type* new_net(const std::string& host, unsigned int port);
 
 	/** net6 signal handlers.
 	 */
@@ -254,12 +281,12 @@ private:
 	/** This function provides access to the underlaying net6::basic_client
 	 * object.
 	 */
-	net6::basic_client<selector_type>& net6_client();
+	net_type& net6_client();
 
 	/** This function provides access to the underlaying net6::basic_client
 	 * object.
 	 */
-	const net6::basic_client<selector_type>& net6_client() const;
+	const net_type& net6_client() const;
 };
 
 typedef basic_client_buffer<net6::selector> client_buffer;
@@ -271,20 +298,36 @@ basic_client_buffer<selector_type>::basic_client_buffer()
 }
 
 template<typename selector_type>
-basic_client_buffer<selector_type>::
-	basic_client_buffer(const std::string& hostname, unsigned int port)
+void basic_client_buffer<selector_type>::connect(const std::string& hostname,
+                                                 unsigned int port)
 {
-	// Reslve hostname
-	net6::ipv4_address addr(
-		net6::ipv4_address::create_from_hostname(hostname, port)
-	);
+	if(is_connected() )
+		throw std::logic_error("obby::basic_client_buffer::connect");
 
 	// Connect to host
-	basic_buffer<selector_type>::m_net =
-		new net6::basic_client<selector_type>(addr);
+	basic_buffer<selector_type>::m_net.reset(new_net(hostname, port) );
 
 	// Register signal handlers
 	register_signal_handlers();
+}
+
+template<typename selector_type>
+void basic_client_buffer<selector_type>::disconnect()
+{
+	if(!is_connected() )
+		throw std::logic_error("obby::basic_client_buffer::disconnect");
+
+	// TODO: Keep documents and users until reconnection
+	basic_buffer<selector_type>::document_clear();
+	basic_buffer<selector_type>::m_user_table.clear();
+	basic_buffer<selector_type>::m_net.reset(NULL);
+	m_self = NULL;
+}
+
+template<typename selector_type>
+bool basic_client_buffer<selector_type>::is_connected() const
+{
+	return basic_buffer<selector_type>::m_net.get() != NULL;
 }
 
 template<typename selector_type>
@@ -293,6 +336,7 @@ void basic_client_buffer<selector_type>::
               const std::string& global_password,
 	      const std::string& user_password)
 {
+	// Need public key (which comes with welcome packet) before login
 	if(!m_public)
 		throw std::logic_error("obby::basic_client_buffer::login");
 
@@ -304,6 +348,12 @@ void basic_client_buffer<selector_type>::
 	m_user_password = user_password;
 
 	net6_client().login(name);
+}
+
+template<typename selector_type>
+bool basic_client_buffer<selector_type>::is_logged_in() const
+{
+	return m_self != NULL;
 }
 
 template<typename selector_type>
@@ -498,6 +548,9 @@ void basic_client_buffer<selector_type>::
 template<typename selector_type>
 void basic_client_buffer<selector_type>::on_close()
 {
+	// Disconnect
+	disconnect();
+	// TODO: Emit signal_close in the disconnect() function?
 	m_signal_close.emit();
 }
 
@@ -872,19 +925,33 @@ basic_client_buffer<selector_type>::new_document_info(const net6::packet& pack)
 }
 
 template<typename selector_type>
-net6::basic_client<selector_type>& basic_client_buffer<selector_type>::
-	net6_client()
+typename basic_client_buffer<selector_type>::net_type*
+basic_client_buffer<selector_type>::new_net(const std::string& host,
+                                            unsigned int port)
 {
-	return dynamic_cast<net6::basic_client<selector_type>&>(
+	// Resolve hostname
+	net6::ipv4_address addr(
+		net6::ipv4_address::create_from_hostname(host, port)
+	);
+
+	// Connect to remote host
+	return new net_type(addr);
+}
+
+template<typename selector_type>
+typename basic_client_buffer<selector_type>::net_type&
+basic_client_buffer<selector_type>::net6_client()
+{
+	return dynamic_cast<net_type&>(
 		*basic_buffer<selector_type>::m_net.get()
 	);
 }
 
 template<typename selector_type>
-const net6::basic_client<selector_type>& basic_client_buffer<selector_type>::
-	net6_client() const
+const typename basic_client_buffer<selector_type>::net_type&
+basic_client_buffer<selector_type>::net6_client() const
 {
-	return dynamic_cast<const net6::basic_client<selector_type>&>(
+	return dynamic_cast<const net_type&>(
 		*basic_buffer<selector_type>::m_net.get()
 	);
 }

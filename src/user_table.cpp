@@ -24,12 +24,15 @@ obby::user_table::user_table()
 
 obby::user_table::~user_table()
 {
-	for(base_iterator iter = m_user_map.begin();
-	    iter != m_user_map.end();
-	    ++ iter)
-	{
-		delete iter->second;
-	}
+	clear();
+}
+
+void obby::user_table::clear()
+{
+	for(base_iterator i = m_user_map.begin(); i != m_user_map.end(); ++ i)
+		delete i->second;
+
+	m_user_map.clear();
 }
 
 obby::user* obby::user_table::add_user(const net6::user& user6, int red,

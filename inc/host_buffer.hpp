@@ -32,21 +32,23 @@ template<typename selector_type>
 class basic_host_buffer : virtual public basic_local_buffer<selector_type>,
                           virtual public basic_server_buffer<selector_type>
 {
-public: 
+public:
+	typedef net6::basic_host<selector_type> net_type;
 	typedef basic_host_document_info<selector_type> document_info;
 
+	// TODO: Move this parameters into the open() call. The call would have
+	// to lose its virtualness, but should be better nevertheless.
+
 	/** Creates a new host_buffer.
-	 * @param port Port to listen to for incoming connections.
 	 * @param username User name for the local user.
 	 * @param red Red color component for the local user.
 	 * @param green Green color component for the local user.
 	 * @param blue Blue color component for the local user.
 	 */
-	basic_host_buffer(unsigned int port, const std::string& username,
+	basic_host_buffer(const std::string& username,
 	                  int red, int green, int blue);
 
 	/** Creates a new host_buffer.
-	 * @param port Port to listen to for incoming connections.
 	 * @param username User name for the local user.
 	 * @param red Red color component for the local user.
 	 * @param green Green color component for the local user.
@@ -55,10 +57,23 @@ public:
 	 * @param private_key Corresponding private key. Must match
 	 * the public one.
 	 */
-	basic_host_buffer(unsigned int port, const std::string& username,
+	basic_host_buffer(const std::string& username,
 			  int red, int green, int blue,
 	                  const RSA::Key& public_key,
 	                  const RSA::Key& private_key);
+
+	/** Opens the server on the given port.
+	 */
+	virtual void open(unsigned int port);
+
+	/** Opens the server on the given port and resumes the obby session
+	 * stored in the given file.
+	 */
+	virtual void open(const std::string& session, unsigned int port);
+
+	/** Closes the session.
+	 */
+	virtual void close();
 
 	/** Looks for a document with the given ID which belongs to the user
 	 * with the given owner ID. Note that we do not take a real user object
@@ -88,48 +103,45 @@ public:
 	virtual void set_colour(int red, int green, int blue);
 	
 protected:
-	/** Private constructor used by derived classed. It does not create
-	 * a net6::basic_host object to allow derived classed to create
-	 * derivates from net6::basic_host
-	 */
-	basic_host_buffer();
-	basic_host_buffer(const RSA::Key& public_key,
-	                  const RSA::Key& private_key);
-
 	/** Creates a new document info object according to the type of buffer.
 	 */
 	virtual typename basic_server_buffer<selector_type>::document_info*
 	new_document_info(const user* owner, unsigned int id,
 	                  const std::string& title, const std::string& content);
 
+	/** Creates the underlaying net6 network object corresponding to the
+	 * buffer's type.
+	 */
+	virtual net_type* new_net(unsigned int port);
+
+	std::string m_username;
+	int m_red;
+	int m_green;
+	int m_blue;
+
 	user* m_self;
 private:
-	/** Private function which executes the constructor code, called by
-	 * both public constructors.
+	/** This function provides access to the underlaying net6::basic_host
+	 * object.
 	 */
-	void init_impl(unsigned int port, const std::string& username,
-	               int red, int green, int blue);
+	net_type& net6_host();
 
 	/** This function provides access to the underlaying net6::basic_host
 	 * object.
 	 */
-	net6::basic_host<selector_type>& net6_host();
-
-	/** This function provides access to the underlaying net6::basic_host
-	 * object.
-	 */
-	const net6::basic_host<selector_type>& net6_host() const;
+	const net_type& net6_host() const;
 };
 
 typedef basic_host_buffer<net6::selector> host_buffer;
 
-template<typename selector_type>
+/*template<typename selector_type>
 basic_host_buffer<selector_type>::basic_host_buffer()
  : basic_buffer<selector_type>(),
    basic_local_buffer<selector_type>(),
    basic_server_buffer<selector_type>(),
    m_self(NULL)
 {
+
 }
 
 template<typename selector_type>
@@ -141,50 +153,55 @@ basic_host_buffer<selector_type>::
    basic_server_buffer<selector_type>(public_key, private_key),
    m_self(NULL)
 {
-}
+}*/
 
 template<typename selector_type>
 basic_host_buffer<selector_type>::
-	basic_host_buffer(unsigned int port, const std::string& username,
+	basic_host_buffer(const std::string& username,
 	                  int red, int green, int blue)
  : basic_buffer<selector_type>(),
    basic_local_buffer<selector_type>(),
    basic_server_buffer<selector_type>(),
-   m_self(NULL)
+   m_username(username), m_red(red), m_green(green), m_blue(blue), m_self(NULL)
 {
-	init_impl(port, username, red, green, blue);
 }
 
 template<typename selector_type>
 basic_host_buffer<selector_type>::
-	basic_host_buffer(unsigned int port, const std::string& username,
+	basic_host_buffer(const std::string& username,
 	                  int red, int green, int blue,
 	                  const RSA::Key& public_key,
 	                  const RSA::Key& private_key)
  : basic_buffer<selector_type>(),
    basic_local_buffer<selector_type>(),
    basic_server_buffer<selector_type>(public_key, private_key),
-   m_self(NULL)
+   m_username(username), m_red(red), m_green(green), m_blue(blue), m_self(NULL)
 {
-	init_impl(port, username, red, green, blue);
 }
 
 template<typename selector_type>
-void basic_host_buffer<selector_type>::
-	init_impl(unsigned int port, const std::string& username,
-	          int red, int green, int blue)
+void basic_host_buffer<selector_type>::open(unsigned int port)
 {
-	// Create host object
-	basic_buffer<selector_type>::m_net =
-		new net6::host(port, username, false);
+	basic_server_buffer<selector_type>::open(port);
 
 	// Create local user
 	m_self = basic_buffer<selector_type>::m_user_table.add_user(
-		net6_host().get_self(), red, green, blue
+		net6_host().get_self(), m_red, m_green, m_blue
 	);
+}
 
-	// Register signal handlers
-	basic_server_buffer<selector_type>::register_signal_handlers();
+template<typename selector_type>
+void basic_host_buffer<selector_type>::open(const std::string& content,
+                                            unsigned int port)
+{
+	basic_server_buffer<selector_type>::open(content, port);
+}
+
+template<typename selector_type>
+void basic_host_buffer<selector_type>::close()
+{
+	basic_server_buffer<selector_type>::close();
+	m_self = NULL;
 }
 
 template<typename selector_type>
@@ -268,19 +285,26 @@ basic_host_buffer<selector_type>::
 }
 
 template<typename selector_type>
-net6::basic_host<selector_type>& basic_host_buffer<selector_type>::
-	net6_host()
+typename basic_host_buffer<selector_type>::net_type*
+basic_host_buffer<selector_type>::new_net(unsigned int port)
 {
-	return dynamic_cast<net6::basic_host<selector_type>&>(
+	return new net_type(port, m_username);
+}
+
+template<typename selector_type>
+typename basic_host_buffer<selector_type>::net_type&
+basic_host_buffer<selector_type>::net6_host()
+{
+	return dynamic_cast<net_type&>(
 		*basic_buffer<selector_type>::m_net
 	);
 }
 
 template<typename selector_type>
-const net6::basic_host<selector_type>& basic_host_buffer<selector_type>::
-	net6_host() const
+const typename basic_host_buffer<selector_type>::net_type&
+basic_host_buffer<selector_type>::net6_host() const
 {
-	return dynamic_cast<const net6::basic_host<selector_type>&>(
+	return dynamic_cast<const net_type&>(
 		*basic_buffer<selector_type>::m_net
 	);
 }

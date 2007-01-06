@@ -147,6 +147,10 @@ public:
 	user_table();
 	virtual ~user_table();
 
+	/** Clears all users from the user table.
+	 */
+	void clear();
+
 	/** Adds a new user to the user list. The name and ID is read from the
 	 * net6::user object. Because of the fact that a net6::user object
 	 * exists, the new user will be marked as connected. If a user with the
@@ -185,17 +189,6 @@ public:
 	const user* find(unsigned int id,
 	                 user::flags flags = user::flags::NONE,
 	                 bool inverse = false) const;
-#if 0
-	{
-		user_map::iterator iter = m_user_map.find(id);
-		if(iter == m_user_map.end() ) return NULL;
-
-		if(iterator(m_user_map, iter, flags, inverse) != iter)
-			return NULL;
-
-		return iter->second;
-	}
-#endif
 
 	/** Searches a user which represents the given underlaying net6::user
 	 * object.
