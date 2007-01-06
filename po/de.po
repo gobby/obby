@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: obby 0.2.0\n"
 "Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
-"POT-Creation-Date: 2005-12-08 22:43+0100\n"
+"POT-Creation-Date: 2006-03-30 21:44+0200\n"
 "PO-Revision-Date: 2005-07-24 16:44+0200\n"
 "Last-Translator: Philipp Kern <phil@0x539.de>\n"
 "Language-Team: German Translation Team <crew@0x539.de>\n"
@@ -15,73 +15,67 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: inc/server_buffer.hpp:274
+#: inc/server_buffer.hpp:279
+msgid "Sends an action to the chat."
+msgstr ""
+
+#: inc/server_buffer.hpp:338
 msgid "File is not an obby document"
 msgstr "Datei ist kein obby-Dokument"
 
-#: inc/server_buffer.hpp:281
+#: inc/server_buffer.hpp:345
 msgid "File is not a stored obby session"
 msgstr "Datei ist keine gespeicherte obby-Sitzung"
 
-#: inc/server_buffer.hpp:322 src/user_table.cpp:75 src/chat.cpp:220
-#: src/line.cpp:98 src/document.cpp:57
+#: inc/server_buffer.hpp:388 src/user_table.cpp:75 src/chat.cpp:251
+#: src/text.cpp:188
 #, c-format
 msgid "Unexpected child node: '%0%'"
 msgstr "Kindknoten '%0%' unerwartet"
 
-#: inc/serialise/attribute.hpp:126
+#: inc/serialise/attribute.hpp:127
 #, c-format
 msgid "Attribute '%0%' has unexpected type: %1%"
 msgstr "Unerwarteter Datentyp für Attribut %0%: %1%"
 
-#: src/error.cpp:37
+#: src/error.cpp:39
 msgid "Colour is already in use"
 msgstr "Farbe wird bereits benutzt"
 
-#: src/error.cpp:39
+#: src/error.cpp:41
 msgid "Wrong session password"
 msgstr "Falsches Sitzungspasswort"
 
-#: src/error.cpp:41
+#: src/error.cpp:43
 msgid "Wrong user password"
 msgstr "Falsches Benutzerpasswort"
 
-#: src/error.cpp:43
+#: src/error.cpp:45
 msgid "Protocol version mismatch"
 msgstr "Falsche Protokollversion"
+
+#: src/error.cpp:47
+msgid "Connection is not yet encrypted"
+msgstr ""
 
 #: src/user_table.cpp:58
 #, c-format
 msgid "User ID %0% is already in use"
 msgstr "Benutzer-ID %0% wird bereits benutzt"
 
-#: src/chat.cpp:226
+#: src/chat.cpp:257
 msgid "Restored session"
 msgstr "Sitzung wiederhergestellt"
 
-#: src/chat.cpp:293
+#: src/chat.cpp:330
 #, c-format
 msgid "%0% has joined"
 msgstr "%0% hat die Sitzung betreten"
 
-#: src/chat.cpp:300
+#: src/chat.cpp:337
 #, c-format
 msgid "%0% has left"
 msgstr "%0% hat die Sitzung verlassen"
-
-#: src/chat.cpp:313
-#, c-format
-msgid "%0% has created a new document: %1%"
-msgstr "%0% hat ein neues Dokument erstellt: %1%"
-
-#: src/chat.cpp:319
-#, c-format
-msgid "A new document was created: %0%"
-msgstr "Ein neues Dokument wurde erstellt: %0%"
-
-#: src/document.cpp:66
-msgid "Document needs at least one line"
-msgstr "Das Dokument muss mindestens eine Zeile enthalten"
 
 #: src/serialise/token.cpp:94
 #, c-format
@@ -164,6 +158,15 @@ msgstr "Eingabeende nach '%0%' erwartet"
 #, c-format
 msgid "Could not open file '%0%' for writing"
 msgstr "Konnte die Datei '%0%' nicht zum Schreiben öffnen"
+
+#~ msgid "%0% has created a new document: %1%"
+#~ msgstr "%0% hat ein neues Dokument erstellt: %1%"
+
+#~ msgid "A new document was created: %0%"
+#~ msgstr "Ein neues Dokument wurde erstellt: %0%"
+
+#~ msgid "Document needs at least one line"
+#~ msgstr "Das Dokument muss mindestens eine Zeile enthalten"
 
 #~ msgid "No server public key available, wait for the welcome packet"
 #~ msgstr ""
