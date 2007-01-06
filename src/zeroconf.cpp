@@ -31,6 +31,11 @@ obby::zeroconf::zeroconf()
 
 obby::zeroconf::~zeroconf()
 {
+	for(std::vector<sw_discovery_oid>::iterator i = m_published.begin();
+		i != m_published.end(); ++i)
+	{
+		sw_discovery_cancel(m_session, *i);
+	}
 	sw_discovery_fina(m_session);
 }
 
@@ -49,6 +54,10 @@ void obby::zeroconf::publish(const std::string& name, unsigned int port)
 		std::stringstream stream;
 		stream << "sw_discovery_publish(...) failed: " << result;
 		throw std::runtime_error(stream.str());
+	}
+	else
+	{
+		m_published.push_back(oid);
 	}
 }
 

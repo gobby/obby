@@ -20,6 +20,7 @@
 #define _OBBY_ZEROCONF_HPP_
 
 #include <string>
+#include <vector>
 
 #include <sigc++/signal.h>
 #include <howl.h>
@@ -65,6 +66,8 @@ public:
 	signal_leave_type leave_event() const;
 	
 protected:
+	std::vector<sw_discovery_oid> m_published;
+
 	sw_discovery m_session;
 	sw_salt m_salt;
 	
