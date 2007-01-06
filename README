@@ -10,5 +10,5 @@ Unix-like platforms.
 Dependencies
 ------------
  * sigc++-2.0
- * net6-1.0
+ * net6-1.1
 
