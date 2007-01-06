@@ -104,6 +104,28 @@ int main()
 	assert(line1.m_authors[1].author == &user3);
 	assert(line1.m_authors[1].position == 2);
 
+	// Expecting [2]r[3]foo
+	line1 = line1.substr(1, 4);
+	assert(line1.m_authors.size() == 2);
+	assert(line1.m_authors[0].author == &user2);
+	assert(line1.m_authors[0].position == 0);
+	assert(line1.m_authors[1].author == &user3);
+	assert(line1.m_authors[1].position == 1);
+
+	// Expecting [2]r[3]fo
+	line1 = line1.substr(1, 1);
+	assert(line1.m_authors.size() == 1);
+	assert(line1.m_authors[0].author == &user3);
+	assert(line1.m_authors[0].position == 0);
+
+	// Expecting ""
+	line1.erase(0, 3);
+	assert(line1.m_authors.size() == 0);
+
+	// Expecting ""
+	line1 = line1.substr(0, 0);
+	assert(line1.m_authors.size() == 0);
+
 	return 0;
 }
 

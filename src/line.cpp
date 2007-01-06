@@ -192,9 +192,11 @@ obby::line obby::line::substr(size_type from, size_type len) const
 {
 	// Set correct length for npos
 	if(len == npos) len = m_line.length() - from;
+	assert(from + len <= m_line.length() );
 
 	// Create new line
 	line new_line;
+	new_line.m_authors.reserve(m_authors.size() );
 
 	// Ignore authors before the given range
 	std::vector<user_pos>::size_type i;
@@ -203,27 +205,30 @@ obby::line obby::line::substr(size_type from, size_type len) const
 			break;
 
 	// Insert first author
-	new_line.m_authors.push_back(m_authors[i - 1]);
-	new_line.m_authors[m_authors.size()].position = 0;
-
-	// Insert others
-	for(; i < m_authors.size(); ++ i)
+	if(i > 0)
 	{
-		// After the given range? Forget them.
-		if(m_authors[i].position >= from + len)
-		{
-			break;
-		}
-		else
-		{
-			std::vector<user_pos>::size_type new_pos =
-				new_line.m_authors.size();
+		new_line.m_authors.push_back(m_authors[i - 1]);
+		new_line.m_authors[0].position = 0;
 
-			new_line.m_authors.push_back(m_authors[i]);
-			new_line.m_authors[new_pos].position -= from;
+		// Insert others
+		for(; i < m_authors.size(); ++ i)
+		{
+			// After the given range? Forget them.
+			if(m_authors[i].position >= from + len)
+			{
+				break;
+			}
+			else
+			{
+				std::vector<user_pos>::size_type new_pos =
+					new_line.m_authors.size();
+
+				new_line.m_authors.push_back(m_authors[i]);
+				new_line.m_authors[new_pos].position -= from;
+			}
 		}
 	}
-			
+
 	// Set content
 	new_line.m_line = m_line.substr(from, len);
 	
