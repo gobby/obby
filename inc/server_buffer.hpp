@@ -91,6 +91,7 @@ public:
 	 * the resulting obby::document_info.
 	 */
 	virtual void document_create(const std::string& title,
+	                             const std::string& encoding,
 	                             const std::string& content = "");
 
 	/** Removes an existing document.
@@ -129,6 +130,7 @@ protected:
 	new_document_info(const user* owner,
 	                  unsigned int id,
 	                  const std::string& title,
+	                  const std::string& encoding,
 	                  const std::string& content);
 
 	/** Creates a new document info deserialised from a serialisation
@@ -147,6 +149,7 @@ protected:
 	void document_create_impl(const obby::user* owner,
 	                          unsigned int id,
 	                          const std::string& title,
+	                          const std::string& encoding,
 	                          const std::string& content);
 
 	/** Internal function send a message to all users that comes from
@@ -394,7 +397,9 @@ void basic_server_buffer<Document, Selector>::
 
 template<typename Document, typename Selector>
 void basic_server_buffer<Document, Selector>::
-	document_create(const std::string& title, const std::string& content)
+	document_create(const std::string& title,
+	                const std::string& encoding,
+	                const std::string& content)
 {
 	// TODO: m_doc_counter should not be declared in basic_buffer
 	// but client_buffer / server_buffer separately
@@ -402,7 +407,7 @@ void basic_server_buffer<Document, Selector>::
 
 	// Create the document with the special owner NULL which means that
 	// this document was created by the server.
-	document_create_impl(NULL, id, title, content);
+	document_create_impl(NULL, id, title, encoding, content);
 }
 
 template<typename Document, typename Selector>
@@ -467,18 +472,19 @@ void basic_server_buffer<Document, Selector>::
 	document_create_impl(const user* owner,
 	                     unsigned int id,
 	                     const std::string& title,
+	                     const std::string& encoding,
                              const std::string& content)
 {
 	// Create new document
 	base_document_info_type* info =
-		new_document_info(owner, id, title, content);
+		new_document_info(owner, id, title, encoding, content);
 	// Add to buffer
 	basic_buffer<Document, Selector>::document_add(*info);
 	// Publish the new document to the users. Note that we do not have
 	// to send the document's initial content because no user is currently
 	// subscribed, and the content is synced with the subscription.
 	net6::packet pack("obby_document_create");
-	pack << owner << id << title;
+	pack << owner << id << title << encoding;
 
 	// TODO: send_to_all_except function or something
 	// or, better: user_table.send() with given flags.
@@ -607,8 +613,11 @@ void basic_server_buffer<Document, Selector>::on_join(const net6::user& user6)
 	{
 		// Setup document packet
 		net6::packet document_pack("obby_sync_doclist_document");
+
+		// TODO: Creation of this packet should be a method of
+		// server_document_info
 		document_pack << iter->get_owner() << iter->get_id()
-		              << iter->get_title();
+		              << iter->get_title() << iter->get_encoding();
 
 		// Add users that are subscribed
 		for(typename document_info_type::user_iterator user_iter =
@@ -896,10 +905,12 @@ void basic_server_buffer<Document, Selector>::
 		pack.get_param(0).net6::parameter::as<unsigned int>();
 	const std::string title =
 		pack.get_param(1).net6::parameter::as<std::string>();
-	const std::string content =
+	const std::string encoding =
 		pack.get_param(2).net6::parameter::as<std::string>();
+	const std::string content =
+		pack.get_param(3).net6::parameter::as<std::string>();
 
-	document_create_impl(&from, id, title, content);
+	document_create_impl(&from, id, title, encoding, content);
 }
 
 template<typename Document, typename Selector>
@@ -1008,11 +1019,12 @@ basic_server_buffer<Document, Selector>::
 	new_document_info(const user* owner,
 	                  unsigned int id,
                           const std::string& title,
+	                  const std::string& encoding,
 	                  const std::string& content)
 {
 	// Create server_document_info, according to server_buffer
 	return new document_info_type(
-		*this, net6_server(), owner, id, title, content
+		*this, net6_server(), owner, id, title, encoding, content
 	);
 }
 

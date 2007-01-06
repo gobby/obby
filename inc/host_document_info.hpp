@@ -54,6 +54,7 @@ public:
 	                         const user* owner,
 	                         unsigned int id,
 	                         const std::string& title,
+	                         const std::string& encoding,
 	                         const std::string& content);
 
 	basic_host_document_info(const buffer_type& buffer,
@@ -118,10 +119,11 @@ basic_host_document_info<Document, Selector>::
 	                         const user* owner,
 	                         unsigned int id,
 	                         const std::string& title,
+	                         const std::string& encoding,
 	                         const std::string& content):
-	base_type(buffer, net, owner, id, title),
-	base_local_type(buffer, net, owner, id, title),
- 	base_server_type(buffer, net, owner, id, title, content)
+	base_type(buffer, net, owner, id, title, encoding),
+	base_local_type(buffer, net, owner, id, title, encoding),
+ 	base_server_type(buffer, net, owner, id, title, encoding, content)
 {
 	// Server adds owner automagically to jupiter algo. If the local user
 	// is the owner, it does not need to be added to jupiter.

@@ -103,6 +103,7 @@ public:
 	 * the resulting obby::document.
 	 */
 	virtual void document_create(const std::string& title,
+	                             const std::string& encoding,
 	                             const std::string& content);
 
 	/** Sets a new colour for the local user.
@@ -116,6 +117,7 @@ protected:
 	new_document_info(const user* owner,
 	                  unsigned int id,
 	                  const std::string& title,
+	                  const std::string& encoding,
 	                  const std::string& content);
 
 	/** Creates a new document info deserialised from a serialisation
@@ -179,22 +181,27 @@ void basic_host_buffer<Document, Selector>::open(unsigned int port)
 	// Create local user
 	m_self = basic_buffer<Document, Selector>::m_user_table.add_user(
 		basic_buffer<Document, Selector>::m_user_table.find_free_id(),
-		net6_host().get_self(), m_colour
+		net6_host().get_self(),
+		m_colour
 	);
 
 	basic_buffer<Document, Selector>::m_signal_user_join.emit(*m_self);
 }
 
 template<typename Document, typename Selector>
-void basic_host_buffer<Document, Selector>::open(const std::string& content,
+void basic_host_buffer<Document, Selector>::open(const std::string& session,
                                                  unsigned int port)
 {
-	basic_server_buffer<Document, Selector>::open(content, port);
+	basic_server_buffer<Document, Selector>::open(session, port);
 
-	// Create local user
+	// Create user
+	// TODO: This MUST be done directly after the user table has been
+	// deserialised so it is available to the documents that are
+	// loaded after the user table.
 	m_self = basic_buffer<Document, Selector>::m_user_table.add_user(
 		basic_buffer<Document, Selector>::m_user_table.find_free_id(),
-		net6_host().get_self(), m_colour
+		net6_host().get_self(),
+		m_colour
 	);
 
 	basic_buffer<Document, Selector>::m_signal_user_join.emit(*m_self);
@@ -257,6 +264,7 @@ void basic_host_buffer<Document, Selector>::
 template<typename Document, typename Selector>
 void basic_host_buffer<Document, Selector>::
 	document_create(const std::string& title,
+	                const std::string& encoding,
 	                const std::string& content)
 {
 	if(m_self == NULL)
@@ -272,7 +280,7 @@ void basic_host_buffer<Document, Selector>::
 	// Create document with local user as owner instead of NULL indicating
 	// that it is the server's document.
 	basic_server_buffer<Document, Selector>::document_create_impl(
-		m_self, id, title, content
+		m_self, id, title, encoding, content
 	);
 }
 
@@ -309,6 +317,7 @@ basic_host_buffer<Document, Selector>::
 	new_document_info(const user* owner,
 	                  unsigned int id,
 	                  const std::string& title,
+	                  const std::string& encoding,
 	                  const std::string& content)
 {
 	// Create host_document_info, according to host_buffer
@@ -318,6 +327,7 @@ basic_host_buffer<Document, Selector>::
 		owner,
 		id,
 		title,
+		encoding,
 		content
 	);
 }

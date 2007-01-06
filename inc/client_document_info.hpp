@@ -62,7 +62,8 @@ public:
 	                           net_type& net,
 	                           const user* owner,
 	                           unsigned int id,
-	                           const std::string& title);
+	                           const std::string& title,
+	                           const std::string& encoding);
 
 	/** Constructor which allows to give initial content and as such creates
 	 * an underlaying document assuming the local client just created the
@@ -73,6 +74,7 @@ public:
 	                           const user* owner,
 	                           unsigned int id,
 	                           const std::string& title,
+	                           const std::string& encoding,
 	                           const std::string& content);
 
 	/** Constructor which reads the document_info from a network packet
@@ -181,9 +183,10 @@ basic_client_document_info<Document, Selector>::
                                    net_type& net,
 	                           const user* owner,
 	                           unsigned int id,
-	                           const std::string& title):
-	base_type(buffer, net, owner, id, title),
-	base_local_type(buffer, net, owner, id, title),
+	                           const std::string& title,
+	                           const std::string& encoding):
+	base_type(buffer, net, owner, id, title, encoding),
+	base_local_type(buffer, net, owner, id, title, encoding),
 	m_subscription_state(base_local_type::UNSUBSCRIBED)
 {
 	// If we created this document, the constructor with initial content
@@ -209,9 +212,10 @@ basic_client_document_info<Document, Selector>::
 	                           const user* owner,
 	                           unsigned int id,
 	                           const std::string& title,
+	                           const std::string& encoding,
 	                           const std::string& content):
-	base_type(buffer, net, owner, id, title),
-	base_local_type(buffer, net, owner, id, title),
+	base_type(buffer, net, owner, id, title, encoding),
+	base_local_type(buffer, net, owner, id, title, encoding),
 	m_subscription_state(base_local_type::SUBSCRIBED)
 {
 	// content is provided, so we should have created this document
@@ -226,9 +230,8 @@ basic_client_document_info<Document, Selector>::
 	}
 
 	// Assign document, initialise content
-	basic_document_info<Document, Selector>::assign_document();
-	basic_document_info<Document, Selector>::
-		m_document->insert(0, content, NULL);
+	base_type::assign_document();
+	base_type::m_document->insert(0, content, NULL);
 
 	// Subscribe owner
 	user_subscribe(*owner);
@@ -249,7 +252,8 @@ basic_client_document_info<Document, Selector>::
 			)
 		),
 		init_pack.get_param(1).net6::parameter::as<unsigned int>(),
-		init_pack.get_param(2).net6::parameter::as<std::string>()
+		init_pack.get_param(2).net6::parameter::as<std::string>(),
+		init_pack.get_param(3).net6::parameter::as<std::string>()
 	),
 	base_local_type(
 		buffer,
@@ -260,12 +264,13 @@ basic_client_document_info<Document, Selector>::
 			)
 		),
 		init_pack.get_param(1).net6::parameter::as<unsigned int>(),
-		init_pack.get_param(2).net6::parameter::as<std::string>()
+		init_pack.get_param(2).net6::parameter::as<std::string>(),
+		init_pack.get_param(3).net6::parameter::as<std::string>()
 	),
 	m_subscription_state(base_local_type::UNSUBSCRIBED)
 {
 	// Load initially subscribed users
-	for(unsigned int i = 3; i < init_pack.get_param_count(); ++ i)
+	for(unsigned int i = 4; i < init_pack.get_param_count(); ++ i)
 	{
 		// Get user
 		const user* cur_user =

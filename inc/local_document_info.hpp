@@ -38,8 +38,8 @@ class basic_local_document_info:
 	virtual public basic_document_info<Document, Selector>
 {
 public:
-	typedef typename basic_document_info<Document, Selector>::document_type
-		document_type;
+	typedef basic_document_info<Document, Selector> base_type;
+	typedef typename base_type::document_type document_type;
 
 	typedef basic_local_buffer<Document, Selector> buffer_type;
 	typedef typename buffer_type::net_type net_type;
@@ -55,7 +55,8 @@ public:
 	                          net_type& net,
 	                          const user* owner,
 	                          unsigned int id,
-	                          const std::string& title);
+	                          const std::string& title,
+	                          const std::string& encoding);
 
 	basic_local_document_info(const buffer_type& buffer,
 	                          net_type& net,
@@ -106,8 +107,9 @@ basic_local_document_info<Document, Selector>::
 	                          net_type& net,
 	                          const user* owner,
 	                          unsigned int id,
-	                          const std::string& title):
-	basic_document_info<Document, Selector>(buffer, net, owner, id, title)
+	                          const std::string& title,
+	                          const std::string& encoding):
+	base_type(buffer, net, owner, id, title, encoding)
 {
 }
 
@@ -116,50 +118,42 @@ basic_local_document_info<Document, Selector>::
 	basic_local_document_info(const buffer_type& buffer,
 	                          net_type& net,
 	                          const serialise::object& obj):
-	basic_document_info<Document, Selector>(buffer, net, obj)
+	base_type(buffer, net, obj)
 {
 }
 
 template<typename Document, typename Selector>
 bool basic_local_document_info<Document, Selector>::is_subscribed() const
 {
-	return basic_document_info<Document, Selector>::is_subscribed(
-		get_buffer().get_self()
-	);
+	return base_type::is_subscribed(get_buffer().get_self() );
 }
 
 template<typename Document, typename Selector>
 bool basic_local_document_info<Document, Selector>::
 	is_subscribed(const user& user) const
 {
-	return basic_document_info<Document, Selector>::is_subscribed(user);
+	return base_type::is_subscribed(user);
 }
 
 template<typename Document, typename Selector>
 const typename basic_local_document_info<Document, Selector>::buffer_type&
 basic_local_document_info<Document, Selector>::get_buffer() const
 {
-	return dynamic_cast<const buffer_type&>(
-		basic_document_info<Document, Selector>::get_buffer()
-	);
+	return dynamic_cast<const buffer_type&>(base_type::get_buffer() );
 }
 
 template<typename Document, typename Selector>
 typename basic_local_document_info<Document, Selector>::net_type&
 basic_local_document_info<Document, Selector>::get_net6()
 {
-	return dynamic_cast<net_type&>(
-		basic_document_info<Document, Selector>::get_net6()
-	);
+	return dynamic_cast<net_type&>(base_type::get_net6() );
 }
 
 template<typename Document, typename Selector>
 const typename basic_local_document_info<Document, Selector>::net_type&
 basic_local_document_info<Document, Selector>::get_net6() const
 {
-	return dynamic_cast<const net_type&>(
-		basic_document_info<Document, Selector>::get_net6()
-	);
+	return dynamic_cast<const net_type&>(base_type::get_net6() );
 }
 
 } // namespace obby

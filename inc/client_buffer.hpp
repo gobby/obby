@@ -135,6 +135,7 @@ public:
 	 * authorised the creation process.
 	 */
 	virtual void document_create(const std::string& title,
+	                             const std::string& encoding,
 	                             const std::string& content = "");
 
 	/** Requests the deletion of a document at the server.
@@ -224,7 +225,8 @@ protected:
 	virtual base_document_info_type*
 	new_document_info(const user* owner,
 	                  unsigned int id,
-	                  const std::string& title);
+	                  const std::string& title,
+	                  const std::string& encoding);
 
         /** Creates a new document info object according to the type of buffer.
 	 */
@@ -232,6 +234,7 @@ protected:
 	new_document_info(const user* owner,
 	                  unsigned int id,
 	                  const std::string& title,
+	                  const std::string& encoding,
 	                  const std::string& content);
 
         /** Creates a new document info object according to the type of buffer.
@@ -419,6 +422,7 @@ bool basic_client_buffer<Document, Selector>::is_logged_in() const
 template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::
 	document_create(const std::string& title,
+	                const std::string& encoding,
 	                const std::string& content)
 {
 	// TODO: Special handling if not connected
@@ -427,12 +431,12 @@ void basic_client_buffer<Document, Selector>::
 	unsigned int id = ++ basic_buffer<Document, Selector>::m_doc_counter;
 	// Create document
 	base_document_info_type* info =
-		new_document_info(m_self, id, title, content);
+		new_document_info(m_self, id, title, encoding, content);
 	// Add document to list
 	basic_buffer<Document, Selector>::document_add(*info);
 	// Tell server
 	net6::packet request_pack("obby_document_create");
-	request_pack << id << title << content;
+	request_pack << id << title << encoding << content;
 	net6_client().send(request_pack);
 }
 
@@ -803,6 +807,8 @@ void basic_client_buffer<Document, Selector>::
 		pack.get_param(1).net6::parameter::as<unsigned int>();
 	const std::string& title =
 		pack.get_param(2).net6::parameter::as<std::string>();
+	const std::string& encoding =
+		pack.get_param(3).net6::parameter::as<std::string>();
 
 	// Get owner ID
 	unsigned int owner_id = (owner == NULL ? 0 : owner->get_id() );
@@ -825,7 +831,9 @@ void basic_client_buffer<Document, Selector>::
 	}
 
 	// Add new document
-	base_document_info_type* info = new_document_info(owner, id, title);
+	base_document_info_type* info =
+		new_document_info(owner, id, title, encoding);
+
 	basic_buffer<Document, Selector>::document_add(*info);
 }
 
@@ -1021,10 +1029,13 @@ typename basic_client_buffer<Document, Selector>::base_document_info_type*
 basic_client_buffer<Document, Selector>::
 	new_document_info(const user* owner,
 	                  unsigned int id,
-	                  const std::string& title)
+	                  const std::string& title,
+	                  const std::string& encoding)
 {
 	// Create client_document_info, according to client_buffer
-	return new document_info_type(*this, net6_client(), owner, id, title);
+	return new document_info_type(
+		*this, net6_client(), owner, id, title, encoding
+	);
 }
 
 template<typename Document, typename Selector>
@@ -1033,10 +1044,11 @@ basic_client_buffer<Document, Selector>::
 	new_document_info(const user* owner,
 	                  unsigned int id,
 	                  const std::string& title,
+	                  const std::string& encoding,
 	                  const std::string& content)
 {
 	return new document_info_type(
-		*this, net6_client(), owner, id, title, content
+		*this, net6_client(), owner, id, title, encoding, content
 	);
 }
 

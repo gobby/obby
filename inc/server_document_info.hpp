@@ -45,8 +45,8 @@ class basic_server_document_info:
 	virtual public basic_document_info<Document, Selector>
 {
 public:
-	typedef typename basic_document_info<Document, Selector>::document_type
-		document_type;
+	typedef basic_document_info<Document, Selector> base_type;
+	typedef typename base_type::document_type document_type;
 
 	typedef basic_server_buffer<Document, Selector> buffer_type;
 	typedef typename buffer_type::net_type net_type;
@@ -58,6 +58,7 @@ public:
 	                           const user* owner,
 	                           unsigned int id,
 	                           const std::string& title,
+	                           const std::string& encoding,
 	                           const std::string& content);
 
 	/** Deserialises a document from a serialisation object.
@@ -183,14 +184,12 @@ basic_server_document_info<Document, Selector>::
 	                           const user* owner,
 	                           unsigned int id,
 	                           const std::string& title,
+	                           const std::string& encoding,
 	                           const std::string& content):
-	basic_document_info<Document, Selector>(buffer, net, owner, id, title)
+	base_type(buffer, net, owner, id, title, encoding)
 {
-	// Assign document content
-	basic_document_info<Document, Selector>::assign_document();
-	// Create initial content
-	basic_document_info<Document, Selector>::
-		m_document->insert(0, content, NULL);
+	base_type::assign_document();
+	base_type::m_document->insert(0, content, NULL);
 
 	// Create jupiter server implementation
 	m_jupiter.reset(new jupiter_type(
@@ -215,11 +214,11 @@ basic_server_document_info<Document, Selector>::
 	basic_server_document_info(const buffer_type& buffer,
 	                           net_type& net,
 	                           const serialise::object& obj):
-	basic_document_info<Document, Selector>(buffer, net, obj)
+	base_type(buffer, net, obj)
 {
 	// TODO: Avoid code duplication somehow
 	// Assign document content
-	basic_document_info<Document, Selector>::assign_document();
+	base_type::assign_document();
 
 	// Deserialise document
 	for(serialise::object::child_iterator child_it = obj.children_begin();
@@ -234,7 +233,7 @@ basic_server_document_info<Document, Selector>::
 		const serialise::attribute& author_attr =
 			child_it->get_required_attribute("author");
 
-		basic_document_info<Document, Selector>::m_document->append(
+		base_type::m_document->append(
 			content_attr.as<std::string>(),
 			author_attr.as<const obby::user*>(
 				buffer.get_user_table()
@@ -286,8 +285,7 @@ void basic_server_document_info<Document, Selector>::
 	user_subscribe(user);
 
 	// Synchronise initial document to user
-	document_type& doc =
-		*basic_document_info<Document, Selector>::m_document;
+	document_type& doc = *base_type::m_document;
 
 	document_packet init_pack(*this, "sync_init");
 	init_pack << doc.size();
@@ -448,8 +446,7 @@ void basic_server_document_info<Document, Selector>::
 	record_type rec(
 		pack,
 		index,
-		basic_document_info<Document, Selector>::
-			m_buffer.get_user_table()
+		base_type::m_buffer.get_user_table()
 	);
 
 	m_jupiter->remote_op(rec, &from);
@@ -487,27 +484,21 @@ template<typename Document, typename Selector>
 const typename basic_server_document_info<Document, Selector>::buffer_type&
 basic_server_document_info<Document, Selector>::get_buffer() const
 {
-	return dynamic_cast<const buffer_type&>(
-		basic_document_info<Document, Selector>::get_buffer()
-	);
+	return dynamic_cast<const buffer_type&>(base_type::get_buffer() );
 }
 
 template<typename Document, typename Selector>
 typename basic_server_document_info<Document, Selector>::net_type&
 basic_server_document_info<Document, Selector>::get_net6()
 {
-	return dynamic_cast<net_type&>(
-		basic_document_info<Document, Selector>::get_net6()
-	);
+	return dynamic_cast<net_type&>(base_type::get_net6() );
 }
 
 template<typename Document, typename Selector>
 const typename basic_server_document_info<Document, Selector>::net_type&
 basic_server_document_info<Document, Selector>::get_net6() const
 {
-	return dynamic_cast<const net_type&>(
-		basic_document_info<Document, Selector>::get_net6()
-	);
+	return dynamic_cast<const net_type&>(base_type::get_net6() );
 }
 
 } // namespace obby

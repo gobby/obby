@@ -131,7 +131,8 @@ public:
 	basic_document_info(const buffer_type& buffer,
 	                    net_type& net,
 	                    const user* owner, unsigned int id,
-	                    const std::string& title);
+	                    const std::string& title,
+	                    const std::string& encoding);
 
 	basic_document_info(const buffer_type& buffer,
 	                    net_type& net,
@@ -158,6 +159,10 @@ public:
 	/** Returns the title set for this document.
 	 */
 	const std::string& get_title() const;
+
+	/** @brief Returns the character set in which the document is encoded.
+	 */
+	const std::string& get_encoding() const;
 
 	/** Returns the content of the document, if available.
 	 */
@@ -245,6 +250,7 @@ protected:
 	const user* m_owner;
 	unsigned int m_id;
 	std::string m_title;
+	std::string m_encoding;
 
 	std::auto_ptr<privileges_table> m_priv_table;
 	std::auto_ptr<document_type> m_document;
@@ -557,8 +563,10 @@ basic_document_info<Document, Selector>::
 	basic_document_info(const buffer_type& buffer,
 	                    net_type& net,
 	                    const user* owner, unsigned int id,
-	                    const std::string& title):
+	                    const std::string& title,
+	                    const std::string& encoding):
 	m_buffer(buffer), m_net(net), m_owner(owner), m_id(id), m_title(title),
+	m_encoding(encoding),
 	m_priv_table(
 		new privileges_table(privileges::SUBSCRIBE | privileges::MODIFY)
 	)
@@ -587,6 +595,10 @@ basic_document_info<Document, Selector>::
 		obj.get_required_attribute("title").
 			obby::serialise::attribute::as<std::string>()
 	),
+	m_encoding(
+		obj.get_required_attribute("encoding").
+			obby::serialise::attribute::as<std::string>()
+	),
 	m_priv_table(
 		new privileges_table(privileges::SUBSCRIBE | privileges::MODIFY)
 	)
@@ -609,6 +621,7 @@ void basic_document_info<Document, Selector>::
 	obj.add_attribute("owner").set_value(m_owner);
 	obj.add_attribute("id").set_value(m_id);
 	obj.add_attribute("title").set_value(m_title);
+	obj.add_attribute("encoding").set_value(m_encoding);
 
 	for(typename document_type::chunk_iterator chunk_it =
 		m_document->chunk_begin();
@@ -648,6 +661,12 @@ template<typename Document, typename Selector>
 const std::string& basic_document_info<Document, Selector>::get_title() const
 {
 	return m_title;
+}
+
+template<typename Document, typename Selector>
+const std::string& basic_document_info<Document, Selector>::get_encoding() const
+{
+	return m_encoding;
 }
 
 template<typename Document, typename Selector>
