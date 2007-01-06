@@ -23,6 +23,7 @@
 #include <net6/object.hpp>
 #include "ptr_iterator.hpp"
 #include "user.hpp"
+#include "user_table.hpp"
 #include "document.hpp"
 #include "document_packet.hpp"
 
@@ -39,6 +40,16 @@ template<typename selector_type>
 class basic_document_info : private net6::non_copyable, public sigc::trackable
 {
 public:
+	enum privileges {
+		PRIV_NONE      = 0x00,
+		PRIV_SUBSCRIBE = 0x01, // User may subscribe to document
+		PRIV_MODIFY    = 0x02, // User may modify the document
+		PRIV_CLOSE     = 0x04, // User may close the document (completly)
+		PRIV_RENAME    = 0x08  // TODO: Implement rename in Gobby :)
+	};
+
+	class privileges_table;
+
 	typedef sigc::signal<void, const std::string&> signal_rename_type;
 	typedef sigc::signal<void, const user&> signal_subscribe_type;
 	typedef sigc::signal<void, const user&> signal_unsubscribe_type;
@@ -161,6 +172,7 @@ protected:
 	unsigned int m_id;
 	std::string m_title;
 
+	std::auto_ptr<privileges_table> m_priv_table;
 	std::auto_ptr<document> m_document;
 	std::list<const user*> m_users;
 
@@ -183,6 +195,66 @@ private:
 	 * transmitted.
 	 */
 	const net6::basic_object<selector_type>& get_net6() const;
+};
+
+// typename basic_document_info<selector_type>::privileges combination operators
+template<typename selector_type>
+inline typename basic_document_info<selector_type>::privileges operator|(typename basic_document_info<selector_type>::privileges lhs, typename basic_document_info<selector_type>::privileges rhs) {
+	return static_cast<typename basic_document_info<selector_type>::privileges>(
+		static_cast<int>(lhs) | static_cast<int>(rhs)
+	);
+}
+
+template<typename selector_type>
+inline typename basic_document_info<selector_type>::privileges operator&(typename basic_document_info<selector_type>::privileges lhs, typename basic_document_info<selector_type>::privileges rhs) {
+	return static_cast<typename basic_document_info<selector_type>::privileges>(
+		static_cast<int>(lhs) & static_cast<int>(rhs)
+	);
+}
+
+template<typename selector_type>
+inline typename basic_document_info<selector_type>::privileges operator^(typename basic_document_info<selector_type>::privileges lhs, typename basic_document_info<selector_type>::privileges rhs) {
+	return static_cast<typename basic_document_info<selector_type>::privileges>(
+		static_cast<int>(lhs) ^ static_cast<int>(rhs)
+	);
+}
+
+template<typename selector_type>
+inline typename basic_document_info<selector_type>::privileges& operator|=(typename basic_document_info<selector_type>::privileges& lhs, typename basic_document_info<selector_type>::privileges rhs) {
+	return lhs = (lhs | rhs);
+}
+
+template<typename selector_type>
+inline typename basic_document_info<selector_type>::privileges& operator&=(typename basic_document_info<selector_type>::privileges& lhs, typename basic_document_info<selector_type>::privileges rhs) {
+	return lhs = (lhs & rhs);
+}
+
+template<typename selector_type>
+inline typename basic_document_info<selector_type>::privileges& operator^=(typename basic_document_info<selector_type>::privileges& lhs, typename basic_document_info<selector_type>::privileges rhs) {
+	return lhs = (lhs ^ rhs);
+}
+
+template<typename selector_type>
+inline typename basic_document_info<selector_type>::privileges operator~(typename basic_document_info<selector_type>::privileges rhs) {
+	return static_cast<typename basic_document_info<selector_type>::privileges>(static_cast<int>(rhs) );
+}
+
+/** Table that stores the privileges for multiple users.
+ */
+template<typename selector_type>
+class basic_document_info<selector_type>::privileges_table
+{
+public:
+	/** Adds a new user with the user's default privileges.
+	 */
+	void user_add(const user& user);
+
+	/** Queries the privileges for the given user.
+	 */
+	privileges user_privileges(const user& user) const;
+protected:
+	typedef std::map<const user*, privileges> priv_map;
+	priv_map m_privs;
 };
 
 } // namespace obby
@@ -246,8 +318,18 @@ basic_document_info<selector_type>::
 	                    net6::basic_object<selector_type>& net,
 	                    const user* owner, unsigned int id,
 	                    const std::string& title)
- : m_buffer(buffer), m_net(net), m_owner(owner), m_id(id), m_title(title)
+ : m_buffer(buffer), m_net(net), m_owner(owner), m_id(id), m_title(title),
+   m_priv_table(new privileges_table)
 {
+	// Add all initial users to the table, with default values
+	const user_table& user_table = buffer.get_user_table();
+	for(user_table::user_iterator<user::NONE> iter =
+		user_table.user_begin<user::NONE>();
+	    iter != user_table.user_end<user::NONE>();
+	    ++ iter)
+	{
+		m_priv_table->user_add(*iter);
+	}
 }
 
 template<typename selector_type>
@@ -341,6 +423,8 @@ basic_document_info<selector_type>::unsubscribe_event() const
 template<typename selector_type>
 void basic_document_info<selector_type>::obby_user_join(const user& user)
 {
+	// Add new user into privileges table
+	m_priv_table->user_add(user);
 }
 
 template<typename selector_type>
@@ -415,6 +499,33 @@ basic_document_info<selector_type>::get_net6() const
 	return m_net;
 }
 
+// privileges_table
+template<typename selector_type>
+void basic_document_info<selector_type>::privileges_table::
+	user_add(const user& user)
+{
+	// TODO: Initial privileges as parameter
+	m_privs[&user] = basic_document_info<selector_type>::PRIV_NONE;
+}
+
+template<typename selector_type>
+typename basic_document_info<selector_type>::privileges
+basic_document_info<selector_type>::privileges_table::
+	user_privileges(const user& user) const
+{
+	typename priv_map::const_iterator iter = m_privs.find(&user);
+	if(iter == m_privs.end() )
+	{
+		throw std::logic_error(
+			"obby::basic_document_info::privileges_table::"
+			"user_privileges"
+		);
+	}
+
+	return iter->second;
+}
+
 } // namespace obby
 
 #endif // _OBBY_DOCUMENT_INFO_HPP_
+

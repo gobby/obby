@@ -35,8 +35,13 @@ class user : private net6::non_copyable
 {
 public:
 	enum flags {
-		NONE = 0x00,
+		NONE      = 0x00,
 		CONNECTED = 0x01
+	};
+
+	enum privileges {
+		PRIV_NONE            = 0x00,
+		PRIV_CREATE_DOCUMENT = 0x01
 	};
 
 	/** Creates a new user from an existing net6::user.
@@ -149,6 +154,7 @@ protected:
 	std::string m_password;
 
 	flags m_flags;
+	privileges m_privs;
 };
 
 // Flag combination operations
@@ -184,6 +190,41 @@ inline user::flags& operator^=(user::flags& rhs, user::flags lhs) {
 
 inline user::flags operator~(user::flags rhs) {
 	return static_cast<user::flags>(~static_cast<int>(rhs) );
+}
+
+// Privileges combination operations
+inline user::privileges operator|(user::privileges rhs, user::privileges lhs) {
+	return static_cast<user::privileges>(
+		static_cast<int>(rhs) | static_cast<int>(lhs)
+	);
+}
+
+inline user::privileges operator&(user::privileges rhs, user::privileges lhs) {
+	return static_cast<user::privileges>(
+		static_cast<int>(rhs) & static_cast<int>(lhs)
+	);
+}
+
+inline user::privileges operator^(user::privileges rhs, user::privileges lhs) {
+	return static_cast<user::privileges>(
+		static_cast<int>(rhs) ^ static_cast<int>(lhs)
+	);
+}
+
+inline user::privileges& operator|=(user::privileges& rhs, user::privileges lhs) {
+	return rhs = (rhs | lhs);
+}
+
+inline user::privileges& operator&=(user::privileges& rhs, user::privileges lhs) {
+	return rhs = (rhs & lhs);
+}
+
+inline user::privileges& operator^=(user::privileges& rhs, user::privileges lhs) {
+	return rhs = (rhs ^ lhs);
+}
+
+inline user::privileges operator~(user::privileges rhs) {
+	return static_cast<user::privileges>(~static_cast<int>(rhs) );
 }
 
 }
@@ -232,5 +273,6 @@ public:
 }
 
 #endif // _OBBY_USER_HPP_
+
 
 
