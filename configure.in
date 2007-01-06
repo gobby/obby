@@ -1,0 +1,30 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ(2.59)
+AC_INIT([libobby], [0.1.0], [crew@0x539.de])
+AM_INIT_AUTOMAKE
+AM_MAINTAINER_MODE
+AC_CONFIG_SRCDIR([inc/buffer.hpp])
+AC_CONFIG_HEADER([inc/config.hpp])
+
+# Checks for programs.
+AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+AC_PROG_LIBTOOL
+AC_CACHE_SAVE
+
+# Checks for libraries.
+PKG_CHECK_MODULES([libobby], [sigc++-2.0])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT([lobby-1.0.pc])
+
