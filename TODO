@@ -10,10 +10,8 @@ Major:
 Normal:
   * Provide some means of authentication (#21)
   * Hide equivalent insert / change calls (#28)
-  * Implement server-side commands for remote actions (#29)
   * Implement records to (un)indent lines of text (#30)
   * Undo/Redo (#39)
-  * libobby: Localisation (#40)
   * Exchange version information (#42)
 
 Minor:
@@ -22,6 +20,7 @@ Trivial:
 
 Enhancement:
   * Session serialisation (#20)
+  * Implement server-side commands for remote actions (#29)
   * Document owners (#38)
 
 
@@ -48,13 +47,6 @@ Hide equivalent insert / change calls
 ''This is a stub and generated out of the old TODO located in the 
 repository.''
 
-29: Implement server-side commands for remote actions
------------------------------------------------------
-The possibility to send server-side commands would enable one to e.g. save 
-the current document to a directory on the server or to perform other 
-actions. ''libobby'' should provide the framework for this and ''Gobby'' 
-some command interface to submit such commands to the server.
-
 30: Implement records to (un)indent lines of text
 -------------------------------------------------
 Implement indent_record and unindent_record to (un)indent lines of text
@@ -67,10 +59,6 @@ repository.''
 The current undo/redo implementation is taken directly from GtkSourceView. 
 This is not good because text that other people have written may be undone. 
 We need a proper undo/redo handling in libobby.
-
-40: libobby: Localisation
--------------------------
-libobby has one string to be localised (see src/error.cpp).
 
 42: Exchange version information
 --------------------------------
@@ -91,6 +79,13 @@ implemented:
  * Load/save documents to/from file and/or memory (while preserving 
 history)
  * Load/save complete obby session
+
+29: Implement server-side commands for remote actions
+-----------------------------------------------------
+The possibility to send server-side commands would enable one to e.g. save 
+the current document to a directory on the server or to perform other 
+actions. ''libobby'' should provide the framework for this and ''Gobby'' 
+some command interface to submit such commands to the server.
 
 38: Document owners
 -------------------
