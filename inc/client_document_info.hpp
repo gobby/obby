@@ -43,13 +43,17 @@ class basic_client_document_info:
 	virtual public basic_local_document_info<Document, Selector>
 {
 public:
-	typedef typename basic_local_document_info<Document, Selector>::
-		document_type document_type;
+	typedef basic_document_info<Document, Selector> base_type;
+	typedef basic_local_document_info<Document, Selector> base_local_type;
+
+	typedef typename base_local_type::document_type document_type;
 
 	typedef basic_client_buffer<Document, Selector> buffer_type;
 	typedef typename buffer_type::net_type net_type;
 	typedef jupiter_client<Document> jupiter_type;
 	typedef typename jupiter_type::record_type record_type;
+
+	typedef typename base_local_type::subscription_state subscription_state;
 
 	/** Constructor which does not automatically create an underlaying
 	 * document.
@@ -100,33 +104,15 @@ public:
 	 */
 	virtual void unsubscribe();
 
+        /** @brief Returns the state of the local user's subscription to
+	 * this document.
+	 */
+	virtual subscription_state get_subscription_state() const;
+
 	/** Called by the buffer if a network event occured that belongs to the
 	 * document.
 	 */
 	virtual void on_net_packet(const document_packet& pack);
-
-#if 0
-	/** Called by the client buffer when user synchronisation begins.
-	 * This clears all the currently subscribed users.
-	 * TODO: Make another function here. Maybe something like
-	 * on_net_sync(const net6::packet& pack)
-	 */
-	virtual void obby_sync_init();
-
-	/** Adds a user to the list of subscribed users. This function is
-	 * called by the buffer while synchronising the document list.
-	 * TODO: Merge with TODO item above
-	 */
-	virtual void obby_sync_subscribe(const user& user);
-
-	/** Called by the buffer if the local user created a document. The
-	 * document content is assigned immediately in this case because
-	 * the clients does not wait for server acknowledgement to show the
-	 * new document without delay.
-	 * TODO: Make something other with this...
-	 */
-	virtual void obby_local_init(const std::string& initial_content);
-#endif
 
 protected:
 	/** Subscribes a user to this document.
@@ -172,6 +158,7 @@ protected:
 	                               const user* from);
 
 	std::auto_ptr<jupiter_type> m_jupiter;
+	subscription_state m_subscription_state;
 
 public:
 	/** Returns the buffer to which this document_info belongs.
@@ -195,20 +182,9 @@ basic_client_document_info<Document, Selector>::
 	                           const user* owner,
 	                           unsigned int id,
 	                           const std::string& title):
-	basic_document_info<Document, Selector>(
-		buffer,
-		net,
-		owner,
-		id,
-		title
-	),
-	basic_local_document_info<Document, Selector>(
-		buffer,
-		net,
-		owner,
-		id,
-		title
-	)
+	base_type(buffer, net, owner, id, title),
+	base_local_type(buffer, net, owner, id, title),
+	m_subscription_state(base_local_type::UNSUBSCRIBED)
 {
 	// If we created this document, the constructor with initial content
 	// should be called.
@@ -234,20 +210,9 @@ basic_client_document_info<Document, Selector>::
 	                           unsigned int id,
 	                           const std::string& title,
 	                           const std::string& content):
-	basic_document_info<Document, Selector>(
-		buffer,
-		net,
-		owner,
-		id,
-		title
-	),
-	basic_local_document_info<Document, Selector>(
-		buffer,
-		net,
-		owner,
-		id,
-		title
-	)
+	base_type(buffer, net, owner, id, title),
+	base_local_type(buffer, net, owner, id, title),
+	m_subscription_state(base_local_type::SUBSCRIBED)
 {
 	// content is provided, so we should have created this document
 	if(owner != &buffer.get_self() )
@@ -275,7 +240,7 @@ basic_client_document_info<Document, Selector>::
 	                           net_type& net,
 	                           const net6::packet& init_pack):
 	// TODO: Find a way to only extract the data once out of the packet
-	basic_document_info<Document, Selector>(
+	base_type(
 		buffer,
 		net,
 		init_pack.get_param(0).net6::parameter::as<const user*>(
@@ -286,7 +251,7 @@ basic_client_document_info<Document, Selector>::
 		init_pack.get_param(1).net6::parameter::as<unsigned int>(),
 		init_pack.get_param(2).net6::parameter::as<std::string>()
 	),
-	basic_local_document_info<Document, Selector>(
+	base_local_type(
 		buffer,
 		net,
 		init_pack.get_param(0).net6::parameter::as<const user*>(
@@ -296,7 +261,8 @@ basic_client_document_info<Document, Selector>::
 		),
 		init_pack.get_param(1).net6::parameter::as<unsigned int>(),
 		init_pack.get_param(2).net6::parameter::as<std::string>()
-	)
+	),
+	m_subscription_state(base_local_type::UNSUBSCRIBED)
 {
 	// Load initially subscribed users
 	for(unsigned int i = 3; i < init_pack.get_param_count(); ++ i)
@@ -373,34 +339,49 @@ template<typename Document, typename Selector>
 void basic_client_document_info<Document, Selector>::subscribe()
 {
 	// Already subscribed
-	if(m_jupiter.get() != NULL)
+	if(m_subscription_state == base_local_type::SUBSCRIBED ||
+	   m_subscription_state == base_local_type::SUBSCRIBING)
 	{
 		throw std::logic_error(
 			"obby::basic_client_document_info::subscribe:\n"
-			"Local user is already subscribed"
+			"Local user is already subscribed or has sent a "
+			"subscription request"
 		);
 	}
 
 	// Send request
 	document_packet pack(*this, "subscribe");
 	get_net6().send(pack);
+
+	m_subscription_state = base_local_type::SUBSCRIBING;
 }
 
 template<typename Document, typename Selector>
 void basic_client_document_info<Document, Selector>::unsubscribe()
 {
 	// Not subscribed?
-	if(m_jupiter.get() == NULL)
+	if(m_subscription_state == base_local_type::UNSUBSCRIBED ||
+	   m_subscription_state == base_local_type::UNSUBSCRIBING)
 	{
 		throw std::logic_error(
 			"obby::basic_client_document_info::unsubscribe:\n"
-			"Local user is not subscribed"
+			"Local user is not subscribed or has sent a "
+			"unsubscription request"
 		);
 	}
 
 	// Send request
 	document_packet pack(*this, "unsubscribe");
 	get_net6().send(pack);
+
+	m_subscription_state = base_local_type::UNSUBSCRIBING;
+}
+
+template<typename Document, typename Selector>
+typename basic_client_document_info<Document, Selector>::subscription_state
+basic_client_document_info<Document, Selector>::get_subscription_state() const
+{
+	return m_subscription_state;
 }
 
 template<typename Document, typename Selector>
@@ -415,49 +396,12 @@ void basic_client_document_info<Document, Selector>::
 	}
 }
 
-#if 0
-template<typename Document, typename Selector>
-void basic_client_document_info<Document, Selector>::obby_sync_init()
-{
-	// Document gets synced now, all subscribed users will be transmitted.
-	basic_document_info<Document, Selector>::m_users.clear();
-}
-
-template<typename Document, typename Selector>
-void basic_client_document_info<Document, Selector>::
-	obby_sync_subscribe(const user& user)
-{
-	// Subscribe user to info
-	// TODO: Why did we call the base method here?
-	// - armin, 10-31-2005
-	//basic_document_info<Dorument, Selector>::user_subscribe(user);
-
-	user_subscribe(user);
-}
-
-template<typename Document, typename Selector>
-void basic_client_document_info<Document, Selector>::
-	obby_local_init(const std::string& content)
-{
-	// Assign local document before subscribing
-	basic_document_info<Document, Selector>::assign_document();
-	// Subscribe local user
-	user_subscribe(get_buffer().get_self() );
-	// Add initial content
-	basic_document_info<Document, Selector>::m_document->insert(
-		0,
-		content,
-		NULL
-	);
-}
-#endif
-
 template<typename Document, typename Selector>
 void basic_client_document_info<Document, Selector>::
 	user_subscribe(const user& user)
 {
 	// Call base function
-	basic_document_info<Document, Selector>::user_subscribe(user);
+	base_type::user_subscribe(user);
 
 	// Add client to jupiter algo if we are subscribed
 	if(m_jupiter.get() != NULL)
@@ -469,8 +413,7 @@ void basic_client_document_info<Document, Selector>::
 		// Note that the document must be there at this point because
 		// the whole document synchronisation process should have been
 		// performed before we subscribed to a document.
-		if(basic_document_info<Document, Selector>::
-			m_document.get() == NULL)
+		if(base_type::m_document.get() == NULL)
 		{
 			throw std::logic_error(
 				"obby::basic_client_document_info::"
@@ -488,10 +431,9 @@ void basic_client_document_info<Document, Selector>::
 		);
 
 		// Add existing clients
-		for(typename basic_document_info<Document, Selector>::
-			user_iterator iter =
-			basic_document_info<Document, Selector>::user_begin();
-		    iter != basic_document_info<Document, Selector>::user_end();
+		for(typename base_type::user_iterator iter =
+			base_type::user_begin();
+		    iter != base_type::user_end();
 		    ++ iter)
 		{
 			m_jupiter->client_add(*iter);
@@ -503,6 +445,8 @@ void basic_client_document_info<Document, Selector>::
 				&basic_client_document_info::on_jupiter_record
 			)
 		);
+
+		m_subscription_state = base_local_type::SUBSCRIBED;
 	}
 }
 
@@ -515,15 +459,17 @@ void basic_client_document_info<Document, Selector>::
 		m_jupiter->client_remove(user);
 
 	// Call base function
-	basic_document_info<Document, Selector>::user_unsubscribe(user);
+	base_type::user_unsubscribe(user);
 
 	// Local unsubscription
 	if(&get_buffer().get_self() == &user)
 	{
 		// Release document if the local user unsubscribed
-		basic_document_info<Document, Selector>::release_document();
+		base_type::release_document();
 		// Release jupiter algorithm
 		m_jupiter.reset(NULL);
+
+		m_subscription_state = base_local_type::UNSUBSCRIBED;
 	}
 }
 
@@ -562,7 +508,7 @@ void basic_client_document_info<Document, Selector>::
 		pack.get_param(1).net6::parameter::as<std::string>();
 
 	// Rename document
-	basic_document_info<Document, Selector>::document_rename(new_title);
+	base_type::document_rename(new_title);
 }
 
 template<typename Document, typename Selector>
@@ -577,9 +523,7 @@ void basic_client_document_info<Document, Selector>::
 			"%0%/%1%"
 		);
 
-		str << basic_document_info<Document, Selector>::get_owner_id()
-		    << basic_document_info<Document, Selector>::get_id();
-
+		str << base_type::get_owner_id() << base_type::get_id();
 		throw net6::bad_value(str.str() );
 	}
 
@@ -593,12 +537,7 @@ void basic_client_document_info<Document, Selector>::
 	// Extract record from packet (TODO: virtualness for document_packet,
 	// would allow to remove "+ 2" here)
 	unsigned int index = 1 + 2;
-	record_type rec(
-		pack,
-		index,
-		basic_document_info<Document, Selector>::
-			m_buffer.get_user_table()
-	);
+	record_type rec(pack, index, base_type::m_buffer.get_user_table() );
 
 	// Apply remote operation
 	m_jupiter->remote_op(rec, author);
@@ -608,51 +547,46 @@ template<typename Document, typename Selector>
 void basic_client_document_info<Document, Selector>::
 	on_net_sync_init(const document_packet& pack)
 {
-	// Subscribed?
-	if(basic_document_info<Document, Selector>::m_document.get() != NULL)
+	// TODO: Allow subscription without former requisition?
+	if(m_subscription_state != base_local_type::SUBSCRIBING)
 	{
 		format_string str(
-			"Got sync_init for subscribed document %0%/%1%"
+			"Got sync_init without having sent a subscription "
+			"request for document %0%/%1%"
 		);
 
-		str << basic_document_info<Document, Selector>::get_owner_id()
-		    << basic_document_info<Document, Selector>::get_id();
-
+		str << base_type::get_owner_id() << base_type::get_id();
 		throw net6::bad_value(str.str() );
 	}
 
 	// Assign empty document
-	basic_document_info<Document, Selector>::assign_document();
+	base_type::assign_document();
 }
 
 template<typename Document, typename Selector>
 void basic_client_document_info<Document, Selector>::
 	on_net_sync_chunk(const document_packet& pack)
 {
-	// No document assigned or subscribed?
-	if(basic_document_info<Document, Selector>::m_document.get() == NULL)
+	// No document assigned or already subscribed?
+	if(base_type::m_document.get() == NULL ||
+	   m_subscription_state != base_local_type::SUBSCRIBING)
 	{
 		format_string str(
 			"Got sync_chunk without sync_init for document %0%/%1%"
 		);
 
-		str << basic_document_info<Document, Selector>::get_owner_id()
-		    << basic_document_info<Document, Selector>::get_id();
-
+		str << base_type::get_owner_id() << base_type::get_id();
 		throw net6::bad_value(str.str() );
 	}
 
 	// Add chunk to document
 	unsigned int index = 2;
-	basic_document_info<Document, Selector>::m_document->append(
+	base_type::m_document->append(
 		pack.get_param(0).net6::parameter::as<std::string>(),
 		pack.get_param(1).net6::parameter::as<const user*>(
 			::serialise::hex_context<
 				const user*
-			>(basic_document_info<
-				Document,
-				Selector
-			>::get_buffer().get_user_table() )
+			>(base_type::m_buffer.get_user_table() )
 		)
 	);
 }
@@ -668,6 +602,9 @@ void basic_client_document_info<Document, Selector>::
 			)
 		);
 
+	// TODO: Throw bad value when already subscribed? Would be redundant
+	// check...
+
 	user_subscribe(*new_user);
 }
 
@@ -681,6 +618,9 @@ void basic_client_document_info<Document, Selector>::
 				get_buffer().get_user_table()
 			)
 		);
+
+	// TODO: Throw bad value when already subscribed? Would be redundant
+	// check...
 
 	user_unsubscribe(*old_user);
 }
@@ -701,27 +641,21 @@ template<typename Document, typename Selector>
 const typename basic_client_document_info<Document, Selector>::buffer_type&
 basic_client_document_info<Document, Selector>::get_buffer() const
 {
-	return dynamic_cast<const buffer_type&>(
-		basic_local_document_info<Document, Selector>::get_buffer()
-	);
+	return dynamic_cast<const buffer_type&>(base_local_type::get_buffer());
 }
 
 template<typename Document, typename Selector>
 typename basic_client_document_info<Document, Selector>::net_type&
 basic_client_document_info<Document, Selector>::get_net6()
 {
-	return dynamic_cast<net_type&>(
-		basic_local_document_info<Document, Selector>::get_net6()
-	);
+	return dynamic_cast<net_type&>(base_local_type::get_net6() );
 }
 
 template<typename Document, typename Selector>
 const typename basic_client_document_info<Document, Selector>::net_type&
 basic_client_document_info<Document, Selector>::get_net6() const
 {
-	return dynamic_cast<const net_type&>(
-		basic_local_document_info<Document, Selector>::get_net6()
-	);
+	return dynamic_cast<const net_type&>(base_local_type::get_net6() );
 }
 
 } // namespace obby

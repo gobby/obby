@@ -44,6 +44,13 @@ public:
 	typedef basic_local_buffer<Document, Selector> buffer_type;
 	typedef typename buffer_type::net_type net_type;
 
+	enum subscription_state {
+		UNSUBSCRIBED,
+		UNSUBSCRIBING,
+		SUBSCRIBED,
+		SUBSCRIBING
+	};
+
 	basic_local_document_info(const buffer_type& buffer,
 	                          net_type& net,
 	                          const user* owner,
@@ -72,6 +79,11 @@ public:
 	 * this document.
 	 */
 	virtual bool is_subscribed(const user& user) const;
+
+	/** @brief Returns the state of the local user's subscription to
+	 * this document.
+	 */
+	virtual subscription_state get_subscription_state() const = 0;
 
 public:
 	/** Returns the buffer this document belongs to.

@@ -38,11 +38,16 @@ class basic_host_document_info:
 	virtual public basic_server_document_info<Document, Selector>
 {
 public:
-	typedef typename basic_server_document_info<Document, Selector>::
-		document_type document_type;
+	typedef basic_document_info<Document, Selector> base_type;
+	typedef basic_local_document_info<Document, Selector> base_local_type;
+	typedef basic_server_document_info<Document, Selector> base_server_type;
+
+	typedef typename base_server_type::document_type document_type;
 
 	typedef basic_host_buffer<Document, Selector> buffer_type;
 	typedef typename buffer_type::net_type net_type;
+
+	typedef typename base_local_type::subscription_state subscription_state;
 
 	basic_host_document_info(const buffer_type& buffer,
 	                         net_type& net,
@@ -77,6 +82,11 @@ public:
 	 */
 	virtual void unsubscribe();
 
+	/** @brief Returns the state of the local user's subscription to
+	 * this document.
+	 */
+	virtual subscription_state get_subscription_state() const;
+
 protected:
 	/** Internally subscribes a user to this document.
 	 */
@@ -109,38 +119,16 @@ basic_host_document_info<Document, Selector>::
 	                         unsigned int id,
 	                         const std::string& title,
 	                         const std::string& content):
-	basic_document_info<Document, Selector>(
-		buffer,
-		net,
-		owner,
-		id,
-		title
-	),
-	basic_local_document_info<Document, Selector>(
-		buffer,
-		net,
-		owner,
-		id,
-		title
-	),
- 	basic_server_document_info<Document, Selector>(
-		buffer,
-		net,
-		owner,
-		id,
-		title,
-		content
-	)
+	base_type(buffer, net, owner, id, title),
+	base_local_type(buffer, net, owner, id, title),
+ 	base_server_type(buffer, net, owner, id, title, content)
 {
 	// Server adds owner automagically to jupiter algo. If the local user
 	// is the owner, it does not need to be added to jupiter.
 	// TODO: Find a better solution here, maybe another server_document_info
 	// ctor
 	if(&buffer.get_self() == owner)
-	{
-		basic_server_document_info<Document, Selector>::
-			m_jupiter->client_remove(*owner);
-	}
+		base_server_type::m_jupiter->client_remove(*owner);
 }
 
 template<typename Document, typename Selector>
@@ -148,9 +136,9 @@ basic_host_document_info<Document, Selector>::
 	basic_host_document_info(const buffer_type& buffer,
 	                         net_type& net,
 	                         const serialise::object& obj):
-	basic_document_info<Document, Selector>(buffer, net, obj),
-	basic_local_document_info<Document, Selector>(buffer, net, obj),
-	basic_server_document_info<Document, Selector>(buffer, net, obj)
+	base_type(buffer, net, obj),
+	base_local_type(buffer, net, obj),
+	base_server_type(buffer, net, obj)
 {
 }
 
@@ -161,8 +149,7 @@ void basic_host_document_info<Document, Selector>::
 {
 	const user* self = &get_buffer().get_self();
 
-	basic_server_document_info<Document, Selector>::
-		insert_impl(pos, text, self);
+	base_server_type::insert_impl(pos, text, self);
 }
 
 template<typename Document, typename Selector>
@@ -170,16 +157,14 @@ void basic_host_document_info<Document, Selector>::
 	erase(position pos,
 	      position len)
 {
-	basic_server_document_info<Document, Selector>::
-		erase_impl(pos, len, &get_buffer().get_self() );
+	base_server_type::erase_impl(pos, len, &get_buffer().get_self() );
 }
 
 template<typename Document, typename Selector>
 void basic_host_document_info<Document, Selector>::
 	rename(const std::string& new_title)
 {
-	basic_server_document_info<Document, Selector>::
-		rename_impl(new_title, &get_buffer().get_self() );
+	base_server_type::rename_impl(new_title, &get_buffer().get_self() );
 }
 
 template<typename Document, typename Selector>
@@ -187,16 +172,25 @@ void basic_host_document_info<Document, Selector>::subscribe()
 {
 	// TODO: Call a base-class method that does not try to sync the document
 	// contents to the user, it is not senseful in our case.
-	basic_server_document_info<Document, Selector>::
-		subscribe_user(get_buffer().get_self() );
+	base_server_type::subscribe_user(get_buffer().get_self() );
 }
 
 template<typename Document, typename Selector>
 void basic_host_document_info<Document, Selector>::unsubscribe()
 {
 	// TODO: Same here
-	basic_server_document_info<Document, Selector>::
-		unsubscribe_user(get_buffer().get_self() );
+	base_server_type::unsubscribe_user(get_buffer().get_self() );
+}
+
+template<typename Document, typename Selector>
+typename basic_host_document_info<Document, Selector>::subscription_state
+basic_host_document_info<Document, Selector>::get_subscription_state() const
+{
+	// SUBSCRIBING and UNSUBSCRIBING do not exist in our case
+	if(base_local_type::is_subscribed() )
+		return base_local_type::SUBSCRIBED;
+	else
+		return base_local_type::UNSUBSCRIBED;
 }
 
 template<typename Document, typename Selector>
@@ -209,14 +203,11 @@ void basic_host_document_info<Document, Selector>::
 
 	// Do not call server function because it will add the client to
 	// jupiter in any case.
-	basic_document_info<Document, Selector>::user_subscribe(user);
+	base_type::user_subscribe(user);
 
 	// Add client to jupiter if it is not the local client
 	if(&user != &get_buffer().get_self() )
-	{
-		basic_server_document_info<Document, Selector>::
-			m_jupiter->client_add(user);
-	}
+		base_server_type::m_jupiter->client_add(user);
 }
 
 template<typename Document, typename Selector>
@@ -225,40 +216,31 @@ void basic_host_document_info<Document, Selector>::
 {
 	// Remove client from jupiter if is is not the local client
 	if(&user != &get_buffer().get_self() )
-	{
-		basic_server_document_info<Document, Selector>::
-			m_jupiter->client_remove(user);
-	}
+		base_server_type::m_jupiter->client_remove(user);
 
 	// Call base function
-	basic_document_info<Document, Selector>::user_unsubscribe(user);
+	base_type::user_unsubscribe(user);
 }
 
 template<typename Document, typename Selector>
 const typename basic_host_document_info<Document, Selector>::buffer_type&
 basic_host_document_info<Document, Selector>::get_buffer() const
 {
-	return dynamic_cast<const buffer_type&>(
-		basic_server_document_info<Document, Selector>::get_buffer()
-	);
+	return dynamic_cast<const buffer_type&>(base_server_type::get_buffer());
 }
 
 template<typename Document, typename Selector>
 typename basic_host_document_info<Document, Selector>::net_type&
 basic_host_document_info<Document, Selector>::get_net6()
 {
-	return dynamic_cast<net_type&>(
-		basic_server_document_info<Document, Selector>::get_net6()
-	);
+	return dynamic_cast<net_type&>(base_server_type::get_net6());
 }
 
 template<typename Document, typename Selector>
 const typename basic_host_document_info<Document, Selector>::net_type&
 basic_host_document_info<Document, Selector>::get_net6() const
 {
-	return dynamic_cast<const net_type&>(
-		basic_server_document_info<Document, Selector>::get_net6()
-	);
+	return dynamic_cast<const net_type&>(base_server_type::get_net6());
 }
 
 } // namespace obby
