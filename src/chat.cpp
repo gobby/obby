@@ -313,6 +313,7 @@ void obby::chat::on_sync_init(unsigned int)
 	m_user_join_conn.block();
 	m_user_part_conn.block();
 	m_document_insert_conn.block();
+	m_document_remove_conn.block();
 }
 
 void obby::chat::on_sync_final()
@@ -320,6 +321,7 @@ void obby::chat::on_sync_final()
 	m_user_join_conn.unblock();
 	m_user_part_conn.unblock();
 	m_document_insert_conn.unblock();
+	m_document_remove_conn.unblock();
 }
 
 void obby::chat::on_user_join(const user& user)

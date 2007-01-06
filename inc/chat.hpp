@@ -191,6 +191,9 @@ protected:
 	template<typename DocumentInfo>
 	void on_document_insert(DocumentInfo& document);
 
+	template<typename DocumentInfo>
+	void on_document_remove(DocumentInfo& document);
+
 	unsigned int m_max_messages;
 	std::list<message*> m_messages;
 
@@ -199,6 +202,7 @@ protected:
 	sigc::connection m_user_join_conn;
 	sigc::connection m_user_part_conn;
 	sigc::connection m_document_insert_conn;
+	sigc::connection m_document_remove_conn;
 };
 
 template<typename Buffer>
@@ -220,6 +224,13 @@ chat::chat(const Buffer& buffer, unsigned int max_messages):
 		sigc::mem_fun(
 			*this,
 			&chat::on_document_insert<document_info_type>
+		)
+	);
+
+	m_document_remove_conn = buffer.document_remove_event().connect(
+		sigc::mem_fun(
+			*this,
+			&chat::on_document_remove<document_info_type>
 		)
 	);
 }
@@ -246,6 +257,14 @@ void chat::on_document_insert(DocumentInfo& document)
 	}
 
 	add_message(new system_message(localised_str, std::time(NULL)) );
+}
+
+template<typename DocumentInfo>
+void chat::on_document_remove(DocumentInfo& document)
+{
+	obby::format_string str(_("Document %0% has been removed"));
+	str << document.get_title();
+	add_message(new system_message(str.str(), std::time(NULL)));
 }
 
 } // namespace obby
