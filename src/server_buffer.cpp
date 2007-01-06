@@ -19,6 +19,7 @@
 #include "server_buffer.hpp"
 
 obby::server_buffer::server_buffer(unsigned int port)
+ : buffer(), m_counter(0), m_server(port)
 {
 }
 
@@ -28,9 +29,38 @@ obby::server_buffer::~server_buffer()
 
 void obby::server_buffer::select()
 {
+	m_server.select();
 }
 
 void obby::server_buffer::select(unsigned int timeout)
 {
+	m_server.select(timeout);
+}
+
+obby::server_buffer::signal_insert_type
+obby::server_buffer::insert_event() const
+{
+	return m_signal_insert;
+}
+
+obby::server_buffer::signal_delete_type
+obby::server_buffer::delete_event() const
+{
+	return m_signal_delete;
+}
+
+obby::server_buffer::signal_join_type obby::server_buffer::join_event() const
+{
+	return m_signal_join;
+}
+
+obby::server_buffer::signal_login_type obby::server_buffer::login_event() const
+{
+	return m_signal_login;
+}
+
+obby::server_buffer::signal_part_type obby::server_buffer::part_event() const
+{
+	return m_signal_part;
 }
 
