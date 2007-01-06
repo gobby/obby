@@ -568,8 +568,11 @@ void basic_client_buffer<selector_type>::
 	on_part(const net6::user& user6, const net6::packet& pack)
 {
 	// Find user
-	const user* cur_user = basic_buffer<selector_type>::
-		m_user_table.find(user6);
+	const user* cur_user = basic_buffer<selector_type>::m_user_table.find(
+		user6,
+		user::flags::CONNECTED,
+		user::flags::NONE
+	);
 
 	// Should never happen
 	if(cur_user == NULL)

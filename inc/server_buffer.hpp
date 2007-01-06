@@ -435,9 +435,9 @@ void basic_server_buffer<selector_type>::
 	// TODO: send_to_all_except function or something
 	// or, better: user_table.send() with given flags.
 	for(user_table::iterator iter = basic_buffer<selector_type>::
-		m_user_table.begin(user::flags::CONNECTED);
+		m_user_table.begin(user::flags::CONNECTED, user::flags::NONE);
 	    iter != basic_buffer<selector_type>::
-		m_user_table.end(user::flags::CONNECTED);
+		m_user_table.end(user::flags::CONNECTED, user::flags::NONE);
 	    ++ iter)
 	{
 		// The owner already knows about the document.
@@ -519,7 +519,11 @@ void basic_server_buffer<selector_type>::on_join(const net6::user& user6)
 {
 	// Find user in list
 	const user* new_user = basic_buffer<selector_type>::
-		m_user_table.find(user6);
+		m_user_table.find(
+			user6,
+			user::flags::CONNECTED,
+			user::flags::NONE
+		);
 
 	// Should not happen
 	if(new_user == NULL)
@@ -532,7 +536,7 @@ void basic_server_buffer<selector_type>::on_join(const net6::user& user6)
 	// Calculate number of required sync packets (one for each
 	// non-connected user, one for each document in the list).
 	unsigned int sync_n = basic_buffer<selector_type>::
-		m_user_table.count(user::flags::CONNECTED, true);
+		m_user_table.count(user::flags::NONE, user::flags::CONNECTED);
 	sync_n += basic_buffer<selector_type>::document_count();
 
 	// Send initial sync packet with this number, the client may then show
@@ -543,9 +547,9 @@ void basic_server_buffer<selector_type>::on_join(const net6::user& user6)
 
 	// Synchronise non-connected users.
 	for(user_table::iterator iter = basic_buffer<selector_type>::
-		m_user_table.begin(user::flags::CONNECTED, true);
+		m_user_table.begin(user::flags::NONE, user::flags::CONNECTED);
 	    iter != basic_buffer<selector_type>::
-		m_user_table.end(user::flags::CONNECTED, true);
+		m_user_table.end(user::flags::NONE, user::flags::CONNECTED);
 	    ++ iter)
 	{
 		net6::packet user_pack("obby_sync_usertable_user");
@@ -597,7 +601,11 @@ void basic_server_buffer<selector_type>::on_part(const net6::user& user6)
 {
 	// Find obby::user object for given net6::user
 	const user* cur_user = basic_buffer<selector_type>::
-		m_user_table.find(user6);
+		m_user_table.find(
+			user6,
+			user::flags::CONNECTED,
+			user::flags::NONE
+		);
 
 	// Should not happen
 	if(cur_user == NULL)
@@ -623,7 +631,8 @@ void basic_server_buffer<selector_type>::on_part(const net6::user& user6)
 
 template<typename selector_type>
 bool basic_server_buffer<selector_type>::
-	on_auth(const net6::user& user6, const net6::packet& pack,
+	on_auth(const net6::user& user6,
+	        const net6::packet& pack,
 	        net6::login::error& error)
 {
 	const std::string name =
@@ -675,7 +684,8 @@ bool basic_server_buffer<selector_type>::
 
 	// Search user in user table
 	const user_table& table = basic_buffer<selector_type>::m_user_table;
-	const obby::user* user = table.find(name, user::flags::CONNECTED, true);
+	const obby::user* user =
+		 table.find(name, user::flags::NONE, user::flags::CONNECTED);
 
 	// Compare user password
 	if(user && !user->get_password().empty() )
@@ -735,7 +745,11 @@ void basic_server_buffer<selector_type>::
 {
 	// Find corresponding user in list
 	const user* cur_user = basic_buffer<selector_type>::
-		m_user_table.find(user6);
+		m_user_table.find(
+			user6,
+			user::flags::CONNECTED,
+			user::flags::NONE
+		);
 
 	// Should not happen
 	if(cur_user == NULL)
@@ -755,7 +769,11 @@ void basic_server_buffer<selector_type>::
 {
 	// Get obby::user from net6::user
 	const user* from_user = basic_buffer<selector_type>::
-		m_user_table.find(user6);
+		m_user_table.find(
+			user6,
+			user::flags::CONNECTED,
+			user::flags::NONE
+		);
 
 	// Should not happen
 	if(from_user == NULL)

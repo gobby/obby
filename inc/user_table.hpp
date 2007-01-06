@@ -35,31 +35,36 @@ class user_table: private net6::non_copyable
 {
 public:
 	typedef std::map<unsigned int, user*> user_map;
+	typedef user_map::size_type size_type;
 	typedef user_map::const_iterator base_iterator;
 
-	class iterator : public base_iterator
+	class iterator: public base_iterator
 	{
 	public:
 		typedef user_map map_type;
 
-		iterator(const map_type& map, user::flags flags,
-		         bool inverse) :
-			base_iterator(), m_map(map), m_flags(flags),
-			m_inverse(inverse)
+		iterator(const map_type& map,
+		         user::flags inc_flags,
+		         user::flags exc_flags):
+			base_iterator(), m_map(map), m_inc_flags(inc_flags),
+			m_exc_flags(exc_flags)
 		{
 		}
 
-		iterator(const map_type& map, const base_iterator& base,
-		         user::flags flags, bool inverse) :
-			base_iterator(base), m_map(map), m_flags(flags),
-			m_inverse(inverse)
+		iterator(const map_type& map,
+		         const base_iterator& base,
+		         user::flags inc_flags,
+		         user::flags exc_flags):
+			base_iterator(base), m_map(map), m_inc_flags(inc_flags),
+			m_exc_flags(exc_flags)
 		{
 			inc_valid();
 		}
 
-		iterator(const iterator& other) :
+		iterator(const iterator& other):
 			base_iterator(other), m_map(other.m_map),
-			m_flags(other.m_flags), m_inverse(other.m_inverse)
+			m_inc_flags(other.m_inc_flags),
+			m_exc_flags(other.m_exc_flags)
 		{
 		}
 
@@ -101,7 +106,17 @@ public:
 			return temp;
 		}
 
-		iterator& operator--()
+		static bool check_flags(obby::user::flags flags,
+		                        obby::user::flags inc_flags,
+		                        obby::user::flags exc_flags)
+		{
+			return (
+				( (flags & inc_flags) == inc_flags) &&
+				( (flags & exc_flags) == 0)
+			);
+		}
+
+		/*iterator& operator--()
 		{
 			base_iterator::operator--();
 			dec_valid();
@@ -113,35 +128,32 @@ public:
 			iterator temp(*this);
 			operator--();
 			return temp;
-		}
+		}*/
 	protected:
 		void inc_valid()
 		{
-//			if(m_inverse == false && m_flags == user::flags::NONE)
-//				return;
+			while(*this != m_map.end() )
+			{
+				obby::user::flags flags = (*this)->get_flags();
+				if(check_flags(flags, m_inc_flags, m_exc_flags))
+					break;
 
-			while( (*this != m_map.end()) && (m_inverse ? (
-				((*this)->get_flags() & m_flags) != 0) : (
-				((*this)->get_flags() & m_flags) != m_flags))
-			)
 				base_iterator::operator++();
+			}
 		}
 
-		void dec_valid()
+		/*void dec_valid()
 		{
-//			if(m_inverse == false && m_flags == user::flags::NONE)
-//				return;
-
 			while( (*this != m_map.end()) && (m_inverse ? (
 				((*this)->get_flags() & m_flags) != 0) : (
 				((*this)->get_flags() & m_flags) != m_flags))
 			)
 				base_iterator::operator--();
-		}
+		}*/
 
 		const map_type& m_map;
-		user::flags m_flags;
-		bool m_inverse;
+		user::flags m_inc_flags;
+		user::flags m_exc_flags;
 	};
 
 	user_table();
@@ -191,37 +203,37 @@ public:
 
 	/** Returns the beginning of the user list.
 	 */
-	iterator begin(user::flags flags = user::flags::NONE,
-	               bool inverse = false) const;
+	iterator begin(user::flags inc_flags,
+	               user::flags exc_flags) const;
 
 	/** Returns the end of the user list.
 	 */
-	iterator end(user::flags flags = user::flags::NONE,
-	             bool inverse = false) const;
+	iterator end(user::flags inc_flags,
+	             user::flags exc_flags) const;
 
 	/** Searches a user with the given flags that has the given ID.
 	 */
 	const user* find(unsigned int id,
-	                 user::flags flags = user::flags::NONE,
-	                 bool inverse = false) const;
+	                 user::flags inc_flags,
+	                 user::flags exc_flags) const;
 
 	/** Searches a user which represents the given underlaying net6::user
 	 * object.
 	 */
 	const user* find(const net6::user& user,
-	                 user::flags flags = user::flags::NONE,
-	                 bool inverse = false) const;
+	                 user::flags inc_flags,
+	                 user::flags exc_flags) const;
 
 	/** Searches for a user with the given name.
 	 */
 	const user* find(const std::string& name,
-	                 user::flags flags = user::flags::NONE,
-	                 bool inverse = false) const;
+	                 user::flags inc_flags,
+	                 user::flags exc_flags) const;
 
 	/** Counts users.
 	 */
-	unsigned int count(user::flags flags = user::flags::NONE,
-	                   bool inverse = false) const;
+	size_type count(user::flags inc_flags,
+	                user::flags exc_flags) const;
 protected:
 	/** Internal function to find a non-const user with the given name.
 	 */

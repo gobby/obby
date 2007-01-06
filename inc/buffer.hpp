@@ -322,8 +322,9 @@ bool basic_buffer<selector_type>::check_colour(const colour& colour,
                                                const user* ignore) const
 {
 	for(user_table::iterator iter =
-		m_user_table.begin(user::flags::CONNECTED);
-	    iter != m_user_table.end(user::flags::CONNECTED);
+		m_user_table.begin(user::flags::CONNECTED, user::flags::NONE);
+	    iter !=
+		m_user_table.end(user::flags::CONNECTED, user::flags::NONE);
 	    ++ iter)
 	{
 		// Ignore given user to ignore

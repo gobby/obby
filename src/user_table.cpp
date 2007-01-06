@@ -152,70 +152,80 @@ void obby::user_table::remove_user(const user& user_to_remove)
 unsigned int obby::user_table::find_free_id() const
 {
 	unsigned int free_id = 1;
-	for(iterator iter = begin(); iter != end(); ++ iter)
-		if(iter->get_id() >= free_id)
-			free_id = iter->get_id() + 1;
+	for(base_iterator i = m_user_map.begin(); i != m_user_map.end(); ++ i)
+		if( i->second->get_id() >= free_id)
+			free_id = i->second->get_id() + 1;
 
 	return free_id;
 }
 
-obby::user_table::iterator obby::user_table::begin(user::flags flags,
-                                                   bool inverse) const
+obby::user_table::iterator obby::user_table::begin(user::flags inc_flags,
+                                                   user::flags exc_flags) const
 {
-	return iterator(m_user_map, m_user_map.begin(), flags, inverse);
+	return iterator(m_user_map, m_user_map.begin(), inc_flags, exc_flags);
 }
 
-obby::user_table::iterator obby::user_table::end(user::flags flags,
-                                                 bool inverse) const
+obby::user_table::iterator obby::user_table::end(user::flags inc_flags,
+                                                 user::flags exc_flags) const
 {
-	return iterator(m_user_map, m_user_map.end(), flags, inverse);
+	return iterator(m_user_map, m_user_map.end(), inc_flags, exc_flags);
 }
 
 const obby::user* obby::user_table::find(unsigned int id,
-                                         user::flags flags,
-                                         bool inverse) const
+                                         user::flags inc_flags,
+                                         user::flags exc_flags) const
 {
 	base_iterator iter = m_user_map.find(id);
 	if(iter == m_user_map.end() ) return NULL;
 
-	// User does not match the criteria
-	if(iterator(m_user_map, iter, flags, inverse) != iter)
-		return NULL;
-
+	user::flags flags = iter->second->get_flags();
+	if(!iterator::check_flags(flags, inc_flags, exc_flags) ) return NULL;
 	return iter->second;
 }
 
 const obby::user* obby::user_table::find(const net6::user& user,
-                                         user::flags flags,
-                                         bool inverse) const
+                                         user::flags inc_flags,
+                                         user::flags exc_flags) const
 {
-	for(iterator iter = begin(); iter != end(); ++ iter)
-		if(iter->get_flags() & user::flags::CONNECTED)
-			if(&iter->get_net6() == &user)
-				return &(*iter);
+	for(base_iterator i = m_user_map.begin(); i != m_user_map.end(); ++ i)
+	{
+		if(~i->second->get_flags() & user::flags::CONNECTED) continue;
+		if( &i->second->get_net6() != &user) continue;
+
+		user::flags flags = i->second->get_flags();
+		if(!iterator::check_flags(flags, inc_flags, exc_flags) ) break;
+		return i->second;
+	}
 
 	return NULL;
 }
 
 const obby::user* obby::user_table::find(const std::string& name,
-                                         user::flags flags,
-                                         bool inverse) const
+                                         user::flags inc_flags,
+                                         user::flags exc_flags) const
 {
-	for(iterator iter = begin(); iter != end(); ++ iter)
-		if(iter->get_name() == name)
-			return &(*iter);
+	for(base_iterator i = m_user_map.begin(); i != m_user_map.end(); ++ i)
+	{
+		if(i->second->get_name() != name) continue;
+
+		user::flags flags = i->second->get_flags();
+		if(!iterator::check_flags(flags, inc_flags, exc_flags) ) break;
+		return i->second;
+	}
 
 	return NULL;
 }
 
-unsigned int obby::user_table::count(user::flags flags, bool inverse) const
+obby::user_table::size_type obby::user_table::count(user::flags inc_flags,
+                                                    user::flags exc_flags) const
 {
-	if(flags == user::flags::NONE && inverse == false)
+	// No criteria: Optimize by returning the cached value from the map
+	if(inc_flags == user::flags::NONE && exc_flags == user::flags::NONE)
 		return m_user_map.size();
 
-	unsigned int c = 0;
-	for(iterator iter = begin(flags, inverse);
-	    iter != end(flags, inverse);
+	size_type c = 0;
+	for(iterator iter = begin(inc_flags, exc_flags);
+	    iter != end(inc_flags, exc_flags);
 	    ++ iter)
 	{
 		++ c;
@@ -236,4 +246,3 @@ obby::user* obby::user_table::find_int(const std::string& name)
 
 	return NULL;
 }
-

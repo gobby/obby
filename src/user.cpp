@@ -206,7 +206,12 @@ serialise::context<obby::user*>::from_string(const std::string& string) const
 	if(user_id == 0) return NULL;
 
 	// Find user
-	const obby::user* user = m_user_table->find(user_id);
+	const obby::user* user = m_user_table->find(
+		user_id,
+		obby::user::flags::NONE,
+		obby::user::flags::NONE
+	);
+
 	if(user == NULL)
 	{
 		// Not in user table
