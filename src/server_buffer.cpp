@@ -68,6 +68,14 @@ void obby::server_buffer::create_document(const std::string& title)
 void obby::server_buffer::create_document(const std::string& title,
                                           const std::string& content)
 {
+	// Create the document with the special server id 0.
+	create_document(title, content, 0);
+}
+
+void obby::server_buffer::create_document(const std::string& title,
+                                          const std::string& content,
+                                          unsigned int author_id)
+{
 	// Internally create the document
 	unsigned int id = ++ m_doc_counter;
 	document& doc = add_document(id);
@@ -75,11 +83,11 @@ void obby::server_buffer::create_document(const std::string& title,
 
 	// Publish the new document to the users
 	net6::packet pack("obby_document_create");
-	pack << id << title << content;
+	pack << id << title << author_id << content;
 	m_server->send(pack);
 
 	// Insert the document's content, syncing is done by the create packet.
-	doc.insert_nosync(0, content, 0);
+	doc.insert_nosync(0, content, author_id);
 
 	// Emit the signal
 	m_signal_insert_document.emit(doc);
@@ -315,7 +323,7 @@ void obby::server_buffer::on_net_document_create(const net6::packet& pack,
 	const std::string& title = pack.get_param(0).as_string();
 	const std::string& content = pack.get_param(1).as_string();
 
-	create_document(title, content);
+	create_document(title, content, from.get_id() );
 }
 
 void obby::server_buffer::on_net_document_rename(const net6::packet& pack,

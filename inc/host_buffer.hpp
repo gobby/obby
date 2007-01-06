@@ -51,6 +51,14 @@ public:
 	/** Sends a global message to all users.
 	 */
 	virtual void send_message(const std::string& message);
+	
+	/** Creates a new document with predefined content.
+	 * signal_insert_document will be emitted and may be used to access
+	 * the resulting obby::document. Additional signals will be emitted
+	 * for the synced content.
+	 */
+	virtual void create_document(const std::string& title,
+	                             const std::string& content);
 
 protected:
 	/** Private constructor used by derived classed. It does not create

@@ -104,6 +104,13 @@ protected:
 	 */
 	virtual document& add_document(unsigned int id);
 
+	/** Internal function to create a document with predefined content
+	 * and the creator's id.
+	 */
+	virtual void create_document(const std::string& title,
+	                             const std::string& content,
+				     unsigned int author_id);
+
 	/** Relays a message to the other users.
 	 */
 	void relay_message(unsigned int uid, const std::string& message);

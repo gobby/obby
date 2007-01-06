@@ -87,3 +87,9 @@ obby::document& obby::host_buffer::add_document(unsigned int id)
 	return *doc;
 }
 
+void obby::host_buffer::create_document(const std::string& title,
+                                        const std::string& content)
+{
+	server_buffer::create_document(title, content, m_self->get_id() );
+}
+

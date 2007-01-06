@@ -228,10 +228,11 @@ void obby::client_buffer::on_net_record(const net6::packet& pack)
 
 void obby::client_buffer::on_net_document_create(const net6::packet& pack)
 {
-	if(pack.get_param_count() < 3) return;
+	if(pack.get_param_count() < 4) return;
 	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
 	if(pack.get_param(1).get_type() != net6::packet::param::STRING) return;
-	if(pack.get_param(2).get_type() != net6::packet::param::STRING) return;
+	if(pack.get_param(2).get_type() != net6::packet::param::INT) return;
+	if(pack.get_param(3).get_type() != net6::packet::param::STRING) return;
 
 	unsigned int id = pack.get_param(0).as_int();
 	const std::string& title = pack.get_param(1).as_string();
@@ -240,9 +241,10 @@ void obby::client_buffer::on_net_document_create(const net6::packet& pack)
 	document& new_doc = add_document(id);
 	new_doc.set_title(title);
 	
-	const std::string& content = pack.get_param(2).as_string();
-	new_doc.insert_nosync(0, content, 0);
-	
+	unsigned int author_id = pack.get_param(2).as_int();
+	const std::string& content = pack.get_param(3).as_string();
+	new_doc.insert_nosync(0, content, author_id);
+
 	m_signal_insert_document.emit(new_doc);
 }
 
