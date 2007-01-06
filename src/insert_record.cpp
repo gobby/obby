@@ -58,8 +58,13 @@ void obby::insert_record::on_insert(const position& pos,
 
 void obby::insert_record::on_delete(const position& from, const position& to)
 {
-	if(m_pos < from)
+	if(m_pos >= from && m_pos < to)
 	{
+		m_text = "";
+	}
+	else(m_pos >= to)
+	{
+		// TODO: Put this into a method of position?
 		if(to.get_line() == m_pos.get_line() )
 			m_pos.move_by(
 				from.get_line() - to.get_line(),
@@ -67,10 +72,6 @@ void obby::insert_record::on_delete(const position& from, const position& to)
 			);
 		else
 			m_pos.move_by(from.get_line() - to.get_line(), 0);
-	}
-	else if(m_pos >= from && m_pos < to)
-	{
-		m_text = "";
 	}
 }
 
