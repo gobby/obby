@@ -13,6 +13,7 @@ Normal:
   * Undo/Redo (#39)
   * Authentication: Database-based authentication using user/password (#57)
   * Authentication: Access control lists (#58)
+  * Use precompiled headers (#61)
 
 Minor:
 
@@ -54,6 +55,10 @@ useful for dedicated private ''obby'' servers.
 ''libobby'' should provide the following mean of authentication:
  * Single documents should be get some kind of password or access control 
 list protection.
+
+61: Use precompiled headers
+---------------------------
+All projects should make use of precompiled headers.
 
 20: Session serialisation
 -------------------------
