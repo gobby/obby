@@ -96,6 +96,15 @@ void obby::server_buffer::remove_document(document* doc)
 	delete doc;
 }
 
+void obby::server_buffer::relay_message(unsigned int uid,
+                                        const std::string& message)
+{
+	net6::packet pack("obby_message");
+	pack << uid;
+	pack << message;
+	m_server->send(pack);
+}
+
 obby::server_buffer::signal_connect_type
 obby::server_buffer::connect_event() const
 {
@@ -127,6 +136,8 @@ void obby::server_buffer::on_data(const net6::packet& pack,
 		on_net_document_rename(pack, *from_user);
 	if(pack.get_command() == "obby_document_remove")
 		on_net_document_remove(pack, *from_user);
+	if(pack.get_command() == "obby_message")
+		on_net_message(pack, *from_user);
 }
 
 bool obby::server_buffer::on_auth(net6::server::peer& peer,
@@ -322,5 +333,17 @@ void obby::server_buffer::on_net_document_remove(const net6::packet& pack,
 
 	m_signal_remove_document.emit(*doc);
 	remove_document(doc);
+}
+
+void obby::server_buffer::on_net_message(const net6::packet& pack, user& from)
+{
+	if(pack.get_param_count() < 1) return;
+	if(pack.get_param(0).get_type() != net6::packet::param::STRING) return;
+
+	unsigned int uid = from.get_id();
+	const std::string& message = pack.get_param(0).as_string();
+
+	m_signal_message.emit(uid, message);
+	relay_message(uid, message);
 }
 

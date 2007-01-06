@@ -62,6 +62,10 @@ public:
 	/** Removes an existing document.
 	 */
 	void remove_document(document* doc);
+
+	/** Relays a message to the other users.
+	 */
+	void relay_message(unsigned int uid, const std::string& message);
 	
 	/** Signal which will be emitted if a new client has connected.
 	 */
@@ -105,6 +109,8 @@ protected:
 	void on_net_document_create(const net6::packet& pack, user& from);
 	void on_net_document_rename(const net6::packet& pack, user& from);
 	void on_net_document_remove(const net6::packet& pack, user& from);
+
+	void on_net_message(const net6::packet& pack, user& from);
 
 	unsigned int m_doc_counter;
 	net6::server* m_server;

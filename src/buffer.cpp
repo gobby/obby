@@ -130,6 +130,12 @@ obby::buffer::remove_document_event() const
 	return m_signal_remove_document;
 }
 
+obby::buffer::signal_message_type
+obby::buffer::message_event() const
+{
+	return m_signal_message;
+}
+
 obby::user* obby::buffer::add_user(net6::peer& peer, int red, int green,
                                    int blue)
 {

@@ -156,6 +156,9 @@ void obby::client_buffer::on_data(const net6::packet& pack)
 	if(pack.get_command() == "obby_document_remove")
 		on_net_document_remove(pack);
 
+	if(pack.get_command() == "obby_message")
+		on_net_message(pack);
+
 	if(pack.get_command() == "obby_sync_init")
 		on_net_sync_init(pack);
 	if(pack.get_command() == "obby_sync_usertable_init")
@@ -248,6 +251,18 @@ void obby::client_buffer::on_net_document_remove(const net6::packet& pack)
 			break;
 		}
 	}
+}
+
+void obby::client_buffer::on_net_message(const net6::packet& pack)
+{
+	if(pack.get_param_count() < 2) return;
+	if(pack.get_param(0).get_type() != net6::packet::param::INT) return;
+	if(pack.get_param(1).get_type() != net6::packet::param::STRING) return;
+
+	unsigned int uid = pack.get_param(0).as_int();
+	const std::string& message = pack.get_param(1).as_string();
+
+	m_signal_message.emit(uid, message);
 }
 
 void obby::client_buffer::on_net_sync_init(const net6::packet& pack)

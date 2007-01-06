@@ -63,6 +63,8 @@ public:
 	typedef sigc::signal<void, document&, const std::string&>
 		signal_rename_document_type;
 	typedef sigc::signal<void, document&> signal_remove_document_type;
+	typedef sigc::signal<void, unsigned int, const std::string&>
+		signal_message_type;
 
 	buffer();
 	virtual ~buffer();
@@ -118,6 +120,11 @@ public:
 	 * obby session has removed an existing document.
 	 */
 	signal_remove_document_type remove_document_event() const;
+
+	/** Signal which will be emitted when another participant in the
+	 * obby session sends a chat packet.
+	 */
+	signal_message_type message_event() const;
 protected:
 	/** Internal function to add a new user to the user list.
 	 */
@@ -150,6 +157,8 @@ protected:
 	signal_insert_document_type m_signal_insert_document;
 	signal_rename_document_type m_signal_rename_document;
 	signal_remove_document_type m_signal_remove_document;
+
+	signal_message_type m_signal_message;
 };
 
 }
