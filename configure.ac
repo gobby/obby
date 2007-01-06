@@ -44,15 +44,15 @@ AC_CACHE_CHECK([whether to compile with Zeroconf support],
 
 using_zeroconf=no
 if test "x$zeroconf" = "xyes" ; then
-  # Check for Apple's Bonjour first
-  AC_CHECK_HEADER(dns_sd.h, [AC_CHECK_LIB(dns_sd, DNSServiceRegister,
-                  [AC_DEFINE(WITH_BONJOUR, 1,
-                             [Use Bonjour Zeroconf implementation.])])])
-  if test "x$ac_cv_lib_dns_sd_DNSServiceRegister" = "xyes" ; then
-    using_zeroconf=bonjour
-    extra_libraries="$extra_libraries -ldns_sd"
-    AC_MSG_NOTICE([Using Bonjour/DNS-SD Zeroconf implementation.])
-  else
+##  # Check for Apple's Bonjour first
+##  AC_CHECK_HEADER(dns_sd.h, [AC_CHECK_LIB(dns_sd, DNSServiceRegister,
+##                  [AC_DEFINE(WITH_BONJOUR, 1,
+##                             [Use Bonjour Zeroconf implementation.])])])
+##  if test "x$ac_cv_lib_dns_sd_DNSServiceRegister" = "xyes" ; then
+##    using_zeroconf=bonjour
+##    extra_libraries="$extra_libraries -ldns_sd"
+##    AC_MSG_NOTICE([Using Bonjour/DNS-SD Zeroconf implementation.])
+##  else
     PKG_CHECK_MODULES([libhowl], [howl], [howl_found=yes], [howl_found=no])
     if test "x$howl_found" = "xyes" ; then
       using_zeroconf=howl
@@ -60,19 +60,19 @@ if test "x$zeroconf" = "xyes" ; then
       AC_DEFINE(WITH_HOWL, 1, [Use Howl Zeroconf implementation.])
       AC_MSG_NOTICE([Using Howl Zeroconf implementation.])
     else
-      PKG_CHECK_MODULES([libavahi], [avahi-client >= 0.6], [avahi_found=yes],
-                        [avahi_found=no])
-      if test "x$avahi_found" = "xyes" ; then
-        using_zeroconf=avahi
-        extra_requires="$extra_requires avahi-client"
-        AC_DEFINE(WITH_AVAHI, 1, [Use Avahi Zeroconf implementation.])
-        AC_MSG_NOTICE([Using Avahi Zeroconf implementation.])
-      else
+##      PKG_CHECK_MODULES([libavahi], [avahi-client >= 0.6], [avahi_found=yes],
+##                        [avahi_found=no])
+##      if test "x$avahi_found" = "xyes" ; then
+##        using_zeroconf=avahi
+##        extra_requires="$extra_requires avahi-client"
+##        AC_DEFINE(WITH_AVAHI, 1, [Use Avahi Zeroconf implementation.])
+##        AC_MSG_NOTICE([Using Avahi Zeroconf implementation.])
+##      else
         AC_MSG_ERROR([No supported Zeroconf implementation found.])
-        exit
-      fi
+##        exit
+##      fi
     fi
-  fi
+##  fi
 fi
 AM_CONDITIONAL(WITH_ZEROCONF, test x$using_zeroconf != xno)
 AM_CONDITIONAL(WITH_BONJOUR, test x$using_zeroconf = xbonjour)
