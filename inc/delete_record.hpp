@@ -46,15 +46,6 @@ protected:
 	position m_to;
 };
 
-protected:
-	// Changes to the document
-	std::list<record*> m_history;
-	// Document revision
-	unsigned int m_revision;
-	// document data
-	std::vector<std::string> m_lines;
-};
-
 }
 
-// _OBBY_DELETE_RECORD_HPP_
+#endif // _OBBY_DELETE_RECORD_HPP_

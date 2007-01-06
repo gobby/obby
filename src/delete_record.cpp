@@ -17,6 +17,7 @@
  */
 
 #include "delete_record.hpp"
+#include "buffer.hpp"
 
 obby::delete_record::delete_record(const position& begin, const position& end,
                                    unsigned int revision, unsigned int from)
@@ -40,12 +41,8 @@ void obby::delete_record::apply(buffer& buf)
 	buf.erase(m_from, m_to);
 }
 
-bool obby::delete_record::is_valid() const
-{
-	return m_to > m_from;
-}
-
-void obby::delete_event::on_insert(const position& pos, const std::string& text)
+void obby::delete_record::on_insert(const position& pos,
+                                    const std::string& text)
 {
 	position size(text);
 
