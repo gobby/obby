@@ -14,6 +14,7 @@ Normal:
  * Implement automatic service announcement and discovery
  * Sync-On-Request
  * UTF-8 string handling (Well, do we care about encodings?)
+ * Host sends record with user id 0 instead of local user
 
 Minor:
  * Implement indent_record and unindent_record to (un)indent lines of text

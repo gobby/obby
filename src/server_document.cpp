@@ -35,7 +35,7 @@ void obby::server_document::insert(position pos, const std::string& text)
 	// Apply on document
 	rec->apply(*this);
 	// Insert into history
-	m_history.push_back(rec);
+	m_history.push_front(rec);
 	// Synchronize to clients
 	m_server.send(rec->to_packet() );
 }
@@ -49,7 +49,7 @@ void obby::server_document::erase(position from, position to)
 	// Apply on document
 	rec->apply(*this);
 	// Insert into history
-	m_history.push_back(rec);
+	m_history.push_front(rec);
 	// Synchronize to clients
 	m_server.send(rec->to_packet() );
 }
