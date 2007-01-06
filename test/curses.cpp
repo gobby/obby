@@ -216,6 +216,8 @@ public:
 	curses_editor(int argc, char* argv[]);
 	~curses_editor();
 
+	void dispatch_key(int c);
+
 	bool run();
 	void quit();
 
@@ -279,6 +281,44 @@ curses_editor::~curses_editor()
 		quit();
 }
 
+void curses_editor::dispatch_key(int c)
+{
+	unsigned int first;
+	unsigned int last;
+
+	switch(c)
+	{
+	case KEY_LEFT:
+		m_screen->move_cursor(-1, 0, true);
+		break;
+	case KEY_RIGHT:
+		m_screen->move_cursor(1, 0, true);
+		break;
+	case KEY_UP:
+		m_screen->move_cursor(0, -1, false);
+		break;
+	case KEY_DOWN:
+		m_screen->move_cursor(0, 1, false);
+		break;
+	case KEY_BACKSPACE:
+		last = m_screen->get_cursor();
+		first = last == 0 ? 0 : m_screen->get_cursor() - 1;
+		m_document->erase(first, last);
+		m_screen->on_erase(first, last);
+		break;
+	case KEY_DC:
+		first = m_screen->get_cursor();
+		last = first == m_document->position_eob() ? first :
+			m_screen->get_cursor() + 1;
+		m_document->erase(first, last);
+		m_screen->on_erase(first, last);
+		break;
+	case 'q':
+		quit();
+		break;
+	}
+}
+
 bool curses_editor::run()
 {
 	m_quit = false;
@@ -308,22 +348,7 @@ bool curses_editor::run()
 				m_screen->on_insert(m_screen->get_cursor(), "\n");
 			}
 
-			if(c == KEY_LEFT)
-				m_screen->move_cursor(-1, 0, true);
-			if(c == KEY_RIGHT)
-				m_screen->move_cursor(1, 0, true);
-			if(c == KEY_UP)
-				m_screen->move_cursor(0, -1, false);
-			if(c == KEY_DOWN)
-				m_screen->move_cursor(0, 1, false);
-			if(c == KEY_BACKSPACE)
-			{
-				m_document->erase(m_screen->get_cursor() - 1, m_screen->get_cursor() );
-				m_screen->on_erase(m_screen->get_cursor() - 1, m_screen->get_cursor() );
-			}
-
-			if(c == 'q')
-				quit();
+			dispatch_key(c);
 		}
 
 		m_buffer.select(0);
