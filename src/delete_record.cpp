@@ -58,7 +58,7 @@ net6::packet obby::delete_record::to_packet()
 {
 	net6::packet pack("obby_record");
 	pack << "delete" << m_id << m_document << m_revision << m_from
-	     << m_pos << m_text;
+	     << static_cast<unsigned int>(m_pos) << m_text;
 	return pack;
 }
 
