@@ -28,6 +28,8 @@ const obby::login::error obby::login::ERROR_WRONG_USER_PASSWORD =
 	net6::login::ERROR_MAX + 3;
 const obby::login::error obby::login::ERROR_PROTOCOL_VERSION_MISMATCH =
 	net6::login::ERROR_MAX + 4;
+const obby::login::error obby::login::ERROR_NOT_ENCRYPTED =
+	net6::login::ERROR_MAX + 5;
 const obby::login::error obby::login::ERROR_MAX =
 	net6::login::ERROR_MAX + 0xff;
 
@@ -41,6 +43,8 @@ std::string obby::login::errstring(error err)
 		return _("Wrong user password");
 	if(err == ERROR_PROTOCOL_VERSION_MISMATCH)
 		return _("Protocol version mismatch");
+	if(err == ERROR_NOT_ENCRYPTED)
+		return _("Connection is not yet encrypted");
 	else
 		return net6::login::errstring(err);
 }

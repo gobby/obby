@@ -112,7 +112,7 @@ public:
 
 	/** Requests encryption of the connection.
 	 */
-	void request_encryption();
+	//void request_encryption();
 
 	/** Sends a login request for this client. If either the login request
 	 * failed because of name or colour are already in use or a password
@@ -256,6 +256,7 @@ protected:
 	void on_join(const net6::user& user6, const net6::packet& pack);
 	void on_part(const net6::user& user6, const net6::packet& pack);
 	void on_close();
+	void on_encrypted();
 	void on_data(const net6::packet& pack);
 	void on_login_failed(net6::login::error error);
 	void on_login_extend(net6::packet& pack);
@@ -397,7 +398,7 @@ void basic_client_buffer<Document, Selector>::disconnect()
 	session_close();
 }
 
-template<typename Document, typename Selector>
+/*template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::request_encryption()
 {
 	if(!basic_buffer<Document, Selector>::is_open() )
@@ -409,7 +410,7 @@ void basic_client_buffer<Document, Selector>::request_encryption()
 	}
 
 	net6_client().request_encryption();
-}
+}*/
 
 template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::login(const std::string& name,
@@ -712,11 +713,12 @@ void basic_client_buffer<Document, Selector>::on_close()
 	m_signal_close.emit();
 }
 
-/*template<typename Document, typename Selector>
+template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::on_encrypted()
 {
-	m_signal_encrypted.emit();
-}*/
+	// Login now possible
+	m_signal_welcome.emit();
+}
 
 template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::on_data(const net6::packet& pack)
@@ -825,8 +827,8 @@ template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::
 	on_net_welcome(const net6::packet& pack)
 {
-	// Get the OBBY version the server is running and compare to the version
-	// of this library.
+	// Get the OBBY version the server is running and compare to the
+	// version of this library.
 	unsigned long server_version =
 		pack.get_param(0).net6::parameter::as<unsigned long>();
 
@@ -856,7 +858,11 @@ void basic_client_buffer<Document, Selector>::
 
 	// Emit welcome signal to indicate that the user may now perform a
 	// login() call.
-	m_signal_welcome.emit();
+	//
+	// Do no longer emit signal welcome here since the login has to be
+	// performed after the connection has been encrypted since
+	// obby 0.4.0.
+	//m_signal_welcome.emit();
 }
 
 template<typename Document, typename Selector>
@@ -1153,6 +1159,8 @@ void basic_client_buffer<Document, Selector>::register_signal_handlers()
 		sigc::mem_fun(*this, &basic_client_buffer::on_part) );
 	net6_client().close_event().connect(
 		sigc::mem_fun(*this, &basic_client_buffer::on_close) );
+	net6_client().encrypted_event().connect(
+		sigc::mem_fun(*this, &basic_client_buffer::on_encrypted) );
 	net6_client().data_event().connect(
 		sigc::mem_fun(*this, &basic_client_buffer::on_data) );
 	net6_client().login_failed_event().connect(

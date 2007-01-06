@@ -628,6 +628,9 @@ void basic_server_buffer<Document, Selector>::
 
 	net6_server().send(welcome_pack, user6);
 
+	// Request encryption after welcome packet.
+	net6_server().request_encryption(user6);
+
 	// User connected
 	m_signal_connect.emit(user6);
 }
@@ -758,6 +761,13 @@ bool basic_server_buffer<Document, Selector>::
 	        const net6::packet& pack,
 	        net6::login::error& error)
 {
+	// Do not allow joins from clients whose connection is not encrypted
+	if(!user6.is_encrypted() )
+	{
+		error = login::ERROR_NOT_ENCRYPTED;
+		return false;
+	}
+
 	const std::string name =
 		pack.get_param(0).net6::parameter::as<std::string>();
 	colour colour =
