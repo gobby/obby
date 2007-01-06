@@ -48,6 +48,10 @@ public:
 	 */
 	const user& get_self() const;
 
+	/** Sends a global message to all users.
+	 */
+	virtual void send_message(const std::string& message);
+
 protected:
 	/** Private constructor used by derived classed. It does not create
 	 * a net6::host object to allow derived classed to create derived

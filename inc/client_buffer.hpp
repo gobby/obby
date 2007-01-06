@@ -82,6 +82,10 @@ public:
 	 */
 	virtual void select(unsigned int timeout);
 
+	/** Sends a global message to all users.
+	 */
+	virtual void send_message(const std::string& message);
+
 	/** Signal which will be emitted if the initial synchronization of
 	 * the documents has been completed.
 	 */

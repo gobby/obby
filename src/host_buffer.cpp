@@ -70,6 +70,11 @@ const obby::user& obby::host_buffer::get_self() const
 	return *m_self;
 }
 
+void obby::host_buffer::send_message(const std::string& message)
+{
+	relay_message(m_self->get_id(), message);
+}
+
 obby::document& obby::host_buffer::add_document(unsigned int id)
 {
 	host_user_table* table = static_cast<host_user_table*>(m_usertable);

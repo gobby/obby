@@ -96,6 +96,10 @@ public:
 	/** Returns the end of the document list.
 	 */
 	document_iterator document_end() const;
+
+	/** Sends a global chat message to all users.
+	 */
+	virtual void send_message(const std::string& message) = 0;
 	
 	/** Signal which will be emitted if a new user has joined the obby
 	 * session.

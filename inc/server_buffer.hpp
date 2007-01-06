@@ -63,10 +63,10 @@ public:
 	 */
 	void remove_document(document* doc);
 
-	/** Relays a message to the other users.
+	/** Sends a global message to all users.
 	 */
-	void relay_message(unsigned int uid, const std::string& message);
-	
+	virtual void send_message(const std::string& message);
+
 	/** Signal which will be emitted if a new client has connected.
 	 */
 	signal_connect_type connect_event() const;
@@ -94,6 +94,10 @@ protected:
 	 */
 	virtual document& add_document(unsigned int id);
 
+	/** Relays a message to the other users.
+	 */
+	void relay_message(unsigned int uid, const std::string& message);
+	
 	void on_join(net6::server::peer& peer);
 	void on_pre_login(net6::server::peer& peer, const net6::packet& pack);
 	void on_post_login(net6::server::peer& peer, const net6::packet& pack);

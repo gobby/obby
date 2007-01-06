@@ -97,13 +97,9 @@ void obby::server_buffer::remove_document(document* doc)
 	delete doc;
 }
 
-void obby::server_buffer::relay_message(unsigned int uid,
-                                        const std::string& message)
+void obby::server_buffer::send_message(const std::string& message)
 {
-	net6::packet pack("obby_message");
-	pack << uid;
-	pack << message;
-	m_server->send(pack);
+	relay_message(0, message);
 }
 
 obby::server_buffer::signal_connect_type
@@ -348,4 +344,13 @@ void obby::server_buffer::on_net_message(const net6::packet& pack, user& from)
 	m_signal_message.emit(uid, message);
 	relay_message(uid, message);
 }
+void obby::server_buffer::relay_message(unsigned int uid,
+                                        const std::string& message)
+{
+	net6::packet pack("obby_message");
+	pack << uid;
+	pack << message;
+	m_server->send(pack);
+}
+
 
