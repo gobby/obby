@@ -122,6 +122,14 @@ public:
 	 */
 	void remove_flags(flags old_flags);
 
+	/** Checks if both objects are identical by comparing their id.
+	 */
+	bool operator==(const user& other) { return m_id == other.m_id; }
+
+	/** Checks if both objects differ by comparing their id.
+	 */
+	bool operator!=(const user& other) { return m_id != other.m_id; }
+
 #if 0
 	/** Adds this document to the user's list of subscribed documents.
 	 * Note that this function does not add the user to the subscribe
