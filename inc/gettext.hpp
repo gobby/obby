@@ -20,11 +20,6 @@
 
 #include "config.hpp"
 
-const char* obby_version()
-{
-	return PACKAGE_VERSION;
-}
-
 #ifdef ENABLE_NLS
 #include <libintl.h>
 
