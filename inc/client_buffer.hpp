@@ -1049,6 +1049,11 @@ void basic_client_buffer<Document, Selector>::
 	// Get document owner ID
 	unsigned int owner_id = (owner == NULL ? 0 : owner->get_id() );
 
+	// Initialise document counter to the document's ID to produce
+	// unique IDs even when rejoining a session.
+	if(owner_id == m_self->get_id() )
+		basic_buffer<Document, Selector>::m_doc_counter = id + 1;
+
 	// Check for duplicates, should not happen
 	if(document_find(owner_id, id) != NULL)
 	{
