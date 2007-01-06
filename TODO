@@ -15,6 +15,7 @@ Normal:
   * Authentication: Access control lists (#58)
   * Use precompiled headers (#61)
   * UPNP support (#77)
+  * Servers should be elected (#86)
 
 Minor:
 
@@ -73,6 +74,12 @@ the NAT box to the one on which the game runs.
 which implements NAT traversal through UPNP. I don't know yet if we could 
 borrow some code there or integrate it. This would solve at least some 
 hosting problems of a centralised model.
+
+86: Servers should be elected
+-----------------------------
+When a server dies, clients should elect a new server from among them.  
+This requires that clients know each other's ip addresses (or have a 
+third-party server which can coordinate such things).
 
 20: Session serialisation
 -------------------------
