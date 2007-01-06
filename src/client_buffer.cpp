@@ -270,7 +270,8 @@ void obby::client_buffer::on_net_message(const net6::packet& pack)
 	unsigned int uid = pack.get_param(0).as_int();
 	const std::string& message = pack.get_param(1).as_string();
 
-	m_signal_message.emit(uid, message);
+	obby::user* user = find_user(uid);
+	m_signal_message.emit(*user, message);
 }
 
 void obby::client_buffer::on_net_sync_init(const net6::packet& pack)

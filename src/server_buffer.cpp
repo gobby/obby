@@ -341,7 +341,8 @@ void obby::server_buffer::on_net_message(const net6::packet& pack, user& from)
 	unsigned int uid = from.get_id();
 	const std::string& message = pack.get_param(0).as_string();
 
-	m_signal_message.emit(uid, message);
+	obby::user* user = find_user(uid);
+	m_signal_message.emit(*user, message);
 	relay_message(uid, message);
 }
 void obby::server_buffer::relay_message(unsigned int uid,

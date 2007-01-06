@@ -63,7 +63,7 @@ public:
 	typedef sigc::signal<void, document&, const std::string&>
 		signal_rename_document_type;
 	typedef sigc::signal<void, document&> signal_remove_document_type;
-	typedef sigc::signal<void, unsigned int, const std::string&>
+	typedef sigc::signal<void, obby::user&, const std::string&>
 		signal_message_type;
 
 	buffer();
