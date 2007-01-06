@@ -1,3 +1,36 @@
+Thu Aug 17 14:22:55 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Translation roundup
+
+Thu Aug 17 14:16:48 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Fix the po/ Makefile
+
+Wed Aug 16 14:41:13 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Bump version to 0.4.0rc4 and depend on net6-1.3.0rc3 or higher
+
+Tue Aug 15 17:04:19 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * Use IPv6 when compiled with --enable-ipv6
+
+Tue Aug 15 13:23:52 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Update NEWS
+
+Fri Aug 11 23:51:35 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * Try IPv6 name resolution when IPv4 failed and USE_IPV6 is activated
+
+Fri Aug 11 17:04:56 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * Broadcast document removals
+
+Tue Aug 15 01:45:43 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Add chunk and suffix handling to obby-web
+
+Fri Aug 11 23:40:12 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Enable IPv6 defines
+
+Mon Aug  7 17:41:44 CEST 2006  Philipp Kern <phil@0x539.de>
+  tagged obby-0.4.0rc3
+
+Mon Aug  7 17:36:17 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Updated ChangeLog for release
+
 Mon Aug  7 17:35:51 CEST 2006  Philipp Kern <phil@0x539.de>
   * Bumped version to 0.4.0rc3
 
