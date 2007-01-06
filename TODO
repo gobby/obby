@@ -9,6 +9,9 @@ Major:
 
 Normal:
   * Provide some means of authentication (#21)
+  * Hide equivalent insert / change calls (#28)
+  * Implement server-side commands for remote actions (#29)
+  * Implement records to (un)indent lines of text (#30)
 
 Minor:
 
@@ -18,6 +21,7 @@ Enhancement:
   * Flags for obby::user (#8)
   * Syncronise documents on request (#10)
   * Session serialisation (#20)
+
 
 21: Provide some means of authentication
 ----------------------------------------
@@ -34,6 +38,27 @@ users of it.
 useful for dedicated private ''obby'' servers.
  * Single documents could be get some kind of password or access control 
 list protection, but #10 has to be implemented first.
+
+28: Hide equivalent insert / change calls
+-----------------------------------------
+Hide equivalent insert / change calls
+
+''This is a stub and generated out of the old TODO located in the 
+repository.''
+
+29: Implement server-side commands for remote actions
+-----------------------------------------------------
+Implement server-side commands to let the server act on the remote side
+
+''This is a stub and generated out of the old TODO located in the 
+repository.''
+
+30: Implement records to (un)indent lines of text
+-------------------------------------------------
+Implement indent_record and unindent_record to (un)indent lines of text
+
+''This is a stub and generated out of the old TODO located in the 
+repository.''
 
 8: Flags for obby::user
 -----------------------
