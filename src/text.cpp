@@ -327,6 +327,19 @@ void obby::text::insert(size_type pos,
 void obby::text::erase(size_type pos, size_type len)
 {
 	list_type::iterator ers_pos = find_chunk(pos);
+	list_type::iterator first_chunk = ers_pos;
+	size_type first_pos = pos;
+
+	// Remember first chunk position that will not be removed.
+	// After having erased a chunk in the middle, something may have
+	// been mergen with this first chunk that should have been deleted.
+	// We watch it and remove merged stuff if the chunk grew.
+	if(first_pos == 0 && first_chunk != m_chunks.begin() )
+	{
+		-- first_chunk;
+		first_pos = (*first_chunk)->get_length();
+	}
+
 	while( (len == npos || len > 0) && ers_pos != m_chunks.end() )
 	{
 		size_type count = (*ers_pos)->get_length() - pos;
@@ -337,7 +350,16 @@ void obby::text::erase(size_type pos, size_type len)
 		}
 
 		ers_pos = erase_chunk(ers_pos, pos, count);
-		pos = 0;
+
+		if(first_pos > 0 && (*first_chunk)->get_length() > first_pos)
+		{
+			ers_pos = first_chunk;
+			pos = first_pos;
+		}
+		else
+		{
+			pos = 0;
+		}
 	}
 
 	if(len != npos && len > 0)

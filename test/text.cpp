@@ -182,7 +182,8 @@ namespace
 		{ "[1]b[2]a", 1, "[1]f[2]oo", "[1]bf[2]ooa" },
 		{ "[1]b[2]a", 1, "[2]f[1]oo", "[1]b[2]f[1]oo[2]a" },
 		{ "[1]b[2]a", 1, "[1]f[2]o[1]o", "[1]bf[2]o[1]o[2]a" },
-		{ "[1]b[2]a", 1, "[2]f[1]o[2]o", "[1]b[2]f[1]o[2]oa" }
+		{ "[1]b[2]a", 1, "[2]f[1]o[2]o", "[1]b[2]f[1]o[2]oa" },
+		{ "[1]Die Frage[2] ist halt,[3] [2]ob[1] das so", 11, "[3]n", "[1]Die Frage[2] i[3]n[2]st halt,[3] [2]ob[1] das so" }
 	};
 
 	substr_test SUBSTR_TESTS[] = {
@@ -228,7 +229,9 @@ namespace
 		{ "[1]foo[2]bar", 3, 3, "[1]foo" },
 		{ "[1]foo[2]bar[1]baz", 2, 3, "[1]fo[2]r[1]baz" },
 		{ "[1]foo[2]bar[1]baz", 3, 3, "[1]foobaz" },
-		{ "[1]foo[2]bar[1]baz", 4, 3, "[1]foo[2]b[1]az" }
+		{ "[1]foo[2]bar[1]baz", 4, 3, "[1]foo[2]b[1]az" },
+		{ "[1]foo[2]b[3]az[1]o", 2, 5, "[1]fo" },
+		{ "[1]foo[2]bar[3]baz[2]qux[3]fo[2]gneh[1]grah", 0, 10, "[2]ux[3]fo[2]gneh[1]grah" }
 	};
 
 	append_test APPEND_TESTS[] = {
