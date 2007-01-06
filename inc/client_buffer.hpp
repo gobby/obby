@@ -213,8 +213,10 @@ protected:
 
 	/** Creates the underlaying net6 network object corresponding to the
 	 * buffer's type.
+	 * TODO: Make server_buffer's and host_buffer's new_net parameterless
+	 * and callopen() approproately
 	 */
-	virtual net_type* new_net(const std::string& host, unsigned int port);
+	virtual net_type* new_net();
 
 	/** net6 signal handlers.
 	 */
@@ -304,11 +306,22 @@ void basic_client_buffer<selector_type>::connect(const std::string& hostname,
 	if(is_connected() )
 		throw std::logic_error("obby::basic_client_buffer::connect");
 
-	// Connect to host
-	basic_buffer<selector_type>::m_net.reset(new_net(hostname, port) );
+	// Create connection object
+	// TODO: Make the same with server_buffer
+	// (create object, register signal handlers, open server)
+	basic_buffer<selector_type>::m_net.reset(new_net() );
 
 	// Register signal handlers
 	register_signal_handlers();
+
+	// Make sure that the signal handlers to the net6::client object
+	// are registered before the connection is made, otherwise we may
+	// lose a welcome packet if the remote site sends the packet between
+	// the connection and the signal handler registration (which _may_
+	// occur with connections to localhost).
+	net6_client().connect(
+		net6::ipv4_address::create_from_hostname(hostname, port)
+	);
 }
 
 template<typename selector_type>
@@ -926,16 +939,10 @@ basic_client_buffer<selector_type>::new_document_info(const net6::packet& pack)
 
 template<typename selector_type>
 typename basic_client_buffer<selector_type>::net_type*
-basic_client_buffer<selector_type>::new_net(const std::string& host,
-                                            unsigned int port)
+basic_client_buffer<selector_type>::new_net()
 {
-	// Resolve hostname
-	net6::ipv4_address addr(
-		net6::ipv4_address::create_from_hostname(host, port)
-	);
-
 	// Connect to remote host
-	return new net_type(addr);
+	return new net_type;
 }
 
 template<typename selector_type>
