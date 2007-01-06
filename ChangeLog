@@ -1,3 +1,39 @@
+Mon Aug  7 17:35:51 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Bumped version to 0.4.0rc3
+
+Mon Aug  7 17:13:45 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * m4 gettext macros
+
+Mon Aug  7 17:14:13 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Re-establish the local m4 storage
+
+Mon Aug  7 16:18:39 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * Fix insert/insert transformation, probably caused desync
+
+Thu Aug  3 16:18:07 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * Updated po/Makefile.in.in to gettext-0.15
+
+Mon Jul  3 19:34:50 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * Adjusted use of global PROTOCOL_VERSION
+
+Mon Jul  3 19:14:19 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * Find more users when flags do not match in user_table::find functions
+
+Mon Jul  3 19:13:31 CEST 2006  Armin Burgmeier <armin@0x539.de>
+  * Made PROTOCOL_VERSION global in order to get it linked correctly
+
+Sun Jul  2 00:54:30 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Move the protocol version to buffer.cpp
+
+Fri Jun 16 22:17:34 CEST 2006  Philipp Kern <phil@0x539.de>
+  * GCC 3.3 compile fixes
+
+Thu May 18 19:44:36 CEST 2006  Philipp Kern <phil@0x539.de>
+  tagged obby-0.4.0rc2
+
+Thu May 18 19:44:31 CEST 2006  Philipp Kern <phil@0x539.de>
+  * Updated ChangeLog for release
+
 Thu May 18 19:44:17 CEST 2006  Philipp Kern <phil@0x539.de>
   * Compile fix for GCC 4.0
 
