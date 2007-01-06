@@ -23,9 +23,10 @@
 
 obby::serialise::attribute::attribute(
 	const std::string& name,
-	const std::string& value
+	const std::string& value,
+	unsigned int line
 ) :
-	m_name(name), m_value(value)
+	m_name(name), m_value(value), m_line(line)
 {
 }
 
@@ -45,6 +46,7 @@ void obby::serialise::attribute::deserialise(
 {
 	// Get attribute name from identifier's name
 	m_name = iter->get_text();
+	m_line = iter->get_line();
 	tokens.next_token(iter);
 
 	// Next token must be assignment
@@ -87,5 +89,10 @@ const std::string& obby::serialise::attribute::get_value() const
 const std::string& obby::serialise::attribute::get_name() const
 {
 	return m_name;
+}
+
+unsigned int obby::serialise::attribute::get_line() const
+{
+	return m_line;
 }
 

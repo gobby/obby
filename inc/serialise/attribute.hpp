@@ -33,7 +33,8 @@ class attribute
 public:
 	attribute(
 		const std::string& name = "Unnamed",
-		const std::string& value = "Unassigned"
+		const std::string& value = "Unassigned",
+		unsigned int line = 0
 	);
 
 	void serialise(
@@ -50,11 +51,12 @@ public:
 	);
 
 	const std::string& get_value() const;
-
 	const std::string& get_name() const;
+	unsigned int get_line() const;
 private:
 	std::string m_name;
 	std::string m_value;
+	unsigned int m_line;
 };
 
 } // namespace serialise
