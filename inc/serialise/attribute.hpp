@@ -20,6 +20,8 @@
 #define _OBBY_SERIALISE_ATTRIBUTE_HPP_
 
 #include <string>
+#include <sstream>
+#include <net6/serialise.hpp>
 #include "serialise/token.hpp"
 
 namespace obby
@@ -28,35 +30,101 @@ namespace obby
 namespace serialise
 {
 
+/** Attribute for an object. An attribute has a name and a corresponding value.
+ */
 class attribute
 {
 public:
-	attribute(
-		const std::string& name = "Unnamed",
-		const std::string& value = "Unassigned"
-	);
+	/** Creates a new attribute with a value of the given data type that
+	 * is serialised using the given context.
+	 */
+	template<typename data_type>
+	attribute(const std::string& name,
+	          const data_type& value,
+	          const ::serialise::context<data_type>& ctx =
+	          ::serialise::context<data_type>());
 
-	void serialise(
-		token_list& tokens
-	) const;
+	/** Creates a new attribute with the serialised value given.
+	 */
+	attribute(const std::string& name = "Unnamed",
+	          const std::string& value = "Unassigned");
 
-	void deserialise(
-		const token_list& tokens,
-		token_list::iterator& iter
-	);
+	/** Serialises the attribute to a list of tokens.
+	 */
+	void serialise(token_list& tokens) const;
 
-	void set_value(
-		const std::string& value
-	);
+	/** Deserialises the attribute from a list of tokens.
+	 */
+	void deserialise(const token_list& tokens,
+	                 token_list::iterator& iter);
 
+	/** Changes the value of the attribute by serialising the value to
+	 * a string using <em>ctx</em> as context.
+	 */
+	template<typename data_type>
+	void set_value(const data_type& value,
+	               const ::serialise::context<data_type>& ctx =
+	               ::serialise::context<data_type>());
+
+	/** Changes the value of the attribute.
+	 */
+	void set_value(const std::string& value);
+
+	/** Returns the serialised value of the attribute.
+	 */
 	const std::string& get_value() const;
+
+	/** Returns the name of the attribute.
+	 */
 	const std::string& get_name() const;
+
+	/** Returns the line where the attribute occured in the source file, if
+	 * the attribute was deserialised from a token list.
+	 */
 	unsigned int get_line() const;
+
+	/** Deserialises the value of the attribute to <em>data_type</em> using
+	 * the context <em>ctx</em>.
+	 */
+	template<typename data_type>
+	data_type as(const ::serialise::context<data_type>& ctx) const;
 private:
 	std::string m_name;
-	std::string m_value;
+	::serialise::data m_value;
 	unsigned int m_line;
 };
+
+template<typename data_type>
+attribute::attribute(const std::string& name,
+	             const data_type& value,
+	             const ::serialise::context<data_type>& ctx):
+	m_name(name), m_value(value, ctx), m_line(0)
+{
+}
+
+template<typename data_type>
+void attribute::set_value(const data_type& value,
+                          const ::serialise::context<data_type>& ctx)
+{
+	m_value = ::serialise::data(value, ctx);
+}
+
+template<typename data_type>
+data_type attribute::as(const ::serialise::context<data_type>& ctx) const
+{
+	try
+	{
+		return m_value.as<data_type>(ctx);
+	}
+	catch(::serialise::conversion_error& e)
+	{
+		// TODO: Localise this. This would depend on a call to _
+		// in a header file!
+		format_string str("Attribute '%0%' has unexpected type");
+		str << m_name;
+		throw error(str.str(), m_line);
+	}
+}
 
 } // namespace serialise
 

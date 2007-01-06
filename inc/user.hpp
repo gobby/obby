@@ -28,6 +28,8 @@
 namespace obby
 {
 
+class user_table;
+
 /** User in a obby session.
  */
 	
@@ -205,122 +207,36 @@ protected:
 	privileges m_privs;
 };
 
-#if 0
-// Flag combination operations
-inline user::flags operator|(user::flags rhs, user::flags lhs) {
-	return static_cast<user::flags>(
-		static_cast<int>(rhs) | static_cast<int>(lhs)
-	);
-}
-
-inline user::flags operator&(user::flags rhs, user::flags lhs) {
-	return static_cast<user::flags>(
-		static_cast<int>(rhs) & static_cast<int>(lhs)
-	);
-}
-
-inline user::flags operator^(user::flags rhs, user::flags lhs) {
-	return static_cast<user::flags>(
-		static_cast<int>(rhs) ^ static_cast<int>(lhs)
-	);
-}
-
-inline user::flags& operator|=(user::flags& rhs, user::flags lhs) {
-	return rhs = (rhs | lhs);
-}
-
-inline user::flags& operator&=(user::flags& rhs, user::flags lhs) {
-	return rhs = (rhs & lhs);
-}
-
-inline user::flags& operator^=(user::flags& rhs, user::flags lhs) {
-	return rhs = (rhs ^ lhs);
-}
-
-inline user::flags operator~(user::flags rhs) {
-	return static_cast<user::flags>(~static_cast<int>(rhs) );
-}
-
-// Privileges combination operations
-inline user::privileges operator|(user::privileges rhs, user::privileges lhs) {
-	return static_cast<user::privileges>(
-		static_cast<int>(rhs) | static_cast<int>(lhs)
-	);
-}
-
-inline user::privileges operator&(user::privileges rhs, user::privileges lhs) {
-	return static_cast<user::privileges>(
-		static_cast<int>(rhs) & static_cast<int>(lhs)
-	);
-}
-
-inline user::privileges operator^(user::privileges rhs, user::privileges lhs) {
-	return static_cast<user::privileges>(
-		static_cast<int>(rhs) ^ static_cast<int>(lhs)
-	);
-}
-
-inline user::privileges& operator|=(user::privileges& rhs, user::privileges lhs) {
-	return rhs = (rhs | lhs);
-}
-
-inline user::privileges& operator&=(user::privileges& rhs, user::privileges lhs) {
-	return rhs = (rhs & lhs);
-}
-
-inline user::privileges& operator^=(user::privileges& rhs, user::privileges lhs) {
-	return rhs = (rhs ^ lhs);
-}
-
-inline user::privileges operator~(user::privileges rhs) {
-	return static_cast<user::privileges>(~static_cast<int>(rhs) );
-}
-#endif
-
 } // namespace obby
 
-namespace net6
+namespace serialise
 {
 
-/** obby user packet type
- */
 template<>
-class parameter<obby::user*> : public basic_parameter {
+class context<obby::user*>
+{
 public:
-	parameter(obby::user* user)
-	 : basic_parameter(TYPE_ID, user) { }
+	context();
+	context(const obby::user_table& user_table);
 
-	virtual basic_parameter* clone() const {
-		return new parameter<obby::user*>(as<obby::user*>() );
-	}
+	virtual std::string to_string(const obby::user* from) const;
+	virtual const obby::user* from_string(const std::string& string) const;
 
-	virtual std::string to_string() const {
-		obby::user* user = as<obby::user*>();
-		int user_id = user ? user->get_id() : 0;
-
-		std::stringstream stream;
-		stream << std::hex << user_id;
-		return stream.str();
-	}
-
-	static const identification_type TYPE_ID = 'u';
+protected:
+	const obby::user_table* m_user_table;
 };
 
 template<>
-class parameter<obby::user> : public parameter<obby::user*> {
+class context<const obby::user*>: public context<obby::user*>
+{
 public:
-	parameter(obby::user& user)
-	 : parameter<obby::user*>(&user) { }
+	context():
+		context<obby::user*>() {}
+	context(const obby::user_table& user_table):
+		context<obby::user*>(user_table) {}
 };
 
-template<>
-class parameter<const obby::user*> : public parameter<obby::user*> {
-public:
-	parameter(const obby::user* user)
-	: parameter<obby::user*>(const_cast<obby::user*>(user) ) { }
-};
-
-} // namespace net6
+} // namespace serialise
 
 #endif // _OBBY_USER_HPP_
 

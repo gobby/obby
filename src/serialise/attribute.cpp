@@ -35,7 +35,7 @@ void obby::serialise::attribute::serialise(
 {
 	tokens.add(token::TYPE_IDENTIFIER, m_name, 0);
 	tokens.add(token::TYPE_ASSIGNMENT, "=", 0);
-	tokens.add(token::TYPE_STRING, m_value, 0);
+	tokens.add(token::TYPE_STRING, m_value.serialised(), 0);
 }
 
 void obby::serialise::attribute::deserialise(
@@ -82,7 +82,7 @@ void obby::serialise::attribute::set_value(
 
 const std::string& obby::serialise::attribute::get_value() const
 {
-	return m_value;
+	return m_value.serialised();
 }
 
 const std::string& obby::serialise::attribute::get_name() const

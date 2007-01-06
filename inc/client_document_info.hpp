@@ -237,14 +237,16 @@ basic_client_document_info<selector_type>::basic_client_document_info(
 	const net6::packet& init_pack
 ) : basic_document_info<selector_type>(
 	buffer, net,
-	init_pack.get_param(0).net6::basic_parameter::as<user*>(),
-	init_pack.get_param(1).net6::basic_parameter::as<int>(),
-	init_pack.get_param(2).net6::basic_parameter::as<std::string>()
+	init_pack.get_param(0).net6::parameter::as<const user*>(
+		buffer.get_user_table()
+	), init_pack.get_param(1).net6::parameter::as<unsigned int>(),
+	init_pack.get_param(2).net6::parameter::as<std::string>()
    ), basic_local_document_info<selector_type>(
 	buffer, net,
-	init_pack.get_param(0).net6::basic_parameter::as<user*>(),
-	init_pack.get_param(1).net6::basic_parameter::as<int>(),
-	init_pack.get_param(2).net6::basic_parameter::as<std::string>()
+	init_pack.get_param(0).net6::parameter::as<const user*>(
+		buffer.get_user_table()
+	), init_pack.get_param(1).net6::parameter::as<unsigned int>(),
+	init_pack.get_param(2).net6::parameter::as<std::string>()
    )
 {
 	// Load initially subscribed users
@@ -252,7 +254,7 @@ basic_client_document_info<selector_type>::basic_client_document_info(
 	{
 		// Get user
 		const user* cur_user = init_pack.get_param(i).net6::
-			basic_parameter::as<user*>();
+			parameter::as<const user*>(buffer.get_user_table());
 
 		// Must not be local user (who just joined the session and now
 		// synchronises the document list)
@@ -349,7 +351,7 @@ void basic_client_document_info<selector_type>::
 {
 	if(!execute_packet(pack) )
 	{
-		throw net6::basic_parameter::bad_value(
+		throw net6::bad_value(
 			"Unexpected command: " + pack.get_command()
 		);
 	}
@@ -462,7 +464,7 @@ void basic_client_document_info<selector_type>::
 {
 	// First parameter is the user who changed the title
 	const std::string& new_title =
-		pack.get_param(1).net6::basic_parameter::as<std::string>();
+		pack.get_param(1).net6::parameter::as<std::string>();
 
 	// Rename document
 	basic_document_info<selector_type>::document_rename(new_title);
@@ -483,12 +485,12 @@ void basic_client_document_info<selector_type>::
 		str << basic_document_info<selector_type>::get_owner_id()
 		    << basic_document_info<selector_type>::get_id();
 
-		throw net6::basic_parameter::bad_value(str.str() );
+		throw net6::bad_value(str.str() );
 	}
 
 	// Get author of record
-	const user* author =
-		pack.get_param(0).net6::basic_parameter::as<user*>();
+	const user* author = pack.get_param(0).net6::
+		parameter::as<const user*>(get_buffer().get_user_table());
 
 	// Extract record from packet (TODO: virtualness for document_packet,
 	// would allow to remove "+ 2" here)
@@ -513,7 +515,7 @@ void basic_client_document_info<selector_type>::
 		str << basic_document_info<selector_type>::get_owner_id()
 		    << basic_document_info<selector_type>::get_id();
 
-		throw net6::basic_parameter::bad_value(str.str() );
+		throw net6::bad_value(str.str() );
 	}
 
 	// Assign empty document
@@ -537,19 +539,21 @@ void basic_client_document_info<selector_type>::
 		str << basic_document_info<selector_type>::get_owner_id()
 		    << basic_document_info<selector_type>::get_id();
 
-		throw net6::basic_parameter::bad_value(str.str() );
+		throw net6::bad_value(str.str() );
 	}
 
 	// Add line to document
-	basic_document_info<selector_type>::m_document->add_line(line(pack, 2));
+	basic_document_info<selector_type>::m_document->add_line(
+		line(pack, 2, get_buffer().get_user_table())
+	);
 }
 
 template<typename selector_type>
 void basic_client_document_info<selector_type>::
 	on_net_subscribe(const document_packet& pack)
 {
-	const user* new_user =
-		pack.get_param(0).net6::basic_parameter::as<user*>();
+	const user* new_user = pack.get_param(0).net6::
+		parameter::as<const user*>(get_buffer().get_user_table() );
 
 	user_subscribe(*new_user);
 }
@@ -558,8 +562,8 @@ template<typename selector_type>
 void basic_client_document_info<selector_type>::
 	on_net_unsubscribe(const document_packet& pack)
 {
-	const user* old_user =
-		pack.get_param(0).net6::basic_parameter::as<user*>();
+	const user* old_user = pack.get_param(0).net6::
+		parameter::as<const user*>(get_buffer().get_user_table() );
 
 	user_unsubscribe(*old_user);
 }

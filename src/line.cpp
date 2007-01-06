@@ -32,14 +32,16 @@ obby::line::line(const string_type& text, const user_type* author)
  : m_line(text), m_authors()
 {
 	// It is just _one_ line.
-	assert(text.find('\n') == string_type::npos);
+	//assert(text.find('\n') == string_type::npos);
 
 	// Insert initial author
 	user_pos pos = { author, 0 };
 	m_authors.push_back(pos);
 }
 
-obby::line::line(const net6::packet& pack, unsigned int from)
+obby::line::line(const net6::packet& pack,
+                 unsigned int from,
+                 const user_table& user_table)
 {
 	// First there is the string
 	m_line = pack.get_param(from).as<std::string>();
@@ -50,9 +52,11 @@ obby::line::line(const net6::packet& pack, unsigned int from)
 	// Add authors
 	for(unsigned int i = from + 1; i < pack.get_param_count(); i += 2)
 	{
-		// Get position and author id
-		unsigned int pos = pack.get_param(i).as<int>();
-		const user* author = pack.get_param(i + 1).as<user*>();
+		// Get position and author
+		unsigned int pos =
+			pack.get_param(i).as<unsigned int>();
+		const user* author =
+			pack.get_param(i + 1).as<const user*>(user_table);
 
 		// Add to vector
 		user_pos upos = { author, pos };

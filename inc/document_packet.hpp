@@ -39,13 +39,13 @@ public:
 	{
 		// Real command is obby_document, so the command who is
 		// interesting for the document is stored as second parameter.
-		*this << info << command;
+		*this << &info << command;
 	}
 
 	explicit document_packet(const net6::packet& base);
 
 	const std::string& get_command() const;
-	const net6::basic_parameter& get_param(unsigned int index) const;
+	const net6::parameter& get_param(unsigned int index) const;
 	unsigned int get_param_count() const;
 };
 

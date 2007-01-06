@@ -180,14 +180,6 @@ protected:
 	 */
 	void document_clear();
 
-	/** Translates a user parameter back to a net6 packet parameter.
-	 */
-	net6::basic_parameter* translate_user(const std::string& str) const;
-
-	/** Translates a document parameter back to a net6 packet parameter.
-	 */
-	net6::basic_parameter* translate_document(const std::string& str) const;
-
 	/** net6 main object to keep net6 initialised during the obby session.
 	 */
 	net6::main m_netkit;
@@ -235,18 +227,6 @@ basic_buffer<selector_type>::basic_buffer()
 {
 	// Initialize gettext
 	init_gettext();
-
-	// Register user type
-	net6::packet::register_type(
-		net6::parameter<user*>::TYPE_ID,
-		sigc::mem_fun(*this, &basic_buffer::translate_user)
-	);
-
-	// Register document type
-	net6::packet::register_type(
-		net6::parameter<basic_document_info<selector_type>*>::TYPE_ID,
-		sigc::mem_fun(*this, &basic_buffer::translate_document)
-	);
 
 	// Seed random number generator with system time
 	m_rclass.seed(std::time(NULL) );
@@ -397,73 +377,6 @@ typename basic_buffer<selector_type>::signal_server_message_type
 basic_buffer<selector_type>::server_message_event() const
 {
 	return m_signal_server_message;
-}
-
-template<typename selector_type>
-net6::basic_parameter*
-basic_buffer<selector_type>::translate_user(const std::string& str) const
-{
-	// Read user ID
-	unsigned int user_id;
-	std::stringstream stream(str);
-	stream >> std::hex >> user_id;
-
-	// Check for success
-	if(stream.bad() )
-	{
-		throw net6::basic_parameter::bad_format(
-			"User ID ought to be a hexadecimal integer"
-		);
-	}
-
-	// No user
-	if(user_id == 0) return new net6::parameter<user*>(NULL);
-
-	// Find corresponding user in user table
-	const user* found_user = m_user_table.find(user_id);
-	if(found_user == NULL)
-	{
-		// No such user
-		format_string str("User ID %0% does not exist");
-		str << user_id;
-		throw net6::basic_parameter::bad_format(str.str() );
-	}
-
-	// Done
-	// TODO: Type should be net6::parameter<const user*>
-	return new net6::parameter<user*>(const_cast<user*>(found_user) );
-}
-
-template<typename selector_type>
-net6::basic_parameter*
-basic_buffer<selector_type>::translate_document(const std::string& str) const
-{
-	// Read document and owner ID
-	unsigned int owner_id, document_id;
-	std::stringstream stream(str);
-	stream >> std::hex >> owner_id >> document_id;
-
-	// Check for success
-	if(stream.bad() )
-	{
-		throw net6::basic_parameter::bad_format(
-			"Document ID ought to be two hexadecimal integers"
-		);
-	}
-
-	// Lookup document
-	basic_document_info<selector_type>* info =
-		document_find(owner_id, document_id);
-
-	if(info == NULL)
-	{
-		// No such document
-		format_string str("Document ID %0%/%1% does not exist");
-		str << owner_id << document_id;
-		throw net6::basic_parameter::bad_format(str.str() );
-	}
-
-	return new net6::parameter<basic_document_info<selector_type>*>(info);
 }
 
 template<typename selector_type>

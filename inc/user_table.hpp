@@ -22,8 +22,8 @@
 #include "user.hpp"
 #include "ptr_iterator.hpp"
 #include <net6/non_copyable.hpp>
+#include <map>
 #include <string>
-#include <list>
 
 namespace obby
 {
@@ -31,7 +31,7 @@ namespace obby
 /** Table that contains all users.
  */
 
-class user_table : private net6::non_copyable
+class user_table: private net6::non_copyable
 {
 public:
 	typedef std::map<unsigned int, user*> user_map;

@@ -330,7 +330,7 @@ void basic_server_buffer<selector_type>::
 
 	// Tell other clients about removal
 	net6::packet remove_pack("obby_document_remove");
-	remove_pack << info;
+	remove_pack << &info;
 	net6_server().send(remove_pack);
 
 	// Delete document
@@ -469,7 +469,7 @@ void basic_server_buffer<selector_type>::on_join(const net6::user& user6)
 	{
 		format_string str("User %0% is not connected");
 		str << user6.get_id();
-		throw net6::basic_parameter::bad_value(str.str() );
+		throw net6::bad_value(str.str() );
 	}
 
 	// Calculate number of required sync packets (one for each
@@ -548,7 +548,7 @@ void basic_server_buffer<selector_type>::on_part(const net6::user& user6)
 	{
 		format_string str("User %0% is not connected");
 		str << user6.get_id();
-		throw net6::basic_parameter::bad_value(str.str() );
+		throw net6::bad_value(str.str() );
 	}
 
 	// Forward part message to documents
@@ -570,20 +570,20 @@ bool basic_server_buffer<selector_type>::
 	on_auth(const net6::user& user6, const net6::packet& pack,
 	        net6::login::error& error)
 {
-	const std::string& name =
-		pack.get_param(0).net6::basic_parameter::as<std::string>();
+	const std::string name =
+		pack.get_param(0).net6::parameter::as<std::string>();
 	unsigned int red =
-		pack.get_param(1).net6::basic_parameter::as<int>();
+		pack.get_param(1).net6::parameter::as<unsigned int>();
 	unsigned int green =
-		pack.get_param(2).net6::basic_parameter::as<int>();
+		pack.get_param(2).net6::parameter::as<unsigned int>();
 	unsigned int blue =
-		pack.get_param(3).net6::basic_parameter::as<int>();
+		pack.get_param(3).net6::parameter::as<unsigned int>();
 
 	// Get global and user password
-	const std::string& global_password =
-		pack.get_param(4).net6::basic_parameter::as<std::string>();
-	const std::string& user_password =
-		pack.get_param(5).net6::basic_parameter::as<std::string>();
+	const std::string global_password =
+		pack.get_param(4).net6::parameter::as<std::string>();
+	const std::string user_password =
+		pack.get_param(5).net6::parameter::as<std::string>();
 
 	// Check colour
 	if(!basic_buffer<selector_type>::check_colour(red, green, blue) )
@@ -601,7 +601,7 @@ bool basic_server_buffer<selector_type>::
 	{
 		format_string str("No token available for user %0%");
 		str << user6.get_id();
-		throw net6::basic_parameter::bad_value(str.str() );
+		throw net6::bad_value(str.str() );
 	}
 
 	// Get token from iterator
@@ -641,11 +641,11 @@ unsigned int basic_server_buffer<selector_type>::
 {
 	// Get color
 	unsigned int red =
-		pack.get_param(1).net6::basic_parameter::as<int>();
+		pack.get_param(1).net6::parameter::as<unsigned int>();
 	unsigned int green =
-		pack.get_param(2).net6::basic_parameter::as<int>();
+		pack.get_param(2).net6::parameter::as<unsigned int>();
 	unsigned int blue =
-		pack.get_param(3).net6::basic_parameter::as<int>();
+		pack.get_param(3).net6::parameter::as<unsigned int>();
 
 	// Insert into user list
 	user* new_user = basic_buffer<selector_type>::m_user_table.add_user(
@@ -662,7 +662,7 @@ unsigned int basic_server_buffer<selector_type>::
 	{
 		format_string str("No token available for user %0%");
 		str << user6.get_id();
-		throw net6::basic_parameter::bad_value(str.str() );
+		throw net6::bad_value(str.str() );
 	}
 
 	// Store token in user, remove from list
@@ -688,7 +688,7 @@ void basic_server_buffer<selector_type>::
 	{
 		format_string str("User %0% is not connected");
 		str << user6.get_id();
-		throw net6::basic_parameter::bad_value(str.str() );
+		throw net6::bad_value(str.str() );
 	}
 
 	// Extend user-join packet with colour
@@ -709,13 +709,13 @@ void basic_server_buffer<selector_type>::
 	{
 		format_string str("User %0% is not connected");
 		str << user6.get_id();
-		throw net6::basic_parameter::bad_value(str.str() );
+		throw net6::bad_value(str.str() );
 	}
 
 	// Execute packet
 	if(!execute_packet(pack, *from_user) )
 	{
-		throw net6::basic_parameter::bad_value(
+		throw net6::bad_value(
 			"Unexpected command: " + pack.get_command()
 		);
 	}
@@ -750,11 +750,11 @@ void basic_server_buffer<selector_type>::
 	on_net_document_create(const net6::packet& pack, const user& from)
 {
 	unsigned int id =
-		pack.get_param(0).net6::basic_parameter::as<int>();
-	const std::string& title =
-		pack.get_param(1).net6::basic_parameter::as<std::string>();
-	const std::string& content =
-		pack.get_param(2).net6::basic_parameter::as<std::string>();
+		pack.get_param(0).net6::parameter::as<unsigned int>();
+	const std::string title =
+		pack.get_param(1).net6::parameter::as<std::string>();
+	const std::string content =
+		pack.get_param(2).net6::parameter::as<std::string>();
 
 	document_create_impl(&from, id, title, content);
 }
@@ -764,8 +764,8 @@ void basic_server_buffer<selector_type>::
 	on_net_document_remove(const net6::packet& pack, const user& from)
 {
 	// Get document to remove
-	document_info* doc =
-		pack.get_param(0).net6::basic_parameter::as<document_info*>();
+	obby::document_info* doc = pack.get_param(0).net6::
+		parameter::as<obby::document_info*>(*this);
 
 	// TODO: AUTH
 
@@ -777,8 +777,8 @@ template<typename selector_type>
 void basic_server_buffer<selector_type>::
 	on_net_message(const net6::packet& pack, const user& from)
 {
-	const std::string& message =
-		pack.get_param(0).net6::basic_parameter::as<std::string>();
+	const std::string message =
+		pack.get_param(0).net6::parameter::as<std::string>();
 
 	// TODO: Move signal emission to send_message_impl
 	basic_buffer<selector_type>::m_signal_message.emit(from, message);
@@ -794,9 +794,7 @@ void basic_server_buffer<selector_type>::
 	const_cast<user&>(from).set_password(
 		RSA::decrypt(
 			m_private,
-			pack.get_param(0).net6::basic_parameter::as<
-				std::string
-			>()
+			pack.get_param(0).net6::parameter::as<std::string>()
 		)
 	);
 }
@@ -806,11 +804,11 @@ void basic_server_buffer<selector_type>::
 	on_net_user_colour(const net6::packet& pack, const user& from)
 {
 	unsigned int red =
-		pack.get_param(0).net6::basic_parameter::as<int>();
+		pack.get_param(0).net6::parameter::as<unsigned int>();
 	unsigned int green =
-		pack.get_param(1).net6::basic_parameter::as<int>();
+		pack.get_param(1).net6::parameter::as<unsigned int>();
 	unsigned int blue =
-		pack.get_param(2).net6::basic_parameter::as<int>();
+		pack.get_param(2).net6::parameter::as<unsigned int>();
 
 	// Check new user colour for conflicts
 	if(!basic_buffer<selector_type>::check_colour(red, green, blue, &from) )
@@ -831,9 +829,9 @@ void basic_server_buffer<selector_type>::
 	on_net_document(const net6::packet& pack, const user& from)
 {
 	document_info& info = dynamic_cast<document_info&>(
-		*pack.get_param(0).net6::basic_parameter::as<
+		*pack.get_param(0).net6::parameter::as<
 			obby::document_info*
-		>()
+		>(*this)
 	);
 
 	// TODO: Rename this function. Think about providing a signal that may

@@ -71,8 +71,12 @@ public:
 	/** Reads a line from a network packet as appended by append_packet
 	 * @param pack The net6::packet to read the line from.
 	 * @param from Parameter were to start to read.
+	 * @param user_table obby::user_table where to find the authors of this
+	 * line
 	 */
-	line(const net6::packet& pack, unsigned int from);
+	line(const net6::packet& pack,
+	     unsigned int from,
+	     const user_table& user_table);
 
 	/** Copy constructor, it copies a line with its authors.
 	 */

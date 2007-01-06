@@ -44,7 +44,7 @@ const std::string& obby::document_packet::get_command() const
 	return net6::packet::get_param(1).as<std::string>();
 }
 
-const net6::basic_parameter&
+const net6::parameter&
 obby::document_packet::get_param(unsigned int index) const
 {
 	return net6::packet::get_param(index + 2);

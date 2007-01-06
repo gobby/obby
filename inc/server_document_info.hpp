@@ -272,7 +272,7 @@ void basic_server_document_info<selector_type>::
 {
 	if(!execute_packet(pack, from) )
 	{
-		throw net6::basic_parameter::bad_value(
+		throw net6::bad_value(
 			"Unexpected command: " + pack.get_command()
 		);
 	}
@@ -366,7 +366,7 @@ void basic_server_document_info<selector_type>::
 	// TODO: Authentication
 
 	const std::string& new_title =
-		pack.get_param(0).net6::basic_parameter::as<std::string>();
+		pack.get_param(0).net6::parameter::as<std::string>();
 
 	rename_impl(new_title, &from);
 }

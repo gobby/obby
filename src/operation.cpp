@@ -79,9 +79,7 @@ obby::operation::from_packet(const net6::packet& pack, unsigned int& index)
 	}
 	else
 	{
-		throw net6::basic_parameter::bad_value(
-			"Unexpected record type: " + type
-		);
+		throw net6::bad_value("Unexpected record type: " + type);
 	}
 
 	return op;

@@ -19,6 +19,7 @@
 #ifndef _OBBY_JUPITER_SERVER_HPP_
 #define _OBBY_JUPITER_SERVER_HPP_
 
+#include <map>
 #include <net6/non_copyable.hpp>
 #include "operation.hpp"
 #include "record.hpp"

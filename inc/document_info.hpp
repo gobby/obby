@@ -22,6 +22,7 @@
 #include <sigc++/signal.h>
 #include <net6/object.hpp>
 #include "ptr_iterator.hpp"
+#include "format_string.hpp"
 #include "user.hpp"
 #include "document.hpp"
 #include "document_packet.hpp"
@@ -277,53 +278,152 @@ protected:
 
 } // namespace obby
 
-namespace net6
+namespace serialise
 {
 
-/** obby document packet type
- */
+// TODO: Make a specialised version with const data_type in net6 for const
+// objects.
 template<typename selector_type>
-class parameter<obby::basic_document_info<selector_type>*>
- : public basic_parameter {
+class context<obby::basic_document_info<selector_type>*>
+{
 public:
-	parameter(obby::basic_document_info<selector_type>* document)
-	 : basic_parameter(TYPE_ID, document) { }
+	typedef obby::basic_buffer<selector_type> buffer;
+	typedef obby::basic_document_info<selector_type> document_info;
 
-	virtual basic_parameter* clone() const {
-		return new parameter<obby::basic_document_info<selector_type>*>(
-			as<obby::basic_document_info<selector_type>*>()
-		);
-	}
+	context();
+	context(const buffer& buffer);
 
-	virtual std::string to_string() const {
-		obby::basic_document_info<selector_type>* document =
-			as<obby::basic_document_info<selector_type>*>();
-
-		int owner_id = 0;
-		if(document->get_owner() != NULL)
-			owner_id = document->get_owner()->get_id();
-
-		std::stringstream stream;
-		stream << std::hex << owner_id << " " << document->get_id();
-		return stream.str();
-	}
-
-	static const identification_type TYPE_ID = 'd';
+	virtual std::string to_string(document_info* from) const;
+	virtual document_info* from_string(const std::string& string) const;
+protected:
+	const buffer* m_buffer;
 };
 
 template<typename selector_type>
-class parameter<obby::basic_document_info<selector_type> > :
- public parameter<obby::basic_document_info<selector_type>*> {
+class context<const obby::basic_document_info<selector_type>*>
+{
 public:
-	parameter(const obby::basic_document_info<selector_type>& document)
-	 : parameter<obby::basic_document_info<selector_type>*>(
-		&const_cast<obby::basic_document_info<selector_type>&>(document)
-	   )
+	typedef obby::basic_buffer<selector_type> buffer;
+	typedef obby::basic_document_info<selector_type> document_info;
+
+	context();
+	context(const buffer& buffer);
+
+	virtual std::string to_string(const document_info* from) const;
+	virtual const document_info* from_string(const std::string& string) const;
+protected:
+	const buffer* m_buffer;
+};
+
+template<typename selector_type>
+context<obby::basic_document_info<selector_type>*>::context():
+	m_buffer(NULL)
+{
+}
+
+template<typename selector_type>
+context<const obby::basic_document_info<selector_type>*>::context():
+	m_buffer(NULL)
+{
+}
+
+template<typename selector_type>
+context<obby::basic_document_info<selector_type>*>::
+	context(const buffer& buffer):
+	m_buffer(&buffer)
+{
+}
+
+template<typename selector_type>
+context<const obby::basic_document_info<selector_type>*>::
+	context(const buffer& buffer):
+	m_buffer(&buffer)
+{
+}
+
+template<typename selector_type>
+std::string context<obby::basic_document_info<selector_type>*>::
+	to_string(document_info* from) const
+{
+	typedef context<const document_info*> const_context;
+
+	// Use const context to convert
+	if(m_buffer == NULL)
 	{
+		const_context ctx;
+		return ctx.to_string(from);
 	}
-};
+	else
+	{
+		const_context ctx(*m_buffer);
+		return ctx.to_string(from);
+	}
+}
 
-} // namespace net6
+template<typename selector_type>
+typename context<obby::basic_document_info<selector_type>*>::document_info*
+context<obby::basic_document_info<selector_type>*>::
+	from_string(const std::string& string) const
+{
+	// We need a buffer to lookup the document
+	if(m_buffer == NULL)
+		throw conversion_error("Buffer object required");
+
+	// Read document and owner id
+	unsigned int owner_id, document_id;
+	std::stringstream stream(string);
+	stream >> owner_id >> document_id;
+
+	// Successful conversion?
+	if(stream.bad() )
+		throw conversion_error("Document ID ought to be two integers");
+
+	// Lookup document
+	document_info* info = m_buffer->document_find(owner_id, document_id);
+
+	if(info == NULL)
+	{
+		// No such document
+		obby::format_string str("Document ID %0%/%1% does not exist");
+		str << owner_id << document_id;
+		throw conversion_error(str.str() );
+	}
+
+	// Done
+	return info;
+}
+
+template<typename selector_type>
+std::string context<const obby::basic_document_info<selector_type>*>::
+	to_string(const document_info* from) const
+{
+	std::stringstream stream;
+	stream << from->get_owner_id() << ' ' << from->get_id();
+	return stream.str();
+}
+
+template<typename selector_type>
+const typename context<const obby::basic_document_info<selector_type>*>::
+	document_info*
+context<const obby::basic_document_info<selector_type>*>::
+	from_string(const std::string& string) const
+{
+	typedef context<document_info*> nonconst_context;
+
+	// Use non-const context to convert
+	if(m_buffer == NULL)
+	{
+		nonconst_context ctx;
+		return ctx.from_string(string);
+	}
+	else
+	{
+		nonconst_context ctx(*m_buffer);
+		return ctx.from_string(string);
+	}
+}
+
+} // namespace serialise
 
 namespace obby
 {
@@ -335,7 +435,7 @@ basic_document_info<selector_type>::
 	basic_document_info(const basic_buffer<selector_type>& buffer,
 	                    net6::basic_object<selector_type>& net,
 	                    const user* owner, unsigned int id,
-	                    const std::string& title) :
+	                    const std::string& title):
 	m_buffer(buffer), m_net(net), m_owner(owner), m_id(id), m_title(title),
 	m_priv_table(
 		new privileges_table(privileges::SUBSCRIBE | privileges::MODIFY)

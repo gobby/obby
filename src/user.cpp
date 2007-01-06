@@ -16,8 +16,9 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <net6/server.hpp>
+#include "format_string.hpp"
 #include "user.hpp"
+#include "user_table.hpp"
 
 const obby::user::flags obby::user::flags::NONE = obby::user::flags(0x00000000);
 const obby::user::flags obby::user::flags::CONNECTED = obby::user::flags(0x00000001);
@@ -149,3 +150,53 @@ void obby::user::remove_flags(flags old_flags)
 	m_flags &= ~old_flags;
 }
 
+serialise::context<obby::user*>::context():
+	m_user_table(NULL)
+{
+}
+
+serialise::context<obby::user*>::context(const obby::user_table& user_table):
+	m_user_table(&user_table)
+{
+}
+
+std::string
+serialise::context<obby::user*>::to_string(const obby::user* from) const
+{
+	std::stringstream stream;
+	stream << ( (from != NULL) ? (from->get_id()) : (0) );
+	return stream.str();
+}
+
+const obby::user*
+serialise::context<obby::user*>::from_string(const std::string& string) const
+{
+	// We need a user table to lookup the user ID
+	if(m_user_table == NULL)
+		throw conversion_error("User table required");
+
+	// Extract user ID from stream
+	unsigned int user_id;
+	std::stringstream stream(string);
+	stream >> user_id;
+
+	// Not a valid ID?
+	if(stream.bad() )
+		throw conversion_error("User ID must be an integer");
+
+	// "No user"
+	if(user_id == 0) return NULL;
+
+	// Find user
+	const obby::user* user = m_user_table->find(user_id);
+	if(user == NULL)
+	{
+		// Not in user table
+		obby::format_string str("User ID %0% does not exist");
+		str << user_id;
+		throw conversion_error(str.str() );
+	}
+
+	// Deserialisation successful
+	return user;
+}

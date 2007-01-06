@@ -393,7 +393,7 @@ void basic_client_buffer<selector_type>::
 {
 	// Send remove request
 	net6::packet request_pack("obby_document_remove");
-	request_pack << document;
+	request_pack << &document;
 	net6_client().send(request_pack);
 }
 
@@ -503,9 +503,12 @@ template<typename selector_type>
 void basic_client_buffer<selector_type>::
 	on_join(const net6::user& user6, const net6::packet& pack)
 {
-	unsigned int red = pack.get_param(2).net6::basic_parameter::as<int>();
-	unsigned int green = pack.get_param(3).net6::basic_parameter::as<int>();
-	unsigned int blue = pack.get_param(4).net6::basic_parameter::as<int>();
+	unsigned int red =
+		pack.get_param(2).net6::parameter::as<unsigned int>();
+	unsigned int green =
+		pack.get_param(3).net6::parameter::as<unsigned int>();
+	unsigned int blue =
+		pack.get_param(4).net6::parameter::as<unsigned int>();
 
 	// Add user
 	user* new_user = basic_buffer<selector_type>::m_user_table.add_user(
@@ -540,7 +543,7 @@ void basic_client_buffer<selector_type>::
 	{
 		format_string str("User %0% is not connected");
 		str << user6.get_id();
-		throw net6::basic_parameter::bad_value(str.str() );
+		throw net6::bad_value(str.str() );
 	}
 
 	// Forward part message to the documents
@@ -572,7 +575,7 @@ void basic_client_buffer<selector_type>::on_data(const net6::packet& pack)
 {
 	if(!execute_packet(pack) )
 	{
-		throw net6::basic_parameter::bad_value(
+		throw net6::bad_value(
 			"Unexpected command: " + pack.get_command()
 		);
 	}
@@ -669,7 +672,7 @@ void basic_client_buffer<selector_type>::
 	// Get the OBBY version the server is running and compare to the version
 	// of this library.
 	unsigned long server_version =
-		pack.get_param(0).net6::basic_parameter::as<int>();
+		pack.get_param(0).net6::parameter::as<unsigned long>();
 
 	if(server_version != basic_buffer<selector_type>::PROTOCOL_VERSION)
 	{
@@ -680,17 +683,17 @@ void basic_client_buffer<selector_type>::
 	// This token is prepended to every hashed password that is sent over
 	// the line. Because every client has its individual token, it is
 	// not possible to take one's password hash and send it to the server.
-	m_token = pack.get_param(1).net6::basic_parameter::as<std::string>();
+	m_token = pack.get_param(1).net6::parameter::as<std::string>();
 
 	// The server's public key, used to encrypt the password if we want
 	// to change it.
 	m_public.set_n(mpz_class(
-		pack.get_param(2).net6::basic_parameter::as<std::string>(),
+		pack.get_param(2).net6::parameter::as<std::string>(),
 		36
 	) );
 
 	m_public.set_k(mpz_class(
-		pack.get_param(3).net6::basic_parameter::as<std::string>(),
+		pack.get_param(3).net6::parameter::as<std::string>(),
 		36
 	) );
 
@@ -704,12 +707,12 @@ void basic_client_buffer<selector_type>::
 	on_net_document_create(const net6::packet& pack)
 {
 	// Get owner, id and title
-	const user* owner =
-		pack.get_param(0).net6::basic_parameter::as<user*>();
+	const user* owner = pack.get_param(0).net6::parameter::
+		as<const user*>(basic_buffer<selector_type>::get_user_table());
 	unsigned int id =
-		pack.get_param(1).net6::basic_parameter::as<int>();
+		pack.get_param(1).net6::parameter::as<unsigned int>();
 	const std::string& title =
-		pack.get_param(2).net6::basic_parameter::as<std::string>();
+		pack.get_param(2).net6::parameter::as<std::string>();
 
 	// Get owner ID
 	unsigned int owner_id = (owner == NULL ? 0 : owner->get_id() );
@@ -720,7 +723,7 @@ void basic_client_buffer<selector_type>::
 	{
 		format_string str("Owner of document %0%/%1% is self");
 		str << owner_id << id;
-		throw net6::basic_parameter::bad_value(str.str() );
+		throw net6::bad_value(str.str() );
 	}
 
 	// Is there already such a document?
@@ -728,7 +731,7 @@ void basic_client_buffer<selector_type>::
 	{
 		format_string str("Document %0%/%1% exists already");
 		str << owner_id << id;
-		throw net6::basic_parameter::bad_value(str.str() );
+		throw net6::bad_value(str.str() );
 	}
 
 	// Add new document
@@ -741,8 +744,8 @@ void basic_client_buffer<selector_type>::
 	on_net_document_remove(const net6::packet& pack)
 {
 	// Get document to remove
-	document_info* doc =
-		pack.get_param(0).net6::basic_parameter::as<document_info*>();
+	obby::document_info* doc = pack.get_param(0).net6::
+		parameter::as<obby::document_info*>(*this);
 
 	// Emit unsubscribe singal for users who were subscribed to this doc
 	// TODO: Do this is in document_delete!
@@ -759,10 +762,10 @@ template<typename selector_type>
 void basic_client_buffer<selector_type>::
 	on_net_message(const net6::packet& pack)
 {
-	user* writer =
-		pack.get_param(0).net6::basic_parameter::as<user*>();
+	const user* writer = pack.get_param(0).net6::parameter::
+		as<const user*>(basic_buffer<selector_type>::get_user_table() );
 	const std::string& message =
-		pack.get_param(1).net6::basic_parameter::as<std::string>();
+		pack.get_param(1).net6::parameter::as<std::string>();
 
 	// Valid user id indicates that the message comes from a user, otherwise
 	// the server sent the message directly
@@ -784,13 +787,14 @@ template<typename selector_type>
 void basic_client_buffer<selector_type>::
 	on_net_user_colour(const net6::packet& pack)
 {
-	user* from = pack.get_param(0).net6::basic_parameter::as<user*>();
+	const user* from = pack.get_param(0).net6::parameter::
+		as<const user*>(basic_buffer<selector_type>::get_user_table() );
 
 	// TODO: Should be done by a call to the user_table
-	from->set_colour(
-		pack.get_param(1).net6::basic_parameter::as<int>(),
-		pack.get_param(2).net6::basic_parameter::as<int>(),
-		pack.get_param(3).net6::basic_parameter::as<int>()
+	const_cast<user*>(from)->set_colour(
+		pack.get_param(1).net6::parameter::as<unsigned int>(),
+		pack.get_param(2).net6::parameter::as<unsigned int>(),
+		pack.get_param(3).net6::parameter::as<unsigned int>()
 	);
 
 	// TODO: user::set_colour should emit the signal
@@ -809,7 +813,7 @@ void basic_client_buffer<selector_type>::
 	on_net_sync_init(const net6::packet& pack)
 {
 	m_signal_sync_init.emit(
-		pack.get_param(0).net6::basic_parameter::as<int>()
+		pack.get_param(0).net6::parameter::as<unsigned int>()
 	);
 }
 
@@ -821,15 +825,15 @@ void basic_client_buffer<selector_type>::
 
 	// Extract data from packet
 	unsigned int id =
-		pack.get_param(0).net6::basic_parameter::as<int>();
+		pack.get_param(0).net6::parameter::as<unsigned int>();
 	const std::string& name =
-		pack.get_param(1).net6::basic_parameter::as<std::string>();
+		pack.get_param(1).net6::parameter::as<std::string>();
 	unsigned int red =
-		pack.get_param(2).net6::basic_parameter::as<int>();
+		pack.get_param(2).net6::parameter::as<unsigned int>();
 	unsigned int green =
-		pack.get_param(3).net6::basic_parameter::as<int>();
+		pack.get_param(3).net6::parameter::as<unsigned int>();
 	unsigned int blue =
-		pack.get_param(4).net6::basic_parameter::as<int>();
+		pack.get_param(4).net6::parameter::as<unsigned int>();
 
 	// Add user into user table
 	basic_buffer<selector_type>::m_user_table.add_user(
@@ -845,10 +849,10 @@ void basic_client_buffer<selector_type>::
 	on_net_sync_doclist_document(const net6::packet& pack)
 {
 	// Get data from packet
-	user* owner =
-		pack.get_param(0).net6::basic_parameter::as<user*>();
+	const user* owner = pack.get_param(0).net6::parameter::
+		as<const user*>(basic_buffer<selector_type>::get_user_table() );
 	unsigned int id =
-		pack.get_param(1).net6::basic_parameter::as<int>();
+		pack.get_param(1).net6::parameter::as<unsigned int>();
 //	const std::string& title =
 //		pack.get_param(2).net6::basic_parameter::as<std::string>();
 
@@ -860,7 +864,7 @@ void basic_client_buffer<selector_type>::
 	{
 		format_string str("Document %0%/%1% exists already");
 		str << owner_id << id;
-		throw net6::basic_parameter::bad_value(str.str() );
+		throw net6::bad_value(str.str() );
 	}
 
 	// Create document_info from packet
@@ -882,9 +886,9 @@ void basic_client_buffer<selector_type>::
 {
 	// Get document, forward packet
 	document_info& info = dynamic_cast<document_info&>(
-		*pack.get_param(0).net6::basic_parameter::as<
+		*pack.get_param(0).net6::parameter::as<
 			obby::document_info*
-		>()
+		>(*this)
 	);
 
 	// TODO: Rename this function. Think about providing a signal that may
