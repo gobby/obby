@@ -49,12 +49,12 @@ AM_CONDITIONAL(WIN32, test x$win32 = xtrue)
 
 # Allow to disable the build of the tests.
 AC_ARG_ENABLE([tests],
-	      AS_HELP_STRING([--disable-tests],
-			     [disable the build of the tests]),
-	      [ac_cv_build_tests=$enableval], [ac_cv_build_tests=yes])
+	      AS_HELP_STRING([--enable-tests],
+			     [enable the build of the tests]),
+	      [ac_cv_build_tests=$enableval], [ac_cv_build_tests=no])
 AC_CACHE_CHECK([whether to build the tests], [ac_cv_build_tests],
-	       [ac_cv_build_tests=yes])
-AM_CONDITIONAL(BUILD_TESTS, test x$ac_cv_build_tests = xyes)
+	       [ac_cv_build_tests=no])
+AM_CONDITIONAL(BUILD_TESTS, test x$ac_cv_build_tests != xno)
 
 # Checks for libraries.
 PKG_CHECK_MODULES([libobby], [sigc++-2.0 net6-1.0])
