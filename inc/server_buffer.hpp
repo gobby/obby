@@ -55,6 +55,10 @@ public:
 	 */
 	document& create_document();
 
+	/** Renames a document
+	 */
+	void rename_document(document& doc, const std::string& name);
+
 	/** Removes an existing document.
 	 */
 	void remove_document(document* doc);
