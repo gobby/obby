@@ -12,8 +12,9 @@ Normal:
   * Hide equivalent insert / change calls (#28)
   * Implement server-side commands for remote actions (#29)
   * Implement records to (un)indent lines of text (#30)
+  * Format strings for texts to translate (#37)
   * Undo/Redo (#39)
-  * libobby localisation (#40)
+  * libobby: Localisation (#40)
   * Exchange version information (#42)
 
 Minor:
@@ -21,7 +22,6 @@ Minor:
 Trivial:
 
 Enhancement:
-  * Syncronise documents on request (#10)
   * Session serialisation (#20)
   * Document owners (#38)
 
@@ -63,14 +63,20 @@ Implement indent_record and unindent_record to (un)indent lines of text
 ''This is a stub and generated out of the old TODO located in the 
 repository.''
 
+37: Format strings for texts to translate
+-----------------------------------------
+We should use format strings instead of just catting strings togeather to 
+permit translators to change word order. Maybe a wrapper around 
+''g_sprintf_strdup''.
+
 39: Undo/Redo
 -------------
 The current undo/redo implementation is taken directly from GtkSourceView. 
 This is not good because text that other people have written may be undone. 
 We need a proper undo/redo handling in libobby.
 
-40: libobby localisation
-------------------------
+40: libobby: Localisation
+-------------------------
 libobby has one string to be localised (see src/error.cpp).
 
 42: Exchange version information
@@ -78,21 +84,6 @@ libobby has one string to be localised (see src/error.cpp).
 The client should send it's version of libobby when sending the login 
 packet. The server may compare the versions and detect protocol 
 incompability and drop a corresponding error message.
-
-10: Syncronise documents on request
------------------------------------
-Currently, all documents are synced to incoming clients. Having large 
-and/or many documents, this causes much network traffic even if a user just 
-wants to edit one of these documents.
-
-The idea is to send just a document list on connection. Users can subscribe 
-and unsubscribe to documents which means that the document content is 
-synced and they can edit the documents collaboratively until they 
-unsubscribe.
-
-create_document should subscribe the creating user automatically.
-
-Of course, Gobby also needs many adjustments to support this feature.
 
 20: Session serialisation
 -------------------------
