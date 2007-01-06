@@ -22,6 +22,7 @@
 extern "C" {
 
 const char* obby_version();
+const char* obby_codename();
 
 }
 

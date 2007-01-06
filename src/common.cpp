@@ -20,18 +20,27 @@
 #include "config.hpp"
 #include "gettext.hpp"
 
+extern "C"
+{
+
 const char* obby_version()
 {
 	return PACKAGE_VERSION;
 }
 
+const char* obby_codename()
+{
+	return "firenze";
+}
+
 #ifdef WITH_HOWL
 /* This is an entry point for which external scripts could check. */
-extern "C" void obby_has_howl()
+void obby_has_howl()
 {
 	return;
 }
 #endif
+}
 
 void obby::init_gettext()
 {
