@@ -423,7 +423,7 @@ template<typename selector_type>
 void basic_server_buffer<selector_type>::on_join(const net6::user& user6)
 {
 	// Find user in list
-	user* new_user = basic_buffer<selector_type>::
+	const user* new_user = basic_buffer<selector_type>::
 		m_user_table.find(user6);
 
 	// Should not happen
@@ -502,8 +502,8 @@ template<typename selector_type>
 void basic_server_buffer<selector_type>::on_part(const net6::user& user6)
 {
 	// Find obby::user object for given net6::user
-	user* cur_user = basic_buffer<selector_type>::
-		m_user_table.find_user(user6);
+	const user* cur_user = basic_buffer<selector_type>::
+		m_user_table.find(user6);
 
 	// Should not happen
 	if(cur_user == NULL)
@@ -524,7 +524,7 @@ void basic_server_buffer<selector_type>::on_part(const net6::user& user6)
 	// Emit part signal, remove user from list
 	// TODO: Move part signal emission to remove_user
 	basic_buffer<selector_type>::m_signal_user_part.emit(*cur_user);
-	basic_buffer<selector_type>::m_user_table.remove_user(cur_user);
+	basic_buffer<selector_type>::m_user_table.remove_user(*cur_user);
 }
 
 template<typename selector_type>
@@ -581,7 +581,7 @@ bool basic_server_buffer<selector_type>::
 
 	// Search user in user table
 	const user_table& table = basic_buffer<selector_type>::m_user_table;
-	obby::user* user = table.find(name, user::flags::CONNECTED, true);
+	const obby::user* user = table.find(name, user::flags::CONNECTED, true);
 
 	// Compare user password
 	if(user && !user->get_password().empty() )
@@ -642,7 +642,7 @@ void basic_server_buffer<selector_type>::
 	on_extend(const net6::user& user6, net6::packet& pack)
 {
 	// Find corresponding user in list
-	user* cur_user = basic_buffer<selector_type>::
+	const user* cur_user = basic_buffer<selector_type>::
 		m_user_table.find(user6);
 
 	// Should not happen
@@ -663,7 +663,7 @@ void basic_server_buffer<selector_type>::
 	on_data(const net6::user& user6, const net6::packet& pack)
 {
 	// Get obby::user from net6::user
-	user* from_user = basic_buffer<selector_type>::
+	const user* from_user = basic_buffer<selector_type>::
 		m_user_table.find(user6);
 
 	// Should not happen

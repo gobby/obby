@@ -168,7 +168,7 @@ public:
 	 * marked as non-connected and the reference to the underlaying
 	 * net6::user object is dropped.
 	 */
-	void remove_user(user* user_to_remove);
+	void remove_user(const user& user_to_remove);
 	
 	/** Returns the beginning of the user list.
 	 */

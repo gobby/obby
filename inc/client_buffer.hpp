@@ -469,8 +469,8 @@ void basic_client_buffer<selector_type>::
 	on_part(const net6::user& user6, const net6::packet& pack)
 {
 	// Find user
-	user* cur_user = basic_buffer<selector_type>::
-		m_user_table.find<user::flags::CONNECTED>(user6);
+	const user* cur_user = basic_buffer<selector_type>::
+		m_user_table.find(user6);
 
 	// Should never happen
 	if(cur_user == NULL)
@@ -492,8 +492,7 @@ void basic_client_buffer<selector_type>::
 	basic_buffer<selector_type>::m_signal_user_part.emit(*cur_user);
 
 	// Remove user
-	// TODO: This function should take reference, not pointer.
-	basic_buffer<selector_type>::m_user_table.remove_user(cur_user);
+	basic_buffer<selector_type>::m_user_table.remove_user(*cur_user);
 }
 
 template<typename selector_type>

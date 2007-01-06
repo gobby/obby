@@ -77,11 +77,11 @@ obby::user* obby::user_table::add_user(unsigned int id, const std::string& name,
 	return new_user;
 }
 
-void obby::user_table::remove_user(user* user_to_remove)
+void obby::user_table::remove_user(const user& user_to_remove)
 {
 	// Release underlaying net6::user object, this disables the connected
 	// flag, too. Keep the user in the list to recognize him if he rejoins.
-	user_to_remove->release_net6();
+	const_cast<user&>(user_to_remove).release_net6();
 }
 
 obby::user_table::iterator obby::user_table::begin(user::flags flags,
