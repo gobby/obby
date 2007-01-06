@@ -139,9 +139,9 @@ void obby::client_buffer::on_data(const net6::packet& pack)
 	if(pack.get_command() == "obby_record")
 	{
 		record* rec = record::from_packet(pack);
-		// TODO: Ensure that rec exists
+		if(!rec) return;
+
 		// Undo all non-synced changes
-	
 		std::list<record*>::iterator iter;
 		for(iter = m_unsynced.begin(); iter != m_unsynced.end(); ++iter)
 		{
@@ -149,7 +149,13 @@ void obby::client_buffer::on_data(const net6::packet& pack)
 			rev_iter->apply(*this);
 			delete rev_iter;
 
-			rec->apply(**iter);
+			// TODO: Check if it behaves correct if we have
+			// more than one unsynced changes
+			if( (*iter)->get_from() != rec->get_from() ||
+			    (*iter)->get_id() != rec->get_id() )
+			{
+				rec->apply(**iter);
+			}
 		}
 
 		// Apply new record
@@ -174,16 +180,16 @@ void obby::client_buffer::on_data(const net6::packet& pack)
 
 					// Record is synced - remove from list
 					iter = m_unsynced.erase(iter);
-
 					continue;
 				}
 			}
 
+			// TODO: Maybe switch these two statements, don't know :/
 			// Apply the current change to the new record
 			(*iter)->apply(*rec);
 
 			// Apply the current change to the syncing record
-			if(sync_record) (*iter)->apply(*sync_record);
+			if(sync_record) (sync_record)->apply(**iter);
 
 			// Reapply revision to the buffer
 			(*iter)->apply(*this);
@@ -203,16 +209,26 @@ void obby::client_buffer::on_data(const net6::packet& pack)
 		// again, HACKHACKHACK :D
 		if(pack.get_param(0).as_string() == "insert")
 		{
-			m_signal_delete.emit(
-				*static_cast<delete_record*>(sync_record) );
+			if(sync_record)
+				m_signal_delete.emit(
+					*static_cast<delete_record*>(
+						sync_record
+					)
+				);
+
 			m_signal_insert.emit(
 				*static_cast<insert_record*>(rec) );
 		}
 		
 		if(pack.get_param(0).as_string() == "delete")
 		{
-			m_signal_insert.emit(
-				*static_cast<insert_record*>(sync_record) );
+			if(sync_record)
+				m_signal_insert.emit(
+					*static_cast<insert_record*>(
+						sync_record
+					)
+				);
+
 			m_signal_delete.emit(
 				*static_cast<delete_record*>(rec) );
 		}
