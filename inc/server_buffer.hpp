@@ -28,7 +28,7 @@ namespace obby
 /** Buffer that serves as (dedicated) server. It listens for incoming
  * connections from client_buffers and synchronises their changes.
  */
-	
+
 class server_buffer : virtual public buffer,
                       public sigc::trackable
 {
@@ -48,6 +48,10 @@ public:
 	/** Waits for incoming events or until <em>timeout</em> expires.
 	 */
 	virtual void select(unsigned int timeout);
+
+	/** Changes the global password for this session.
+	 */
+	void set_global_password(const std::string& password);
 	
 	/** Creates a new document with predefined content.
 	 * signal_document_insert will be emitted and may be used to access
@@ -146,9 +150,14 @@ protected:
 	 */
 	void on_net_document(const net6::packet& pack, user& from);
 
-	// Is in buffer
-	//unsigned int m_doc_counter;
+	/** net6 server object.
+	 */
 	net6::server* m_server;
+
+	/** Global session password. Only people who know this password are
+	 * allowed to join the session.
+	 */
+	std::string m_global_password;
 
 	signal_connect_type m_signal_connect;
 	signal_disconnect_type m_signal_disconnect;

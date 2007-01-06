@@ -27,7 +27,7 @@
  * Another solution would be to establish the connection to the login_extend
  * just in the login() call and bind the colour components to it.
  */
-namespace { int st_red, st_green, st_blue; }
+/*namespace { int st_red, st_green, st_blue; std::string st_password; }*/
 
 obby::client_buffer::client_buffer()
  : buffer(), m_client(NULL), m_self(NULL)
@@ -61,9 +61,14 @@ obby::client_buffer::~client_buffer()
 }
 
 void obby::client_buffer::login(const std::string& name, int red, int green,
-                                int blue)
+                                int blue, const std::string& global_password)
 {
-	st_red = red; st_green = green; st_blue = blue;
+	m_name = name;
+	m_red = red;
+	m_green = green;
+	m_blue = blue;
+	m_global_password = global_password;
+
 	m_client->login(name);
 }
 
@@ -151,6 +156,12 @@ obby::client_buffer::login_failed_event() const
 	return m_signal_login_failed;
 }
 
+obby::client_buffer::signal_global_password_type
+obby::client_buffer::global_password_event() const
+{
+	return m_signal_global_password;
+}
+
 void obby::client_buffer::on_join(net6::client::peer& peer,
                                   const net6::packet& pack)
 {
@@ -213,12 +224,26 @@ void obby::client_buffer::on_data(const net6::packet& pack)
 
 void obby::client_buffer::on_login_failed(net6::login::error error)
 {
-	m_signal_login_failed.emit(error);
+	// Wrong password?
+	if(error == login::ERROR_WRONG_GLOBAL_PASSWORD)
+	{
+		// Prompt for new one
+		std::string global_password;
+		if(m_signal_global_password.emit(global_password) )
+		{
+			// Retry login
+			login(m_name, m_red, m_green, m_blue, global_password);
+		}
+	}
+	else
+	{
+		m_signal_login_failed.emit(error);
+	}
 }
 
 void obby::client_buffer::on_login_extend(net6::packet& pack)
 {
-	pack << st_red << st_green << st_blue;
+	pack << m_red << m_green << m_blue << m_global_password;
 }
 
 bool obby::client_buffer::execute_packet(const net6::packet& pack)

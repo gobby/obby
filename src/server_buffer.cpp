@@ -55,6 +55,11 @@ void obby::server_buffer::select(unsigned int timeout)
 	m_server->select(timeout);
 }
 
+void obby::server_buffer::set_global_password(const std::string& password)
+{
+	m_global_password = password;
+}
+
 void obby::server_buffer::create_document(const std::string& title,
                                           const std::string& content)
 {
@@ -170,8 +175,6 @@ void obby::server_buffer::on_join(net6::server::peer& peer)
 		return;
 	}
 
-	// Client logged in. Begin with synchronising.
-
 	// Synchronise not-connected users.
 	for(user_table::user_iterator<user::CONNECTED, true> iter =
 		m_usertable.user_begin<user::CONNECTED, true>();
@@ -247,6 +250,11 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 	int green = pack.get_param(2).as<int>();
 	int blue = pack.get_param(3).as<int>();
 
+	// Get password, if given
+	std::string global_password;
+	if(pack.get_param_count() > 4)
+		global_password = pack.get_param(4).as<std::string>();
+
 	// Check for existing colors
 	// TODO: Check for colors that non-connected user occupy?
 	std::list<user*>::iterator iter;
@@ -260,6 +268,17 @@ bool obby::server_buffer::on_auth(net6::server::peer& peer,
 		    abs(blue  - iter->get_blue())) < 32)
 		{
 			error = login::ERROR_COLOR_IN_USE;
+			return false;
+		}
+	}
+
+	// Non-empty password?
+	if(!m_global_password.empty() )
+	{
+		// Compare passwords
+		if(global_password != m_global_password)
+		{
+			error = login::ERROR_WRONG_GLOBAL_PASSWORD;
 			return false;
 		}
 	}

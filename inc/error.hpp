@@ -29,6 +29,7 @@ namespace login
 	typedef net6::login::error error;
 
 	extern const error ERROR_COLOR_IN_USE;
+	extern const error ERROR_WRONG_GLOBAL_PASSWORD;
 
 	extern const error ERROR_MAX;
 
