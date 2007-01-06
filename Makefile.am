@@ -9,7 +9,8 @@ pkginclude_HEADERS = \
 	inc/insert_record.hpp \
 	inc/buffer.hpp \
 	inc/client_buffer.hpp \
-	inc/server_buffer.hpp
+	inc/server_buffer.hpp \
+	inc/rendezvous.hpp
 
 libobby_la_SOURCES = \
 	src/position.cpp \
@@ -18,7 +19,8 @@ libobby_la_SOURCES = \
 	src/delete_record.cpp \
 	src/buffer.cpp \
 	src/client_buffer.cpp \
-	src/server_buffer.cpp
+	src/server_buffer.cpp \
+	src/rendezvous.cpp
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = lobby-1.0.pc
