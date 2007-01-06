@@ -11,6 +11,7 @@ Important:
  * Implement automatic service announcement and discovery.
 
 Normal:
+ * Implement indent_record and unindent_record to (un)indent lines of text
 
 Minor:
 
