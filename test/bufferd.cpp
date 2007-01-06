@@ -40,12 +40,13 @@ protected:
 bufferd::bufferd(int argc, char* argv[])
  : m_buffer(argc > 1 ? strtol(argv[1], NULL, 10) : 6522), m_quit(false)
 {
-	obby::document& doc = m_buffer.create_document("main");
+	/*obby::document& doc =*/ m_buffer.create_document("main");
 
 	/* We need to issue this manually the first time, as create_document()
 	 * does not emit any signal.
 	 */
-	on_insert_document(doc);
+	/* FIXED: create_document() emits a signal --armin */
+//	on_insert_document(doc);
 
 	m_buffer.insert_document_event().connect(
 		sigc::mem_fun(*this, &bufferd::on_insert_document) );
@@ -62,13 +63,6 @@ bufferd::bufferd(int argc, char* argv[])
 		sigc::mem_fun(*this, &bufferd::on_connect) );
 	m_buffer.disconnect_event().connect(
 		sigc::mem_fun(*this, &bufferd::on_disconnect));
-	
-	doc.insert_event().connect(sigc::bind(
-		sigc::mem_fun(*this, &bufferd::on_doc_insert), sigc::ref(doc)));
-	doc.delete_event().connect(sigc::bind(
-		sigc::mem_fun(*this, &bufferd::on_doc_remove), sigc::ref(doc)));
-
-	doc.insert(0, "OBBY");
 }
 
 bufferd::~bufferd()
@@ -102,6 +96,11 @@ void bufferd::on_insert_document(obby::document& doc)
 {
 	std::cout << "New document created: ID = " << doc.get_id() << ", ";
 	std::cout << "TITLE = \"" << doc.get_title() << "\"" << std::endl;
+	
+	doc.insert_event().connect(sigc::bind(
+		sigc::mem_fun(*this, &bufferd::on_doc_insert), sigc::ref(doc)));
+	doc.delete_event().connect(sigc::bind(
+		sigc::mem_fun(*this, &bufferd::on_doc_remove), sigc::ref(doc)));
 }
 
 void bufferd::on_message(obby::user& user, const std::string& message)

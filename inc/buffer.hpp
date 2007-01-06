@@ -58,6 +58,8 @@ public:
 
 	typedef sigc::signal<void, user&> signal_user_join_type;
 	typedef sigc::signal<void, user&> signal_user_part_type;
+
+	// TODO: Rename to signal_document_foo_type
 	typedef sigc::signal<void, document&>
 	       	signal_insert_document_type;
 	typedef sigc::signal<void, document&, const std::string&>
@@ -78,6 +80,22 @@ public:
 	/** Waits for incoming events or until <em>timeout</em> expires.
 	 */
 	virtual void select(unsigned int timeout) = 0;
+
+	/* Creates a new document. signal_insert_document will be emitted if
+	 * it has been created.
+	 */
+	virtual void create_document(const std::string& title) = 0;
+
+	/** Renames an existing document. signal_rename_document will be
+	 * emitted if the document has been renamed.
+	 */
+	virtual void rename_document(document& doc,
+	                             const std::string& new_title) = 0;
+
+	/** Removes an existing document. signal_remove_document will be
+	 * emitted if the document has been removed.
+	 */
+	virtual void remove_document(document& doc) = 0;
 	
 	/** Looks for a document with the given ID.
 	 */

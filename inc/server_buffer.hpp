@@ -51,17 +51,19 @@ public:
 	 */
 	virtual void select(unsigned int timeout);
 	
-	/** Creates a new document.
+	/** Creates a new document. signal_insert_document will be emitted
+	 * and may be used to access the resulting obby::document.
 	 */
-	document& create_document(const std::string& title);
+	virtual void create_document(const std::string& title);
 
-	/** Renames a document
+	/** Renames an existing document.
 	 */
-	void rename_document(document& doc, const std::string& title);
+	virtual void rename_document(document& doc,
+	                             const std::string& new_title);
 
 	/** Removes an existing document.
 	 */
-	void remove_document(document* doc);
+	virtual void remove_document(document& doc);
 
 	/** Sends a global message to all users.
 	 */

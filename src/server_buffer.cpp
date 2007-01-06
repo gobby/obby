@@ -60,41 +60,45 @@ void obby::server_buffer::select(unsigned int timeout)
 	m_server->select(timeout);
 }
 
-obby::document& obby::server_buffer::create_document(const std::string& title)
+void obby::server_buffer::create_document(const std::string& title)
 {
 	unsigned int id = ++ m_doc_counter;
 	document& doc = add_document(id);
 	doc.set_title(title);
 
 	net6::packet pack("obby_document_create");
-	pack << id;
-	pack << title;
+	pack << id << title;
 	m_server->send(pack);
 
-	return doc;
+	m_signal_insert_document.emit(doc);
+//	signal_document_insert.emit(doc);
 }
 
 void obby::server_buffer::rename_document(document& doc,
-                                          const std::string& title)
+                                          const std::string& new_title)
 {
-	doc.set_title(title);
+	doc.set_title(new_title);
 
 	net6::packet pack("obby_document_rename");
-	pack << doc.get_id();
-	pack << title;
+	pack << doc.get_id() << new_title;
 	m_server->send(pack);
+
+	m_signal_rename_document.emit(doc, new_title);
+//	signal_document_rename.emit(doc, new_title);
 }
 
-void obby::server_buffer::remove_document(document* doc)
+void obby::server_buffer::remove_document(document& doc)
 {
-	m_doclist.erase(std::remove(m_doclist.begin(), m_doclist.end(), doc),
+	m_signal_remove_document.emit(doc);
+//	signal_document_remove.emit(doc);
+	m_doclist.erase(std::remove(m_doclist.begin(), m_doclist.end(), &doc),
 	                m_doclist.end() );
 	
 	net6::packet pack("obby_document_remove");
-	pack << doc->get_id();
+	pack << doc.get_id();
 	m_server->send(pack);
 
-	delete doc;
+	delete &doc;
 }
 
 void obby::server_buffer::send_message(const std::string& message)
@@ -298,9 +302,7 @@ void obby::server_buffer::on_net_document_create(const net6::packet& pack,
 
 	const std::string& title = pack.get_param(0).as_string();
 
-	document& doc = create_document(title);
-	doc.set_title(title);
-	m_signal_insert_document.emit(doc);
+	create_document(title);
 }
 
 void obby::server_buffer::on_net_document_rename(const net6::packet& pack,
@@ -316,7 +318,6 @@ void obby::server_buffer::on_net_document_rename(const net6::packet& pack,
 	document* doc = find_document(id);
 	if(!doc) return;
 
-	m_signal_rename_document.emit(*doc, title);
 	rename_document(*doc, title);
 }
 
@@ -330,8 +331,7 @@ void obby::server_buffer::on_net_document_remove(const net6::packet& pack,
 	document* doc = find_document(id);
 	if(!doc) return;
 
-	m_signal_remove_document.emit(*doc);
-	remove_document(doc);
+	remove_document(*doc);
 }
 
 void obby::server_buffer::on_net_message(const net6::packet& pack, user& from)

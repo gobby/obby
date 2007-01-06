@@ -56,15 +56,21 @@ public:
 	 */
 	void login(const std::string& name, int red, int green, int blue);
 
-	/** Requests a new document on the server. signal_insert_doc will be
-	 * emitted if the server authorized the creation process.
+	/** Requests a new document at the server. signal_insert_document
+	 * will be emitted if the server authorized the creation process.
 	 */
-	void request_create_document(const std::string& title);
+	virtual void create_document(const std::string& title);
 
-	/** Requests the deletion of a document by the server. signal_remove_doc
-	 * will be emitted if the server authorized the deletion.
+	/** Requests a new name for an existing document.
 	 */
-	void request_remove_document(unsigned int id);
+	virtual void rename_document(document& doc,
+	                             const std::string& new_title);
+
+	/** Requests the deletion of a document at the server.
+	 * signal_remove_document will be emitted if the server
+	 * authorized the deletion.
+	 */
+	virtual void remove_document(document& doc);
 
 	/** Returns the local user.
 	 */
