@@ -207,6 +207,15 @@ protected:
 	virtual void on_net_document(const net6::packet& pack,
 	                             const user& from);
 
+	/** @brief Closes a session.
+	 */
+	virtual void session_close();
+
+	/** @brief Implementation of session_close() that does not call
+	 * a base function.
+	 */
+	void session_close_impl();
+
 	/** This map temporarily caches all tokens issued to the various
 	 * clients, they get removed as soon as they are copied into the
 	 * corresponding user object.
@@ -384,18 +393,9 @@ void basic_server_buffer<Document, Selector>::close()
 		);
 	}
 
-	user_table& table = basic_buffer<Document, Selector>::m_user_table;
-	for(user_table::iterator iter =
-		table.begin(user::flags::CONNECTED, user::flags::NONE);
-	    iter != table.end(user::flags::CONNECTED, user::flags::NONE);
-	    ++ iter)
-	{
-		table.remove_user(*iter);
-	}
-
-	// Reset documents, users and network object
-	// TODO: Keep documents and users until reconnection
-	basic_buffer<Document, Selector>::m_net.reset(NULL);
+	// Virtual call - host buffer overwrites this to keep local
+	// user subscribed
+	session_close();
 }
 
 template<typename Document, typename Selector>
@@ -447,20 +447,6 @@ void basic_server_buffer<Document, Selector>::
 		net6::packet remove_pack("obby_document_remove");
 		remove_pack << &info;
 		net6_server().send(remove_pack);
-	}
-	else
-	{
-		// No users must be subscribed to this document when the
-		// session is not open, they should have been unsubscribed
-		// on session close.
-		if(info.user_count() > 0)
-		{
-			throw std::logic_error(
-				"obby::basic_server_buffer::document_remove:\n"
-				"Users are still subscribed to the document "
-				"although the session has been closed"
-			);
-		}
 	}
 
 	// Delete document
@@ -1037,6 +1023,29 @@ void basic_server_buffer<Document, Selector>::
 	// TODO: Rename this function. Think about providing a signal that may
 	// be emitted.
 	info.on_net_packet(document_packet(pack), from);
+}
+
+template<typename Document, typename Selector>
+void basic_server_buffer<Document, Selector>::session_close()
+{
+	session_close_impl();
+	basic_buffer<Document, Selector>::session_close_impl();
+}
+
+template<typename Document, typename Selector>
+void basic_server_buffer<Document, Selector>::session_close_impl()
+{
+	// Session is closed, so all users have quit
+	user_table& table = basic_buffer<Document, Selector>::m_user_table;
+
+	for(user_table::iterator iter =
+		table.begin(user::flags::CONNECTED, user::flags::NONE);
+	    iter != table.end(user::flags::CONNECTED, user::flags::NONE);
+	    ++ iter)
+	{
+		// This call also unsubscribes the user from all documents
+		basic_buffer<Document, Selector>::user_part(*iter);
+	}
 }
 
 template<typename Document, typename Selector>

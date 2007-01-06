@@ -116,6 +116,10 @@ public:
 	 */
 	virtual void on_net_packet(const document_packet& pack);
 
+	/** @brief Called when the session has been closed.
+	 */
+	virtual void obby_session_close();
+
 protected:
 	/** Subscribes a user to this document.
 	 */
@@ -158,6 +162,11 @@ protected:
 	 */
 	virtual void on_jupiter_record(const record_type& rec,
 	                               const user* from);
+
+	/** @brief Implementation of the session close callback that does
+	 * not call the base function.
+	 */
+	virtual void session_close_impl();
 
 	std::auto_ptr<jupiter_type> m_jupiter;
 	subscription_state m_subscription_state;
@@ -302,7 +311,7 @@ void basic_client_document_info<Document, Selector>::
 	insert(position pos,
 	       const std::string& text)
 {
-	if(m_jupiter.get() == NULL)
+	if(base_type::m_document.get() == NULL)
 	{
 		throw std::logic_error(
 			"obby::basic_client_document_info::insert:\n"
@@ -310,8 +319,20 @@ void basic_client_document_info<Document, Selector>::
 		);
 	}
 
-	insert_operation<document_type> op(pos, text);
-	m_jupiter->local_op(op, &get_buffer().get_self() );
+	if(m_jupiter.get() != NULL)
+	{
+		insert_operation<document_type> op(pos, text);
+		m_jupiter->local_op(op, &get_buffer().get_self() );
+	}
+	else
+	{
+		// No network connection available: Perform direct insertion
+		base_type::m_document->insert(
+			pos,
+			text,
+			&get_buffer().get_self()
+		);
+	}
 }
 
 template<typename Document, typename Selector>
@@ -319,7 +340,7 @@ void basic_client_document_info<Document, Selector>::
 	erase(position pos,
 	      position len)
 {
-	if(m_jupiter.get() == NULL)
+	if(base_type::m_document.get() == NULL)
 	{
 		throw std::logic_error(
 			"obby::basic_client_document_info::erase:\n"
@@ -327,17 +348,31 @@ void basic_client_document_info<Document, Selector>::
 		);
 	}
 
-	delete_operation<document_type> op(pos, len);
-	m_jupiter->local_op(op, &get_buffer().get_self() );
+	if(m_jupiter.get() != NULL)
+	{
+		delete_operation<document_type> op(pos, len);
+		m_jupiter->local_op(op, &get_buffer().get_self() );
+	}
+	else
+	{
+		base_type::m_document->erase(pos, len);
+	}
 }
 
 template<typename Document, typename Selector>
 void basic_client_document_info<Document, Selector>::
 	rename(const std::string& new_title)
 {
-	document_packet pack(*this, "rename");
-	pack << new_title;
-	get_net6().send(pack);
+	if(base_type::m_net != NULL)
+	{
+		document_packet pack(*this, "rename");
+		pack << new_title;
+		get_net6().send(pack);
+	}
+	else
+	{
+		base_type::document_rename(new_title);
+	}
 }
 
 template<typename Document, typename Selector>
@@ -354,11 +389,21 @@ void basic_client_document_info<Document, Selector>::subscribe()
 		);
 	}
 
-	// Send request
-	document_packet pack(*this, "subscribe");
-	get_net6().send(pack);
+	if(base_type::m_net != NULL)
+	{
+		// Send request
+		document_packet pack(*this, "subscribe");
+		get_net6().send(pack);
 
-	m_subscription_state = base_local_type::SUBSCRIBING;
+		m_subscription_state = base_local_type::SUBSCRIBING;
+	}
+	else
+	{
+		throw std::logic_error(
+			"obby::basic_client_document_info::subscribe:\n"
+			"Cannot subscribe to document without being connected"
+		);
+	}
 }
 
 template<typename Document, typename Selector>
@@ -375,11 +420,18 @@ void basic_client_document_info<Document, Selector>::unsubscribe()
 		);
 	}
 
-	// Send request
-	document_packet pack(*this, "unsubscribe");
-	get_net6().send(pack);
+	if(base_type::m_net != NULL)
+	{
+		// Send request
+		document_packet pack(*this, "unsubscribe");
+		get_net6().send(pack);
 
-	m_subscription_state = base_local_type::UNSUBSCRIBING;
+		m_subscription_state = base_local_type::UNSUBSCRIBING;
+	}
+	else
+	{
+		user_unsubscribe(get_buffer().get_self() );
+	}
 }
 
 template<typename Document, typename Selector>
@@ -399,6 +451,14 @@ void basic_client_document_info<Document, Selector>::
 			"Unexpected command: " + pack.get_command()
 		);
 	}
+}
+
+template<typename Document, typename Selector>
+void basic_client_document_info<Document, Selector>::obby_session_close()
+{
+	session_close_impl();
+	basic_local_document_info<Document, Selector>::session_close_impl();
+	basic_document_info<Document, Selector>::session_close_impl();
 }
 
 template<typename Document, typename Selector>
@@ -643,24 +703,33 @@ void basic_client_document_info<Document, Selector>::
 }
 
 template<typename Document, typename Selector>
+void basic_client_document_info<Document, Selector>::session_close_impl()
+{
+	// Jupiter has been reset, but we are still subscribed if
+	// m_document exists.
+	m_jupiter.reset(NULL);
+}
+
+
+template<typename Document, typename Selector>
 const typename basic_client_document_info<Document, Selector>::buffer_type&
 basic_client_document_info<Document, Selector>::get_buffer() const
 {
-	return dynamic_cast<const buffer_type&>(base_local_type::get_buffer());
+	return dynamic_cast<const buffer_type&>(base_type::get_buffer());
 }
 
 template<typename Document, typename Selector>
 typename basic_client_document_info<Document, Selector>::net_type&
 basic_client_document_info<Document, Selector>::get_net6()
 {
-	return dynamic_cast<net_type&>(base_local_type::get_net6() );
+	return dynamic_cast<net_type&>(base_type::get_net6() );
 }
 
 template<typename Document, typename Selector>
 const typename basic_client_document_info<Document, Selector>::net_type&
 basic_client_document_info<Document, Selector>::get_net6() const
 {
-	return dynamic_cast<const net_type&>(base_local_type::get_net6() );
+	return dynamic_cast<const net_type&>(base_type::get_net6() );
 }
 
 } // namespace obby

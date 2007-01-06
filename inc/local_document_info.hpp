@@ -86,6 +86,16 @@ public:
 	 */
 	virtual subscription_state get_subscription_state() const = 0;
 
+	/** @brief Called when the session has been closed.
+	 */
+	virtual void obby_session_close();
+
+protected:
+	/** Implementation of the session close callback that does not call
+	 * the base function.
+	 */
+	void session_close_impl();
+
 public:
 	/** Returns the buffer this document belongs to.
 	 */
@@ -133,6 +143,18 @@ bool basic_local_document_info<Document, Selector>::
 	is_subscribed(const user& user) const
 {
 	return base_type::is_subscribed(user);
+}
+
+template<typename Document, typename Selector>
+void basic_local_document_info<Document, Selector>::obby_session_close()
+{
+	session_close_impl();
+	basic_document_info<Document, Selector>::session_close_impl();
+}
+
+template<typename Document, typename Selector>
+void basic_local_document_info<Document, Selector>::session_close_impl()
+{
 }
 
 template<typename Document, typename Selector>

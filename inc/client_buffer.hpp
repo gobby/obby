@@ -219,7 +219,7 @@ public:
 
 protected:
 	/** Registers the signal handlers for the net6::client object. It may
-	 * be used by derived classed to register these signal handlers.
+	 * be used by derived classes to register these signal handlers.
 	 */
 	void register_signal_handlers();
 
@@ -294,6 +294,15 @@ protected:
 	/** Forwarding commands.
 	 */
 	virtual void on_net_document(const net6::packet& pack);
+
+	/** @brief Closes the session.
+	 */
+	virtual void session_close();
+
+	/** @brief Implementation of session_close() that does not call
+	 * a base function.
+	 */
+	void session_close_impl();
 
 	const user* m_self;
 
@@ -373,25 +382,8 @@ void basic_client_buffer<Document, Selector>::disconnect()
 		);
 	}
 
-	// Remove all users from table. Note that this still keeps the users
-	// including their colors but just drops their reference to the
-	// underlaying net6::user.
-	user_table& table =
-		basic_buffer<Document, Selector>::m_user_table;
-
-	for(user_table::iterator iter =
-		table.begin(user::flags::CONNECTED, user::flags::NONE);
-	    iter != table.end(user::flags::CONNECTED, user::flags::NONE);
-	    ++ iter)
-	{
-		table.remove_user(*iter);
-	}
-
-	// Keep documents and users until reconnection
-	basic_buffer<Document, Selector>::m_net.reset(NULL);
-
-	// Empty passwords
-	m_settings.global_password = m_settings.user_password = "";
+	// Close session
+	session_close();
 }
 
 template<typename Document, typename Selector>
@@ -488,18 +480,6 @@ void basic_client_buffer<Document, Selector>::
 	}
 	else
 	{
-		// We are not logged in, so there should no users
-		// be subscribed to the document. They should have been
-		// unsubscribed on disconnection.
-		if(document.user_count() > 0)
-		{
-			throw std::logic_error(
-				"obby::basic_client_buffer::document_remove:\n"
-				"Users are still subscribed to document "
-				"without being connected"
-			);
-		}
-
 		// Delete document
 		basic_buffer<Document, Selector>::document_delete(document);
 	}
@@ -512,10 +492,7 @@ basic_client_buffer<Document, Selector>::
 	              unsigned int id) const
 {
 	return dynamic_cast<document_info_type*>(
-		basic_local_buffer<Document, Selector>::document_find(
-			owner_id,
-			id
-		)
+		basic_buffer<Document, Selector>::document_find(owner_id, id)
 	);
 }
 
@@ -682,18 +659,7 @@ void basic_client_buffer<Document, Selector>::on_join(const net6::user& user6,
 	// The first joining user is the local one
 	if(m_self == NULL) m_self = new_user;
 
-	// Forward join message to documents
-	// TODO: Document shall connect to user_join_event
-	for(typename basic_buffer<Document, Selector>::document_iterator
-		doc_iter = basic_buffer<Document, Selector>::document_begin();
-	    doc_iter != basic_buffer<Document, Selector>::document_end();
-	    ++ doc_iter)
-	{
-		doc_iter->obby_user_join(*new_user);
-	}
-
-	// TODO: Move signal emission to user_table::add_user
-	basic_buffer<Document, Selector>::m_signal_user_join.emit(*new_user);
+	basic_buffer<Document, Selector>::user_join(*new_user);
 }
 
 template<typename Document, typename Selector>
@@ -716,21 +682,7 @@ void basic_client_buffer<Document, Selector>::on_part(const net6::user& user6,
 		throw net6::bad_value(str.str() );
 	}
 
-	// Forward part message to the documents
-	// TODO: Documents should connect to user_part_event
-	for(typename basic_buffer<Document, Selector>::document_iterator
-		doc_iter = basic_buffer<Document, Selector>::document_begin();
-	    doc_iter != basic_buffer<Document, Selector>::document_end();
-	    ++ doc_iter)
-	{
-		doc_iter->obby_user_part(*cur_user);
-	}
-
-	// TODO: Should be done by user_table::remove_user
-	basic_buffer<Document, Selector>::m_signal_user_part.emit(*cur_user);
-
-	// Remove user
-	basic_buffer<Document, Selector>::m_user_table.remove_user(*cur_user);
+	basic_buffer<Document, Selector>::user_part(*cur_user);
 }
 
 template<typename Document, typename Selector>
@@ -1101,6 +1053,21 @@ void basic_client_buffer<Document, Selector>::
 	// TODO: Rename this function. Think about providing a signal that may
 	// be emitted.
 	info.on_net_packet(document_packet(pack) );
+}
+
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::session_close()
+{
+	session_close_impl();
+	basic_local_buffer<Document, Selector>::session_close_impl();
+	basic_buffer<Document, Selector>::session_close_impl();
+}
+
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::session_close_impl()
+{
+	// Reset passwords to prevent using them for the next connection
+	m_settings.global_password = m_settings.user_password = "";
 }
 
 template<typename Document, typename Selector>

@@ -213,13 +213,15 @@ public:
 	 */
 	signal_unsubscribe_type unsubscribe_event() const;
 
+	/** Called by the buffer when the session has been closed.
+	 */
+	virtual void obby_session_close();
+
 	/** Called by the buffer when a user has joined.
-	 * TODO: Replace by a signal connection to the buffer.
 	 */
 	virtual void obby_user_join(const user& user);
 
 	/** Called by the buffer when a user has left.
-	 * TODO: Replace by a signal connection to the buffer.
 	 */
 	virtual void obby_user_part(const user& user);
 
@@ -244,8 +246,13 @@ protected:
 	 */
 	void release_document();
 
+	/** @brief Implementation of session_close() that does not call
+	 * base functions.
+	 */
+	void session_close_impl();
+
 	const buffer_type& m_buffer;
-	net_type& m_net;
+	net_type* m_net;
 
 	const user* m_owner;
 	unsigned int m_id;
@@ -565,7 +572,7 @@ basic_document_info<Document, Selector>::
 	                    const user* owner, unsigned int id,
 	                    const std::string& title,
 	                    const std::string& encoding):
-	m_buffer(buffer), m_net(net), m_owner(owner), m_id(id), m_title(title),
+	m_buffer(buffer), m_net(&net), m_owner(owner), m_id(id), m_title(title),
 	m_encoding(encoding),
 	m_priv_table(
 		new privileges_table(privileges::SUBSCRIBE | privileges::MODIFY)
@@ -578,7 +585,7 @@ basic_document_info<Document, Selector>::
 	basic_document_info(const buffer_type& buffer,
 	                    net_type& net,
 	                    const serialise::object& obj):
-	m_buffer(buffer), m_net(net),
+	m_buffer(buffer), m_net(&net),
 	m_owner(
 		obj.get_required_attribute("owner").
 			obby::serialise::attribute::as<const user*>(
@@ -745,6 +752,12 @@ basic_document_info<Document, Selector>::unsubscribe_event() const
 }
 
 template<typename Document, typename Selector>
+void basic_document_info<Document, Selector>::obby_session_close()
+{
+	session_close_impl();
+}
+
+template<typename Document, typename Selector>
 void basic_document_info<Document, Selector>::obby_user_join(const user& user)
 {
 }
@@ -814,6 +827,13 @@ void basic_document_info<Document, Selector>::release_document()
 }
 
 template<typename Document, typename Selector>
+void basic_document_info<Document, Selector>::session_close_impl()
+{
+	// Drop network reference
+	m_net = NULL;
+}
+
+template<typename Document, typename Selector>
 const typename basic_document_info<Document, Selector>::buffer_type&
 basic_document_info<Document, Selector>::get_buffer() const
 {
@@ -824,14 +844,32 @@ template<typename Document, typename Selector>
 typename basic_document_info<Document, Selector>::net_type&
 basic_document_info<Document, Selector>::get_net6()
 {
-	return m_net;
+	if(m_net == NULL)
+	{
+		throw std::logic_error(
+			"obby::basic_document_info::::get_net6:\n"
+			"No network object available. Most probably the "
+			"session has been closed"
+		);
+	}
+
+	return *m_net;
 }
 
 template<typename Document, typename Selector>
 const typename basic_document_info<Document, Selector>::net_type&
 basic_document_info<Document, Selector>::get_net6() const
 {
-	return m_net;
+	if(m_net == NULL)
+	{
+		throw std::logic_error(
+			"obby::basic_document_info::::get_net6:\n"
+			"No network object available. Most probably the "
+			"session has been closed"
+		);
+	}
+
+	return *m_net;
 }
 
 // privileges_table

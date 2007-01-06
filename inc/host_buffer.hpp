@@ -78,10 +78,6 @@ public:
 	 */
 	virtual void open(const std::string& session, unsigned int port);
 
-	/** Closes the session.
-	 */
-	virtual void close();
-
 	/** Looks for a document with the given ID which belongs to the user
 	 * with the given owner ID. Note that we do not take a real user object
 	 * here because the ID is enough and one might not have a user object
@@ -130,6 +126,15 @@ protected:
 	 * buffer's type.
 	 */
 	virtual base_net_type* new_net();
+
+	/** @brief Closes the session.
+	 */
+	virtual void session_close();
+
+	/** @brief Implementation of session_close() that does not call
+	 * a base function.
+	 */
+	void session_close_impl();
 
 	std::string m_username;
 	colour m_colour;
@@ -208,13 +213,6 @@ void basic_host_buffer<Document, Selector>::open(const std::string& session,
 }
 
 template<typename Document, typename Selector>
-void basic_host_buffer<Document, Selector>::close()
-{
-	basic_server_buffer<Document, Selector>::close();
-	m_self = NULL;
-}
-
-template<typename Document, typename Selector>
 typename basic_host_buffer<Document, Selector>::document_info_type*
 basic_host_buffer<Document, Selector>::
 	document_find(unsigned int owner_id,
@@ -235,7 +233,8 @@ const user& basic_host_buffer<Document, Selector>::get_self() const
 	{
 		throw std::logic_error(
 			"obby::host_buffer::get_self:\n"
-			"Server has not been opened"
+			"Local user is not available This probably means that "
+			"the server has never been opened"
 		);
 	}
 
@@ -250,7 +249,8 @@ void basic_host_buffer<Document, Selector>::
 	{
 		throw std::logic_error(
 			"obby::host_buffer::send_message:\n"
-			"Server has net been opened"
+			"Local user is not available This probably means that "
+			"the server has never been opened"
 		);
 	}
 
@@ -271,7 +271,8 @@ void basic_host_buffer<Document, Selector>::
 	{
 		throw std::logic_error(
 			"obby::host_buffer::document_create:\n"
-			"Server has not been opened"
+			"Local user is not available This probably means that "
+			"the server has never been opened"
 		);
 	}
 
@@ -291,7 +292,8 @@ void basic_host_buffer<Document, Selector>::set_colour(const colour& colour)
 	{
 		throw std::logic_error(
 			"obby::host_buffer::set_colour:\n"
-			"Server has not been opened"
+			"Local user is not available This probably means that "
+			"the server has never been opened"
 		);
 	}
 
@@ -309,6 +311,20 @@ void basic_host_buffer<Document, Selector>::set_colour(const colour& colour)
 			colour
 		);
 	}
+}
+
+template<typename Document, typename Selector>
+void basic_host_buffer<Document, Selector>::session_close()
+{
+	session_close_impl();
+	basic_local_buffer<Document, Selector>::session_close_impl();
+	basic_buffer<Document, Selector>::session_close_impl();
+}
+
+template<typename Document, typename Selector>
+void basic_host_buffer<Document, Selector>::session_close_impl()
+{
+	// Keep self until reopening
 }
 
 template<typename Document, typename Selector>
@@ -353,7 +369,7 @@ typename basic_host_buffer<Document, Selector>::net_type&
 basic_host_buffer<Document, Selector>::net6_host()
 {
 	return dynamic_cast<net_type&>(
-		*basic_server_buffer<Document, Selector>::m_net
+		*basic_buffer<Document, Selector>::m_net
 	);
 }
 
@@ -362,7 +378,7 @@ const typename basic_host_buffer<Document, Selector>::net_type&
 basic_host_buffer<Document, Selector>::net6_host() const
 {
 	return dynamic_cast<const net_type&>(
-		*basic_server_buffer<Document, Selector>::m_net
+		*basic_buffer<Document, Selector>::m_net
 	);
 }
 

@@ -88,6 +88,10 @@ public:
 	 */
 	virtual subscription_state get_subscription_state() const;
 
+	/** @brief Called when the session has been closed.
+	 */
+	virtual void obby_session_close();
+
 protected:
 	/** Internally subscribes a user to this document.
 	 */
@@ -96,6 +100,11 @@ protected:
 	/** Internally unsubscribes a user from this document.
 	 */
 	virtual void user_unsubscribe(const user& user);
+
+	/** @brief Implementation of the session close callback that does
+	 * not call the base function.
+	 */
+	virtual void session_close_impl();
 
 public:
 	/** Returns the buffer to which this document_info belongs.
@@ -169,19 +178,26 @@ void basic_host_document_info<Document, Selector>::
 	base_server_type::rename_impl(new_title, &get_buffer().get_self() );
 }
 
+// TODO: Overload (un)subscribe_user to map to these functions here to
+// prevent host from sending stuff to itself
 template<typename Document, typename Selector>
 void basic_host_document_info<Document, Selector>::subscribe()
 {
-	// TODO: Call a base-class method that does not try to sync the document
-	// contents to the user, it is not senseful in our case.
-	base_server_type::subscribe_user(get_buffer().get_self() );
+	const user& self = get_buffer().get_self();
+	user_subscribe(self);
+
+	if(base_type::m_net != NULL)
+		base_server_type::broadcast_subscription(self);
 }
 
 template<typename Document, typename Selector>
 void basic_host_document_info<Document, Selector>::unsubscribe()
 {
-	// TODO: Same here
-	base_server_type::unsubscribe_user(get_buffer().get_self() );
+	const user& self = get_buffer().get_self();
+	user_unsubscribe(self);
+
+	if(base_type::m_net != NULL)
+		base_server_type::broadcast_unsubscription(self);
 }
 
 template<typename Document, typename Selector>
@@ -208,8 +224,11 @@ void basic_host_document_info<Document, Selector>::
 	base_type::user_subscribe(user);
 
 	// Add client to jupiter if it is not the local client
-	if(&user != &get_buffer().get_self() )
+	if(base_server_type::m_jupiter.get() != NULL &&
+	   &user != &get_buffer().get_self() )
+	{
 		base_server_type::m_jupiter->client_add(user);
+	}
 }
 
 template<typename Document, typename Selector>
@@ -217,32 +236,48 @@ void basic_host_document_info<Document, Selector>::
 	user_unsubscribe(const user& user)
 {
 	// Remove client from jupiter if is is not the local client
-	if(&user != &get_buffer().get_self() )
+	if(base_server_type::m_jupiter.get() != NULL &&
+	   &user != &get_buffer().get_self() )
+	{
 		base_server_type::m_jupiter->client_remove(user);
+	}
 
 	// Call base function
 	base_type::user_unsubscribe(user);
 }
 
 template<typename Document, typename Selector>
+void basic_host_document_info<Document, Selector>::obby_session_close()
+{
+	session_close_impl();
+	basic_server_document_info<Document, Selector>::session_close_impl();
+	basic_document_info<Document, Selector>::session_close_impl();
+}
+
+template<typename Document, typename Selector>
+void basic_host_document_info<Document, Selector>::session_close_impl()
+{
+}
+
+template<typename Document, typename Selector>
 const typename basic_host_document_info<Document, Selector>::buffer_type&
 basic_host_document_info<Document, Selector>::get_buffer() const
 {
-	return dynamic_cast<const buffer_type&>(base_server_type::get_buffer());
+	return dynamic_cast<const buffer_type&>(base_type::get_buffer());
 }
 
 template<typename Document, typename Selector>
 typename basic_host_document_info<Document, Selector>::net_type&
 basic_host_document_info<Document, Selector>::get_net6()
 {
-	return dynamic_cast<net_type&>(base_server_type::get_net6());
+	return dynamic_cast<net_type&>(base_type::get_net6());
 }
 
 template<typename Document, typename Selector>
 const typename basic_host_document_info<Document, Selector>::net_type&
 basic_host_document_info<Document, Selector>::get_net6() const
 {
-	return dynamic_cast<const net_type&>(base_server_type::get_net6());
+	return dynamic_cast<const net_type&>(base_type::get_net6());
 }
 
 } // namespace obby

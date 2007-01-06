@@ -79,6 +79,16 @@ public:
 	signal_user_colour_failed_type user_colour_failed_event() const;
 
 protected:
+	/** @brief Closes the session.
+	 */
+	virtual void session_close();
+
+	/** @brief Implementation of session_close() that does not call
+	 * a base function.
+	 */
+	void session_close_impl();
+
+protected:
 	signal_user_colour_failed_type m_signal_user_colour_failed;
 };
 
@@ -111,6 +121,32 @@ typename basic_local_buffer<Document, Selector>::signal_user_colour_failed_type
 basic_local_buffer<Document, Selector>::user_colour_failed_event() const
 {
 	return m_signal_user_colour_failed;
+}
+
+template<typename Document, typename Selector>
+void basic_local_buffer<Document, Selector>::session_close()
+{
+	session_close_impl();
+	basic_buffer<Document, Selector>::session_close_impl();
+}
+
+template<typename Document, typename Selector>
+void basic_local_buffer<Document, Selector>::session_close_impl()
+{
+	// Remove all users except for the local one
+	user_table& table = basic_buffer<Document, Selector>::m_user_table;
+
+	for(user_table::iterator iter =
+		table.begin(user::flags::CONNECTED, user::flags::NONE);
+	    iter != table.end(user::flags::CONNECTED, user::flags::NONE);
+	    ++ iter)
+	{
+		if(&(*iter) == &get_self() ) continue;
+
+		// This tells documents that the user has gone. This causes
+		// the user to be unsubscribed from documents
+		basic_buffer<Document, Selector>::user_part(*iter);
+	}
 }
 
 } // namespace obby

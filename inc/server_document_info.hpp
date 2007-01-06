@@ -101,6 +101,10 @@ public:
 	 */
 	virtual void obby_user_part(const user& user);
 
+	/** @brief Called when the session has been closed.
+	 */
+	virtual void obby_session_close();
+
 protected:
 	/** Internal function that subscribes a user to this document.
 	 */
@@ -159,6 +163,19 @@ protected:
 	 */
 	virtual void on_jupiter_record(const record_type& rec, const user& user,
 	                               const obby::user* from);
+
+	/** @brief Broadcasts a user subscription to the other users.
+	 */
+	void broadcast_subscription(const user& user);
+
+	/** @brief Broadcasts user unsubscription to the other users.
+	 */
+	void broadcast_unsubscription(const user& user);
+
+	/** @brief Implementation of the session close callback that does
+	 * not call the base function.
+	 */
+	void session_close_impl();
 
 	std::auto_ptr<jupiter_type> m_jupiter;
 
@@ -281,6 +298,19 @@ template<typename Document, typename Selector>
 void basic_server_document_info<Document, Selector>::
 	subscribe_user(const user& user)
 {
+	// Note that the host is able to subscribe the local user even if
+	// no network connection is available. The host overloads this
+	// function and basic_local_document_info::subscribe for that purpose
+	if(base_type::m_net == NULL)
+	{
+		throw std::logic_error(
+			"obby::basic_server_document_info::subscribe_user:\n"
+			"Cannot subscribe user without having a network object "
+		);
+	}
+
+	// TODO: Check userflags for connected?
+
 	// Subscribe given user
 	user_subscribe(user);
 
@@ -302,23 +332,26 @@ void basic_server_document_info<Document, Selector>::
 		get_net6().send(chunk_pack, user.get_net6() );
 	}
 
-	// Tell clients
-	document_packet pack(*this, "subscribe");
-	pack << &user;
-	get_net6().send(pack);
+	// Broadcast subscription
+	broadcast_subscription(user);
 }
 
 template<typename Document, typename Selector>
 void basic_server_document_info<Document, Selector>::
 	unsubscribe_user(const user& user)
 {
+	if(base_type::m_net == NULL)
+	{
+		throw std::logic_error(
+			"obby::basic_server_document_info::unsubscribe_user:\n"
+			"Cannot subscribe user without having a network object "
+		);
+	}
+
 	// Unsubscribe user
 	user_unsubscribe(user);
-
-	// Tell clients
-	document_packet pack(*this, "unsubscribe");
-	pack << &user;
-	get_net6().send(pack);
+	// Broadcast unsubscription
+	broadcast_unsubscription(user);
 }
 
 template<typename Document, typename Selector>
@@ -349,6 +382,13 @@ void basic_server_document_info<Document, Selector>::
 }
 
 template<typename Document, typename Selector>
+void basic_server_document_info<Document, Selector>::obby_session_close()
+{
+	session_close_impl();
+	basic_document_info<Document, Selector>::session_close_impl();
+}
+
+template<typename Document, typename Selector>
 void basic_server_document_info<Document, Selector>::
 	user_subscribe(const user& user)
 {
@@ -374,8 +414,15 @@ void basic_server_document_info<Document, Selector>::
 	            const std::string& text,
 	            const user* author)
 {
-	insert_operation<document_type> op(pos, text);
-	m_jupiter->local_op(op, author);
+	if(m_jupiter.get() != NULL)
+	{
+		insert_operation<document_type> op(pos, text);
+		m_jupiter->local_op(op, author);
+	}
+	else
+	{
+		base_type::m_document->insert(pos, text, author);
+	}
 }
 
 template<typename Document, typename Selector>
@@ -384,8 +431,15 @@ void basic_server_document_info<Document, Selector>::
 	           position len,
 	           const user* author)
 {
-	delete_operation<document_type> op(pos, len);
-	m_jupiter->local_op(op, author);
+	if(m_jupiter.get() != NULL)
+	{
+		delete_operation<document_type> op(pos, len);
+		m_jupiter->local_op(op, author);
+	}
+	else
+	{
+		base_type::m_document->erase(pos, len);
+	}
 }
 
 template<typename Document, typename Selector>
@@ -396,10 +450,13 @@ void basic_server_document_info<Document, Selector>::
 	// Rename document
 	basic_document_info<Document, Selector>::document_rename(new_title);
 
-	// Forward to clients
-	document_packet pack(*this, "rename");
-	pack << from << new_title;
-	get_net6().send(pack);
+	if(base_type::m_net != NULL)
+	{
+		// Forward to clients
+		document_packet pack(*this, "rename");
+		pack << from << new_title;
+		get_net6().send(pack);
+	}
 }
 
 template<typename Document, typename Selector>
@@ -478,6 +535,30 @@ void basic_server_document_info<Document, Selector>::
 	pack << from;
 	rec.append_packet(pack);
 	get_net6().send(pack, user.get_net6() );
+}
+
+template<typename Document, typename Selector>
+void basic_server_document_info<Document, Selector>::
+	broadcast_subscription(const user& user)
+{
+	document_packet pack(*this, "subscribe");
+	pack << &user;
+	get_net6().send(pack);
+}
+
+template<typename Document, typename Selector>
+void basic_server_document_info<Document, Selector>::
+	broadcast_unsubscription(const user& user)
+{
+	document_packet pack(*this, "unsubscribe");
+	pack << &user;
+	get_net6().send(pack);
+}
+
+template<typename Document, typename Selector>
+void basic_server_document_info<Document, Selector>::session_close_impl()
+{
+	m_jupiter.reset(NULL);
 }
 
 template<typename Document, typename Selector>

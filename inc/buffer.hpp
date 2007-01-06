@@ -215,6 +215,23 @@ protected:
 	 */
 	void document_clear();
 
+	/** @brief Internal function to add a user to the buffer.
+	 */
+	void user_join(const user& user);
+
+	/** @brief Internal function that clears up when a user has gone.
+	 */
+	void user_part(const user& user);
+
+	/** @brief Closes the session.
+	 */
+	virtual void session_close();
+
+	/** @brief Implementation of session_close() that does not call
+	 * a base function.
+	 */
+	void session_close_impl();
+
 	signal_sync_init_type m_signal_sync_init;
 	signal_sync_final_type m_signal_sync_final;
 
@@ -516,6 +533,57 @@ void basic_buffer<Document, Selector>::document_clear()
 		delete *iter;
 
 	m_docs.clear();
+}
+
+template<typename Document, typename Selector>
+void basic_buffer<Document, Selector>::user_join(const user& user)
+{
+	// User should have already been added to the user table (that creates
+	// the user object).
+	for(document_iterator iter = document_begin();
+	    iter != document_end();
+	    ++ iter)
+	{
+		iter->obby_user_join(user);
+	}
+
+	// TODO: Move signal emission to user_table::add_user.
+	m_signal_user_join.emit(user);
+}
+
+template<typename Document, typename Selector>
+void basic_buffer<Document, Selector>::user_part(const user& user)
+{
+	for(document_iterator iter = document_begin();
+	    iter != document_end();
+	    ++ iter)
+	{
+		iter->obby_user_part(user);
+	}
+
+	m_signal_user_part.emit(user);
+
+	// TODO: Move signal emission to user_table::remove_user
+	m_user_table.remove_user(user);
+}
+
+template<typename Document, typename Selector>
+void basic_buffer<Document, Selector>::session_close()
+{
+	session_close_impl();
+}
+
+template<typename Document, typename Selector>
+void basic_buffer<Document, Selector>::session_close_impl()
+{
+	for(document_iterator iter = document_begin();
+	    iter != document_end();
+	    ++ iter)
+	{
+		iter->obby_session_close();
+	}
+
+	m_net.reset(NULL);
 }
 
 } // namespace obby
