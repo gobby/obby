@@ -203,7 +203,7 @@ obby::position obby::document::coord_to_position(unsigned int row,
 
 	position pos = 0;
 	for(std::vector<std::string>::size_type i = 0; i < row; ++ i)
-		pos += m_lines[i].length();
+		pos += m_lines[i].length() + 1;
 	pos += col;
 	return pos;
 }
