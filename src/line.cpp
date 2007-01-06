@@ -250,7 +250,8 @@ net6::packet obby::line::to_packet(unsigned int document_id) const
 
 	std::vector<user_pos>::const_iterator iter;
 	for(iter = m_authors.begin(); iter != m_authors.end(); ++ iter)
-		pack << iter->position << iter->author->get_id();
+		pack << static_cast<int>(iter->position) <<
+			static_cast<int>(iter->author->get_id());
 
 	return pack;
 }
