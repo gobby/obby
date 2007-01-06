@@ -286,6 +286,12 @@ int main(int argc, char* argv[])
 	if(argc >= 2) filename = argv[1];
 
 	std::ifstream file(filename.c_str());
+	if(!file)
+	{
+		std::cerr << "Could not open \"" << filename << "\"" << std::endl;
+		return EXIT_FAILURE;
+	}
+
 	std::string line;
 	unsigned int count = 0;
 	unsigned int success = 0;
