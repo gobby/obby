@@ -5,13 +5,14 @@ This file lists prioritised items which need to be fixed or developed.
 
 Serious:
  * Hide equivalent insert/delete change calls
- * Check for valid records or something, however, deleting text does not work
-   correctly
+ * Test libobby under realtime conditions
 
 Important:
  * Implement automatic service announcement and discovery.
  * Implement chat 
  * Implement user colorizing
+ * Catch connection resets in net6::server/client and handle them just as normal
+   EOF
 
 Normal:
  * Implement indent_record and unindent_record to (un)indent lines of text

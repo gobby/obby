@@ -52,6 +52,8 @@ bufferd::bufferd(int argc, char* argv[])
 		sigc::mem_fun(*this, &bufferd::on_doc_insert), sigc::ref(doc)));
 	doc.delete_event().connect(sigc::bind(
 		sigc::mem_fun(*this, &bufferd::on_doc_remove), sigc::ref(doc)));
+
+	doc.insert(0, "OBBY");
 }
 
 bufferd::~bufferd()

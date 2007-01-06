@@ -102,3 +102,13 @@ void obby::insert_record::emit_document_signal(const document& doc) const
 	doc.insert_event().emit(*this);
 }
 
+#ifndef NDEBUG
+#include <sstream>
+
+std::string obby::insert_record::inspect() const
+{
+	std::stringstream stream;
+	stream << "insert " << m_text << " at " << m_pos;
+	return stream.str();
+}
+#endif

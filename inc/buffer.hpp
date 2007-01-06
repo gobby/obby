@@ -50,6 +50,9 @@ public:
 
 		document& operator*();
 		const document& operator*() const;
+
+		document* operator->();
+		const document* operator->() const;
 	};
 
 	typedef sigc::signal<void, user&> signal_user_join_type;

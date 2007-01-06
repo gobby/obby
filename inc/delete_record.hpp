@@ -54,6 +54,10 @@ public:
 	position get_begin() const;
 	position get_end() const;
 	const std::string& get_text() const;
+
+#ifndef NDEBUG
+	virtual std::string inspect() const;
+#endif
 protected:
 	position m_pos;
 	std::string m_text;

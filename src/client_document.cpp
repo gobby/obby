@@ -62,11 +62,57 @@ void obby::client_document::on_net_record(record& rec)
 	m_history.push_front(rec.clone() );
 
 	// Look for a unsynced change we are syncing
-	record* sync_record = NULL;
+//	record* sync_record = NULL;
 	std::list<record*>::iterator iter;
 
+	for(iter = m_unsynced.end(); iter-- != m_unsynced.begin(); )
+	{
+		record* rev = (*iter)->reverse();
+
+		rev->apply(*this);
+		rev->emit_document_signal(*this);
+
+		delete rev;
+	}
+
+	// Insert rec.
+	rec.apply(*this);
+	rec.emit_document_signal(*this);
+
+	for(iter = m_unsynced.begin(); iter != m_unsynced.end(); )
+	{
+		if( (*iter)->get_from() == rec.get_from() &&
+		    (*iter)->get_id() == rec.get_id() )
+		{
+			delete *iter;
+			iter = m_unsynced.erase(iter);
+		}
+		else
+		{
+			if((*iter)->get_from() != rec.get_from() )
+				rec.apply(**iter);
+
+			if(!(*iter)->is_valid() )
+			{
+				delete *iter;
+				iter = m_unsynced.erase(iter);
+			}
+			else
+			{
+				(*iter)->apply(*this);
+				(*iter)->emit_document_signal(*this);
+				
+				++ iter;
+			}
+		}
+	}
+
+	m_revision = rec.get_revision();
+
+	// THE FOLLOWING DOES NOT WORK :((99
 	// TODO: What happens with invalid records?
 	// Is this change made from this client?
+#if 0
 	if(rec.get_from() == m_client.get_self()->get_id() )
 	{
 		// Look in unsynced changes
@@ -133,6 +179,7 @@ void obby::client_document::on_net_record(record& rec)
 
 end:
 	delete sync_record;
+#endif
 }
 
 void obby::client_document::on_net_sync_init(const net6::packet& pack)

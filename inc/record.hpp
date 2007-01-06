@@ -60,6 +60,10 @@ public:
 	virtual void emit_document_signal(const document& doc) const = 0;
 
 	static record* from_packet(const net6::packet& pack);
+
+#ifndef NDEBUG
+	virtual std::string inspect() const = 0;
+#endif
 protected:
 	void invalidate();
 

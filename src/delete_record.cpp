@@ -91,6 +91,11 @@ void obby::delete_record::on_delete(position from, position to)
 	{
 		m_pos -= (to - from);
 	}
+	// Deletion around the range
+	else if(from <= m_pos && to >= m_pos + m_text.length() )
+	{
+		invalidate();
+	}
 	// Deletion of the first part of the range
 	else if(from <= m_pos && to > m_pos)
 	{
@@ -105,10 +110,20 @@ void obby::delete_record::on_delete(position from, position to)
 	// Deletion in the range
 	else
 	{
-		// TODO: Check for invalidation
 		m_text.erase(from - m_pos, to - from);
 	}
 }
+
+#ifndef NDEBUG
+#include <sstream>
+
+std::string obby::delete_record::inspect() const
+{
+	std::stringstream stream;
+	stream << "delete " << m_text << " from " << m_pos;
+	return stream.str();
+}
+#endif
 
 obby::position obby::delete_record::get_begin() const
 {
