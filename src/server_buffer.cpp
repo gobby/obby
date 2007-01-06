@@ -161,10 +161,23 @@ void obby::server_buffer::create_document_impl(const std::string& title,
 	// Internally create the document
 	document_info& doc = add_document_info(owner, id, title);
 	// Publish the new document to the users
-	// TODO: Do not send the packet back to the owner?
 	net6::packet pack("obby_document_create");
 	pack << owner << id << title;
-	m_server->send(pack);
+	// Send it to all users except of the owner
+	// TODO: Send_to_all_except function or something
+	for(user_table::user_iterator<user::CONNECTED> iter =
+		m_usertable.user_begin<user::CONNECTED>();
+	    iter != m_usertable.user_end<user::CONNECTED>();
+	    ++ iter)
+	{
+		if(&(*iter) != owner)
+		{
+			net6::server::peer& peer =
+				*static_cast<net6::server::peer*>(
+					iter->get_peer() );
+			m_server->send(pack, peer);
+		}
+	}
 	// Insert the document's initial content.
 	insert_record rec(0, content, *doc.get_document(), owner, 0, 0);
 	doc.get_document()->insert_nosync(rec);
