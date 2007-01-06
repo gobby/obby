@@ -16,7 +16,6 @@ AM_CPPFLAGS = -I../inc/ $(libobby_CFLAGS)
 
 noinst_PROGRAMS = \
 	ring \
-	rsa \
 	serialise \
 	text
 
@@ -29,7 +28,6 @@ noinst_PROGRAMS = \
 #curses_LDADD = $(LDADD) -lncurses
 
 ring_SOURCES = ring.cpp
-rsa_SOURCES = rsa.cpp
 serialise_SOURCES = serialise.cpp
 text_SOURCES = text.cpp
 

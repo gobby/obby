@@ -56,7 +56,7 @@ public:
 	 */
 	document(const template_type& tmpl);
 
-	/** "brieg Returns TRUE when the document does not contain ony text.
+	/** @brief Returns TRUE when the document does not contain any text.
 	 */
 	bool empty() const;
 
