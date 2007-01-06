@@ -177,6 +177,14 @@ public:
 	 */
 	virtual void set_colour(const colour& colour);
 
+	/** @brief Send keepalives to the server, if enabled.
+	 *
+	 * With this option enabled, the client sends keepalive packets
+	 * to the server when the connection is otherwise idle to make sure
+	 * that the connection has not gone away.
+	 */
+	void set_enable_keepalives(bool enable);
+
 	/** Signal which will be emitted after the first packet, the welcome
 	 * packet, is received. This is a good place to perform a call to
 	 * the login function. Note that you cannot login earlier because the
@@ -308,6 +316,7 @@ protected:
 	const user* m_self;
 
 	connection_settings m_settings;
+	bool m_enable_keepalives;
 
 	signal_welcome_type m_signal_welcome;
 	signal_close_type m_signal_close;
@@ -333,7 +342,8 @@ typedef basic_client_buffer<obby::document, net6::selector> client_buffer;
 
 template<typename Document, typename Selector>
 basic_client_buffer<Document, Selector>::basic_client_buffer():
-	basic_local_buffer<Document, Selector>(), m_self(NULL)
+	basic_local_buffer<Document, Selector>(), m_self(NULL),
+	m_enable_keepalives(false)
 {
 	const command_queue& queue =
 		basic_local_buffer<Document, Selector>::m_command_queue;
@@ -372,6 +382,8 @@ void basic_client_buffer<Document, Selector>::
 	net6_client().connect(
 		net6::ipv4_address::create_from_hostname(hostname, port)
 	);
+
+	net6_client().set_enable_keepalives(m_enable_keepalives);
 }
 
 template<typename Document, typename Selector>
@@ -388,20 +400,6 @@ void basic_client_buffer<Document, Selector>::disconnect()
 	// Close session
 	session_close();
 }
-
-/*template<typename Document, typename Selector>
-void basic_client_buffer<Document, Selector>::request_encryption()
-{
-	if(!basic_buffer<Document, Selector>::is_open() )
-	{
-		throw std::logic_error(
-			"obby::basic_client_buffer::request_encryption:\n"
-			"Client buffer is not connected"
-		);
-	}
-
-	net6_client().request_encryption();
-}*/
 
 template<typename Document, typename Selector>
 void basic_client_buffer<Document, Selector>::login(const std::string& name,
@@ -590,6 +588,16 @@ void basic_client_buffer<Document, Selector>::set_colour(const colour& colour)
 			"Cannot change colour without being logged in"
 		);
 	}
+}
+
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::set_enable_keepalives(bool enable)
+{
+	if(m_enable_keepalives == enable) return;
+
+	m_enable_keepalives = enable;
+	if(basic_buffer<Document, Selector>::m_net.get() != NULL)
+		net6_client().set_enable_keepalives(enable);
 }
 
 template<typename Document, typename Selector>

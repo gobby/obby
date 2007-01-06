@@ -107,6 +107,14 @@ public:
 	 */
 	virtual void send_message(const std::string& message);
 
+	/** @brief Sets whether keepalives are sent to clients.
+	 *
+	 * With this option enabled, the server sends keepalive packets to
+	 * client if the connection is idle to make sure that the
+	 * connection has not gone away.
+	 */
+	void set_enable_keepalives(bool enable);
+
 	/** Signal which will be emitted if a new client has connected.
 	 */
 	signal_connect_type connect_event() const;
@@ -228,6 +236,8 @@ protected:
 	 */
 	std::string m_global_password;
 
+	bool m_enable_keepalives;
+
 	signal_connect_type m_signal_connect;
 	signal_disconnect_type m_signal_disconnect;
 
@@ -249,7 +259,8 @@ typedef basic_server_buffer<obby::document, net6::selector> server_buffer;
 template<typename Document, typename Selector>
 basic_server_buffer<Document, Selector>::
 		basic_server_buffer():
-	basic_buffer<Document, Selector>()
+	basic_buffer<Document, Selector>(),
+	m_enable_keepalives(false)
 {
 	// Note that the command description is translated on server side.
 	// We cannot just send a number or something that the client converts
@@ -460,6 +471,29 @@ void basic_server_buffer<Document, Selector>::
 }
 
 template<typename Document, typename Selector>
+void basic_server_buffer<Document, Selector>::
+	set_enable_keepalives(bool enable)
+{
+	if(m_enable_keepalives == enable) return;
+
+	m_enable_keepalives = enable;
+	user_table& table = basic_buffer<Document, Selector>::m_user_table;
+
+	for(user_table::iterator iter =
+		table.begin(user::flags::CONNECTED, user::flags::NONE);
+	    iter != table.end(user::flags::CONNECTED, user::flags::NONE);
+	    ++ iter)
+	{
+		// Dirty hack for host to work (local user...). We need
+		// user::flags::DIRECT_CONNECTION and user::flags::LOCAL!
+		try
+		{
+			iter->get_net6().set_enable_keepalives(enable);
+		} catch(...) {}
+	}
+}
+
+template<typename Document, typename Selector>
 typename basic_server_buffer<Document, Selector>::signal_connect_type
 basic_server_buffer<Document, Selector>::connect_event() const
 {
@@ -578,6 +612,8 @@ void basic_server_buffer<Document, Selector>::
 
 	// Request encryption after welcome packet.
 	net6_server().request_encryption(user6);
+
+	user6.set_enable_keepalives(m_enable_keepalives);
 
 	// User connected
 	m_signal_connect.emit(user6);
