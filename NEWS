@@ -1,6 +1,9 @@
 obby
 ====
 
+Version 0.4.3:
+ * Fall back to IPv4 when a session could not be hosted on IPv6
+
 Version 0.4.2:
  * Fixed a build problem caused by Autotools
  * Updated Autotools and gettext infrastructure

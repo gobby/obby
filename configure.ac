@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([obby], [0.4.2], [crew@0x539.de])
+AC_INIT([obby], [0.4.3], [crew@0x539.de])
 AM_INIT_AUTOMAKE(1.9 check-news)
 AM_MAINTAINER_MODE
 AC_CONFIG_SRCDIR([inc/buffer.hpp])
@@ -25,7 +25,7 @@ AC_CACHE_SAVE
 
 extra_includes=""
 extra_libraries=""
-extra_requires="sigc++-2.0 net6-1.3 >= 1.3.0rc3"
+extra_requires="sigc++-2.0 net6-1.3 >= 1.3.3"
 AC_SUBST(extra_includes)
 AC_SUBST(extra_libraries)
 AC_SUBST(extra_requires)
