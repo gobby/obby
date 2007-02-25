@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: obby 0.3.0\n"
 "Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
-"POT-Creation-Date: 2006-09-24 21:55+0200\n"
+"POT-Creation-Date: 2007-02-25 13:52+0000\n"
 "PO-Revision-Date: 2006-04-03 13:45+0000\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <sv@li.org>\n"
@@ -16,19 +16,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Rosetta-Version: 0.1\n"
 
-#: inc/server_buffer.hpp:279
+#: inc/server_buffer.hpp:281
 msgid "Sends an action to the chat."
 msgstr ""
 
-#: inc/server_buffer.hpp:338
+#: inc/server_buffer.hpp:362
 msgid "File is not an obby document"
 msgstr "Filen är inte ett obby-dokument"
 
-#: inc/server_buffer.hpp:345
+#: inc/server_buffer.hpp:369
 msgid "File is not a stored obby session"
 msgstr "Filen är inte en sparad obby-session"
 
-#: inc/server_buffer.hpp:388 src/user_table.cpp:75 src/chat.cpp:251
+#: inc/server_buffer.hpp:412 src/user_table.cpp:75 src/chat.cpp:251
 #: src/text.cpp:188
 msgid "Unexpected child node: '%0%'"
 msgstr "Oväntad barn-nod: '%0%'"

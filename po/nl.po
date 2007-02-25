@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: obby\n"
 "Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
-"POT-Creation-Date: 2006-09-24 21:55+0200\n"
+"POT-Creation-Date: 2007-02-25 13:52+0000\n"
 "PO-Revision-Date: 2006-06-29 17:23+0000\n"
 "Last-Translator: Rik van achterberg <rik@vanachterberg.com>\n"
 "Language-Team: Dutch <nl@li.org>\n"
@@ -15,19 +15,19 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: inc/server_buffer.hpp:279
+#: inc/server_buffer.hpp:281
 msgid "Sends an action to the chat."
 msgstr "Verstuurt een actie naar de chat."
 
-#: inc/server_buffer.hpp:338
+#: inc/server_buffer.hpp:362
 msgid "File is not an obby document"
 msgstr "Bestand is geen obby-document"
 
-#: inc/server_buffer.hpp:345
+#: inc/server_buffer.hpp:369
 msgid "File is not a stored obby session"
 msgstr "Bestand is geen opgeslagen obby-sessie"
 
-#: inc/server_buffer.hpp:388 src/user_table.cpp:75 src/chat.cpp:251
+#: inc/server_buffer.hpp:412 src/user_table.cpp:75 src/chat.cpp:251
 #: src/text.cpp:188
 msgid "Unexpected child node: '%0%'"
 msgstr "Onverwachte dochternode: '%0%'"
