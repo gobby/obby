@@ -31,6 +31,8 @@ namespace obby
 class document: private net6::non_copyable
 {
 public:
+	typedef sigc::signal<void> signal_changed_type;
+
 	class chunk_iterator: public text::chunk_iterator
 	{
 	public:
@@ -107,8 +109,14 @@ public:
 	 */
 	chunk_iterator chunk_end() const;
 
+	/** @brief Signal that is emitted every time the document is
+	 * changed. */
+	signal_changed_type changed_event() const;
+
 protected:
 	text m_text;
+
+	signal_changed_type m_signal_changed;
 };
 
 }

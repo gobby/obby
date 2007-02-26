@@ -89,6 +89,7 @@ void obby::document::insert(position pos,
                             const text& str)
 {
 	m_text.insert(pos, str);
+	m_signal_changed.emit();
 }
 
 void obby::document::insert(position pos,
@@ -96,23 +97,27 @@ void obby::document::insert(position pos,
                             const user* author)
 {
 	m_text.insert(pos, str, author);
+	m_signal_changed.emit();
 }
 
 void obby::document::erase(position pos,
                            position len)
 {
 	m_text.erase(pos, len);
+	m_signal_changed.emit();
 }
 
 void obby::document::append(const text& str)
 {
 	m_text.append(str);
+	m_signal_changed.emit();
 }
 
 void obby::document::append(const std::string& str,
                             const user* author)
 {
 	m_text.append(str, author);
+	m_signal_changed.emit();
 }
 
 obby::document::chunk_iterator obby::document::chunk_begin() const
@@ -123,4 +128,9 @@ obby::document::chunk_iterator obby::document::chunk_begin() const
 obby::document::chunk_iterator obby::document::chunk_end() const
 {
 	return m_text.chunk_end();
+}
+
+obby::document::signal_changed_type obby::document::changed_event() const
+{
+	return m_signal_changed;
 }
