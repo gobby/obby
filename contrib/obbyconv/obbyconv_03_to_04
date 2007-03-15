@@ -1,0 +1,96 @@
+#!/usr/bin/perl -w
+
+# Converts (G)obby session files from version 0.3.0 to version 0.4.1
+#
+# Copyright 2007 Katholieke Universiteit Leuven
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# Author: Thomas Herlea
+# Started: 2007-03-15
+# Changed: 2007-03-15
+#
+# Takes the 0.3.0 file on standard input and outputs the 0.4.1 file to
+# standard output.
+
+$cur_author = undef;
+$cur_contents = '';
+
+# Prints the current chun to stdout
+#
+# Parameters:
+# $1 - author
+# $2 - content
+sub print_chunk() {
+	my ($cur_author, $cur_contents) = @_;
+	print qq(  chunk author="$cur_author" content="$cur_contents" \n);
+}
+
+# process lines from STDIN
+while(<STDIN>) {
+	chomp $_;
+
+	# pattern match lines and process
+	if ( /^ document id="(.*)" owner="(.*)" title="(.*)"/ ) {
+		# a new document begins
+
+		# print only if there was a previous document
+		&print_chunk($cur_author, $cur_contents) if defined $cur_author;
+
+		# print the document declaration with additional attributes
+		print qq( document encoding="UTF-8" id="$1" owner="$2" suffix="1" title="$3"\n);
+
+		# reset author and contents
+		$cur_author = undef;
+		$cur_contents = '';
+	} elsif ( /^  line/ ) {
+		# a new line of the current document begins
+
+		# add an escaped newline to the current contents,
+		# only if there was a previous line
+		$cur_contents .= '\n' if defined $cur_author;
+	} elsif ( /^   part author="(.*)" content="(.*)"/ ) {
+		# a new part of the current line of the current document begins
+
+		# if there is a previous author in the document
+		# and this author is different
+		if ( (defined $cur_author ) && ($1 ne $cur_author) ) {
+			# print chunk
+			&print_chunk($cur_author, $cur_contents);
+			# reset contents
+			$cur_contents = '';
+		}
+
+		# assign or overwrite or keep the current author
+		$cur_author = $1;
+
+		# append (possibly to an empty string) the content of this part
+		$cur_contents .= $2;
+	} elsif ( /session version="0.3.0"/ ) {
+		# the line defining the file format
+
+		# replace with new format
+		print qq(session version="0.4.1"\n);
+	} else {
+		# uninteresting input for the concatenation
+
+		# copy it over to the output
+		print $_."\n";
+	}
+}
+
+# print the chunk of the last author, if any
+&print_chunk($cur_author, $cur_contents) if defined $cur_author;
+
+#EOF
