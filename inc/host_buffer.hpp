@@ -83,6 +83,10 @@ public:
 	 */
 	virtual void send_message(const std::string& message);
 
+	/** Sends a message to the given user.
+	 */
+	virtual void send_message(const std::string& message, const user& to);
+
 	/** @brief Executes a command.
 	 */
 	virtual void send_command(const command_query& query);
@@ -236,6 +240,27 @@ void basic_host_buffer<Document, Selector>::
 	basic_server_buffer<Document, Selector>::send_message_impl(
 		message,
 		m_self
+	);
+}
+
+template<typename Document, typename Selector>
+void basic_host_buffer<Document, Selector>::
+	send_message(const std::string& message, const user& to)
+{
+	if(m_self == NULL)
+	{
+		throw std::logic_error(
+			"obby::host_buffer::send_message:\n"
+			"Local user is not available. This probably means "
+			"that the server has never been opened"
+		);
+	}
+
+	// Send message from local user instead of server
+	basic_server_buffer<Document, Selector>::send_message_impl(
+		message,
+		m_self,
+		to
 	);
 }
 

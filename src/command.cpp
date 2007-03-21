@@ -92,7 +92,6 @@ namespace
 		if(escape_flag)
 		{
 			throw std::logic_error(
-				"obby::command.cpp::get_next_param:\n"
 				"Escaping backslash at end of line"
 			);
 		}
@@ -100,7 +99,6 @@ namespace
 		if(i == list.length() && str_char != '\0')
 		{
 			throw std::logic_error(
-				"obby::command.cpp::get_next_param:\n"
 				"String not closed"
 			);
 		}
@@ -112,7 +110,7 @@ namespace
 		}
 		else
 		{
-			result = list.substr(pos, i - pos - 1);
+			result = list.substr(pos, i - pos);
 			pos = i;
 		}
 

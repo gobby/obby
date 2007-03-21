@@ -1,3 +1,12 @@
+2007-03-21  Armin Burgmeier  <armin@0x539.de>
+
+	* src/command.cpp: Do not truncate the last character of command
+	arguments.
+
+	* inc/server_buffer.hpp:
+	* inc/host_buffer.hpp: Added a send_message overload that takes a
+	recipient.
+
 2007-03-15  Armin Burgmeier  <armin@0x539.de>
 
 	* contrib/obbyconv/obbyconv_03_to_04: Added conversion script that

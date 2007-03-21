@@ -107,6 +107,10 @@ public:
 	 */
 	virtual void send_message(const std::string& message);
 
+	/** Sends a message to the given user.
+	 */
+	virtual void send_message(const std::string& message, const user& to);
+
 	/** @brief Sets whether keepalives are sent to clients.
 	 *
 	 * With this option enabled, the server sends keepalive packets to
@@ -170,6 +174,13 @@ protected:
 	 */
 	void send_message_impl(const std::string& message,
 	                       const obby::user* writer);
+
+	/** Internal function send a message to a given user that comes from
+	 * the user <em>writer</em>.
+	 */
+	void send_message_impl(const std::string& message,
+	                       const obby::user* writer,
+			       const obby::user& to);
 
 	/** Changes the colour of the given user to the new provided
 	 * colour and relays the fact to the other users.
@@ -504,6 +515,14 @@ void basic_server_buffer<Document, Selector>::
 
 template<typename Document, typename Selector>
 void basic_server_buffer<Document, Selector>::
+	send_message(const std::string& message, const user& to)
+{
+	// send_message_impl relays the message to the clients
+	send_message_impl(message, NULL, to);
+}
+
+template<typename Document, typename Selector>
+void basic_server_buffer<Document, Selector>::
 	set_enable_keepalives(bool enable)
 {
 	if(m_enable_keepalives == enable) return;
@@ -597,6 +616,32 @@ void basic_server_buffer<Document, Selector>::
 		// The owner already knows about the document.
 		if(&(*iter) != owner)
 			net6_server().send(pack, iter->get_net6() );
+	}
+}
+
+template<typename Document, typename Selector>
+void basic_server_buffer<Document, Selector>::
+	send_message_impl(const std::string& message, const user* writer, const user& to)
+{
+	if(basic_buffer<Document, Selector>::is_open())
+	{
+		net6::packet message_pack("obby_message");
+		message_pack << writer << message;
+		net6_server().send(message_pack, to.get_net6());
+	}
+
+	if(writer == NULL)
+	{
+		basic_buffer<Document, Selector>::m_chat.add_server_message(
+			message
+		);
+	}
+	else
+	{
+		basic_buffer<Document, Selector>::m_chat.add_user_message(
+			message,
+			*writer
+		);
 	}
 }
 
