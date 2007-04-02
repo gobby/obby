@@ -19,7 +19,7 @@
 #include <avahi-client/client.h>
 #include <avahi-client/lookup.h>
 #include <avahi-client/publish.h>
-#include <avahi-common/simple-watch.h>
+#include <avahi-common/thread-watch.h>
 
 #include "zeroconf.hpp"
 
@@ -41,7 +41,7 @@ public:
 
 private:
 	AvahiClient* m_client;
-	AvahiSimplePoll* m_poll;
+	AvahiThreadedPoll* m_poll;
 	AvahiServiceBrowser* m_sb;
 	AvahiEntryGroup* m_group;
 

@@ -1,3 +1,10 @@
+2007-04-02  Philipp Kern <phil@0x539.de>
+
+	* inc/zeroconf_avahi.hpp:
+	* src/zeroconf_avahi.cpp: Some improvements to the native Avahi
+	implementation, thanks to Andreas Niess; yet untested:
+	  + use threaded pool instead of simple pool
+
 2007-03-21  Armin Burgmeier  <armin@0x539.de>
 
 	* src/command.cpp: Do not truncate the last character of command

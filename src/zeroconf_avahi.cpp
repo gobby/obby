@@ -37,11 +37,11 @@ zeroconf_avahi::zeroconf_avahi()
 {
 	int error;
 
-	m_poll = avahi_simple_poll_new();
+	m_poll = avahi_threaded_poll_new();
 	if(!m_poll)
-		throw std::runtime_error("Failed to create simple poll object");
+		throw std::runtime_error("Failed to create threaded poll object");
 
-	m_client = avahi_client_new(avahi_simple_poll_get(m_poll),
+	m_client = avahi_client_new(avahi_threaded_poll_get(m_poll),
 		static_cast<AvahiClientFlags>(0),
 		&zeroconf_avahi::avahi_client_callback, this, &error);
 	if(!m_client)
@@ -50,6 +50,8 @@ zeroconf_avahi::zeroconf_avahi()
 		stream << "Failed to create client: " << avahi_strerror(error);
 		throw std::runtime_error(stream.str() );
 	}
+	std::cout << "Starting poll thread" << std::endl;
+	avahi_threaded_poll_start( m_poll );
 }
 
 zeroconf_avahi::~zeroconf_avahi()
@@ -61,7 +63,7 @@ zeroconf_avahi::~zeroconf_avahi()
 	if(m_client)
 		avahi_client_free(m_client);
 	if(m_poll)
-		avahi_simple_poll_free(m_poll);
+		avahi_threaded_poll_free(m_poll);
 }
 
 void zeroconf_avahi::publish(const std::string& name, unsigned int port)
@@ -138,14 +140,12 @@ void zeroconf_avahi::discover()
 
 void zeroconf_avahi::select()
 {
-	avahi_simple_poll_loop(m_poll);
+	//avahi_simple_poll_loop(m_poll);
 }
 
 void zeroconf_avahi::select(unsigned int msecs)
 {
 	std::cout << "select " << avahi_client_get_state(m_client) <<std::endl;
-	if(avahi_simple_poll_iterate(m_poll, msecs) < 0)
-		throw std::runtime_error("avahi_simple_poll_iterate failed");
 }
 
 void zeroconf_avahi::avahi_client_callback(AvahiClient* client,
@@ -164,13 +164,20 @@ void zeroconf_avahi::avahi_browse_callback(AvahiServiceBrowser* sb,
 	const char* name, const char* type, const char* domain,
 	AvahiLookupResultFlags flags, void* userdata)
 {
-	std::cout << "browse! " << name << std::endl;
+	std::cout << "browse!" << std::endl;
 	zeroconf_avahi* obj = static_cast<zeroconf_avahi*>(userdata);
 	AvahiClient* cl = obj->m_client;
 
 	switch(event)
 	{
+	case AVAHI_BROWSER_FAILURE:
+		std::cerr << "(Browser) " << avahi_strerror(
+			avahi_client_errno(avahi_service_browser_get_client(sb))
+			) << std::endl;
+		return;
+
 	case AVAHI_BROWSER_NEW:
+		std::cout << "AVAHI_BROWSER_NEW " << name << std::endl;
 		if(!avahi_service_resolver_new(cl, interface, protocol, name,
 			type, domain, AVAHI_PROTO_INET,
 			static_cast<AvahiLookupFlags>(0),
@@ -184,8 +191,19 @@ void zeroconf_avahi::avahi_browse_callback(AvahiServiceBrowser* sb,
 		}
 		break;
 	case AVAHI_BROWSER_REMOVE:
+		std::cout << "AVAHI_BROWSER_REMOVE " << name << std::endl;
 		obj->leave_event().emit(name);
 		break;
+	
+	case AVAHI_BROWSER_ALL_FOR_NOW:
+	case AVAHI_BROWSER_CACHE_EXHAUSTED:
+		std::cout << "(Browser) "
+			<< (event == AVAHI_BROWSER_CACHE_EXHAUSTED ?
+				"CACHE_EXHAUSTED" : "ALL_FOR_NOW")
+			<< std::endl;
+		break;
+	default: 
+		std::cout << "uncaught " << std::endl;
 	}
 }
 
@@ -199,6 +217,7 @@ void zeroconf_avahi::avahi_resolve_callback(AvahiServiceResolver* r,
 	switch(event)
 	{
 	case AVAHI_RESOLVER_FOUND:
+		std::cout << "New Service: " << name << "(" << port << ")" << std::endl; 
 		static_cast<zeroconf_avahi*>(userdata)->discover_event().emit(
 			name, net6::ipv4_address::create_from_address(
 			addr->data.ipv4.address, port));
