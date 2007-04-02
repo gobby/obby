@@ -19,6 +19,7 @@
 #ifndef _OBBY_DOCUMENT_INFO_HPP_
 #define _OBBY_DOCUMENT_INFO_HPP_
 
+#include <algorithm>
 #include <sigc++/signal.h>
 #include <net6/object.hpp>
 #include "position.hpp"

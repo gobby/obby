@@ -19,6 +19,7 @@
 #ifndef _OBBY_FORMATSTRING_HPP_
 #define _OBBY_FORMATSTRING_HPP_
 
+#include <cstdlib>
 #include <string>
 #include <vector>
 #include <sstream>

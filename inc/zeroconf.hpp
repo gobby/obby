@@ -21,6 +21,7 @@
 
 #include <string>
 #include <map>
+#include <memory>
 
 #include <sigc++/signal.h>
 #include <net6/non_copyable.hpp>

@@ -1,5 +1,13 @@
 2007-04-02  Philipp Kern <phil@0x539.de>
 
+	* inc/document_info.hpp:
+	* inc/format_string.hpp:
+	* inc/zeroconf.hpp:
+	* src/colour.cpp: added additional #include directives to fix
+	compilation with GCC 4.3, thanks to Martin Michlmayr
+
+2007-04-02  Philipp Kern <phil@0x539.de>
+
 	* inc/zeroconf_avahi.hpp:
 	* src/zeroconf_avahi.cpp: Some improvements to the native Avahi
 	implementation, thanks to Andreas Niess; yet untested:
