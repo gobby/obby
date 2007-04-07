@@ -535,17 +535,31 @@ template<typename Document, typename Selector>
 void basic_buffer<Document, Selector>::
 	document_add(document_info_type& info)
 {
+	typedef typename document_info_type::user_iterator user_iterator;
+	std::set<const obby::user*> users;
+
+	// Remember all users initially subscribed
+	for(user_iterator iter = info.user_begin();
+	    iter != info.user_end();
+	    ++ iter)
+	{
+		users.insert(&(*iter));
+	}
+
 	// Add new document into list
 	m_docs.push_back(&info);
 	// Emit document_insert signal
 	m_signal_document_insert.emit(info);
-	// Emit user_subscribe signal for each user that is initially
-	// subscribed to the document.
-	for(typename document_info_type::user_iterator iter =
-		info.user_begin();
+	// Emit user_subscribe signal for each user that was initially
+	// subscribed to the document. This does not include users that
+	// have been subscribed by the document insert signal handler.
+	for(user_iterator iter = info.user_begin();
 	    iter != info.user_end();
 	    ++ iter)
-		info.subscribe_event().emit(*iter);
+	{
+		if(users.find(&(*iter)) != users.end())
+			info.subscribe_event().emit(*iter);
+	}
 }
 
 template<typename Document, typename Selector>

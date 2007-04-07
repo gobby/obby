@@ -1,3 +1,9 @@
+2007-04-07  Armin Burgmeier  <armin@0x539.de>
+
+	* inc/buffer.hpp (basic_buffer::document_add): Only emit subscription
+	signal for the users that are initially subscribed, not for the ones
+	that document_insert signal handlers potentially subscribe.
+
 2007-04-02  Philipp Kern <phil@0x539.de>
 
 	* inc/document_info.hpp:
