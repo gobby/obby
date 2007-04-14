@@ -1,3 +1,8 @@
+2007-04-14  Philipp Kern <phil@0x539.de>
+
+	* src/Makefile.am: bump library minor version for ABI changes
+	  from 0:0:0 to 0:1:0
+
 2007-04-14  Armin Burgmeier  <armin@0x539.de>
 
 	* inc/zeroconf_avahi.hpp:
