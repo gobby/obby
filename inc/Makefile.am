@@ -51,6 +51,6 @@ if WITH_HOWL
 noinst_HEADERS      = zeroconf_howl.hpp
 endif
 if WITH_AVAHI
-noinst_HEADERS      = zeroconf_avahi.hpp
+pkginclude_HEADERS  = zeroconf_avahi.hpp
 endif
 

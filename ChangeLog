@@ -8,6 +8,12 @@
 
 2007-04-14  Philipp Kern <phil@0x539.de>
 
+	* inc/Makefile.am: install zeroconf_avahi.hpp because dependent
+	  applications might want to dynamic_cast it to specify
+	  a custom poll loop
+
+2007-04-14  Philipp Kern <phil@0x539.de>
+
 	* src/common.cpp: additional entry in the library's symbol table
 	  if Avahi is used as Zeroconf backend
 

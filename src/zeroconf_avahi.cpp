@@ -83,10 +83,14 @@ void zeroconf_avahi::publish(const std::string& name, unsigned int port)
 {
 	std::cout << name << port << std::endl;
 
-	m_group = avahi_entry_group_new(
-		m_client,
-		&zeroconf_avahi::avahi_entry_group_callback,
-		this);
+	if(m_group == NULL)
+	{
+		m_group = avahi_entry_group_new(
+			m_client,
+			&zeroconf_avahi::avahi_entry_group_callback,
+			this
+			);
+	}
 
 	std::string version = "version=";
 	version += obby_version();
@@ -114,7 +118,11 @@ void zeroconf_avahi::unpublish(const std::string& name)
 
 void zeroconf_avahi::unpublish_all()
 {
-	throw std::runtime_error("Not yet implemented");
+	if(m_group != NULL)
+	{
+		avahi_entry_group_free(m_group);
+		m_group = NULL;
+	}
 }
 
 void zeroconf_avahi::discover()
