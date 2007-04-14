@@ -40,7 +40,7 @@ public:
 
 	/** Uses a custom avahi poll. Note that select() does not work with
 	 * a custom poll. */
-	zeroconf_avahi(AvahiPoll* poll);
+	zeroconf_avahi(const AvahiPoll* poll);
 	~zeroconf_avahi();
 
 	virtual void publish(const std::string& name, unsigned int port);

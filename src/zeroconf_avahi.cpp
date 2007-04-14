@@ -51,7 +51,7 @@ zeroconf_avahi::zeroconf_avahi()
 	}
 }
 
-zeroconf_avahi::zeroconf_avahi(AvahiPoll* poll):
+zeroconf_avahi::zeroconf_avahi(const AvahiPoll* poll):
 	m_client(NULL), m_simple_poll(NULL), m_sb(NULL), m_group(NULL)
 {
 	int error;

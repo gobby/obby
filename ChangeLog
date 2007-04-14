@@ -1,3 +1,8 @@
+2007-04-14  Armin Burgmeier  <armin@0x539.de>
+
+	* inc/zeroconf_avahi.hpp:
+	* src/zeroconf_avahi.cpp: Allow custom AvahiPoll to be const.
+
 2007-04-14  Philipp Kern <phil@0x539.de>
 
 	* src/Makefile.am: bump library minor version for ABI changes
