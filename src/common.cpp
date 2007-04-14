@@ -59,6 +59,13 @@ void obby_has_zeroconf()
 	return;
 }
 #endif
+
+#if defined(WITH_AVAHI)
+void obby_has_avahi()
+{
+	return;
+}
+#endif
 }
 
 void obby::init_gettext(net6::gettext_package& package)

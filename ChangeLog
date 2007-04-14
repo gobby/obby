@@ -1,5 +1,10 @@
 2007-04-14  Philipp Kern <phil@0x539.de>
 
+	* src/common.cpp: additional entry in the library's symbol table
+	  if Avahi is used as Zeroconf backend
+
+2007-04-14  Philipp Kern <phil@0x539.de>
+
 	* configure.ac: reactivate the Avahi Zeroconf wrapper and prefer
 	  it over Howl
 
