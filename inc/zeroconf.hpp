@@ -49,6 +49,8 @@ public:
 
 protected:
 	zeroconf_base();
+	// TODO: Get a virtual destructor as soon as we can break ABI.
+	//virtual ~zeroconf_base() {}
 
 private:
 	signal_discover_type m_signal_discover;

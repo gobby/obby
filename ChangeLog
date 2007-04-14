@@ -1,5 +1,10 @@
 2007-04-14  Armin Burgmeier  <armin@0x539.de>
 
+	* inc/zeroconf.hpp: Added a TODO comment that zeroconf_base should get
+	a virtual destructor as soon as we can break ABI.
+
+2007-04-14  Armin Burgmeier  <armin@0x539.de>
+
 	* inc/zeroconf_avahi.hpp:
 	* src/zeroconf_avahi.cpp: Allow custom AvahiPoll to be const.
 
