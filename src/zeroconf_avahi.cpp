@@ -19,6 +19,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
+#include <assert.h>
 
 #include <avahi-client/client.h>
 #include <avahi-client/lookup.h>
@@ -33,15 +34,13 @@ namespace obby
 {
 
 zeroconf_avahi::zeroconf_avahi()
- : m_client(NULL), m_poll(NULL), m_sb(NULL), m_group(NULL)
+ : m_client(NULL), m_simple_poll(NULL), m_sb(NULL), m_group(NULL)
 {
 	int error;
 
-	m_poll = avahi_threaded_poll_new();
-	if(!m_poll)
-		throw std::runtime_error("Failed to create threaded poll object");
+	m_simple_poll = avahi_simple_poll_new();
 
-	m_client = avahi_client_new(avahi_threaded_poll_get(m_poll),
+	m_client = avahi_client_new(avahi_simple_poll_get(m_simple_poll),
 		static_cast<AvahiClientFlags>(0),
 		&zeroconf_avahi::avahi_client_callback, this, &error);
 	if(!m_client)
@@ -50,8 +49,22 @@ zeroconf_avahi::zeroconf_avahi()
 		stream << "Failed to create client: " << avahi_strerror(error);
 		throw std::runtime_error(stream.str() );
 	}
-	std::cout << "Starting poll thread" << std::endl;
-	avahi_threaded_poll_start( m_poll );
+}
+
+zeroconf_avahi::zeroconf_avahi(AvahiPoll* poll):
+	m_client(NULL), m_simple_poll(NULL), m_sb(NULL), m_group(NULL)
+{
+	int error;
+
+	m_client = avahi_client_new(poll, static_cast<AvahiClientFlags>(0),
+		&zeroconf_avahi::avahi_client_callback, this, &error);
+
+	if(!m_client)
+	{
+		std::stringstream stream;
+		stream << "Failed to create client: " << avahi_strerror(error);
+		throw std::runtime_error(stream.str() );
+	}
 }
 
 zeroconf_avahi::~zeroconf_avahi()
@@ -62,8 +75,8 @@ zeroconf_avahi::~zeroconf_avahi()
 		avahi_service_browser_free(m_sb);
 	if(m_client)
 		avahi_client_free(m_client);
-	if(m_poll)
-		avahi_threaded_poll_free(m_poll);
+	if(m_simple_poll)
+		avahi_simple_poll_free(m_simple_poll);
 }
 
 void zeroconf_avahi::publish(const std::string& name, unsigned int port)
@@ -140,12 +153,17 @@ void zeroconf_avahi::discover()
 
 void zeroconf_avahi::select()
 {
-	//avahi_simple_poll_loop(m_poll);
+	assert(m_simple_poll != NULL);
+	avahi_simple_poll_loop(m_simple_poll);
 }
 
 void zeroconf_avahi::select(unsigned int msecs)
 {
-	std::cout << "select " << avahi_client_get_state(m_client) <<std::endl;
+	assert(m_simple_poll != NULL);
+
+	/* Work around Avahi bug */
+	if(msecs == 0) msecs = 1;
+	avahi_simple_poll_iterate(m_simple_poll, msecs);
 }
 
 void zeroconf_avahi::avahi_client_callback(AvahiClient* client,

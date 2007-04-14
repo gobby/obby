@@ -1,3 +1,11 @@
+2007-04-14  Armin Burgmeier  <armin@0x539.de>
+
+	* inc/zeroconf_avahi.hpp:
+	* src/zeroconf_avahi.cpp: Added a constructor that allows the use of
+	a custom AvahiPoll, and use AvahiSimplePoll in the default
+	constructor. Added a obby::avahi_select::poll that implements an avahi
+	poll with a net6 selector as backend. This is yet untested.
+
 2007-04-14  Philipp Kern <phil@0x539.de>
 
 	* src/common.cpp: additional entry in the library's symbol table
