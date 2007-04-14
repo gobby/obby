@@ -47,6 +47,10 @@ public:
 	virtual signal_discover_type discover_event() const;
 	virtual signal_leave_type leave_event() const;
 
+	// TODO: Provide API to allow application programmers to handle
+	// errors while publishing/discovering. This requires at least
+	// additional virtual methods which brak ABI.
+
 protected:
 	zeroconf_base();
 	// TODO: Get a virtual destructor as soon as we can break ABI.
