@@ -1,3 +1,10 @@
+2007-04-15  Philipp Kern <phil@0x539.de>
+
+	* configure.ac, NEWS: bump version to 0.4.3, document changes
+	* Makefile.am: add obby session conversion script to the tarball
+	* po/Makevars: updated Trac URL
+	* po/obby.pot, po/*.po: updated line numbers, Trac URL
+
 2007-04-14  Armin Burgmeier  <armin@0x539.de>
 
 	* inc/zeroconf.hpp: Added another TODO comment about adding extended
@@ -66,7 +73,7 @@
 	* inc/zeroconf_avahi.hpp:
 	* src/zeroconf_avahi.cpp: Some improvements to the native Avahi
 	implementation, thanks to Andreas Niess; yet untested:
-	  + use threaded pool instead of simple pool
+	  + use threaded poll instead of simple poll
 
 2007-03-21  Armin Burgmeier  <armin@0x539.de>
 

@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: obby 0.2.0\n"
-"Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
-"POT-Creation-Date: 2007-02-25 13:52+0000\n"
+"Report-Msgid-Bugs-To: http://gobby.0x539.de/\n"
+"POT-Creation-Date: 2007-04-15 12:36+0200\n"
 "PO-Revision-Date: 2005-07-24 16:44+0200\n"
 "Last-Translator: Philipp Kern <phil@0x539.de>\n"
 "Language-Team: German Translation Team <crew@0x539.de>\n"
@@ -15,19 +15,19 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: inc/server_buffer.hpp:281
+#: inc/server_buffer.hpp:292
 msgid "Sends an action to the chat."
 msgstr "Sendet eine Handlung an den Gesprächsraum."
 
-#: inc/server_buffer.hpp:362
+#: inc/server_buffer.hpp:373
 msgid "File is not an obby document"
 msgstr "Datei ist kein obby-Dokument"
 
-#: inc/server_buffer.hpp:369
+#: inc/server_buffer.hpp:380
 msgid "File is not a stored obby session"
 msgstr "Datei ist keine gespeicherte obby-Sitzung"
 
-#: inc/server_buffer.hpp:412 src/user_table.cpp:75 src/chat.cpp:251
+#: inc/server_buffer.hpp:423 src/user_table.cpp:75 src/chat.cpp:251
 #: src/text.cpp:188
 msgid "Unexpected child node: '%0%'"
 msgstr "Kindknoten '%0%' unerwartet"

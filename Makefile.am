@@ -15,3 +15,6 @@ dist-hook:
 	          $(distdir)/config.sub $(distdir)/config.rpath \
 	          $(distdir)/depcomp
 
+# contributed scripts
+EXTRA_DIST += contrib/obbyconv/obbyconv_03_to_04
+

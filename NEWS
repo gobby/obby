@@ -1,6 +1,12 @@
 obby
 ====
 
+Version 0.4.4:
+ * Native Avahi Zeroconf implementation
+ * Script added to source tarball to convert saved obby sessions from
+   version 0.3 to 0.4
+ * Some GCC 4.3 compilation fixes
+
 Version 0.4.3:
  * Fall back to IPv4 when a session could not be hosted on IPv6
 

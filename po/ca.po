@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: obby\n"
-"Report-Msgid-Bugs-To: http://darcs.0x539.de/trac/obby/\n"
-"POT-Creation-Date: 2007-02-25 13:52+0000\n"
+"Report-Msgid-Bugs-To: http://gobby.0x539.de/\n"
+"POT-Creation-Date: 2007-04-15 12:36+0200\n"
 "PO-Revision-Date: 2006-08-20 21:29+0000\n"
 "Last-Translator: Jordi Mallach <jordi@canonical.com>\n"
 "Language-Team: Catalan  <ca@dodds.net>\n"
@@ -16,19 +16,19 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: inc/server_buffer.hpp:281
+#: inc/server_buffer.hpp:292
 msgid "Sends an action to the chat."
 msgstr "Envia una acció al xat."
 
-#: inc/server_buffer.hpp:362
+#: inc/server_buffer.hpp:373
 msgid "File is not an obby document"
 msgstr "El fitxer no és un document d'obby"
 
-#: inc/server_buffer.hpp:369
+#: inc/server_buffer.hpp:380
 msgid "File is not a stored obby session"
 msgstr "El fitxer no és una sessió d'obby desada"
 
-#: inc/server_buffer.hpp:412 src/user_table.cpp:75 src/chat.cpp:251
+#: inc/server_buffer.hpp:423 src/user_table.cpp:75 src/chat.cpp:251
 #: src/text.cpp:188
 msgid "Unexpected child node: '%0%'"
 msgstr "Node fill inesperat: «%0%»"
