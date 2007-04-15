@@ -1,5 +1,9 @@
 2007-04-15  Philipp Kern <phil@0x539.de>
 
+	* src/zeroconf_avahi.cpp: remove debug output on stdout and stderr
+
+2007-04-15  Philipp Kern <phil@0x539.de>
+
 	* configure.ac, NEWS: bump version to 0.4.3, document changes
 	* Makefile.am: add obby session conversion script to the tarball
 	* po/Makevars: updated Trac URL

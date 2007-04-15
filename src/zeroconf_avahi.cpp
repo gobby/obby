@@ -81,8 +81,6 @@ zeroconf_avahi::~zeroconf_avahi()
 
 void zeroconf_avahi::publish(const std::string& name, unsigned int port)
 {
-	std::cout << name << port << std::endl;
-
 	if(m_group == NULL)
 	{
 		m_group = avahi_entry_group_new(
@@ -127,7 +125,6 @@ void zeroconf_avahi::unpublish_all()
 
 void zeroconf_avahi::discover()
 {
-	std::cout << "discover" << std::endl;
 	/* If there is already a service browser present we need to
 	 * replace it to receive all already emitted servers.
 	 */
@@ -136,7 +133,6 @@ void zeroconf_avahi::discover()
 		avahi_service_browser_free(m_sb);
 		m_sb = NULL;
 	}
-	std::cout << "discover2" << std::endl;
 
 	m_sb = avahi_service_browser_new(
 		m_client,
@@ -149,7 +145,6 @@ void zeroconf_avahi::discover()
 		this
 		);
 
-	std::cout << "discover3 " << m_sb << std::endl;
 	if(!m_sb)
 	{
 		std::stringstream stream;
@@ -177,11 +172,11 @@ void zeroconf_avahi::select(unsigned int msecs)
 void zeroconf_avahi::avahi_client_callback(AvahiClient* client,
 	AvahiClientState state, void* userdata)
 {
-	std::cout << (state == AVAHI_CLIENT_S_RUNNING) << std::endl;
 	switch(state)
 	{
 	case AVAHI_CLIENT_FAILURE:
-		throw std::runtime_error("Avahi failed to connect");
+		std::cerr << "[Avahi] CLIENT-FAILURE: " << avahi_strerror(
+			avahi_client_errno(client)) << std::endl;
 	}
 }
 
@@ -190,46 +185,38 @@ void zeroconf_avahi::avahi_browse_callback(AvahiServiceBrowser* sb,
 	const char* name, const char* type, const char* domain,
 	AvahiLookupResultFlags flags, void* userdata)
 {
-	std::cout << "browse!" << std::endl;
 	zeroconf_avahi* obj = static_cast<zeroconf_avahi*>(userdata);
 	AvahiClient* cl = obj->m_client;
 
 	switch(event)
 	{
 	case AVAHI_BROWSER_FAILURE:
-		std::cerr << "(Browser) " << avahi_strerror(
+		std::cerr << "[Avahi] BROWSER-FAILURE:  " << avahi_strerror(
 			avahi_client_errno(avahi_service_browser_get_client(sb))
 			) << std::endl;
 		return;
 
 	case AVAHI_BROWSER_NEW:
-		std::cout << "AVAHI_BROWSER_NEW " << name << std::endl;
 		if(!avahi_service_resolver_new(cl, interface, protocol, name,
 			type, domain, AVAHI_PROTO_INET,
 			static_cast<AvahiLookupFlags>(0),
 			&zeroconf_avahi::avahi_resolve_callback,
 			userdata))
 		{
-			std::stringstream stream;
-			stream << "Failed to resolve service '" << name << "': "
-			       << avahi_strerror(avahi_client_errno(cl));
-			throw std::runtime_error(stream.str() );
+			std::cerr << "[Avahi] RESOLVE-FAILURE: " << name << "': "
+			          << avahi_strerror(avahi_client_errno(cl));
 		}
 		break;
+
 	case AVAHI_BROWSER_REMOVE:
-		std::cout << "AVAHI_BROWSER_REMOVE " << name << std::endl;
 		obj->leave_event().emit(name);
 		break;
-	
+
 	case AVAHI_BROWSER_ALL_FOR_NOW:
 	case AVAHI_BROWSER_CACHE_EXHAUSTED:
-		std::cout << "(Browser) "
-			<< (event == AVAHI_BROWSER_CACHE_EXHAUSTED ?
-				"CACHE_EXHAUSTED" : "ALL_FOR_NOW")
-			<< std::endl;
 		break;
 	default: 
-		std::cout << "uncaught " << std::endl;
+		std::cerr << "[Avahi] uncaught event: " << event << std::endl;
 	}
 }
 
@@ -243,7 +230,6 @@ void zeroconf_avahi::avahi_resolve_callback(AvahiServiceResolver* r,
 	switch(event)
 	{
 	case AVAHI_RESOLVER_FOUND:
-		std::cout << "New Service: " << name << "(" << port << ")" << std::endl; 
 		static_cast<zeroconf_avahi*>(userdata)->discover_event().emit(
 			name, net6::ipv4_address::create_from_address(
 			addr->data.ipv4.address, port));
