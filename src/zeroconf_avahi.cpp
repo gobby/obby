@@ -146,12 +146,7 @@ void zeroconf_avahi::discover()
 		);
 
 	if(!m_sb)
-	{
-		std::stringstream stream;
-		stream << "Failed to create service browser: "
-		       << avahi_strerror(avahi_client_errno(m_client));
-		throw std::runtime_error(stream.str() );
-	}
+		throw std::runtime_error(avahi_strerror(avahi_client_errno(m_client)));
 }
 
 void zeroconf_avahi::select()
