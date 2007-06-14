@@ -1,3 +1,7 @@
+2007-06-14  Armin Burgmeier  <armin@0x539.de>
+
+	* contrib/obby_web/obby.php: Fix parsing of escaped strings.
+
 2007-04-15  Armin Burgmeier  <armin@0x539.de>
 
 	* src/zeroconf_avahi.cpp: Don't prefix error message in throw() when

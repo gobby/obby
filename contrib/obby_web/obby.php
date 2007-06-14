@@ -5,7 +5,7 @@ require_once './profiler.inc';
 // The last slash is required
 $GLOBALS['rewrite'] = '/obby_web/';
 
-$GLOBALS['version'] = '0.3.0';
+$GLOBALS['version'] = '0.4.0';
 
 $GLOBALS['defrefresh'] = 60;
 $GLOBALS['refresh'] = isset($_GET['refresh']) ? intval($_GET['refresh']) : NULL;
@@ -397,9 +397,35 @@ class parser
 
   function _tokenise_unescape(&$text)
   {
-    $text = str_replace('\t', "\t", $text);
-    $text = str_replace('\n', "\n", $text);
-    $text = str_replace('\"', '"', $text);
+    for($i = 0; $i < strlen($text); )
+    {
+      if($text[$i] == "\\" && i < strlen($text) - 1)
+      {
+        $repl = "";
+        switch($text[$i + 1])
+        {
+        case 'n':
+          $repl = "\n";
+          break;
+        case 't':
+          $repl = "\t";
+          break;
+        case "\\":
+          $repl = "\\";
+          break;
+        case '"':
+          $repl = '"';
+          break;
+        }
+
+        $text = substr_replace($text, $repl, $i, 2);
+        $i += strlen($repl);
+      }
+      else
+      {
+        ++ $i;
+      }
+    }
   }
 
   function print_available_documents()
@@ -553,7 +579,6 @@ class parser
         $chunk = $children[$i]->get_attribute('content');
         $user = intval($children[$i]->get_attribute('author'));
         $content = htmlentities($chunk);
-        $content = str_replace('\n', "\n", $content); // Expand newlines
         echo '<span class="user_' . $user . '">' . $content . '</span>';
       }
     }
