@@ -27,7 +27,7 @@ class zeroconf_howl : public zeroconf_base
 {
 public:
 	zeroconf_howl();
-	~zeroconf_howl();
+	virtual ~zeroconf_howl();
 
 	virtual void publish(const std::string& name, unsigned int port);
 	virtual void unpublish(const std::string& name);

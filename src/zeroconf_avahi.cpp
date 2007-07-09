@@ -28,6 +28,7 @@
 #include <avahi-common/error.h>
 
 #include "zeroconf_avahi.hpp"
+#include "config.hpp"
 #include "common.hpp"
 
 namespace obby
@@ -95,7 +96,11 @@ void zeroconf_avahi::publish(const std::string& name, unsigned int port)
 	avahi_entry_group_add_service(
 		m_group,
 		AVAHI_IF_UNSPEC,
-		AVAHI_PROTO_INET,
+#ifdef USE_IPV6
+		AVAHI_PROTO_UNSPEC,
+#else
+		AVAHI_PROTO_IPV4,
+#endif
 		static_cast<AvahiPublishFlags>(0),
 		name.c_str(),
 		"_lobby._tcp",
@@ -137,7 +142,11 @@ void zeroconf_avahi::discover()
 	m_sb = avahi_service_browser_new(
 		m_client,
 		AVAHI_IF_UNSPEC,
-		AVAHI_PROTO_INET,
+#ifdef USE_IPV6
+		AVAHI_PROTO_UNSPEC,
+#else
+		AVAHI_PROTO_IPV4,
+#endif
 		"_lobby._tcp",
 		NULL,
 		static_cast<AvahiLookupFlags>(0),
@@ -193,7 +202,7 @@ void zeroconf_avahi::avahi_browse_callback(AvahiServiceBrowser* sb,
 
 	case AVAHI_BROWSER_NEW:
 		if(!avahi_service_resolver_new(cl, interface, protocol, name,
-			type, domain, AVAHI_PROTO_INET,
+			type, domain, protocol,
 			static_cast<AvahiLookupFlags>(0),
 			&zeroconf_avahi::avahi_resolve_callback,
 			userdata))
@@ -225,9 +234,14 @@ void zeroconf_avahi::avahi_resolve_callback(AvahiServiceResolver* r,
 	switch(event)
 	{
 	case AVAHI_RESOLVER_FOUND:
-		static_cast<zeroconf_avahi*>(userdata)->discover_event().emit(
-			name, net6::ipv4_address::create_from_address(
-			addr->data.ipv4.address, port));
+		if(protocol == AVAHI_PROTO_INET)
+			static_cast<zeroconf_avahi*>(userdata)->discover_event().emit(
+				name, net6::ipv4_address::create_from_address(
+				addr->data.ipv4.address, port));
+		else
+			static_cast<zeroconf_avahi*>(userdata)->discover6_event().emit(
+				name, net6::ipv6_address::create_from_address(
+				addr->data.ipv6.address, port));
 	}
 
 	/* Clean up */

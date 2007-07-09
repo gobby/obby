@@ -33,8 +33,13 @@ namespace obby
 class zeroconf_base : private net6::non_copyable
 {
 public:
+	virtual ~zeroconf_base() {}
+
 	typedef sigc::signal<void, const std::string&, 
 		const net6::ipv4_address&> signal_discover_type;
+	typedef sigc::signal<void, const std::string&,
+		const net6::ipv6_address&> signal_discover6_type;
+
 	typedef sigc::signal<void, const std::string&> signal_leave_type;
 
 	virtual void publish(const std::string& name, unsigned int port) = 0;
@@ -46,6 +51,7 @@ public:
 
 	virtual signal_discover_type discover_event() const;
 	virtual signal_leave_type leave_event() const;
+	virtual signal_discover6_type discover6_event() const;
 
 	// TODO: Provide API to allow application programmers to handle
 	// errors while publishing/discovering. This requires at least
@@ -53,11 +59,10 @@ public:
 
 protected:
 	zeroconf_base();
-	// TODO: Get a virtual destructor as soon as we can break ABI.
-	//virtual ~zeroconf_base() {}
 
 private:
 	signal_discover_type m_signal_discover;
+	signal_discover6_type m_signal_discover6;
 	signal_leave_type m_signal_leave;
 };
 
@@ -65,7 +70,7 @@ class zeroconf : public zeroconf_base
 {
 public:
 	zeroconf();
-	~zeroconf();
+	virtual ~zeroconf();
 
 	/** Publishes a record to other users of this library within the
 	 * default domain (.local). It uses the service identifier
@@ -100,6 +105,10 @@ public:
 	/** Signal which will be emitted when a new server is found on the
 	 * network. */
 	virtual signal_discover_type discover_event() const;
+
+	/** Signal which will be emitted when a new IPv6 server is found
+	 * on the network. */
+	virtual signal_discover6_type discover6_event() const;
 
 	/** Signal which will be emitted when a formerly present server left
 	 * the network. */

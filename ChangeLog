@@ -1,3 +1,13 @@
+2007-07-09  Armin Burgmeier  <armin@0x539.de>
+
+	* src/zeroconf.cpp:
+	* src/zeroconf_avahi.cpp:
+	* inc/zeroconf_avahi.hpp:
+	* inc/zeroconf_howl.hpp:
+	* inc/zeroconf.hpp: Implement IPv6 discovery for avahi, added
+	discover6_event() to zeroconf interface, added virtual destructor.
+	This is an ABI break.
+
 2007-06-14  Armin Burgmeier  <armin@0x539.de>
 
 	* contrib/obby_web/obby.php: Fix parsing of escaped strings.

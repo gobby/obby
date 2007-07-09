@@ -45,6 +45,11 @@ zeroconf_base::signal_discover_type zeroconf_base::discover_event() const
 	return m_signal_discover;
 }
 
+zeroconf_base::signal_discover6_type zeroconf_base::discover6_event() const
+{
+	return m_signal_discover6;
+}
+
 zeroconf_base::signal_leave_type zeroconf_base::leave_event() const
 {
 	return m_signal_leave;
@@ -103,6 +108,11 @@ zeroconf::signal_discover_type zeroconf::discover_event() const
 zeroconf::signal_leave_type zeroconf::leave_event() const
 {
 	return m_delegate->leave_event();
+}
+
+zeroconf::signal_discover6_type zeroconf::discover6_event() const
+{
+	return m_delegate->discover6_event();
 }
 
 }
