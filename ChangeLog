@@ -1,3 +1,16 @@
+2007-07-14  Philipp Kern <phil@0x539.de>
+
+	* src/delete_operation.cpp:
+	* src/insert_operation.cpp:
+	* src/jupiter_algorithm.cpp:
+	* src/jupiter_client.cpp:
+	* src/jupiter_server.cpp:
+	* src/jupiter_undo.cpp:
+	* src/no_operation.cpp:
+	* src/operation.cpp:
+	* src/record.cpp:
+	* src/split_operation.cpp: purged some dead code
+
 2007-07-09  Armin Burgmeier  <armin@0x539.de>
 
 	* src/zeroconf.cpp:
