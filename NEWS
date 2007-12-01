@@ -1,6 +1,9 @@
 obby
 ====
 
+Version 0.4.5:
+ * Translation roundup
+
 Version 0.4.4:
  * Native Avahi Zeroconf implementation
  * Script added to source tarball to convert saved obby sessions from

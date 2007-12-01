@@ -1,16 +1,16 @@
-# obby l10n German Translation
-# Copyright (C) 2005 0x539 dev group
+# Italian translation for obby
+# Copyright (c) 2007 Rosetta Contributors and Canonical Ltd 2007
 # This file is distributed under the same license as the obby package.
-# Philipp Kern <phil@0x539.de>, 2005.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: obby 0.2.0\n"
+"Project-Id-Version: obby\n"
 "Report-Msgid-Bugs-To: http://gobby.0x539.de/\n"
 "POT-Creation-Date: 2007-04-15 12:36+0200\n"
-"PO-Revision-Date: 2006-08-17 14:00+0000\n"
-"Last-Translator: Philipp Kern <phil@0x539.de>\n"
-"Language-Team: German Translation Team <crew@0x539.de>\n"
+"PO-Revision-Date: 2007-11-30 16:38+0000\n"
+"Last-Translator: Sergio Zanchetta <primes2h@gmail.com>\n"
+"Language-Team: Italian <it@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,144 +19,137 @@ msgstr ""
 
 #: inc/server_buffer.hpp:292
 msgid "Sends an action to the chat."
-msgstr "Sendet eine Handlung an den Gesprächsraum."
+msgstr "Invia un'azione alla chat."
 
 #: inc/server_buffer.hpp:373
 msgid "File is not an obby document"
-msgstr "Datei ist kein obby-Dokument"
+msgstr "Il file non è un documento obby"
 
 #: inc/server_buffer.hpp:380
 msgid "File is not a stored obby session"
-msgstr "Datei ist keine gespeicherte obby-Sitzung"
+msgstr "Il file non è una sessione obby archiviata"
 
 #: inc/server_buffer.hpp:423 src/user_table.cpp:75 src/chat.cpp:251
 #: src/text.cpp:188
 msgid "Unexpected child node: '%0%'"
-msgstr "Kindknoten '%0%' unerwartet"
+msgstr "Nodo figlio non atteso: «%0%»"
 
 #: inc/serialise/attribute.hpp:127
+#, fuzzy
 msgid "Attribute '%0%' has unexpected type: %1%"
-msgstr "Unerwarteter Datentyp für Attribut %0%: %1%"
+msgstr "L'attributo «%0%» è di un tipo non atteso: %1%"
 
 #: src/error.cpp:39
 msgid "Colour is already in use"
-msgstr "Farbe wird bereits benutzt"
+msgstr "Il colore è già in uso"
 
 #: src/error.cpp:41
 msgid "Wrong session password"
-msgstr "Falsches Sitzungspasswort"
+msgstr "Password di sessione errata"
 
 #: src/error.cpp:43
 msgid "Wrong user password"
-msgstr "Falsches Benutzerpasswort"
+msgstr "Password utente errata"
 
 #: src/error.cpp:45
 msgid "Protocol version mismatch"
-msgstr "Falsche Protokollversion"
+msgstr "La versione del protocollo non corrisponde"
 
 #: src/error.cpp:47
 msgid "Connection is not yet encrypted"
-msgstr "Verbindung ist noch nicht verschlüsselt"
+msgstr "La connessione non è ancora cifrata"
 
 #: src/user_table.cpp:58
 msgid "User ID %0% is already in use"
-msgstr "Benutzer-ID %0% wird bereits benutzt"
+msgstr "L'ID utente %0% è già in uso"
 
 #: src/chat.cpp:257
 msgid "Restored session"
-msgstr "Sitzung wiederhergestellt"
+msgstr "Sessione ripristinata"
 
 #: src/chat.cpp:332
+#, fuzzy
 msgid "%0% has joined"
-msgstr "%0% hat die Sitzung betreten"
+msgstr "%0% è entrato"
 
 #: src/chat.cpp:339
+#, fuzzy
 msgid "%0% has left"
-msgstr "%0% hat die Sitzung verlassen"
+msgstr "%0% è uscito"
 
 #: src/serialise/token.cpp:94
 msgid "Unexpected escape sequence: \\%0%"
-msgstr "Unerwartete Escapesequenz: %0%"
+msgstr "Sequenza di escape non attesa: \\%0%"
 
 #: src/serialise/token.cpp:170
+#, fuzzy
 msgid "String not closed"
-msgstr "Zeichenkette nicht geschlossen"
+msgstr "Stringa non terminata"
 
 #: src/serialise/token.cpp:275
 msgid "Unexpected token: '%0%'"
-msgstr "Unerwartetes Token: '%0%'"
+msgstr "Token non atteso: «%0%»"
 
 #: src/serialise/token.cpp:395
 msgid "Unexpected end of input"
-msgstr "Unerwartetes Ende der Eingabe"
+msgstr "Fine dell'input non atteso"
 
 #: src/serialise/attribute.cpp:54
 msgid "Expected '=' after %0%"
-msgstr "'=' nach '%0%' erwartet"
+msgstr "Atteso «=» dopo %0%"
 
 #: src/serialise/attribute.cpp:65
 msgid "Expected string literal as value for attribute '%0%'"
-msgstr "Zeichenkette als Wert für das Attribut '%0%' erwartet"
+msgstr "Attesa stringa letterale come valore per l'attributo «%0%»"
 
 #: src/serialise/object.cpp:135
 msgid "Child object's indentation must be parent's plus one"
-msgstr ""
-"Einrückung des Kindobjektes muss der des Elternobjektes plus eins entsprechen"
+msgstr "Il rientro dell'oggetto figlio deve essere quello del padre più uno"
 
 #: src/serialise/object.cpp:148
+#, fuzzy
 msgid "Expected child object after indentation"
-msgstr "Kindobjekt nach Einrückung erwartet"
+msgstr "Atteso oggetto figlio dopo il rientro"
 
 #: src/serialise/object.cpp:159
 msgid "Expected child object instead of '%0%'"
-msgstr "Kindobjekt statt '%0%' erwartet"
+msgstr "Atteso oggetto figlio al posto di «%0%»"
 
 #: src/serialise/object.cpp:220 src/serialise/object.cpp:234
 msgid "Object '%0%' requires attribute '%1%'"
-msgstr "Objekt '%0%' erfordert das Attribut '%1%'"
+msgstr "L'oggetto «%0%» richiede l'attributo «%1%»"
 
 #: src/serialise/parser.cpp:36
 msgid "Could not open file '%0%' for reading"
-msgstr "Konnte die Datei '%0%' nicht zum Lesen öffnen"
+msgstr "Impossibile aprire il file «%0%» in lettura"
 
 #: src/serialise/parser.cpp:97
 msgid "Expected initial exclamation mark"
-msgstr "Ausrufezeichen zu Beginn erwartet"
+msgstr "Attesto punto esclamativo iniziale"
 
 #: src/serialise/parser.cpp:107
 msgid "Expected document type after '!'"
-msgstr "Dokumenttyp nach '!' erwartet"
+msgstr "Atteso il tipo di documento dopo «!»"
 
 #: src/serialise/parser.cpp:118
+#, fuzzy
 msgid "Expected newline after document type"
-msgstr "Zeilenumbruch nach dem Dokumenttyp erwartet"
+msgstr "Atteso un a capo dopo il tipo di documento"
 
 #: src/serialise/parser.cpp:127
+#, fuzzy
 msgid "Expected top-level object after document type"
-msgstr "Objekt auf oberster Ebene nach dem Dokumenttyp erwartet"
+msgstr "Atteso un oggetto di alto livello dopo il tipo di documento"
 
 #: src/serialise/parser.cpp:137
+#, fuzzy
 msgid "Expected root object after document type"
-msgstr "Wurzelobjekt nach dem Dokumenttyp erwartet"
+msgstr "Atteso un oggetto root dopo il tipo di documento"
 
 #: src/serialise/parser.cpp:147
 msgid "Expected end of input instead of '%0%'"
-msgstr "Eingabeende nach '%0%' erwartet"
+msgstr "Attesa fine dell'input invece di «%0%»"
 
 #: src/serialise/parser.cpp:159
 msgid "Could not open file '%0%' for writing"
-msgstr "Konnte die Datei '%0%' nicht zum Schreiben öffnen"
-
-#~ msgid "No server public key available, wait for the welcome packet"
-#~ msgstr ""
-#~ "Kein öffentlicher Schlüssel des Servers verfügbar, warte auf das erste "
-#~ "Paket"
-
-#~ msgid "%0% has created a new document: %1%"
-#~ msgstr "%0% hat ein neues Dokument erstellt: %1%"
-
-#~ msgid "A new document was created: %0%"
-#~ msgstr "Ein neues Dokument wurde erstellt: %0%"
-
-#~ msgid "Document needs at least one line"
-#~ msgstr "Das Dokument muss mindestens eine Zeile enthalten"
+msgstr "Impossibile aprire il file «%0%» in scrittura"

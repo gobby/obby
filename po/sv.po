@@ -7,160 +7,156 @@ msgid ""
 msgstr ""
 "Project-Id-Version: obby\n"
 "Report-Msgid-Bugs-To: http://gobby.0x539.de/\n"
-"POT-Creation-Date: 2007-07-20 21:02+0200\n"
-"PO-Revision-Date: 2007-07-20 21:02+0100\n"
+"POT-Creation-Date: 2007-04-15 12:36+0200\n"
+"PO-Revision-Date: 2007-09-01 22:46+0000\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2007-12-01 18:12+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
 
-#: ../inc/server_buffer.hpp:292
+#: inc/server_buffer.hpp:292
 msgid "Sends an action to the chat."
 msgstr "Skickar en åtgärd till chatten."
 
-#: ../inc/server_buffer.hpp:373
+#: inc/server_buffer.hpp:373
 msgid "File is not an obby document"
 msgstr "Filen är inte ett obby-dokument"
 
-#: ../inc/server_buffer.hpp:380
+#: inc/server_buffer.hpp:380
 msgid "File is not a stored obby session"
 msgstr "Filen är inte en sparad obby-session"
 
-#. Unexpected child
-#. TODO: unexpected_child_error
-#. TODO: Unexpected child error
-#. TODO: unexpected_child_error
-#: ../inc/server_buffer.hpp:423
-#: ../src/user_table.cpp:75
-#: ../src/chat.cpp:251
-#: ../src/text.cpp:188
+#: inc/server_buffer.hpp:423 src/user_table.cpp:75 src/chat.cpp:251
+#: src/text.cpp:188
 msgid "Unexpected child node: '%0%'"
 msgstr "Oväntad barn-nod: \"%0%\""
 
-#: ../inc/serialise/attribute.hpp:127
+#: inc/serialise/attribute.hpp:127
 msgid "Attribute '%0%' has unexpected type: %1%"
 msgstr "Attributet \"%0%\" har en oväntad typ: %1%"
 
-#: ../src/error.cpp:39
+#: src/error.cpp:39
 msgid "Colour is already in use"
 msgstr "Färgen används redan"
 
-#: ../src/error.cpp:41
+#: src/error.cpp:41
 msgid "Wrong session password"
 msgstr "Fel sessionslösenord"
 
-#: ../src/error.cpp:43
+#: src/error.cpp:43
 msgid "Wrong user password"
 msgstr "Fel användarlösenord"
 
-#: ../src/error.cpp:45
+#: src/error.cpp:45
 msgid "Protocol version mismatch"
 msgstr "Protokollversionen stämmer inte"
 
-#: ../src/error.cpp:47
+#: src/error.cpp:47
 msgid "Connection is not yet encrypted"
 msgstr "Anslutningen ännu inte krypterad"
 
-#: ../src/user_table.cpp:58
+#: src/user_table.cpp:58
 msgid "User ID %0% is already in use"
 msgstr "Användar-id:t %0% används redan"
 
-#: ../src/chat.cpp:257
+#: src/chat.cpp:257
 msgid "Restored session"
 msgstr "Återställd session"
 
-#: ../src/chat.cpp:332
+#: src/chat.cpp:332
 msgid "%0% has joined"
 msgstr "%0% har anslutit"
 
-#: ../src/chat.cpp:339
+#: src/chat.cpp:339
 msgid "%0% has left"
 msgstr "%0% har lämnat"
 
-#: ../src/serialise/token.cpp:94
+#: src/serialise/token.cpp:94
 msgid "Unexpected escape sequence: \\%0%"
 msgstr "Oväntad escape-sekvens: \\%0%"
 
-#: ../src/serialise/token.cpp:170
+#: src/serialise/token.cpp:170
 msgid "String not closed"
 msgstr "Sträng inte avslutad"
 
-#: ../src/serialise/token.cpp:275
+#: src/serialise/token.cpp:275
 msgid "Unexpected token: '%0%'"
 msgstr "Oväntat token: \"%0%\""
 
-#: ../src/serialise/token.cpp:395
+#: src/serialise/token.cpp:395
 msgid "Unexpected end of input"
 msgstr "Oväntat slut på indata"
 
-#: ../src/serialise/attribute.cpp:54
+#: src/serialise/attribute.cpp:54
 msgid "Expected '=' after %0%"
 msgstr "Förväntade \"=\" efter %0%"
 
-#: ../src/serialise/attribute.cpp:65
+#: src/serialise/attribute.cpp:65
 msgid "Expected string literal as value for attribute '%0%'"
 msgstr "Förväntade strängliteral som värde för attributet \"%0%\""
 
-#: ../src/serialise/object.cpp:135
+#: src/serialise/object.cpp:135
 msgid "Child object's indentation must be parent's plus one"
 msgstr "Barnobjektets indrag måste vara förälderns + 1"
 
-#: ../src/serialise/object.cpp:148
+#: src/serialise/object.cpp:148
 msgid "Expected child object after indentation"
 msgstr "Förväntade barnobjekt efter indrag"
 
-#: ../src/serialise/object.cpp:159
+#: src/serialise/object.cpp:159
 msgid "Expected child object instead of '%0%'"
 msgstr "Förväntade barnobjekt istället för \"%0%\""
 
-#: ../src/serialise/object.cpp:220
-#: ../src/serialise/object.cpp:234
+#: src/serialise/object.cpp:220 src/serialise/object.cpp:234
 msgid "Object '%0%' requires attribute '%1%'"
 msgstr "Objektet \"%0%\" kräver attributet \"%1%\""
 
-#: ../src/serialise/parser.cpp:36
+#: src/serialise/parser.cpp:36
 msgid "Could not open file '%0%' for reading"
 msgstr "Kunde inte öppna filen \"%0%\" för läsning"
 
-#: ../src/serialise/parser.cpp:97
+#: src/serialise/parser.cpp:97
 msgid "Expected initial exclamation mark"
 msgstr "Förväntade inledande utropstecken"
 
-#: ../src/serialise/parser.cpp:107
+#: src/serialise/parser.cpp:107
 msgid "Expected document type after '!'"
 msgstr "Förväntade dokumenttyp efter \"!\""
 
-#: ../src/serialise/parser.cpp:118
+#: src/serialise/parser.cpp:118
 msgid "Expected newline after document type"
 msgstr "Förväntade en ny rad efter dokumenttyp"
 
-#: ../src/serialise/parser.cpp:127
+#: src/serialise/parser.cpp:127
 msgid "Expected top-level object after document type"
 msgstr "Förväntade toppnivåobjekt efter dokumenttyp"
 
-#: ../src/serialise/parser.cpp:137
+#: src/serialise/parser.cpp:137
 msgid "Expected root object after document type"
 msgstr "Förväntade rotobjekt efter dokumenttyp"
 
-#: ../src/serialise/parser.cpp:147
+#: src/serialise/parser.cpp:147
 msgid "Expected end of input instead of '%0%'"
 msgstr "Förväntade slut på indata istället för \"%0%\""
 
-#: ../src/serialise/parser.cpp:159
+#: src/serialise/parser.cpp:159
 msgid "Could not open file '%0%' for writing"
 msgstr "Kund inte öppna filen \"%0%\" för skrivning"
 
-#: ../src/command.cpp:221
-msgid "Shows all available commands"
-msgstr "Visar alla tillgängliga kommandon"
-
-#~ msgid "%0% has created a new document: %1%"
-#~ msgstr "%0% har skapat ett nytt dokument: %1%"
-#~ msgid "A new document was created: %0%"
-#~ msgstr "Ett nytt dokument har skapats: %0%"
-#~ msgid "Document needs at least one line"
-#~ msgstr "Dokumentet behöver ha minst en rad"
 #~ msgid "No server public key available, wait for the welcome packet"
 #~ msgstr "Ingen publik servernyckel tillgänglig, väntar på välkomstpaketet"
 
+#~ msgid "%0% has created a new document: %1%"
+#~ msgstr "%0% har skapat ett nytt dokument: %1%"
+
+#~ msgid "A new document was created: %0%"
+#~ msgstr "Ett nytt dokument har skapats: %0%"
+
+#~ msgid "Document needs at least one line"
+#~ msgstr "Dokumentet behöver ha minst en rad"
+
+#~ msgid "Shows all available commands"
+#~ msgstr "Visar alla tillgängliga kommandon"
