@@ -2,7 +2,12 @@ obby
 ====
 
 Version 0.4.5:
+ * IPv6 discovery for Avahi.  This breaks the ABI and thus applications
+   built against an older obby need to be recompiled.
+ * Some fixes in the web-based session viewer.
  * Translation roundup
+   - New Swedish translation, thanks to Daniel Nylander
+   - New Italian translation, thanks to Sergio Zanchetta
 
 Version 0.4.4:
  * Native Avahi Zeroconf implementation
