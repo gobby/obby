@@ -1,5 +1,9 @@
 2007-12-27  Philipp Kern <phil@0x539.de>
 
+	* src/zeroconf_avahi.cpp: compilation fix for non-IPv6 builds
+
+2007-12-27  Philipp Kern <phil@0x539.de>
+
 	* NEWS: document changes
 
 2007-12-27  Philipp Kern <phil@0x539.de>

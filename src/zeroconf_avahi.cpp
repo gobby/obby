@@ -99,7 +99,7 @@ void zeroconf_avahi::publish(const std::string& name, unsigned int port)
 #ifdef USE_IPV6
 		AVAHI_PROTO_UNSPEC,
 #else
-		AVAHI_PROTO_IPV4,
+		AVAHI_PROTO_INET,
 #endif
 		static_cast<AvahiPublishFlags>(0),
 		name.c_str(),
@@ -145,7 +145,7 @@ void zeroconf_avahi::discover()
 #ifdef USE_IPV6
 		AVAHI_PROTO_UNSPEC,
 #else
-		AVAHI_PROTO_IPV4,
+		AVAHI_PROTO_INET,
 #endif
 		"_lobby._tcp",
 		NULL,
