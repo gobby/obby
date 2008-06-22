@@ -115,9 +115,7 @@ sw_result zeroconf_howl::handle_publish_reply(sw_discovery discovery,
 {
 	if (status != SW_OKAY)
 	{
-		std::stringstream stream;
-		stream << "publish failed: " << status;
-		throw std::runtime_error(stream.str());
+		std::cerr << "publish failed: " << status;
 	}
 	return SW_OKAY;
 }
@@ -133,8 +131,7 @@ sw_result zeroconf_howl::handle_browse_reply(sw_discovery discovery,
 	{
 		case SW_DISCOVERY_BROWSE_INVALID:
 		{
-			throw std::runtime_error(
-				"sw_discovery failed within the callback");
+			std::cerr << "sw_discovery failed within the callback";
 			break;
 		}
 
@@ -146,9 +143,7 @@ sw_result zeroconf_howl::handle_browse_reply(sw_discovery discovery,
 				&zeroconf_howl::handle_resolve_reply,
 				extra, &oid)) != SW_OKAY)
 			{
-				std::stringstream stream;
-				stream << "resolve failed: " << result;
-				throw std::runtime_error(stream.str());
+				std::cerr << "resolve failed: " << result;
 			}
 			break;
 		}

@@ -1,3 +1,9 @@
+2008-06-22  Armin Burgmeier  <armin@0x539.de>
+
+	* src/zeroconf_howl.cpp: Don't throw exceptions in C callbacks.
+	Instead, print the error to std::cerr as the avahi implementation
+	does.
+
 2007-12-27  Philipp Kern <phil@0x539.de>
 
 	* src/zeroconf_avahi.cpp: compilation fix for non-IPv6 builds
