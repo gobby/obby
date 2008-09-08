@@ -1,3 +1,8 @@
+2008-09-08  Armin Burgmeier  <armin@0x539.de>
+
+	* src/zeroconf_avahi.cpp: Set scope ID of discovered IPv6 services,
+	for link-local IPv6 to work.
+
 2008-06-22  Armin Burgmeier  <armin@0x539.de>
 
 	* src/zeroconf_howl.cpp: Don't throw exceptions in C callbacks.
@@ -14,7 +19,7 @@
 
 2007-12-27  Philipp Kern <phil@0x539.de>
 
-	* configure.ac: bump version to 1.3.6
+	* configure.ac: bump version to 0.4.5
 
 2007-12-27  Philipp Kern <phil@0x539.de>
 

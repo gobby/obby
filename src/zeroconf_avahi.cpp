@@ -241,7 +241,7 @@ void zeroconf_avahi::avahi_resolve_callback(AvahiServiceResolver* r,
 		else
 			static_cast<zeroconf_avahi*>(userdata)->discover6_event().emit(
 				name, net6::ipv6_address::create_from_address(
-				addr->data.ipv6.address, port));
+				addr->data.ipv6.address, port, 0, interface));
 	}
 
 	/* Clean up */
