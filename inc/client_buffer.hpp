@@ -97,6 +97,18 @@ public:
 	 */
 	void connect(const std::string& hostname, unsigned int port = 6522);
 
+	/** Connects to the given address where a obby server is assumed to be
+	 * running. After the connection has been established, signal_welcome
+	 * will be emitted after the server sent us some initial data
+	 * At this point the login function may be used to login as a user
+	 * with a given colour.
+	 * TODO: Ask username and colour parameters already here and login
+	 * implicitly after having called connect().
+	 *
+	 * @param address Address to connect to.
+	 */
+	void connect(const net6::address& addr);
+
 	/** Disconnects from a server. Note that documents and users are
 	 * still available until reconnection. get_self() will still return
 	 * the local user. is_logged_in() will returns false since the
@@ -398,6 +410,31 @@ void basic_client_buffer<Document, Selector>::
 		);
 	}
 
+	net6_client().set_enable_keepalives(m_enable_keepalives);
+}
+
+template<typename Document, typename Selector>
+void basic_client_buffer<Document, Selector>::
+	connect(const net6::address& addr)
+{
+	if(basic_buffer<Document, Selector>::is_open() )
+	{
+		throw std::logic_error(
+			"obby::basic_client_buffer::connect:\n"
+			"Connection already established"
+		);
+	}
+
+	// Create connection object
+	basic_buffer<Document, Selector>::m_net.reset(new_net() );
+
+	// Register signal handlers
+	register_signal_handlers();
+
+	// Connect
+	net6_client().connect(addr);
+
+	// Set keepalive
 	net6_client().set_enable_keepalives(m_enable_keepalives);
 }
 

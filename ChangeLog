@@ -1,5 +1,10 @@
 2008-09-08  Armin Burgmeier  <armin@0x539.de>
 
+	* inc/client_buffer.hpp: Added a connect(const net6::address&)
+	overload.
+
+2008-09-08  Armin Burgmeier  <armin@0x539.de>
+
 	* src/zeroconf_avahi.cpp: Set scope ID of discovered IPv6 services,
 	for link-local IPv6 to work.
 
