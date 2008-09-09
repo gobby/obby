@@ -1,5 +1,10 @@
 2008-09-09  Philipp Kern  <phil@0x539.de>
 
+	* po/LINGUAS:
+	* po/oc.po: add new Occitan (post 1500) translation
+
+2008-09-09  Philipp Kern  <phil@0x539.de>
+
 	* src/Makefile.am, src/serialise/Makefile.am, test/Makefile.am: clean
 	up include handling; first step to support distcheck
 
