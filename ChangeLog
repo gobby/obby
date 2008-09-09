@@ -1,5 +1,10 @@
 2008-09-09  Philipp Kern  <phil@0x539.de>
 
+	* configure.ac:
+	* NEWS: bump version to 0.4.6, document the changes
+
+2008-09-09  Philipp Kern  <phil@0x539.de>
+
 	* po/LINGUAS:
 	* po/oc.po: add new Occitan (post 1500) translation
 

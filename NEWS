@@ -1,6 +1,12 @@
 obby
 ====
 
+Version 0.4.6:
+ * Enable link-local IPv6 discovery through Avahi.
+ * Bugfix: Do not throw exceptions in C callbacks.
+ * Translation roundup
+   - New Occitan (post 1500) translation, thanks to Cédric VALMARY
+
 Version 0.4.5:
  * IPv6 discovery for Avahi.  This breaks the ABI and thus applications
    built against an older obby need to be recompiled.
