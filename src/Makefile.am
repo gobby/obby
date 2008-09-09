@@ -1,5 +1,7 @@
 SUBDIRS = serialise .
 
+INCLUDES = -I$(top_srcdir)/inc
+
 lib_LTLIBRARIES = libobby.la
 
 #  current  : revision :      age
@@ -14,7 +16,7 @@ if WIN32
 libobby_la_LDFLAGS += -no-undefined -Wl,--enable-runtime-pseudo-reloc
 endif
 
-libobby_la_CPPFLAGS = $(libobby_CFLAGS) -I../inc @extra_includes@
+libobby_la_CPPFLAGS = $(libobby_CFLAGS) @extra_includes@
 
 # gettext
 libobby_la_CPPFLAGS += -DLOCALEDIR=\""$(datadir)/locale"\"

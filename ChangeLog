@@ -1,3 +1,8 @@
+2008-09-09  Philipp Kern  <phil@0x539.de>
+
+	* src/Makefile.am, src/serialise/Makefile.am, test/Makefile.am: clean
+	up include handling; first step to support distcheck
+
 2008-09-08  Armin Burgmeier  <armin@0x539.de>
 
 	* inc/client_buffer.hpp: Added a connect(const net6::address&)

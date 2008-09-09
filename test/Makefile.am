@@ -1,7 +1,9 @@
 check_PROGRAMS = serialise text jupiter
 TESTS = serialise text jupiter
 
-AM_CPPFLAGS        = -I../inc/ $(libobby_CFLAGS)
+INCLUDES = -I$(top_srcdir)/inc
+
+AM_CPPFLAGS        = $(libobby_CFLAGS)
 LDADD              = $(libobby_LIBS)
 
 serialise_SOURCES  = test_serialise.cpp

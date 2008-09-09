@@ -1,5 +1,7 @@
+INCLUDES = -I$(top_srcdir)/inc
+
 noinst_LTLIBRARIES = libserialise.la
-libserialise_la_CPPFLAGS = $(libobby_CFLAGS) -I../inc @extra_includes@
+libserialise_la_CPPFLAGS = $(libobby_CFLAGS) @extra_includes@
 libserialise_la_LIBADD = $(libobby_LIBS) $(LIBINTL) @extra_libraries@
 
 libserialise_la_SOURCES = error.cpp
