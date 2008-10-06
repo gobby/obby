@@ -68,7 +68,7 @@ msgstr "Reprise de séance"
 
 #: src/chat.cpp:332
 msgid "%0% has joined"
-msgstr "%0% est parmis nous !"
+msgstr "%0% est parmi nous !"
 
 #: src/chat.cpp:339
 msgid "%0% has left"
