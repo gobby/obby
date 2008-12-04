@@ -439,7 +439,7 @@ class parser
       // TODO: Link
       if($children[$i]->get_name() == 'document')
       {
-        $title = htmlentities($children[$i]->get_attribute('title') );
+        $title = htmlentities($children[$i]->get_attribute('title'), ENT_COMPAT, 'UTF-8' );
         $suffix = intval($children[$i]->get_attribute('suffix') );
         echo '<li><a href="' . make_link(
           array('file' => $GLOBALS['_GET']['file'],
@@ -567,7 +567,7 @@ class parser
           // Get author
           $user = intval($parts[$p]->get_attribute('author') );
           // Get content
-          $content = htmlentities($parts[$p]->get_attribute('content') );
+          $content = htmlentities($parts[$p]->get_attribute('content'), ENT_COMPAT, 'UTF-8' );
           echo '<span class="user_' . $user . '">' . $content . '</span>';
         }
 
@@ -578,7 +578,7 @@ class parser
       {
         $chunk = $children[$i]->get_attribute('content');
         $user = intval($children[$i]->get_attribute('author'));
-        $content = htmlentities($chunk);
+        $content = htmlentities($chunk, ENT_COMPAT, 'UTF-8');
         echo '<span class="user_' . $user . '">' . $content . '</span>';
       }
     }
@@ -603,7 +603,7 @@ class user_table
     {
       $user  =& $users[$i];
       $id    =& intval($user->get_attribute('id') );
-      $name  =& htmlentities($user->get_attribute('name') );
+      $name  =& htmlentities($user->get_attribute('name'), ENT_COMPAT, 'UTF-8' );
       $color =& sprintf('%x', intval($user->get_attribute('colour'), 16));
       $this->m_users[$id] = array($name, $color);
     }
@@ -702,7 +702,7 @@ echo '<?xml version="1.0" encoding="UTF-8" ?>';
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
  <head>
-  <title><?php echo 'obby.php' . ($error->is_empty() ? (' - ' . htmlentities($filename) . ($document ? (' (' . htmlentities($document) . ')') : '')) : '') ?></title>
+  <title><?php echo 'obby.php' . ($error->is_empty() ? (' - ' . htmlentities($filename, ENT_COMPAT, 'UTF-8') . ($document ? (' (' . htmlentities($document, ENT_COMPAT, 'UTF-8') . ')') : '')) : '') ?></title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <?php if(NULL !== $GLOBALS['refresh']) { ?>
   <meta http-equiv="Refresh" content="<?php echo $GLOBALS['refresh']; ?>;

@@ -1,3 +1,8 @@
+2008-12-04  Armin Burgmeier  <armin@0x539.de>
+
+	* contrib/obby_web/obby.php: Use UTF-8 charset for htmlentities(), so
+	that non-ASCII-characters are correctly shown (Bug #405).
+
 2008-11-27  Philipp Kern  <phil@0x539.de>
 
 	* po/fr.po: reviewed and completed French translation, thanks to
