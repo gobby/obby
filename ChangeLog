@@ -1,3 +1,7 @@
+2009-01-01  Philipp Kern  <phil@0x539.de>
+
+	* po/oc.po: adjusted report-msgid-bugs-to
+
 2008-12-04  Armin Burgmeier  <armin@0x539.de>
 
 	* contrib/obby_web/obby.php: Use UTF-8 charset for htmlentities(), so

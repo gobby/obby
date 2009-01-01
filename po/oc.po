@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: obby\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"Report-Msgid-Bugs-To: http://gobby.0x539.de/\n"
 "POT-Creation-Date: 2007-04-15 12:36+0200\n"
 "PO-Revision-Date: 2008-03-21 16:19+0000\n"
 "Last-Translator: Cédric VALMARY <Unknown>\n"
