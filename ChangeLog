@@ -1,5 +1,15 @@
 2009-01-01  Philipp Kern  <phil@0x539.de>
 
+	* po/ca.po:
+	* po/de.po:
+	* po/es.po:
+	* po/it.po:
+	* po/nl.po:
+	* po/oc.po:
+	* po/sv.po: imported from Launchpad
+
+2009-01-01  Philipp Kern  <phil@0x539.de>
+
 	* configure.ac:
 	* NEWS: bump version to 0.4.7, document the changes
 

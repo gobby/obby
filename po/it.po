@@ -8,13 +8,13 @@ msgstr ""
 "Project-Id-Version: obby\n"
 "Report-Msgid-Bugs-To: http://gobby.0x539.de/\n"
 "POT-Creation-Date: 2007-04-15 12:36+0200\n"
-"PO-Revision-Date: 2007-11-30 16:38+0000\n"
-"Last-Translator: Sergio Zanchetta <primes2h@gmail.com>\n"
+"PO-Revision-Date: 2007-12-04 10:10+0000\n"
+"Last-Translator: Milo Casagrande <milo@milo.name>\n"
 "Language-Team: Italian <it@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2007-12-01 18:12+0000\n"
+"X-Launchpad-Export-Date: 2009-01-01 15:01+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: inc/server_buffer.hpp:292
@@ -35,7 +35,6 @@ msgid "Unexpected child node: '%0%'"
 msgstr "Nodo figlio non atteso: «%0%»"
 
 #: inc/serialise/attribute.hpp:127
-#, fuzzy
 msgid "Attribute '%0%' has unexpected type: %1%"
 msgstr "L'attributo «%0%» è di un tipo non atteso: %1%"
 
@@ -68,12 +67,10 @@ msgid "Restored session"
 msgstr "Sessione ripristinata"
 
 #: src/chat.cpp:332
-#, fuzzy
 msgid "%0% has joined"
 msgstr "%0% è entrato"
 
 #: src/chat.cpp:339
-#, fuzzy
 msgid "%0% has left"
 msgstr "%0% è uscito"
 
@@ -82,7 +79,6 @@ msgid "Unexpected escape sequence: \\%0%"
 msgstr "Sequenza di escape non attesa: \\%0%"
 
 #: src/serialise/token.cpp:170
-#, fuzzy
 msgid "String not closed"
 msgstr "Stringa non terminata"
 
@@ -107,7 +103,6 @@ msgid "Child object's indentation must be parent's plus one"
 msgstr "Il rientro dell'oggetto figlio deve essere quello del padre più uno"
 
 #: src/serialise/object.cpp:148
-#, fuzzy
 msgid "Expected child object after indentation"
 msgstr "Atteso oggetto figlio dopo il rientro"
 
@@ -129,22 +124,19 @@ msgstr "Attesto punto esclamativo iniziale"
 
 #: src/serialise/parser.cpp:107
 msgid "Expected document type after '!'"
-msgstr "Atteso il tipo di documento dopo «!»"
+msgstr "Atteso tipo di documento dopo «!»"
 
 #: src/serialise/parser.cpp:118
-#, fuzzy
 msgid "Expected newline after document type"
-msgstr "Atteso un a capo dopo il tipo di documento"
+msgstr "Atteso newline dopo il tipo di documento"
 
 #: src/serialise/parser.cpp:127
-#, fuzzy
 msgid "Expected top-level object after document type"
-msgstr "Atteso un oggetto di alto livello dopo il tipo di documento"
+msgstr "Atteso oggetto di alto livello dopo il tipo di documento"
 
 #: src/serialise/parser.cpp:137
-#, fuzzy
 msgid "Expected root object after document type"
-msgstr "Atteso un oggetto root dopo il tipo di documento"
+msgstr "Atteso oggetto root dopo il tipo di documento"
 
 #: src/serialise/parser.cpp:147
 msgid "Expected end of input instead of '%0%'"

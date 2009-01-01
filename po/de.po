@@ -9,12 +9,12 @@ msgstr ""
 "Report-Msgid-Bugs-To: http://gobby.0x539.de/\n"
 "POT-Creation-Date: 2007-04-15 12:36+0200\n"
 "PO-Revision-Date: 2006-08-17 14:00+0000\n"
-"Last-Translator: Philipp Kern <phil@0x539.de>\n"
+"Last-Translator: Armin Burgmeier <armin@0x539.de>\n"
 "Language-Team: German Translation Team <crew@0x539.de>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2007-12-01 18:12+0000\n"
+"X-Launchpad-Export-Date: 2009-01-01 15:01+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: inc/server_buffer.hpp:292
@@ -146,17 +146,3 @@ msgstr "Eingabeende nach '%0%' erwartet"
 #: src/serialise/parser.cpp:159
 msgid "Could not open file '%0%' for writing"
 msgstr "Konnte die Datei '%0%' nicht zum Schreiben öffnen"
-
-#~ msgid "No server public key available, wait for the welcome packet"
-#~ msgstr ""
-#~ "Kein öffentlicher Schlüssel des Servers verfügbar, warte auf das erste "
-#~ "Paket"
-
-#~ msgid "%0% has created a new document: %1%"
-#~ msgstr "%0% hat ein neues Dokument erstellt: %1%"
-
-#~ msgid "A new document was created: %0%"
-#~ msgstr "Ein neues Dokument wurde erstellt: %0%"
-
-#~ msgid "Document needs at least one line"
-#~ msgstr "Das Dokument muss mindestens eine Zeile enthalten"
