@@ -1,3 +1,9 @@
+2009-10-12  Armin Burgmeier  <armin@0x539.de>
+
+	* po/uk.po: Added Ukrainian translation by Yuri Chornoivan. Bug #479.
+
+	* po/LINGUAS: Added uk.
+
 2009-01-01  Philipp Kern  <phil@0x539.de>
 
 	* po/ca.po:
