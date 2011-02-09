@@ -1,0 +1,147 @@
+# Danish translation obby.
+# Copyright (C) 2010 obby & nedenstående oversættere.
+# This file is distributed under the same license as obby package.
+# Joe Hansen <joedalton2@yahoo.dk>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: obby\n"
+"Report-Msgid-Bugs-To: http://gobby.0x539.de/\n"
+"POT-Creation-Date: 2007-04-15 12:36+0200\n"
+"PO-Revision-Date: 2010-11-28 17:30+01:00\n"
+"Last-Translator: Joe Hansen <joedalton2@yahoo.dk>\n"
+"Language-Team: Danish <debian-l10n-danish@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: inc/server_buffer.hpp:292
+msgid "Sends an action to the chat."
+msgstr "Sender en handling til snakken (chat)."
+
+#: inc/server_buffer.hpp:373
+msgid "File is not an obby document"
+msgstr "Fil er ikke et obby-dokument"
+
+#: inc/server_buffer.hpp:380
+msgid "File is not a stored obby session"
+msgstr "Fil er ikke en gemt obby-session"
+
+#: inc/server_buffer.hpp:423 src/user_table.cpp:75 src/chat.cpp:251
+#: src/text.cpp:188
+msgid "Unexpected child node: '%0%'"
+msgstr "Uventet underknude: »%0%«"
+
+#: inc/serialise/attribute.hpp:127
+msgid "Attribute '%0%' has unexpected type: %1%"
+msgstr "Attrubut »%0%« har uventet type: »%1%«"
+
+#: src/error.cpp:39
+msgid "Colour is already in use"
+msgstr "Farve er allerede i brug"
+
+#: src/error.cpp:41
+msgid "Wrong session password"
+msgstr "Forkert sessionsadgangskode"
+
+#: src/error.cpp:43
+msgid "Wrong user password"
+msgstr "Forkert brugeradgangskode"
+
+#: src/error.cpp:45
+msgid "Protocol version mismatch"
+msgstr "Forskellige protokolversioner"
+
+#: src/error.cpp:47
+msgid "Connection is not yet encrypted"
+msgstr "Forbindelse er endnu ikke krypteret"
+
+#: src/user_table.cpp:58
+msgid "User ID %0% is already in use"
+msgstr "Bruger-id %0% er allerede i brug"
+
+#: src/chat.cpp:257
+msgid "Restored session"
+msgstr "Gendannet session"
+
+#: src/chat.cpp:332
+msgid "%0% has joined"
+msgstr "%0% er indtrådt"
+
+#: src/chat.cpp:339
+msgid "%0% has left"
+msgstr "%0% har forladt"
+
+#: src/serialise/token.cpp:94
+msgid "Unexpected escape sequence: \\%0%"
+msgstr "Uventet escape-sekvens: \\%0%"
+
+#: src/serialise/token.cpp:170
+msgid "String not closed"
+msgstr "Streng er ikke lukket"
+
+#: src/serialise/token.cpp:275
+msgid "Unexpected token: '%0%'"
+msgstr "Uventet symbol: »%0%«"
+
+#: src/serialise/token.cpp:395
+msgid "Unexpected end of input"
+msgstr "Uventet afslutning på inddata"
+
+#: src/serialise/attribute.cpp:54
+msgid "Expected '=' after %0%"
+msgstr "Forventede »=« efter %0%"
+
+#: src/serialise/attribute.cpp:65
+msgid "Expected string literal as value for attribute '%0%'"
+msgstr "Forventede strenglitteral som værdi for attribut »%0%«"
+
+#: src/serialise/object.cpp:135
+msgid "Child object's indentation must be parent's plus one"
+msgstr "Underobjekts indrykning skal være overobjektets plus en"
+
+#: src/serialise/object.cpp:148
+msgid "Expected child object after indentation"
+msgstr "Forventet underobjekt efter indrykning"
+
+#: src/serialise/object.cpp:159
+msgid "Expected child object instead of '%0%'"
+msgstr "Forventet underobjekt i steden for »%0%«"
+
+#: src/serialise/object.cpp:220 src/serialise/object.cpp:234
+msgid "Object '%0%' requires attribute '%1%'"
+msgstr "Objekt »%0%« kræver attribut »%1%«"
+
+#: src/serialise/parser.cpp:36
+msgid "Could not open file '%0%' for reading"
+msgstr "Kunne ikke åbne fil »%0%« for læsning"
+
+#: src/serialise/parser.cpp:97
+msgid "Expected initial exclamation mark"
+msgstr "Forventede et startudråbstegn"
+
+#: src/serialise/parser.cpp:107
+msgid "Expected document type after '!'"
+msgstr "Forventede dokumenttype efter »!«"
+
+#: src/serialise/parser.cpp:118
+msgid "Expected newline after document type"
+msgstr "Forventede nylinje efter dokumenttype"
+
+#: src/serialise/parser.cpp:127
+msgid "Expected top-level object after document type"
+msgstr "Forventede topniveauobjekt efter dokumenttype"
+
+#: src/serialise/parser.cpp:137
+msgid "Expected root object after document type"
+msgstr "Forventede rodobjekt efter dokumenttype"
+
+#: src/serialise/parser.cpp:147
+msgid "Expected end of input instead of '%0%'"
+msgstr "Forventede afslutning på inddata i steden for »%0%«"
+
+#: src/serialise/parser.cpp:159
+msgid "Could not open file '%0%' for writing"
+msgstr "Kunne ikke åbne fil »%0%« for skriving"
+
+
