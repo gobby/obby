@@ -857,13 +857,6 @@ bool basic_server_buffer<Document, Selector>::
 		user_password =
 			pack.get_param(3).net6::parameter::as<std::string>();
 
-	// Check colour
-	if(!basic_buffer<Document, Selector>::check_colour(colour) )
-	{
-		error = login::ERROR_COLOUR_IN_USE;
-		return false;
-	}
-
 	// Check global password
 	if(!m_global_password.empty() )
 	{
@@ -872,6 +865,13 @@ bool basic_server_buffer<Document, Selector>::
 			error = login::ERROR_WRONG_GLOBAL_PASSWORD;
 			return false;
 		}
+	}
+
+	// Check colour
+	if(!basic_buffer<Document, Selector>::check_colour(colour) )
+	{
+		error = login::ERROR_COLOUR_IN_USE;
+		return false;
 	}
 
 	// Search user in user table

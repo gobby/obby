@@ -1,3 +1,9 @@
+2011-10-30  Armin Burgmeier  <armin@arbur.net>
+
+	* inc/server_buffer.hpp: During authentication, swap user color and
+	global password checks, to avoid for a non-authorized person to gather
+	information on used user colors (Vasiliy Kulikov).
+
 2011-02-09  Philipp Kern  <phil@0x539.de>
 
 	* po/da.po: Added Danish translation by Joe Dalton.
