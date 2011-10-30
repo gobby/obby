@@ -1,3 +1,20 @@
+2011-10-30  Philip Kern  <phil@0x539.de>
+
+	* po/ast.po:
+	* po/en_GB.po:
+	* po/pt_BR.po:
+	* po/ca.po:
+	* po/de.po:
+	* po/es.po:
+	* po/fr.po:
+	* po/it.po:
+	* po/nl.po:
+	* po/oc.po:
+	* po/sv.po:
+	* po/uk.po: updated translations from Launchpad
+
+	* po/LINGUAS: add ast, en_GB and pt_BR
+
 2011-10-30  Armin Burgmeier  <armin@arbur.net>
 
 	* inc/server_buffer.hpp: During authentication, swap user color and

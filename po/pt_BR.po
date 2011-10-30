@@ -1,16 +1,16 @@
-# Italian translation for obby
-# Copyright (c) 2007 Rosetta Contributors and Canonical Ltd 2007
+# Brazilian Portuguese translation for obby
+# Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
 # This file is distributed under the same license as the obby package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: obby\n"
-"Report-Msgid-Bugs-To: http://gobby.0x539.de/\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2007-04-15 12:36+0200\n"
-"PO-Revision-Date: 2007-12-04 10:10+0000\n"
-"Last-Translator: Milo Casagrande <milo@casagrande.name>\n"
-"Language-Team: Italian <it@li.org>\n"
+"PO-Revision-Date: 2010-11-07 19:34+0000\n"
+"Last-Translator: André Gondim <Unknown>\n"
+"Language-Team: Brazilian Portuguese <pt_BR@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,129 +19,129 @@ msgstr ""
 
 #: inc/server_buffer.hpp:292
 msgid "Sends an action to the chat."
-msgstr "Invia un'azione alla chat."
+msgstr "Enviar uma ação para o bate-papo."
 
 #: inc/server_buffer.hpp:373
 msgid "File is not an obby document"
-msgstr "Il file non è un documento obby"
+msgstr "Arquivo não é um documento obby"
 
 #: inc/server_buffer.hpp:380
 msgid "File is not a stored obby session"
-msgstr "Il file non è una sessione obby archiviata"
+msgstr "Arquivo não é uma seção obby armazenada"
 
 #: inc/server_buffer.hpp:423 src/user_table.cpp:75 src/chat.cpp:251
 #: src/text.cpp:188
 msgid "Unexpected child node: '%0%'"
-msgstr "Nodo figlio non atteso: «%0%»"
+msgstr "Nó filho inesperado: '%0%'"
 
 #: inc/serialise/attribute.hpp:127
 msgid "Attribute '%0%' has unexpected type: %1%"
-msgstr "L'attributo «%0%» è di un tipo non atteso: %1%"
+msgstr "Atributo '%0%' tem tipo inesperado: %1%"
 
 #: src/error.cpp:39
 msgid "Colour is already in use"
-msgstr "Il colore è già in uso"
+msgstr "Cor já está em uso"
 
 #: src/error.cpp:41
 msgid "Wrong session password"
-msgstr "Password di sessione errata"
+msgstr "Senha para seção incorreta"
 
 #: src/error.cpp:43
 msgid "Wrong user password"
-msgstr "Password utente errata"
+msgstr "Senha de usuário incorreta"
 
 #: src/error.cpp:45
 msgid "Protocol version mismatch"
-msgstr "La versione del protocollo non corrisponde"
+msgstr "Versão de protocolo incompatível"
 
 #: src/error.cpp:47
 msgid "Connection is not yet encrypted"
-msgstr "La connessione non è ancora cifrata"
+msgstr "Conexão ainda não está criptografada"
 
 #: src/user_table.cpp:58
 msgid "User ID %0% is already in use"
-msgstr "L'ID utente %0% è già in uso"
+msgstr "ID de usuário %0% já está em uso"
 
 #: src/chat.cpp:257
 msgid "Restored session"
-msgstr "Sessione ripristinata"
+msgstr "Seção restaurada"
 
 #: src/chat.cpp:332
 msgid "%0% has joined"
-msgstr "%0% è entrato"
+msgstr "%0% entrou"
 
 #: src/chat.cpp:339
 msgid "%0% has left"
-msgstr "%0% è uscito"
+msgstr "%0% saiu"
 
 #: src/serialise/token.cpp:94
 msgid "Unexpected escape sequence: \\%0%"
-msgstr "Sequenza di escape non attesa: \\%0%"
+msgstr "sequência de saida inesperada: \\%0%"
 
 #: src/serialise/token.cpp:170
 msgid "String not closed"
-msgstr "Stringa non terminata"
+msgstr "Termo interminado"
 
 #: src/serialise/token.cpp:275
 msgid "Unexpected token: '%0%'"
-msgstr "Token non atteso: «%0%»"
+msgstr "Sinal inesperado: '%0%'"
 
 #: src/serialise/token.cpp:395
 msgid "Unexpected end of input"
-msgstr "Fine dell'input non atteso"
+msgstr "Fim de entrada inesperado"
 
 #: src/serialise/attribute.cpp:54
 msgid "Expected '=' after %0%"
-msgstr "Atteso \"=\" dopo %0%"
+msgstr "Esperado '=' depois de %0%"
 
 #: src/serialise/attribute.cpp:65
 msgid "Expected string literal as value for attribute '%0%'"
-msgstr "Attesa stringa letterale come valore per l'attributo \"%0%\""
+msgstr "String literal esperado como valor para atributo '%0%'"
 
 #: src/serialise/object.cpp:135
 msgid "Child object's indentation must be parent's plus one"
-msgstr "Il rientro dell'oggetto figlio deve essere quello del padre più uno"
+msgstr "Identação de objeto filho deve ser a do pai mais um"
 
 #: src/serialise/object.cpp:148
 msgid "Expected child object after indentation"
-msgstr "Atteso oggetto figlio dopo il rientro"
+msgstr "Objeto filho esperado depois da identação"
 
 #: src/serialise/object.cpp:159
 msgid "Expected child object instead of '%0%'"
-msgstr "Atteso oggetto figlio al posto di \"%0%\""
+msgstr "Objeto filho esperado ao invez de '%0%'"
 
 #: src/serialise/object.cpp:220 src/serialise/object.cpp:234
 msgid "Object '%0%' requires attribute '%1%'"
-msgstr "L'oggetto «%0%» richiede l'attributo \"%1%\""
+msgstr "Objeto '%0%' requer o atributo '%1%'"
 
 #: src/serialise/parser.cpp:36
 msgid "Could not open file '%0%' for reading"
-msgstr "Impossibile aprire il file \"%0%\" in lettura"
+msgstr "Não pode abrir o arquivo '%0%' para leitura"
 
 #: src/serialise/parser.cpp:97
 msgid "Expected initial exclamation mark"
-msgstr "Attesto punto esclamativo iniziale"
+msgstr "Marca de exclamação inicial esperada"
 
 #: src/serialise/parser.cpp:107
 msgid "Expected document type after '!'"
-msgstr "Atteso tipo di documento dopo «!»"
+msgstr "Tipo de documento esperado depois de \"!\""
 
 #: src/serialise/parser.cpp:118
 msgid "Expected newline after document type"
-msgstr "Atteso newline dopo il tipo di documento"
+msgstr "Nova linha esperada depois do tipo de documento"
 
 #: src/serialise/parser.cpp:127
 msgid "Expected top-level object after document type"
-msgstr "Atteso oggetto di alto livello dopo il tipo di documento"
+msgstr "Objeto de top-level esperado depois do tipo de documento"
 
 #: src/serialise/parser.cpp:137
 msgid "Expected root object after document type"
-msgstr "Atteso oggetto root dopo il tipo di documento"
+msgstr "Objeto root esperado depois do tipo de documento"
 
 #: src/serialise/parser.cpp:147
 msgid "Expected end of input instead of '%0%'"
-msgstr "Attesa fine dell'input invece di «%0%»"
+msgstr "Fim de entrada esperado ao invez de '%0%'"
 
 #: src/serialise/parser.cpp:159
 msgid "Could not open file '%0%' for writing"
-msgstr "Impossibile aprire il file «%0%» in scrittura"
+msgstr "Não pode abrir o arquivo '%0%' para escrita"
