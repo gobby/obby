@@ -7,15 +7,28 @@ msgid ""
 msgstr ""
 "Project-Id-Version: obby\n"
 "Report-Msgid-Bugs-To: http://gobby.0x539.de/\n"
-"POT-Creation-Date: 2007-04-15 12:36+0200\n"
+"POT-Creation-Date: 2011-11-04 11:28+0100\n"
 "PO-Revision-Date: 2007-09-01 22:46+0000\n"
 "Last-Translator: Daniel Nylander <yeager@ubuntu.com>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
+"Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Launchpad-Export-Date: 2011-10-30 15:16+0000\n"
 "X-Generator: Launchpad (build 14197)\n"
+
+#: inc/server_buffer.hpp:292
+msgid "Sends an action to the chat."
+msgstr "Skickar en åtgärd till chatten."
+
+#: inc/server_buffer.hpp:373
+msgid "File is not an obby document"
+msgstr "Filen är inte ett obby-dokument"
+
+#: inc/server_buffer.hpp:380
+msgid "File is not a stored obby session"
+msgstr "Filen är inte en sparad obby-session"
 
 #: inc/server_buffer.hpp:423 src/user_table.cpp:75 src/chat.cpp:251
 #: src/text.cpp:188
@@ -26,17 +39,69 @@ msgstr "Oväntad barn-nod: '%0%'"
 msgid "Attribute '%0%' has unexpected type: %1%"
 msgstr "Attribut'%0%' har en oväntad typ: %1%"
 
+#: src/error.cpp:39
+msgid "Colour is already in use"
+msgstr "Färgen används redan"
+
+#: src/error.cpp:41
+msgid "Wrong session password"
+msgstr "Fel sessionslösenord"
+
+#: src/error.cpp:43
+msgid "Wrong user password"
+msgstr "Fel användarlösenord"
+
+#: src/error.cpp:45
+msgid "Protocol version mismatch"
+msgstr "Protokollversionen stämmer inte"
+
+#: src/error.cpp:47
+msgid "Connection is not yet encrypted"
+msgstr "Anslutningen ännu inte krypterad"
+
 #: src/user_table.cpp:58
 msgid "User ID %0% is already in use"
 msgstr "Användarid %0% används redan"
+
+#: src/chat.cpp:257
+msgid "Restored session"
+msgstr "Återställd session"
+
+#: src/chat.cpp:332
+msgid "%0% has joined"
+msgstr "%0% har anslutit"
+
+#: src/chat.cpp:339
+msgid "%0% has left"
+msgstr "%0% har lämnat"
+
+#: src/serialise/token.cpp:94
+msgid "Unexpected escape sequence: \\%0%"
+msgstr "Oväntad escape-sekvens: \\%0%"
 
 #: src/serialise/token.cpp:170
 msgid "String not closed"
 msgstr "Sträng ej terminerad"
 
+#: src/serialise/token.cpp:275
+msgid "Unexpected token: '%0%'"
+msgstr "Oväntat token: \"%0%\""
+
+#: src/serialise/token.cpp:395
+msgid "Unexpected end of input"
+msgstr "Oväntat slut på indata"
+
 #: src/serialise/attribute.cpp:54
 msgid "Expected '=' after %0%"
 msgstr "Väntade '=' efter %0%"
+
+#: src/serialise/attribute.cpp:65
+msgid "Expected string literal as value for attribute '%0%'"
+msgstr "Förväntade strängliteral som värde för attributet \"%0%\""
+
+#: src/serialise/object.cpp:135
+msgid "Child object's indentation must be parent's plus one"
+msgstr "Barnobjektets indrag måste vara förälderns + 1"
 
 #: src/serialise/object.cpp:148
 msgid "Expected child object after indentation"
@@ -81,67 +146,3 @@ msgstr "Väntade slut på indata istället för '%0%'"
 #: src/serialise/parser.cpp:159
 msgid "Could not open file '%0%' for writing"
 msgstr "Kund inte öppna filen '%0%' för skrivning"
-
-#: inc/server_buffer.hpp:292
-msgid "Sends an action to the chat."
-msgstr "Skickar en åtgärd till chatten."
-
-#: inc/server_buffer.hpp:373
-msgid "File is not an obby document"
-msgstr "Filen är inte ett obby-dokument"
-
-#: inc/server_buffer.hpp:380
-msgid "File is not a stored obby session"
-msgstr "Filen är inte en sparad obby-session"
-
-#: src/error.cpp:39
-msgid "Colour is already in use"
-msgstr "Färgen används redan"
-
-#: src/error.cpp:41
-msgid "Wrong session password"
-msgstr "Fel sessionslösenord"
-
-#: src/error.cpp:43
-msgid "Wrong user password"
-msgstr "Fel användarlösenord"
-
-#: src/error.cpp:45
-msgid "Protocol version mismatch"
-msgstr "Protokollversionen stämmer inte"
-
-#: src/error.cpp:47
-msgid "Connection is not yet encrypted"
-msgstr "Anslutningen ännu inte krypterad"
-
-#: src/chat.cpp:257
-msgid "Restored session"
-msgstr "Återställd session"
-
-#: src/chat.cpp:332
-msgid "%0% has joined"
-msgstr "%0% har anslutit"
-
-#: src/chat.cpp:339
-msgid "%0% has left"
-msgstr "%0% har lämnat"
-
-#: src/serialise/token.cpp:94
-msgid "Unexpected escape sequence: \\%0%"
-msgstr "Oväntad escape-sekvens: \\%0%"
-
-#: src/serialise/token.cpp:275
-msgid "Unexpected token: '%0%'"
-msgstr "Oväntat token: \"%0%\""
-
-#: src/serialise/token.cpp:395
-msgid "Unexpected end of input"
-msgstr "Oväntat slut på indata"
-
-#: src/serialise/attribute.cpp:65
-msgid "Expected string literal as value for attribute '%0%'"
-msgstr "Förväntade strängliteral som värde för attributet \"%0%\""
-
-#: src/serialise/object.cpp:135
-msgid "Child object's indentation must be parent's plus one"
-msgstr "Barnobjektets indrag måste vara förälderns + 1"

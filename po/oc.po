@@ -7,60 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: obby\n"
 "Report-Msgid-Bugs-To: http://gobby.0x539.de/\n"
-"POT-Creation-Date: 2007-04-15 12:36+0200\n"
+"POT-Creation-Date: 2011-11-04 11:28+0100\n"
 "PO-Revision-Date: 2008-03-21 16:19+0000\n"
 "Last-Translator: Cédric VALMARY (Tot en òc) <cvalmary@yahoo.fr>\n"
 "Language-Team: Occitan (post 1500) <oc@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Launchpad-Export-Date: 2011-10-30 15:16+0000\n"
 "X-Generator: Launchpad (build 14197)\n"
-
-#: inc/server_buffer.hpp:423 src/user_table.cpp:75 src/chat.cpp:251
-#: src/text.cpp:188
-msgid "Unexpected child node: '%0%'"
-msgstr "Nos enfant inesperat :'%0%'"
-
-#: inc/serialise/attribute.hpp:127
-msgid "Attribute '%0%' has unexpected type: %1%"
-msgstr "L'atribut '%0%' possedís un tipe inesperat : %1%"
-
-#: src/user_table.cpp:58
-msgid "User ID %0% is already in use"
-msgstr "L'ID utilizaire %0% ja es utilizada"
-
-#: src/serialise/token.cpp:275
-msgid "Unexpected token: '%0%'"
-msgstr "Marca inesperada : '%0%'"
-
-#: src/serialise/token.cpp:395
-msgid "Unexpected end of input"
-msgstr "Fin de picament inesperat"
-
-#: src/serialise/attribute.cpp:54
-msgid "Expected '=' after %0%"
-msgstr "'=' esperat aprèp %0%"
-
-#: src/serialise/attribute.cpp:65
-msgid "Expected string literal as value for attribute '%0%'"
-msgstr "Cadena literala esperada per la valor de l'atribut '%0%'"
-
-#: src/serialise/object.cpp:220 src/serialise/object.cpp:234
-msgid "Object '%0%' requires attribute '%1%'"
-msgstr "L'objècte '%0%' requerís l'atribut '%1%'"
-
-#: src/serialise/parser.cpp:36
-msgid "Could not open file '%0%' for reading"
-msgstr "Impossible de dobrir lo fichièr '%0%' en lectura"
-
-#: src/serialise/parser.cpp:147
-msgid "Expected end of input instead of '%0%'"
-msgstr "Fin de picada esperada a la plaça de '%0%'"
-
-#: src/serialise/parser.cpp:159
-msgid "Could not open file '%0%' for writing"
-msgstr "Impossible de dobrir lo fichièr '%0%' en escritura"
 
 #: inc/server_buffer.hpp:292
 msgid "Sends an action to the chat."
@@ -73,6 +29,15 @@ msgstr "Lo fichièr es pas un fichièr Obby"
 #: inc/server_buffer.hpp:380
 msgid "File is not a stored obby session"
 msgstr "Lo fichièr correspond pas a cap de sesilha Obby"
+
+#: inc/server_buffer.hpp:423 src/user_table.cpp:75 src/chat.cpp:251
+#: src/text.cpp:188
+msgid "Unexpected child node: '%0%'"
+msgstr "Nos enfant inesperat :'%0%'"
+
+#: inc/serialise/attribute.hpp:127
+msgid "Attribute '%0%' has unexpected type: %1%"
+msgstr "L'atribut '%0%' possedís un tipe inesperat : %1%"
 
 #: src/error.cpp:39
 msgid "Colour is already in use"
@@ -94,6 +59,10 @@ msgstr "Marrida version del protocòl"
 msgid "Connection is not yet encrypted"
 msgstr "La connexion es pas encara chifrada"
 
+#: src/user_table.cpp:58
+msgid "User ID %0% is already in use"
+msgstr "L'ID utilizaire %0% ja es utilizada"
+
 #: src/chat.cpp:257
 msgid "Restored session"
 msgstr "Represa de sesilha"
@@ -114,6 +83,22 @@ msgstr "Sequéncia d'escapament inesperada : \\%0%"
 msgid "String not closed"
 msgstr "Cadena de caractèr non tampada"
 
+#: src/serialise/token.cpp:275
+msgid "Unexpected token: '%0%'"
+msgstr "Marca inesperada : '%0%'"
+
+#: src/serialise/token.cpp:395
+msgid "Unexpected end of input"
+msgstr "Fin de picament inesperat"
+
+#: src/serialise/attribute.cpp:54
+msgid "Expected '=' after %0%"
+msgstr "'=' esperat aprèp %0%"
+
+#: src/serialise/attribute.cpp:65
+msgid "Expected string literal as value for attribute '%0%'"
+msgstr "Cadena literala esperada per la valor de l'atribut '%0%'"
+
 #: src/serialise/object.cpp:135
 msgid "Child object's indentation must be parent's plus one"
 msgstr ""
@@ -126,6 +111,14 @@ msgstr "Objècte enfant inesperat aprèp l'indentacion"
 #: src/serialise/object.cpp:159
 msgid "Expected child object instead of '%0%'"
 msgstr "Objècte enfant inesperat al luòc de '%0%'"
+
+#: src/serialise/object.cpp:220 src/serialise/object.cpp:234
+msgid "Object '%0%' requires attribute '%1%'"
+msgstr "L'objècte '%0%' requerís l'atribut '%1%'"
+
+#: src/serialise/parser.cpp:36
+msgid "Could not open file '%0%' for reading"
+msgstr "Impossible de dobrir lo fichièr '%0%' en lectura"
 
 #: src/serialise/parser.cpp:97
 msgid "Expected initial exclamation mark"
@@ -146,3 +139,11 @@ msgstr "Objècte del màger nivèl esperat aprèp lo tipe de document"
 #: src/serialise/parser.cpp:137
 msgid "Expected root object after document type"
 msgstr "Objècte raiç esperat aprèp lo tipe de document"
+
+#: src/serialise/parser.cpp:147
+msgid "Expected end of input instead of '%0%'"
+msgstr "Fin de picada esperada a la plaça de '%0%'"
+
+#: src/serialise/parser.cpp:159
+msgid "Could not open file '%0%' for writing"
+msgstr "Impossible de dobrir lo fichièr '%0%' en escritura"
