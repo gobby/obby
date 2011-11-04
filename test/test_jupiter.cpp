@@ -283,6 +283,13 @@ int main(int argc, char* argv[])
 	std::cout << std::endl;
 
 	std::string filename = "base_file";
+
+	// Support testing from a build directory (make distcheck).
+	const char* base_path = getenv("srcdir");
+	if(base_path != NULL) {
+		filename = std::string(base_path) + "/" + filename;
+	}
+
 	if(argc >= 2) filename = argv[1];
 
 	std::ifstream file(filename.c_str());
