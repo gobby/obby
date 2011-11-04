@@ -1,6 +1,10 @@
 obby
 ====
 
+Version 0.4.8:
+ * Swap global password and user color checks during authentication
+ * Updated translations
+
 Version 0.4.7:
  * Bugfix: Fix display of non-ASCII characters in obby web (#405).
  * Translation roundup
